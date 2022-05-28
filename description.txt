@@ -1,0 +1,4 @@
+Author: Davow, Robbinson Block
+Gamemode package for Left 4 Block Gamemode, multiple add-ons and packages in one add-on
+
+So let's go kill some zombies, shall we?
