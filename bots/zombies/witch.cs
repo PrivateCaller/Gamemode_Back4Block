@@ -99,6 +99,11 @@ function ZombieWitchHoleBot::onBotLoop(%this,%obj)
         }
         else
         {
+            if(%obj.hFollowing)
+            %obj.hRunAwayFromPlayer(%obj.hFollowing);
+            
+            %obj.playaudio(0,"witch_horrified" @ getrandom(1,2) @ "_sound");
+            %obj.hFollowing = 0;
             %obj.playthread(2,"plant");
             %obj.playthread(1,"root");
             %obj.setMaxForwardSpeed(25);
@@ -174,7 +179,7 @@ function ZombieWitchHoleBot::OnDamage(%this,%obj,%am)
             %obj.hWhoAttacked = 1;
         }
 
-        if(%obj.GetDamageLevel() >= 750 && !%obj.hMelee)
+        if(%obj.GetDamageLevel() >= 750 && %obj.hMelee)
         %obj.hMelee = 0;
     }
     

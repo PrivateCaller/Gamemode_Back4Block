@@ -134,8 +134,8 @@ datablock ExplosionData(BoulderExplosion : spearExplosion)
 {
    soundProfile = "boulder_hit_sound";
    //impulse
-   impulseRadius = 30;
-   impulseForce = 4000;
+   impulseRadius = 10;
+   impulseForce = 5000;
 
    //subExplosion[0] = boulder1debrisExplosion;
    //subExplosion[1] = boulder2debrisExplosion;
@@ -143,8 +143,8 @@ datablock ExplosionData(BoulderExplosion : spearExplosion)
    //subExplosion[3] = boulder4debrisExplosion;
 
    //radius damage
-   radiusDamage        = 30;
-   damageRadius        = 30;
+   radiusDamage        = 50;
+   damageRadius        = 10;
 
    faceViewer     = true;
    explosionScale = "5 5 5";
@@ -374,7 +374,7 @@ function BoulderImage::onActivate(%this, %obj, %slot)
 
 function BoulderProjectile::onExplode(%this,%obj)
 {
-	for(%i=0;%i<15;%i++)
+	for(%i=0;%i<75;%i++)
 	{
 		%rnd = getRandom();
 		%dist = getRandom()*15;
@@ -383,7 +383,7 @@ function BoulderProjectile::onExplode(%this,%obj)
 		%p = new projectile()
 		{
 			datablock = MxRockProjectile;
-			initialPosition = vectorAdd(%obj.getPosition(),"0 0 2.5");
+			initialPosition = vectorAdd(%obj.getPosition(),"0 0 1.5");
 			initialVelocity = %x SPC %y SPC (getRandom()*4);
 			client = %obj.sourceObject.client;
 			sourceObject = %obj.sourceObject;
@@ -411,13 +411,13 @@ function Player::TankThrowBoulder(%obj)
    %obj.playthread(0, "jump");
 
    if(isObject(%targ = %obj.hFollowing))
-   %velocity = vectorscale(%obj.getEyeVector(),50+vectorDist(%obj.getPosition(),%targ.getPosition())*0.5);
-   else %velocity = vectorscale(%obj.getEyeVector(),50);
+   %velocity = vectorscale(%obj.getEyeVector(),50+vectorDist(%obj.getHackPosition(),%targ.getHackPosition())*0.75);
+   else %velocity = vectorscale(%obj.getEyeVector(),75);
    
    %p = new Projectile()
    {
       dataBlock = "BoulderProjectile";
-      initialVelocity = %velocity;
+      initialVelocity = vectorAdd(%velocity,"0 0 2.5");
       initialPosition = %obj.getHackPosition();
       sourceObject = %obj;
       client = %obj.client;

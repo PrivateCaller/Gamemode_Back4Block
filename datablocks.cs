@@ -1,3 +1,44 @@
+%pattern = "Add-Ons/Package_Left4Block/sound/*.wav";//Too lazy to write datablock files for the sounds, just took this from the Disease Gamemode
+%file = findFirstFile(%pattern);
+while(%file !$= "")
+{
+	%soundName = strlwr(%file);
+	%soundName = strreplace(%soundName, "add-ons/package_left4block/sound/", "");
+	%soundName = strreplace(%soundName, "/", "");
+	%soundName = strreplace(%soundName, ".wav", "");
+	%soundName = strreplace(%soundName, "quiet", "");
+	%soundName = strreplace(%soundName, "normal", "");
+	%soundName = strreplace(%soundName, "loud", "");
+	%soundName = strreplace(%soundName, "snd-tank", "");//Has to be written with snd-zombiename or it might replace the name of the zombie sound files themselves
+	%soundName = strreplace(%soundName, "snd-witch", "");
+	%soundName = strreplace(%soundName, "snd-hunter", "");
+	%soundName = strreplace(%soundName, "snd-boomer", "");
+	%soundName = strreplace(%soundName, "snd-charger", "");
+	%soundName = strreplace(%soundName, "snd-smoker", "");
+	%soundName = strreplace(%soundName, "snd-jockey", "");
+	%soundName = strreplace(%soundName, "snd-spitter", "");
+	%soundName = strreplace(%soundName, "snd-common", "");
+	%soundName = strreplace(%soundName, "snd-survivor", "");
+
+	//Check the names of the folders to determine what type of soundscape it will be, and check if it's a loopable sound or not
+	if(strstr(%file,"normal") != -1)//Normal soundscape
+	if(strstr(%file,"loop") != -1)
+	eval("datablock AudioProfile(" @ %soundName @ "_sound) { preload = true; description = AudioCloseLooping3d; filename = \"" @ %file @ "\"; };");
+	else eval("datablock AudioProfile(" @ %soundName @ "_sound) { preload = true; description = AudioClose3d; filename = \"" @ %file @ "\"; };");
+
+	if(strstr(%file,"quiet") != -1)//Quiet soundscape
+	if(strstr(%file,"loop") != -1)
+	eval("datablock AudioProfile(" @ %soundName @ "_sound) { preload = true; description = AudioClosestLooping3d; filename = \"" @ %file @ "\"; };");
+	else eval("datablock AudioProfile(" @ %soundName @ "_sound) { preload = true; description = AudioClosest3d; filename = \"" @ %file @ "\"; };");
+
+	if(strstr(%file,"loud") != -1)//Loudest Soundscape
+	if(strstr(%file,"loop") != -1)
+	eval("datablock AudioProfile(" @ %soundName @ "_sound) { preload = true; description = AudioDefaultLooping3d; filename = \"" @ %file @ "\"; };");
+	else eval("datablock AudioProfile(" @ %soundName @ "_sound) { preload = true; description = AudioDefault3d; filename = \"" @ %file @ "\"; };");
+
+	%file = findNextFile(%pattern);
+}
+
 //Rope shape
 datablock StaticShapeData(HataCylinder2Shape)
 {
@@ -796,7 +837,7 @@ datablock ExplosionData(SpitAcidBallExplosion)
 
 	datablock ProjectileData(SpitterSpitProjectile)
 {
-   	directDamage        = 8;
+   	directDamage        = 4;
    	directDamageType  = $DamageType::SpitAcidBall;
    	radiusDamageType  = $DamageType::SpitAcidBall;
    	explosion           = "SpitAcidBallExplosion";
@@ -825,7 +866,7 @@ datablock ExplosionData(SpitAcidBallExplosion)
 
 	datablock ProjectileData(SpitterSpewedProjectile)
 {
-   	directDamage        = 5;
+   	directDamage        = 2;
    	directDamageType  = $DamageType::SpitAcidBall;
    	radiusDamageType  = $DamageType::SpitAcidBall;
    	explosion           = "SpitAcidBallExplosion";

@@ -23,6 +23,19 @@ function ZombieFallenHoleBot::onAdd(%this,%obj,%style)
 {
 	Parent::onAdd(%this,%obj);
 	CommonZombieHoleBot::onAdd(%this,%obj);
+	if(getRandom(0,100) <= 25)
+	{
+		switch(getRandom(0,6))
+		{
+			case 0: %obj.mountImage(leadpipeImage, 0);
+			case 1: %obj.mountImage(fryingPanImage, 0);
+			case 2: %obj.mountImage(hatchetImage, 0);
+			case 3: %obj.mountImage(spikebatImage, 0);
+			case 4: %obj.mountImage(macheteImage, 0);
+			case 5: %obj.mountImage(crowbarImage, 0);
+			case 6: %obj.mountImage(baseballbatImage, 0);
+		}
+	}
 }
 
 function ZombieFallenHoleBot::onNewDataBlock(%this,%obj)
@@ -58,20 +71,28 @@ function ZombieFallenHoleBot::onDisabled(%this,%obj)
 {
 	CommonZombieHoleBot::OnDisabled(%this,%obj);
 
-	if(!$L4B2Bots::ZombieLootChance || !%obj.hZombieLoot)
-	return;
-	else
+	if(isObject(%weapon = %obj.getMountedImage(0)))
 	{
-		%chancebonus = 30;
-		L4B_ZombieDroopLoot(%obj,Bilebombitem,$L4B2Bots::ZombieLootChance+%chancebonus);
-		L4B_ZombieDroopLoot(%obj,sPipebombitem,$L4B2Bots::ZombieLootChance+%chancebonus);
-		L4B_ZombieDroopLoot(%obj,$L4B2Bots::ZombieLootItem1,$L4B2Bots::ZombieLootChance+%chancebonus/2);
-		L4B_ZombieDroopLoot(%obj,$L4B2Bots::ZombieLootItem2,$L4B2Bots::ZombieLootChance+%chancebonus/2);
-		L4B_ZombieDroopLoot(%obj,$L4B2Bots::ZombieLootItem3,$L4B2Bots::ZombieLootChance+%chancebonus/2);
-		L4B_ZombieDroopLoot(%obj,$L4B2Bots::ZombieLootItem4,$L4B2Bots::ZombieLootChance+%chancebonus/2);
-		L4B_ZombieDroopLoot(%obj,$L4B2Bots::ZombieLootItem5,$L4B2Bots::ZombieLootChance+%chancebonus/2);
-		L4B_ZombieDroopLoot(%obj,$L4B2Bots::ZombieLootItemFallen,$L4B2Bots::ZombieLootChance+%chancebonus/1.5);
+		L4B_ZombieDropLoot(%obj,%weapon.item,100);
+		%obj.unMountImage(0);
 	}
+
+
+	%chancebonus = 30;
+	L4B_ZombieDropLoot(%obj,Bilebombitem,10);
+	L4B_ZombieDropLoot(%obj,sPipebombitem,10);
+	L4B_ZombieDropLoot(%obj,ZombiePillsItem,15);
+	L4B_ZombieDropLoot(%obj,gc_SyringePanaceaItem,10);
+	L4B_ZombieDropLoot(%obj,ammoBox9mmItemA,25);
+	L4B_ZombieDropLoot(%obj,ammoBoxShotgunItemA,25);
+	L4B_ZombieDropLoot(%obj,ammoBoxRevolverItemA,25);
+	L4B_ZombieDropLoot(%obj,ammoBox556ItemA,25);
+	L4B_ZombieDropLoot(%obj,$L4B2Bots::ZombieLootItem1,$L4B2Bots::ZombieLootChance+%chancebonus/2);
+	L4B_ZombieDropLoot(%obj,$L4B2Bots::ZombieLootItem2,$L4B2Bots::ZombieLootChance+%chancebonus/2);
+	L4B_ZombieDropLoot(%obj,$L4B2Bots::ZombieLootItem3,$L4B2Bots::ZombieLootChance+%chancebonus/2);
+	L4B_ZombieDropLoot(%obj,$L4B2Bots::ZombieLootItem4,$L4B2Bots::ZombieLootChance+%chancebonus/2);
+	L4B_ZombieDropLoot(%obj,$L4B2Bots::ZombieLootItem5,$L4B2Bots::ZombieLootChance+%chancebonus/2);
+	L4B_ZombieDropLoot(%obj,$L4B2Bots::ZombieLootItemFallen,$L4B2Bots::ZombieLootChance+%chancebonus/1.5);
 }
 
 function ZombieFallenHoleBot::L4BUncommonAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
@@ -109,7 +130,7 @@ function ZombieFallenHoleBot::L4BUncommonAppearance(%this,%obj,%skinColor,%face,
 	%obj.chest =  %chest;
 	%obj.decalName = "Hoodie";
 	%obj.chestColor = %shirtColor;
-	%obj.pack =  %pack;
+	%obj.pack = 4;
 	%obj.packColor =  %packColor;
 	%obj.secondPack =  "0";
 	%obj.secondPackColor =  %packColor;

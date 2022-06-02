@@ -1,149 +1,25 @@
-%pattern = "Add-Ons/Package_Left4Block/sound/*.wav";//Too lazy to write datablock files for the sounds, just took this from the Disease Gamemode
-%file = findFirstFile(%pattern);
-while(%file !$= "")
-{
-	%soundName = strlwr(%file);
-	%soundName = strreplace(%soundName, "add-ons/package_left4block/sound/", "");
-	%soundName = strreplace(%soundName, "/", "");
-	%soundName = strreplace(%soundName, ".wav", "");
-	%soundName = strreplace(%soundName, "quiet", "");
-	%soundName = strreplace(%soundName, "normal", "");
-	%soundName = strreplace(%soundName, "loud", "");
-	%soundName = strreplace(%soundName, "snd-tank", "");//Has to be written with snd-zombiename or it might replace the name of the zombie sound files themselves
-	%soundName = strreplace(%soundName, "snd-witch", "");
-	%soundName = strreplace(%soundName, "snd-hunter", "");
-	%soundName = strreplace(%soundName, "snd-boomer", "");
-	%soundName = strreplace(%soundName, "snd-charger", "");
-	%soundName = strreplace(%soundName, "snd-smoker", "");
-	%soundName = strreplace(%soundName, "snd-jockey", "");
-	%soundName = strreplace(%soundName, "snd-spitter", "");
-	%soundName = strreplace(%soundName, "snd-common", "");
-	%soundName = strreplace(%soundName, "snd-survivor", "");
+//exec("./support/billboards/billboards.cs");
+//if(isFunction(NetObject, setNetFlag))
+//{
+//	exec("./support/billboards_wrapper.cs");
+//	$L4B_hasSelectiveGhosting = true;
+//}
+//else
+//{
+//	$L4B_hasSelectiveGhosting = false;
+//	error("ERROR: The Selective Ghosting DLL is required for Package_Left4Block's billboards to work.");
+//	schedule(1000, 0, messageAll, 'MsgError', "\c0ERROR: The Selective Ghosting DLL is required for Package_Left4Block's billboards to work.");
+//}
+//exec("./support/afk_system.cs");
+//exec("./bots/survivors/bot_survivor.cs");
 
-	//Check the names of the folders to determine what type of soundscape it will be, and check if it's a loopable sound or not
-	if(strstr(%file,"normal") != -1)//Normal soundscape
-	if(strstr(%file,"loop") != -1)
-	eval("datablock AudioProfile(" @ %soundName @ "_sound) { preload = true; description = AudioCloseLooping3d; filename = \"" @ %file @ "\"; };");
-	else eval("datablock AudioProfile(" @ %soundName @ "_sound) { preload = true; description = AudioClose3d; filename = \"" @ %file @ "\"; };");
-
-	if(strstr(%file,"quiet") != -1)//Quiet soundscape
-	if(strstr(%file,"loop") != -1)
-	eval("datablock AudioProfile(" @ %soundName @ "_sound) { preload = true; description = AudioClosestLooping3d; filename = \"" @ %file @ "\"; };");
-	else eval("datablock AudioProfile(" @ %soundName @ "_sound) { preload = true; description = AudioClosest3d; filename = \"" @ %file @ "\"; };");
-
-	if(strstr(%file,"loud") != -1)//Loudest Soundscape
-	if(strstr(%file,"loop") != -1)
-	eval("datablock AudioProfile(" @ %soundName @ "_sound) { preload = true; description = AudioDefaultLooping3d; filename = \"" @ %file @ "\"; };");
-	else eval("datablock AudioProfile(" @ %soundName @ "_sound) { preload = true; description = AudioDefault3d; filename = \"" @ %file @ "\"; };");
-
-	%file = findNextFile(%pattern);
-}
-function configLoadL4BTXT(%file,%svartype)//Set up custom appearances
-{
-	%read = new FileObject();
-	if(!isFile("config/server/L4B2_Bots/" @ %file @ ".txt"))
-	{
-		%read.openForRead("add-ons/package_left4block/defaultconfig/" @ %file @ ".txt");
-
-		%write = new FileObject();
-		%write.openForWrite("config/server/L4B2_Bots/" @ %file @ ".txt");
-	
-		while(!%read.isEOF())
-		{
-			%line = %read.readLine();
-			%write.writeLine(%line);
-		}
-
-		%write.close();
-		%write.delete();
-	}
-
-	%read.openForRead("config/server/L4B2_Bots/" @ %file @ ".txt");
-
-	while(!%read.isEOF())
-	{
-		%i++;
-		%line = %read.readLine(); 
-		eval("$" @ %svartype @"[%i] = \"" @ %line @ "\";");
-		eval("$" @ %svartype @"Amount = %i;");
-	}
-	
-	%read.close();
-	%read.delete();
-}
-configLoadL4BTXT("zombiemalenames",hZombieNameMale);
-configLoadL4BTXT("zombiefemalenames",hZombieNameFemale);
-configLoadL4BTXT("zombiefaces",hZombieFace);
-configLoadL4BTXT("zombiedecals",hZombieDecal);
-configLoadL4BTXT("zombieskin",hZombieSkin);
-
-$hZombieDecalDefault[%n = 1] = "AAA-None";
-$hZombieDecalDefault[%n++] = "Mod-Army";
-$hZombieDecalDefault[%n++] = "Mod-Police";
-$hZombieDecalDefault[%n++] = "Mod-Suit";
-$hZombieDecalDefault[%n++] = "Meme-Mongler";
-$hZombieDecalDefault[%n++] = "Mod-Daredevil";
-$hZombieDecalDefault[%n++] = "Mod-Pilot";
-$hZombieDecalDefault[%n++] = "Mod-Prisoner";
-$hZombieDecalDefault[%n++] = "Meme-Mongler";
-$hZombieDecalDefault[%n++] = "Medieval-YARLY";
-$hZombieDecalDefault[%n++] = "Medieval-ORLY";
-$hZombieDecalDefault[%n++] = "Medieval-Eagle";
-$hZombieDecalDefault[%n++] = "Medieval-Lion";
-$hZombieDecalDefault[%n++] = "Medieval-Tunic";
-$hZombieDecalDefault[%n++] = "Hoodie";
-$hZombieDecalDefault[%n++] = "DrKleiner";
-$hZombieDecalDefault[%n++] = "Chef";
-$hZombieDecalDefault[%n++] = "worm-sweater";
-$hZombieDecalDefault[%n++] = "worm_engineer";
-$hZombieDecalDefault[%n++] = "Archer";
-$hZombieDecalDefaultAmount = %n;
-
-$hZombieHat[%c++] = 4;
-$hZombieHat[%c++] = 6;
-$hZombieHat[%c++] = 7;
-$hZombieHat[%c++] = 0;
-$hZombieHat[%c++] = 1;
-$hZombieHatAmount = %c;
-
-$hZombiePack[%d++] = 0;
-$hZombiePack[%d++] = 2;
-$hZombiePack[%d++] = 3;
-$hZombiePack[%d++] = 4;
-$hZombiePack[%d++] = 5;
-$hZombiePackAmount = %d;
-
-$hZombieSpecialType[%e++] = "CommonZombieHoleBot";
-$hZombieSpecialType[%e++] = "ZombieHunterHoleBot";
-$hZombieSpecialType[%e++] = "ZombieBoomerHoleBot";
-$hZombieSpecialType[%e++] = "ZombieChargerHoleBot";
-$hZombieSpecialType[%e++] = "ZombieSpitterHoleBot";
-$hZombieSpecialType[%e++] = "ZombieSmokerHoleBot";
-$hZombieSpecialType[%e++] = "ZombieJockeyHoleBot";
-$hZombieSpecialType[%e++] = "ZombieTankHoleBot";
-$hZombieSpecialTypeAmount = %e;
-
-if(isObject(RiotShieldImage))
-$IsRiotShieldEnabled = 1;
-else $IsRiotShieldEnabled = 0;
-
+exec("./variables.cs");
 exec("./datablocks.cs");
 exec("./functions.cs");
-exec("./packages.cs");
+exec("./scripts/script_director.cs");
+exec("./support/packages.cs");
 
-exec("./support/billboards/billboards.cs");
-if(isFunction(NetObject, setNetFlag))
-{
-	exec("./support/billboards_wrapper.cs");
-	$L4B_hasSelectiveGhosting = true;
-}
-else
-{
-	$L4B_hasSelectiveGhosting = false;
-	error("ERROR: The Selective Ghosting DLL is required for Package_Left4Block's billboards to work.");
-	schedule(1000, 0, messageAll, 'MsgError', "\c0ERROR: The Selective Ghosting DLL is required for Package_Left4Block's billboards to work.");
-}
-
+exec("./weapon_mud.cs");
 exec("./weapon_rocks.cs");
 exec("./weapon_melee.cs");
 exec("./weapon_throwableexplosives.cs");
@@ -159,6 +35,7 @@ exec("./bots/zombies/uncommon_clown.cs");
 exec("./bots/zombies/uncommon_jimmy_gibbs.cs");
 exec("./bots/zombies/uncommon_ceda.cs");
 exec("./bots/zombies/uncommon_toxic.cs");
+exec("./bots/zombies/uncommon_pirate.cs");
 exec("./bots/zombies/boomer.cs");
 exec("./bots/zombies/charger.cs");
 exec("./bots/zombies/hunter.cs");
@@ -167,9 +44,6 @@ exec("./bots/zombies/smoker.cs");
 exec("./bots/zombies/spitter.cs");
 exec("./bots/zombies/tank.cs");
 exec("./bots/zombies/witch.cs");
-exec("./bots/survivors/bot_survivor.cs");
-
-exec("./support/afk_system.cs");
 
 if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 {
@@ -279,6 +153,32 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 		requireRestart = false;
 	};
 
+    new ScriptObject(Preference)
+	{
+		className      = "L4B Director";
+
+		addon          = "Package_Left4Block";
+		category       = "Director (Minigame Only)";
+		title          = "Max tank rounds";
+
+		type           = "num";
+		params         = "0 10 0";
+
+		variable       = "$Pref::L4BDirector::TankRounds";
+
+		defaultValue   = "2";
+
+		updateCallback = "";
+		loadCallback   = "";
+
+		hostOnly       = false;
+		secret         = false;
+
+		loadNow        = false;
+		noSave         = false;
+		requireRestart = false;
+	};
+
 	new ScriptObject(Preference)
 	{
 		className      = "Package_left4block";
@@ -310,7 +210,7 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 		className      = "Package_left4block";
 
 		addon          = "Package_left4block";
-		category       = "Player";
+		category       = "Survivor";
 		title          = "Enable survivor brick scanning";
 
 		type           = "bool";
@@ -336,7 +236,7 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 		className      = "Package_left4block";
 
 		addon          = "Package_left4block";
-		category       = "Player";
+		category       = "Survivor";
 		title          = "Enable survivor downing";
 
 		type           = "bool";
@@ -362,7 +262,7 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 		className      = "Package_left4block";
 
 		addon          = "Package_left4block";
-		category       = "Player";
+		category       = "Survivor";
 		title          = "Survivor infection immunity";
 
 		type           = "bool";
@@ -389,7 +289,7 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 
 		addon          = "Package_left4block";
 		category       = "Melee";
-		title          = "Enable Survivor Melee";
+		title          = "Enable Survivor melee";
 
 		type           = "bool";
 		params         = "";
@@ -606,25 +506,6 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 		params         = "0 100 0";
 		variable       = "$Pref::Server::L4B2Bots::TankChargerTumbleChance";
 		defaultValue   = "25";
-		updateCallback = "";
-		loadCallback   = "";
-		hostOnly       = false;
-		secret         = false;
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "Package_left4block";
-		addon          = "Package_left4block";
-		category       = "Bots Main";
-		title          = "Zombified player bot appearance chance";
-		type           = "num";
-		params         = "0 100 0";
-		variable       = "$Pref::Server::L4B2Bots::ZombifiedPlayerBotAppearance";
-		defaultValue   = "5";
 		updateCallback = "";
 		loadCallback   = "";
 		hostOnly       = false;
@@ -925,25 +806,6 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 
 	new ScriptObject(Preference)
 	{
-		className      = "L4B2Bots_TankHP";
-		addon          = "Package_left4block";
-		category       = "Bot Tank";
-		title          = "Tank health";
-		type           = "num";
-		params         = "0 10000 0";
-		variable       = "$Pref::Server::L4B2Bots::TankHP";
-		defaultValue   = "3000";
-		updateCallback = "";
-		loadCallback   = "";
-		hostOnly       = false;
-		secret         = false;
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
 		className      = "Package_left4block";
 		addon          = "Package_left4block";
 		category       = "Bot Tank";
@@ -1138,6 +1000,7 @@ else
     $Pref::L4BDirector::Director_Interval = 30;
 	$Pref::L4BDirector::AllowMGMessages = 1;
 	$Pref::L4BDirector::EnableCues = 1;
+	$Pref::L4BDirector::TankRounds = 2;
     $Pref::SurvivorPlayer::BrickScanning = 1;
     $Pref::SurvivorPlayer::EnableDowning = 1;
 	$Pref::SurvivorPlayer::SurvivorImmunity = 1;
@@ -1161,7 +1024,6 @@ else
 	$Pref::Server::L4B2Bots::HoldVictims = 0;
 	$Pref::Server::L4B2Bots::SpecialsWarnLight = 0;
 	$Pref::Server::L4B2Bots::ClumsyZombies = 0;
-	$Pref::Server::L4B2Bots::TankHP = 3000;
 	$Pref::Server::L4B2Bots::TankBoulders = 50;
 	$Pref::Server::L4B2Bots::NormalsDamage = 5;
 	$Pref::Server::L4B2Bots::TankMeleeDamage = 24;
@@ -1175,11 +1037,5 @@ else
 	$Pref::Server::L4B2Bots::ZombieLootItem5 = "None";
 	$Pref::Server::L4B2Bots::ZombieLootItemFallen = "None";
 	$Pref::Server::L4B2Bots::VictimSavedMessages = 1;
-	$Pref::Server::L4B2Bots::ZombieBurnerCollision = 1;
-	$Pref::Server::L4B2Bots::ZombifiedPlayerBotAppearance = 5;
-}
-
-function L4B2Bots_TankHP::onUpdate(%this, %val) 
-{
-	eval("ZombieTankHoleBot.maxDamage =" @ $Pref::Server::L4B2Bots::TankHP @ ";");
+	$Pref::Server::L4B2Bots::ZombieBurnerCollision = 1;	
 }

@@ -544,6 +544,8 @@ function SurvivorHoleBot::onBotLoop( %this, %obj )
 
 function SurvivorHoleBot::onBotCollision( %this, %obj, %col, %normal, %speed )
 {
+    if(%obj.getstate() $= "Dead")
+    
     if(%col.getClassName() $= "Player" && %col.getState() !$= "Dead" && %obj.hFollowing != %col)
     {
         if(%col.getDatablock().getName() $= "DownPlayerSurvivorArmor")
@@ -581,7 +583,7 @@ function SurvivorHoleBot::onBotCollision( %this, %obj, %col, %normal, %speed )
     if(%col.getType() & $TypeMasks::PlayerObjectType && %col.hType $= "Zombie" && %col.getState() !$= "Dead")
     {
         %obj.setAimObject(%col);
-        %obj.doMelee();
+        %obj.meleeTrigger();	
         %obj.setMoveY(-%obj.hMaxMoveSpeed);
     }
 }

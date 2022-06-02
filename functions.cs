@@ -6,7 +6,7 @@ function Player::setShapeNameHealth(%obj)
 {
 	if(!isObject(%obj))
 	return;
-	
+
 	if(%obj.getState() $= "Dead")
 	{
 		%obj.setShapeName("", 8564862);
@@ -17,7 +17,7 @@ function Player::setShapeNameHealth(%obj)
 	%name = %obj.name SPC %obj.client.name;
 	else %name = %obj.name;
 	
-	%obj.setShapeName(%name SPC "|" SPC %obj.getDataBlock().MaxDamage-%obj.getDamageLevel(), 8564862);
+	%obj.setShapeName(%name SPC "|" SPC %obj.getDataBlock().MaxDamage-mFloatLength(%obj.getDamageLevel(), 0), 8564862);
 	%obj.setShapeNameColor("1 0 0");
 	%obj.setShapeNameDistance(%obj.getdataBlock().ShapeNameDistance);
 }
@@ -60,46 +60,6 @@ function L4B_isPlayerObstructed(%viewer, %target)
     return ContainerRayCast(%viewer.getEyePoint(), %target.getHackPosition(), $TypeMasks::FxBrickObjectType | $TypeMasks::DebrisObjectType | $TypeMasks::InteriorObjectType, %viewer);
 }
 
-function L4B_generateItemString(%client)
-{
-	if(!isObject(%client) || !isObject(%client.player))
-	{
-		return;
-	}
-	%itemString = "";
-	for(%i = 0; %i < %player.getDatablock().maxTools; %i++)
-	{
-		if(isObject(%player.tool[%i]))
-		{
-			%itemString = %itemString SPC %player.tool[%i];
-		}
-	}
-}
-
-function L4B_loadItemString(%player, %string)
-{
-	if(!isObject(%player))
-	{
-		return;
-	}
-	%player.clearTools();
-	for(%i = 0; %i < getRecordCount(%string); %i++)
-	{
-		%id = nameToID(getRecord(%string, %i));
-		if(isObject(%id))
-		{
-			%player.tool[%i] = %id;
-			%player.weaponCount++;
-			messageClient(%client,'MsgItemPickup','', %i, %id);
-			if(%i == 0)
-			{
-				%player.updateArm(%id);
-				%player.mountImage(%id, 0);
-			}
-		}
-	}
-}
-
 function L4B_SaveVictim(%obj,%target)
 {	
 	if(L4B_CheckifinMinigame(%obj,%target) && %target.getState() !$= "Dead" && !%obj.getState() !$= "Dead")
@@ -120,7 +80,7 @@ function L4B_SaveVictim(%obj,%target)
 			%obj.client.centerprint("<color:FFFFFF>You saved " @ %target.client.name,5);
 
 			if(isObject(%minigame = %obj.client.minigame))
-			MinigameSO::L4B_PlaySound(%col.client.minigame,"victim_saved_sound");
+			%minigame.L4B_PlaySound("victim_saved_sound");
 		}
 
 		if(%target.hEater.getDataBlock().getName() !$= "ZombieChargerHoleBot")
@@ -536,6 +496,40 @@ function L4B_ZombieLunge(%obj,%targ,%power)
 	%obj.setvelocity(%final);
 }
 
+function Player::Safehouse(%player)
+{
+	%minigame = getMiniGameFromObject(%player);
+	if(%player.hType !$= "Survivors" || isEventPending(%minigame.resetSchedule))
+	return;
+
+	%player.InSafehouse = 1;
+	cancel(%player.NoSafeHouseSchedule);
+	%player.NoSafeHouseSchedule = %player.schedule(500,NoSafeHouse);
+
+	for(%i = 0; %i < %minigame.numMembers; %i++)
+	{
+		%client = %minigame.member[%i];
+
+		if(isObject(%player = %client.player) && !%player.hIsInfected && %player.getdataBlock().getname() !$= "DownPlayerSurvivorArmor")
+		%livePlayerCount++;
+
+		if(isObject(%player) && %player.InSafehouse)
+		%safehousecount++;
+	}
+	
+	if(%safehousecount >= %livePlayerCount && isObject(%minigame))
+	{
+		%minigame.SurvivorWin();
+		return;
+	}
+}
+
+function Player::NoSafeHouse(%player)
+{
+	%player.InSafehouse = 0;
+}
+registerOutputEvent ("Player", "Safehouse");
+
 // ============================================================
 // 3. Minigame
 // ============================================================
@@ -549,6 +543,38 @@ function MinigameSO::L4B_PlaySound(%minigame,%sound,%client)
         %cl.play2d(%sound.getID());
     }
 }
+
+function MinigameSO::SurvivorWin(%minigame,%client)
+{
+	if(isEventPending(%minigame.resetSchedule))	
+	return;
+	
+	if(isObject(l4b_music))
+	l4b_music.delete();
+
+	//%minigame.schedule(3000,chatMessageAll,0,'<font:impact:25>\c6Resetting minigame in 5 seconds.');
+	//%minigame.schedule(7750,chatMessageAll,0,'<font:impact:25>\c6Resetting minigame.');
+   	%minigame.scheduleReset(8000);
+	%minigame.L4B_PlaySound("game_win_sound");
+	%minigame.DirectorProcessEvent("onSurvivorsWin",%client);
+
+    for(%i=0;%i<%minigame.numMembers;%i++)
+    {
+		%member = %minigame.member[%i];
+
+		if(isObject(%member.player))
+		{
+			if(%member.player.hType $= "Survivors")
+			%member.player.emote(winStarProjectile, 1);
+
+			%member.Camera.setOrbitMode(%member.player, %member.player.getTransform(), 0, 5, 0, 1);
+			%member.setControlObject(%member.Camera);
+		}
+    }
+}
+
+registerInputEvent("fxDTSBrick", "onSurvivorsWin", "Self fxDTSBrick" TAB "MiniGame MiniGame");
+registerInputEvent("fxDTSBrick", "onSurvivorsLose", "Self fxDTSBrick" TAB "MiniGame MiniGame");
 
 function L4B_CheckifinMinigame(%target1,%target2)
 {
@@ -826,7 +852,7 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 				case "Player":	if($Pref::Server::L4B2Bots::MinigameMessages)
 								{
 									chatMessageTeam(%col.client,'fakedeathmessage',"<color:FFFF00>" @ %obj.getDatablock().hName SPC %obj.getdataBlock().hPinCI SPC %col.client.name);
-									MinigameSO::L4B_PlaySound(%col.client.minigame,"victim_needshelp_sound");
+									%col.client.minigame.L4B_PlaySound("victim_needshelp_sound");
 								}
 								//NeedHelp_Cutscene(%col.client, strangledBillboard);
 
@@ -1129,396 +1155,6 @@ registerInputEvent ("fxDTSBrick", "onTankTouch", "Self fxDTSBrick" TAB "Player P
 	"Client GameConnection" TAB "MiniGame MiniGame");
 
 // ============================================================
-// 9. Director
-// ============================================================
-
-LoadRequiredAddOn("Brick_Halloween");
-datablock fxDTSBrickData (brickL4BDirectorData : brickSkullData)
-{
-	subCategory = "Interactive";
-	uiName = "Director Block";
-};
-
-function brickL4BDirectorData::onPlant(%this, %obj)
-{
-    Parent::onPlant(%this, %obj);
-    
-    if(!isObject(directorBricks))
-    {
-        new SimSet(directorBricks);
-        directorBricks.add(%obj);
-    }
-    else directorBricks.add(%obj);
-}
-
-function brickL4BDirectorData::onloadPlant(%data, %brick)
-{
-	brickL4BDirectorData::onPlant(%this, %obj);
-}
-
-function brickL4BDirectorData::onDeath(%this, %obj)
-{
-	if(isObject(directorBricks) && directorBricks.isMember(%obj))
-    directorBricks.remove(%obj);
-
-	Parent::onDeath(%this,%brick);
-}
-
-registerInputEvent("fxDTSBrick", "onDirectorInterval", "Self fxDTSBrick" TAB "MiniGame MiniGame");
-registerInputEvent("fxDTSBrick", "onDirectorLvlShStart", "Self fxDTSBrick" TAB "MiniGame MiniGame");
-registerInputEvent("fxDTSBrick", "onDirectorLvlShEnd", "Self fxDTSBrick" TAB "MiniGame MiniGame");
-registerInputEvent("fxDTSBrick", "onDirectorLvlLhStart", "Self fxDTSBrick" TAB "MiniGame MiniGame");
-registerInputEvent("fxDTSBrick", "onDirectorLvlLhEnd", "Self fxDTSBrick" TAB "MiniGame MiniGame");
-registerInputEvent("fxDTSBrick", "onDirectorLvlTankStart", "Self fxDTSBrick" TAB "MiniGame MiniGame");
-registerInputEvent("fxDTSBrick", "onDirectorLvlTankEnd", "Self fxDTSBrick" TAB "MiniGame MiniGame");
-registerInputEvent("fxDTSBrick", "onDirectorSpecial", "Self fxDTSBrick" TAB "MiniGame MiniGame");
-
-registerOutputEvent(Minigame, L4B_Director, "bool");
-function MinigameSO::L4B_Director(%minigame,%bool,%client)
-{   
-    %directorinterval = $Pref::L4BDirector::Director_Interval*1000;
-    %directorintervalhalf = %directorinterval/2;
-    
-    if(%bool)
-    {
-        if(%minigame.isDirectorEnabled)
-        {
-            GameConnection::ChatMessage (%client,"\c2The director is already enabled.");
-            return;
-        }
-        else
-        {
-            if(isObject(l4b_music)) 
-            l4b_music.delete();
-
-            if($Pref::L4BDirector::AllowMGMessages)
-            MiniGameSO::ChatMsgAll (%minigame, "\c3Director activated.", %client);
-            echo(">>L4B Director enabled");
-
-            %minigame.isDirectorEnabled = 1;
-			cancel(directorSpecialSchedule);
-            %minigame.directorSpecialSchedule = %minigame.schedule(%directorintervalhalf,directorSpecial,%client);
-            cancel(%minigame.directorSchedule);
-            %minigame.directorSchedule = %minigame.schedule(%directorinterval,directorChoose,%client);
-
-            if($Pref::L4BDirector::EnableCues)
-            %minigame.directorPlaySound("hordeincoming" @ getrandom(1,9) @ "_sound",%client);
-        }
-    }
-    else
-    {
-        if(!%minigame.isDirectorEnabled)
-        {
-            GameConnection::ChatMessage (%client, "The director is already disabled.");
-            return;
-        }
-        else
-        {
-            MiniGameSO::ChatMsgAll (%minigame, "<bitmapk:add-ons/package_left4block/icons/ci_skull> Director", %client);
-            echo(">>L4B Director disabled");
-            %minigame.isDirectorEnabled = 0;
-            cancel(%minigame.directorSchedule);
-			cancel(directorSpecialSchedule);
-        }
-    }
-}
-
-function MiniGameSO::directorSpecial(%minigame,%client)
-{
-    if(!%minigame.isDirectorEnabled)
-    return;
-    
-    %directorinterval = $Pref::L4BDirector::Director_Interval*1000;
-    %directorintervalhalf = %directorinterval/2;
-
-    cancel(directorSpecialSchedule);
-    %minigame.directorSpecialSchedule = %minigame.schedule(%directorintervalhalf,directorSpecial,%client);
-
-    if(isObject(directorBricks))
-    for(%i = 0; %i < directorBricks.getCount(); %i++)
-    {
-        %brick = directorBricks.getObject(%i);
-        %brick.processInputEvent("onDirectorSpecial",%client);
-        %brick.setColorFX(2);
-        %brick.schedule(250,setColorFX,0);
-    }
-}
-
-function MiniGameSO::directorChoose(%minigame,%client)
-{
-    if(!%minigame.isDirectorEnabled)
-    return;
-
-    %directorinterval = $Pref::L4BDirector::Director_Interval*1000;
-    %directorintervalhalf = %directorinterval/2;
-
-    if(isObject(directorBricks))//Level 1
-    for(%i = 0; %i < directorBricks.getCount(); %i++)
-    {
-        %brick = directorBricks.getObject(%i);
-        %brick.processInputEvent("onDirectorInterval",%client);
-        %brick.setColorFX(2);
-        %brick.schedule(250,setColorFX,0);
-    }
-
-    cancel(%minigame.directorSchedule);
-    %minigame.directorSchedule = %minigame.schedule($Pref::L4BDirector::Director_Interval*1000,directorChoose,%client);
-    
-    %round = getRandom(0,2);
-    if(getRandom(1,100) <= 15)
-    %round = 3;
-    switch(%round)
-    {
-        case 0: if($Pref::L4BDirector::AllowMGMessages)
-                MiniGameSO::ChatMsgAll (%minigame, "\c2Director <bitmapk:add-ons/package_left4block/icons/ci_peace> \c2Break", %client);
-                
-                if(getRandom(1,100) <= 25)
-                {
-                    if($Pref::L4BDirector::EnableCues)
-                    {
-                        %minigame.directorPlaySound("zombiechoir_0" @ getrandom(1,6) @ "_sound",%client);
-
-                        cancel(%minigame.choirSFX);
-                        %minigame.choirSFX = %minigame.schedule(%directorintervalhalf,directorPlaySound,"zombiechoir_0" @ getrandom(1,6) @ "_sound",%client);
-
-                        if(isObject(l4b_music)) 
-                        l4b_music.delete();
-
-                        if(isObject(%minigame.member0.player))
-                        %pos = %minigame.member0.player.getPosition();
-                        else %pos = "0 0 0";
-
-                        %musicnum = "musicdata_L4D_background" @ getRandom(1,3);
-                        new AudioEmitter(l4b_music)
-                        {
-                            position = %pos;
-                            profile = %musicnum.getID();
-                            isLooping= true;
-                            is3D = 0;
-                            volume = 1;
-			                useProfileDescription = "0";
-			                type = "0";
-			                outsideAmbient = "1";
-			                referenceDistance = "2";
-			                maxDistance = 999999;
-			                enableVisualFeedback = "0";
-                        };
-                        l4b_music.schedule(%directorinterval,delete);
-                    }
-                }
-
-        case 1: if($Pref::L4BDirector::AllowMGMessages)
-                MiniGameSO::ChatMsgAll (%minigame, "\c3Director <bitmapk:add-ons/package_left4block/icons/ci_skull2> \c3Small Horde", %client);
-        
-                if(isObject(directorBricks))//Level 1
-                for(%i = 0; %i < directorBricks.getCount(); %i++)
-                {
-                    %brick = directorBricks.getObject(%i);
-                    %brick.processInputEvent("onDirectorLvlShStart",%client);
-                    %brick.setColorFX(2);
-                    %brick.schedule(250,setColorFX,0);
-                    %brick.schedule(%directorinterval,processInputEvent,"onDirectorLvlShEnd");
-                }
-
-        case 2: if($Pref::L4BDirector::EnableCues)
-                {
-                    %minigame.directorPlaySound("hordeincoming" @ getrandom(1,9) @ "_sound",%client);
-
-                    cancel(%minigame.hordeMusic);
-                    %minigame.hordeMusic = %minigame.schedule(4000,hordeMusic,%client);
-                }
-
-                if($Pref::L4BDirector::AllowMGMessages)
-                MiniGameSO::ChatMsgAll (%minigame,"Director <bitmapk:add-ons/package_left4block/icons/ci_skull> Large Horde", %client);
-
-                cancel(%minigame.TriggerHordeEndEvent);
-                %minigame.TriggerHordeEndEvent = %minigame.schedule(%directorinterval,TriggerHordeEndEvent,%client);
-
-                if(isObject(directorBricks))
-                for(%i = 0; %i < directorBricks.getCount(); %i++)
-                {
-                    %brick = directorBricks.getObject(%i);
-                    %brick.processInputEvent("onDirectorLvlLhStart",%client);
-                    %brick.setColorFX(2);
-                    %brick.schedule(250,setColorFX,0);
-                }
-
-                cancel(%minigame.directorSchedule);
-                %minigame.directorSchedule = %minigame.schedule(%directorinterval+5000,directorChoose,%client);
-                                    
-        case 3: if(%minigame.DirectorTankRound < 2)
-				{
-					%minigame.DirectorTankRound++;
-					if($Pref::L4BDirector::AllowMGMessages)
-                	MiniGameSO::ChatMsgAll (%minigame,"Director <bitmapk:add-ons/package_left4block/icons/ci_skull> Tank", %client);
-
-                	if(isObject(directorBricks))//Level 1
-                	for(%i = 0; %i < directorBricks.getCount(); %i++)
-                	{
-                	    %brick = directorBricks.getObject(%i);
-                	    %brick.processInputEvent("onDirectorLvlTankStart",%client);
-                	    %brick.setColorFX(2);
-                	    %brick.schedule(250,setColorFX,0);
-                	}
-
-                	if($Pref::L4BDirector::EnableCues)
-                	{
-                	    if(isObject(l4b_music)) 
-                	    l4b_music.delete();
-
-                	    if(isObject(%minigame.member0.player))
-                	    %pos = %minigame.member0.player.getPosition();
-                	    else %pos = "0 0 0";
-
-                	    %musicnum = "musicdata_L4D_tank";
-                	    new AudioEmitter(l4b_music)
-                	    {
-                	        position = %pos;
-                	        profile = %musicnum.getID();
-                	        isLooping= true;
-                	        is3D = 0;
-                	        volume = 1;
-			    	        useProfileDescription = "0";
-			    	        type = "0";
-			    	        outsideAmbient = "1";
-			    	        referenceDistance = "2";
-			    	        maxDistance = 999999;
-			    	        enableVisualFeedback = "0";
-                	    };
-                	}
-                	%minigame.isDirectorEnabled = 0;
-                	cancel(%minigame.directorSchedule);
-				}
-				else
-				{
-					if($Pref::L4BDirector::EnableCues)
-               		{
-               		    %minigame.directorPlaySound("hordeincoming" @ getrandom(1,9) @ "_sound",%client);
-	
-               		    cancel(%minigame.hordeMusic);
-               		    %minigame.hordeMusic = %minigame.schedule(4000,hordeMusic,%client);
-               		}
-	
-               		if($Pref::L4BDirector::AllowMGMessages)
-               		MiniGameSO::ChatMsgAll (%minigame,"Director <bitmapk:add-ons/package_left4block/icons/ci_skull> Large Horde", %client);
-	
-               		cancel(%minigame.TriggerHordeEndEvent);
-               		%minigame.TriggerHordeEndEvent = %minigame.schedule(%directorinterval,TriggerHordeEndEvent,%client);
-	
-               		if(isObject(directorBricks))
-               		for(%i = 0; %i < directorBricks.getCount(); %i++)
-               		{
-               		    %brick = directorBricks.getObject(%i);
-               		    %brick.processInputEvent("onDirectorLvlLhStart",%client);
-               		    %brick.setColorFX(2);
-               		    %brick.schedule(250,setColorFX,0);
-               		}
-	
-               		cancel(%minigame.directorSchedule);
-               		%minigame.directorSchedule = %minigame.schedule(%directorinterval+5000,directorChoose,%client);
-				}
-    }
-}
-
-function MiniGameSO::hordeMusic(%minigame,%client)
-{
-    %directorinterval = $Pref::L4BDirector::Director_Interval*1000;
-    %directorintervalhalf = %directorinterval/2;
-
-    if($Pref::L4BDirector::EnableCues)
-    {
-        %minigame.directorPlaySound("drum_suspense_end_sound",%client);
-
-        if(isObject(l4b_music)) 
-        l4b_music.delete();
-
-        if(isObject(%minigame.member0.player))
-        %pos = %minigame.member0.player.getPosition();
-        else %pos = "0 0 0";
-
-        %musicnum = "musicData_L4D_drum_suspense" @ getRandom(1,2);
-        new AudioEmitter(l4b_music)
-        {
-            position = %pos;
-            profile = %musicnum.getID();
-            isLooping= true;
-            is3D = 0;
-            volume = 1;
-            useProfileDescription = "0";
-            type = "0";
-            outsideAmbient = "1";
-            referenceDistance = "2";
-            maxDistance = 999999;
-            enableVisualFeedback = "0";
-        };
-
-        cancel(%minigame.hordeMusic1);
-        %minigame.hordeMusic1 = %minigame.schedule(%directorintervalhalf-9000,directorPlaySound,"hordeslayer_0" @ getrandom(1,3) @ "_sound",%client);
-
-        cancel(%minigame.hordeMusic2);
-        %minigame.hordeMusic2 = %minigame.schedule(%directorintervalhalf-4000,directorPlaySound,"hordeslayer_0" @ getrandom(1,3) @ "_sound",%client);
-    }
-}
-
-function MinigameSO::TriggerHordeEndEvent(%minigame,%client)
-{
-    %directorinterval = $Pref::L4BDirector::Director_Interval*1000;
-    %directorintervalhalf = %directorinterval/2;
-    
-    %minigame.directorPlaySound("drum_suspense_end_sound",%client);
-
-    if(isObject(directorBricks))
-    {
-        for(%i = 0; %i < directorBricks.getCount(); %i++)
-        {
-            %brick = directorBricks.getObject(%i);
-            %brick.processInputEvent("onDirectorLvlLhEnd",%client);
-            %brick.setColorFX(2);
-            %brick.schedule(250,setColorFX,0);
-        }
-    }
-
-    if(isObject(l4b_music))
-    l4b_music.delete();
-}
-
-registerOutputEvent(Minigame, "TriggerTankEndEvent");
-function MinigameSO::TriggerTankEndEvent(%minigame,%client)
-{
-    if(isObject(l4b_music))
-    l4b_music.delete();
-    
-    %directorinterval = $Pref::L4BDirector::Director_Interval*1000;
-    %directorintervalhalf = %directorinterval/2;
-
-    if(isObject(directorBricks))
-    {
-        for(%i = 0; %i < directorBricks.getCount(); %i++)
-        {
-            %brick = directorBricks.getObject(%i);
-            %brick.processInputEvent("onDirectorLvlTankEnd",%client);
-            %brick.setColorFX(2);
-            %brick.schedule(250,setColorFX,0);
-        }
-    }
-
-    %minigame.isDirectorEnabled = 1;
-    cancel(%minigame.directorSchedule);
-    %minigame.directorSchedule = %minigame.schedule($Pref::L4BDirector::Director_Interval*1000,directorChoose,%client);
-}
-
-function MinigameSO::directorPlaySound(%minigame,%sound,%client)
-{
-    for(%i=0;%i<%minigame.numMembers;%i++)
-    {
-        %cl=%minigame.member[%i];
-
-        if(isObject(%cl) && %cl.getClassName() $= "GameConnection")
-        %cl.play2d(%sound.getID());
-    }
-}
-
-// ============================================================
 // 10. Water SFX
 // ============================================================
 
@@ -1759,10 +1395,10 @@ function SurvivorPlayer::onNewDataBlock(%this,%obj)
 {	
 	Parent::onNewDataBlock(%this,%obj);
 
-	%obj.hType = "Survivors";
-
 	if($Pref::SurvivorPlayer::SurvivorImmunity)
 	%obj.hIsImmune = 1;
+	else commandToClient(%obj.client, 'SetVignette', false, " 0 0 0 1" );
+	%obj.hType = "Survivors";
 
 	%obj.BrickScanCheck();
 }
@@ -1938,7 +1574,8 @@ function DownPlayerSurvivorArmor::onNewDataBlock(%this,%obj)
 		Billboard_MountToPlayer(%obj, $L4B::Billboard_SO, incappedBillboard);
 
 		%minigame = %obj.client.minigame;
-		MinigameSO::L4B_PlaySound(%minigame,"victim_needshelp_sound");
+		%minigame.L4B_PlaySound("victim_needshelp_sound");
+		%minigame.checkLastManStanding();
 	}
 
 	%obj.playthread(0,sit);
@@ -2121,8 +1758,7 @@ function serverCmdSecondaryMelee(%cl)
 	
 function player::meleeTrigger(%pl)
 {
-
-	if(%pl.meleeItem || %pl.hIsInfected || %pl.getDatablock().getName() $= "DownPlayerSurvivorArmor" || %pl.isBeingStrangled)
+	if(%pl.getstate() $= "Dead" || %pl.meleeItem || %pl.hIsInfected || %pl.getDatablock().getName() $= "DownPlayerSurvivorArmor" || %pl.isBeingStrangled)
 	if(%pl.disabledMelee)
 	return;
 
@@ -2240,13 +1876,15 @@ function Player::doMelee(%obj)
       	%beam = vectorScale(%vec,%len); //lengthened vector (for calculating the raycast's endpoint)
       	%end = vectorAdd(%pos,%beam); //calculated endpoint for raycast
       	%ray = containerRayCast(%pos,%end,%masks,%obj); //fire raycast
-      	%line = vectorNormalize(vectorSub(%pos,posFromRaycast(%ray)));
+		
+      	%line = vectorNormalize(vectorSub(%pos,%hit.getposition()));
 		%dot = vectorDot(%vec,%line);
 
-     	if(vectorDist(%pos,posFromRaycast(%ray)) > 3 || %dot > -0.5)
+     	if(vectorDist(%pos,%hit.getposition()) > 3.75 || %dot > -0.4)
 		continue;
 
-     	if(%ray.getType() & $TypeMasks::FxBrickObjectType || %ray.getType() & $TypeMasks::StaticObjectType || %ray.getType() & $TypeMasks::VehicleObjectType)
+		if(isObject(%ray))
+        if(%ray.getType() & $TypeMasks::StaticObjectType || %ray.getType() & $TypeMasks::FxBrickObjectType || %ray.getType() & $TypeMasks::VehicleObjectType)
      	{
 			serverPlay3D(%MeleeType @ "HitEnv_Sound",posFromRaycast(%ray));
 			%p = new projectile()
@@ -2254,13 +1892,16 @@ function Player::doMelee(%obj)
 				datablock = "SecondaryMeleeSmallProjectile";
 				initialPosition = posFromRaycast(%ray);
 			};
-			continue;
+			return;
      	}
+
+		%obscure = containerRayCast(%obj.getEyePoint(),vectorAdd(%hit.getPosition(),"0 0 1.9"),$TypeMasks::VehicleObjectType | $TypeMasks::StaticObjectType | $TypeMasks::FxBrickObjectType, %obj);
+		if(isObject(%obscure))
+		continue;
 
 		if(%hit.getType() & $TypeMasks::PlayerObjectType)
 		{
-			%cl = %obj.client;
-			if(minigameCanDamage(%obj,%hit) || (!isObject(%cl.minigame) && %class $= "AiPlayer" && isObject(%spb = %hit.spawnBrick) && %spb.client == %cl))
+			if(minigameCanDamage(%obj,%hit))
 			{
 				if(getSimTime()-%hit.punchedTime[%obj] > 2500)
 				%hit.punched[%obj] = 0;
@@ -2305,49 +1946,42 @@ function Player::doMelee(%obj)
 					schedule(1000,0,serverCmdSit,%hit);
 				}
 
-				serverPlay3D(%sound,posFromRaycast(%ray));
+
+				serverPlay3D(%sound,%hit.getHackPosition());
+
 				%hscale = %hit.getScale();
 				%p = new projectile()
 				{
 					datablock = %projectile;
-					initialPosition = posFromRaycast(%ray);
+					initialPosition = %hit.getHackPosition();
 				};
 
 				%sVec = %hit.getForwardVector();
 				%aimVec = %obj.getForwardVector();
 				%reflect = (vectorDot(%sVec, %aimVec) < 0);
 
-				if($IsRiotShieldEnabled)
+				if(%hit.getMountedImage(0) == RiotShieldimage.getID())
 				{
-					if(%hit.getMountedImage(0) == RiotShieldimage.getID())
-					{
-						serverPlay3d("riotshield_hit_sound",posFromRaycast(%ray));
+					serverPlay3d("riotshield_hit_sound",%hit.getHackPosition());
 
-						if(!%reflect)
-						{
-							%hit.applyimpulse(%hit.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),%hitknockback*$Pref::SecondaryMelee::MeleeForce),"0" SPC "0" SPC %hitz*$Pref::SecondaryMelee::MeleeForce));
-							if(!isObject(%cl.minigame) || %cl.minigame.weaponDamage)
-							%hit.damage(%obj,%hit.getPosition(),%dmg,$DamageType::SecondaryMelee);
-						}
-						else
-						{
-							%hitknockback = 200;
-							%hitz = 75;
-							%hit.applyimpulse(%hit.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),%hitknockback*$Pref::SecondaryMelee::MeleeForce),"0" SPC "0" SPC %hitz*$Pref::SecondaryMelee::MeleeForce));
-							serverPlay3d("riotshield_block_sound",%obj.getPosition());
-						}
+					if(!%reflect)
+					{
+						%hit.applyimpulse(%hit.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),%hitknockback*$Pref::SecondaryMelee::MeleeForce),"0" SPC "0" SPC %hitz*$Pref::SecondaryMelee::MeleeForce));
+						if(minigameCanDamage(%obj,%hit))
+						%hit.damage(%obj,%hit.getPosition(),%dmg,$DamageType::SecondaryMelee);
 					}
 					else
 					{
+						%hitknockback = 200;
+						%hitz = 75;
 						%hit.applyimpulse(%hit.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),%hitknockback*$Pref::SecondaryMelee::MeleeForce),"0" SPC "0" SPC %hitz*$Pref::SecondaryMelee::MeleeForce));
-						if(!isObject(%cl.minigame) || %cl.minigame.weaponDamage)
-						%hit.damage(%obj,%hit.getPosition(),%dmg,$DamageType::SecondaryMelee);
+						serverPlay3d("riotshield_block_sound",%obj.getPosition());
 					}
 				}
 				else
 				{
 					%hit.applyimpulse(%hit.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),%hitknockback*$Pref::SecondaryMelee::MeleeForce),"0" SPC "0" SPC %hitz*$Pref::SecondaryMelee::MeleeForce));
-					if(!isObject(%cl.minigame) || %cl.minigame.weaponDamage)
+					if(minigameCanDamage(%obj,%hit))
 					%hit.damage(%obj,%hit.getPosition(),%dmg,$DamageType::SecondaryMelee);
 				}
 			}
@@ -2382,7 +2016,7 @@ function Player::ToxifyHealth ( %Player, %amt )
 	}
 	else if(%Player.isToxic == 0)
 	{
-		%Player.Damage (%Player, %Player.getPosition(), %amt * -1, $DamageType::Default);
+		%Player.Damage (%Player.hFakeProjectile, %Player.getPosition(), %amt * -1, $DamageType::Default);
 				if(!%Player.Toxified)
 		{
 		schedule(500,0,ToxicityE,%Player);
@@ -2447,10 +2081,10 @@ function brickTeleBrickData::onPlant(%data,%obj)
 
 	%obj.setrendering(0);
 	%obj.setcolliding(0);
+	%obj.setraycasting(0);
 
     if(isObject(%obj.client.currTeleSet))
 	{
-	    %obj.teleset = %obj.client.currTeleSet;
 		%obj.client.currTeleSet.add(%obj);
 		%obj.setNTObjectName(%obj.client.currTeleSet.ParBrick @ "_TeleventSetBrick");
 
@@ -2542,33 +2176,40 @@ function DisableTeleporting(%brick)
     }
 }
 
+registerInputEvent("fxDTSBrick","onSurvivorBrickScan","Self fxDTSBrick");
+
 function Player::BrickScanCheck(%obj)
 {
-	if(!$Pref::SurvivorPlayer::BrickScanning || !isObject(%obj) || %obj.getState() $= "Dead" || !isObject(getMinigameFromObject(%obj)))
+	if(!$Pref::SurvivorPlayer::BrickScanning || !isObject(%obj) || %obj.getState() $= "Dead")
 	return;
 
 	InitContainerRadiusSearch(%obj.getPosition(), 10, $TypeMasks::FxBrickObjectType);
 	while(%brick = containerSearchNext())
-	if(%brick.getdataBlock().IsTeleBrick)
-    {
-		if(isObject(%brick.teleset))
-		{
-        	for(%i = 0; %i < %brick.teleset.getcount(); %i++)
-        	{
-				%telebrick = %brick.teleset.getObject(%i);
+	{
+		$InputTarget_["Self"] = %brick;
+		%brick.processInputEvent("onSurvivorBrickScan",%brick.getgroup().client);
 
-        		if(!isObject(MainTeleSet))
-        		new SimSet(MainTeleSet);
-				else if(!MainTeleSet.isMember(%telebrick))
-				MainTeleSet.add(%telebrick);
-	        }
-        	cancel(%brick.teleset.DisableTeleporting);
-        	%brick.teleset.DisableTeleporting = schedule(2500,0,DisableTeleporting,%brick);
-		}
-    }
+		if(%brick.getdataBlock().IsTeleBrick)
+    	{
+			if(isObject(%brick.teleset))
+			{
+    	    	for(%i = 0; %i < %brick.teleset.getcount(); %i++)
+    	    	{
+					%telebrick = %brick.teleset.getObject(%i);
+
+    	    		if(!isObject(MainTeleSet))
+    	    		new SimSet(MainTeleSet);
+					else if(!MainTeleSet.isMember(%telebrick))
+					MainTeleSet.add(%telebrick);
+		        }
+    	    	cancel(%brick.teleset.DisableTeleporting);
+    	    	%brick.teleset.DisableTeleporting = schedule(2500,0,DisableTeleporting,%brick);
+			}
+    	}
+	}
 
 	cancel(%obj.BrickScanCheck);
-	%obj.BrickScanCheck = %obj.schedule(1500,BrickScanCheck);
+	%obj.BrickScanCheck = %obj.schedule(2000,BrickScanCheck);
 }
 registerOutputEvent("Bot","doMRandomTele");
 registerOutputEvent("Player","doMRandomTele");
@@ -2576,8 +2217,9 @@ registerInputEvent("fxDTSBrick","onMRandomTele","Self fxDTSBrick" TAB "Player Pl
 
 function Player::doMRandomTele(%obj)
 {	
-	if(isObject(%main = MainTeleSet) && %main.getCount() > 0 && isObject(%brick = %main.getObject(getRandom(0,%main.getcount()-1))))
+	if(isObject(%main = MainTeleSet) && %main.getCount() > 0)
 	{	
+		%brick = %main.getObject(getRandom(0,%main.getcount()-1));
 		%obj.settransform(vectorAdd(getwords(%brick.gettransform(),0,2),"0 0 0.25"));
 		%obj.setvelocity(%obj.getvelocity());
 

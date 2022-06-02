@@ -792,6 +792,7 @@ function gc_SyringePanaceaImage::onSelfUse(%this,%obj,%slot)
         {
           %client.Play2d("survivor_immunity_sound");
           GameConnection::ChatMessage (%obj.client, "\c2Immunity gained!");
+		  commandToClient(%obj.client,'SetVignette',$EnvGuiServer::VignetteMultiply,$EnvGuiServer::VignetteColor);
 		}
 	}
 

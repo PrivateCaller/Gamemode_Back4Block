@@ -418,7 +418,7 @@ function CommonZombieHoleBot::L4BCommonAppearance(%this,%obj,%skinColor,%face,%d
 	%obj.rleg =  0;
 	%obj.rlegColor = %rLegColor;
 
-	if(%obj.getClassName() $= "AIPlayer" && getRandom(1,1000) < $Pref::Server::L4B2Bots::ZombifiedPlayerBotAppearance*10)//Chance to become zombie version of player
+	if(%obj.getClassName() $= "AIPlayer" && getRandom(1,1000) < 5)//Chance to become zombie version of player
 	{
 		if(isObject(%playerclient = ClientGroup.getObject(getRandom(ClientGroup.getCount()-1))))
 		%obj.hZombieBotToPlayerApearance(%playerclient);

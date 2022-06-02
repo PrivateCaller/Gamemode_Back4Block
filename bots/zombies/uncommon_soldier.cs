@@ -28,6 +28,16 @@ function ZombieSoldierHoleBot::onAdd(%this,%obj,%style)
 {
 	Parent::onAdd(%this,%obj);
 	CommonZombieHoleBot::onAdd(%this,%obj);
+
+	if(getRandom(0,100) <= 5)
+	{
+		switch(getRandom(0,2))
+		{
+			case 0: %obj.mountImage(batonImage, 0);
+			case 1: %obj.mountImage(riotshieldImage, 0);
+					%obj.playthread(1,"armReadyBoth");
+		}
+	}
 }
 
 function ZombieSoldierHoleBot::onNewDataBlock(%this,%obj)
@@ -59,15 +69,6 @@ function ZombieSoldierHoleBot::onDamage(%this,%obj)
 
 function ZombieSoldierHoleBot::L4BUncommonAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {	
-	if(getRandom(0,100) <= 40)
-	{
-		%obj.mountImage(RiotShieldImage, 0);
-		%obj.playthread(1,"armReady");
-
-		if(getRandom(0,100) <= 10)
-		%obj.mountImage(pistolImage, 0);
-	}
-
 	%obj.suitColor = getRandomBotPantsColor();
 	%uniformColor = %obj.suitColor;
 	%larmColor = getRandom(0,1);

@@ -10,6 +10,46 @@ datablock PlayerData(AFKPlayerHoleBot : PlayerMeleeAnims)
     hooks_guardAtSpawn = -1;
 };
 
+function L4B_generateItemString(%client)
+{
+	if(!isObject(%client) || !isObject(%client.player))
+	{
+		return;
+	}
+	%itemString = "";
+	for(%i = 0; %i < %player.getDatablock().maxTools; %i++)
+	{
+		if(isObject(%player.tool[%i]))
+		{
+			%itemString = %itemString SPC %player.tool[%i];
+		}
+	}
+}
+
+function L4B_loadItemString(%player, %string)
+{
+	if(!isObject(%player))
+	{
+		return;
+	}
+	%player.clearTools();
+	for(%i = 0; %i < getRecordCount(%string); %i++)
+	{
+		%id = nameToID(getRecord(%string, %i));
+		if(isObject(%id))
+		{
+			%player.tool[%i] = %id;
+			%player.weaponCount++;
+			messageClient(%client,'MsgItemPickup','', %i, %id);
+			if(%i == 0)
+			{
+				%player.updateArm(%id);
+				%player.mountImage(%id, 0);
+			}
+		}
+	}
+}
+
 //
 // Spawning functions.
 //

@@ -151,9 +151,6 @@ datablock PlayerData(MudZombieHoleBot : CommonZombieHoleBot)
     maxBackwardCrouchSpeed = 2;
     maxSideCrouchSpeed = 2;
 
-	drag = 0.02;//0.02
-	density = 0.8;
-
 	ShapeNameDistance = 15;
 	hIsInfected = 1;
 	hZombieL4BType = 4;
@@ -172,13 +169,16 @@ function MudZombieHoleBot::onAdd(%this,%obj,%style)
 {
 	Parent::onAdd(%this,%obj);
 	CommonZombieHoleBot::onAdd(%this,%obj);
+
+	%obj.mountImage(MudStatusPlayerImage,1);
+	%obj.mountImage(mud_Image,0);
 }
 
 function MudZombieHoleBot::onNewDataBlock(%this,%obj)
 {
 	Parent::onNewDataBlock(%this,%obj);
 	CommonZombieHoleBot::onNewDataBlock(%this,%obj);
-	%obj.mountImage(MudStatusPlayerImage,1);
+
 }
 
 function MudZombieHoleBot::onDamage(%this,%obj)

@@ -10,7 +10,7 @@ datablock PlayerData(ZombieTankHoleBot : CommonZombieHoleBot)
 {
 	uiName = "Tank Infected";
 	shapeFile = "Add-ons/Package_Left4Block/models/tank/zTank.dts";
-	maxDamage = $Pref::Server::L4B2Bots::TankHP;//Health
+	maxDamage = $hTankHealth;//Health
 	mass = 1000;
 
 	runforce = 48 * 220;

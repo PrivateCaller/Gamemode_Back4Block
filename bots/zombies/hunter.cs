@@ -204,7 +204,7 @@ function ZombieHunterHoleBot::onBotMelee(%this,%obj,%col)
 	%obj.spawnExplosion(pushBroomProjectile,%forcescale SPC %forcescale SPC %forcescale);
 	%obj.setMaxForwardSpeed(9);
 
-	if(%oScale >= 0.9)
+	if(%oScale >= 0.9 && %obj.getstate() !$= "Dead")
 	%obj.SpecialPinAttack(%col,%force);
 
 	if(isObject(%obj.hFollowing) && %obj.hFollowing.getState() !$= "Dead" && %obj.getState() !$= "Dead" && !%obj.isStrangling && !%obj.hFollowing.isBeingStrangled)

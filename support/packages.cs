@@ -1,9 +1,15 @@
 // ============================================================
 // 1. Main Package
 // ============================================================
-
 package L4B2Bots_Main
-{
+{	
+	function rocketLauncherImage::onFire(%this,%obj)
+	{
+		%obj.playaudio(1,"RPGFireSound");
+		%obj.playthread(2,"shotgunfire1");
+		parent::onFire(%this,%obj);
+	}
+
 	function serverLoadSaveFile_End()
 	{
 		parent::serverLoadSaveFile_End();
@@ -29,27 +35,35 @@ package L4B2Bots_Main
 
 			if(%brick.getdataBlock().IsTeleBrick)
 			{
-				%bricknamefix1 = strreplace(%brick.getName(), "_TeleventSetCheck", "");
-				%bricknamefix2 = strreplace(%bricknamefix1, "_TeleventSetSubCheck", "");
-				%bricknamefix3 = strreplace(%bricknamefix2, "_TeleventSetBrick", "");
-				%bricknamefix4 = strreplace(%bricknamefix3, "_", "");
-				%name = %bricknamefix4 @ "_TeleventSet";
-
-				if(strstr(%brick.getName(),"TeleventSetCheck") != -1)
+				if(strstr(%brick.getName(),"SetCheck") != -1)
 				{
+					%bricknamefix1 = strreplace(%brick.getName(), "_TeleventSetCheck", "");
+					%bricknamefix2 = strreplace(%bricknamefix1, "_", "");
+					%name = %bricknamefix2 @ "_TeleventSet";
+
 					%brick.teleset = new SimSet(%name);
 					%brick.teleset.ParBrick = %brick;
-					%simset = %brick.teleset;
+					%mainbrick = %brick;
+					checkTeleAndSubCheckBricks(%mainbrick,%name);
 				}
-				
-				if(isObject(%simset))
-				{
-					if(strstr(%brick.getName(),"TeleventSetSubCheck") != -1)
-					%brick.teleset = %simset;
+			}
+		}
+	}
 
-					if(strstr(%brick.getName(),"TeleventSetBrick") != -1 && !%simset.isMember(%brick))
-					%simset.add(%brick);
-				}
+	function checkTeleAndSubCheckBricks(%mainbrick,%name)
+	{
+		//Probably going to... Kill the server by doing so many for loops lol, but the server loads anyways right??? RIGHT???
+		%count = $LoadingBricks_BrickGroup.getCount();
+		for(%i=0;%i<%count;%i++)
+        {
+			%brick = $LoadingBricks_BrickGroup.getObject(%i);
+			if(%brick.getdataBlock().IsTeleBrick && strstr(%brick.getname(),%name) != -1)
+			{
+				if(strstr(%brick.getName(),"SetBrick") != -1)
+				%mainbrick.teleset.add(%brick);
+
+				if(strstr(%brick.getName(),"SetSubCheck") != -1)
+				%brick.teleset = %mainbrick.teleset;
 			}
 		}
 	}
@@ -222,7 +236,7 @@ package L4B2Bots_Main
 	{
 		if(%this.directDamage && %col.getType() & $TypeMasks::PlayerObjectType)
 		{
-			if(%obj.sourceObject.hType !$= "Zombie" && strstr(%obj.sourceObject.hType,"biled") == -1 && %col.isBeingStrangled && %col.hEater.getDataBlock().getName() $= "ZombieSmokerHoleBot")
+			if(!%obj.sourceObject.hIsInfected %col.isBeingStrangled && %col.hEater.getDataBlock().getName() $= "ZombieSmokerHoleBot")
 			{
 				%col.isBeingStrangled = 0;
 				%col.hEater.SmokerTongueTarget = 0;
@@ -234,9 +248,8 @@ package L4B2Bots_Main
 		if(%col.getClassName() $= "Player" || %col.getClassName() $= "AIPlayer") //If they aren't holding a shield or carrying one on their back...
 		{
 			if(%col.getMountedImage(0) != RiotShieldimage.getID())
-			{
-				return Parent::onCollision(%this,%obj,%col,%fade,%pos,%normal,%velocity); //Play it normally and leave.
-			}
+			return Parent::onCollision(%this,%obj,%col,%fade,%pos,%normal,%velocity); //Play it normally and leave.
+
 			else
 			{
 				%aimVec = %col.getForwardVector();
@@ -264,7 +277,6 @@ package L4B2Bots_Main
 			}
 			else
 			{
-				
 				%aimVec = %col.getForwardVector();
 				%reflect = ((vectorDot(vectorNormalize(%obj.getVelocity()),%aimVec) < 0 && %col.getMountedImage(0) == RiotShieldimage.getID())); //If the shield is facing the projectile...
 
@@ -286,6 +298,14 @@ package L4B2Bots_Main
 		
 		if(!%obj.isBeingStrangled)
 		return parent::serverCmdUseTool(%client, %tool);
+	}
+
+	function ServerCmdDropTool (%client, %position)
+	{
+		if(isObject(%client.player))
+		%client.player.playthread(3,"activate");
+
+		Parent::ServerCmdDropTool (%client, %position);
 	}
 
 	function ServerCmdPlantBrick (%client)
@@ -316,21 +336,6 @@ package L4B2Bots_Main
 			commandToClient (%client, 'ShowEnergyBar', true);
 			%client.setZombieBlock = 0;
 		}
-	}
-
-	function AIPlayer::hRunAwayFromPlayer(%obj,%target)
-	{
-		if(%obj.getDatablock().getName() $= "ZombieWitchHoleBot")
-		%obj.playaudio(0,"witch_horrified" @ getrandom(1,2) @ "_sound");
-		
-		Parent::hRunAwayFromPlayer(%obj,%target);
-	}
-
-	function AIPlayer::hFollowPlayer( %obj, %targ, %inHoleLoop, %skipAlert )
-	{
-		if(%obj.getDatablock().getName() $= "ZombieWitchHoleBot" && !%obj.hMelee)
-		return;
-		else Parent::hFollowPlayer(%obj, %targ, %inHoleLoop,%skipAlert);
 	}
 
 	function applyCharacterPrefs(%client)
@@ -467,9 +472,7 @@ package L4B2Bots_Main
 		%pl.setNodeColor("femchest_blood_back", "0.7 0 0 1");
 	
 		if(%pl.getDataBlock().hCustomNodeAppearance)
-		{
-			%pl.getDataBlock().hCustomNodeAppearance(%pl);
-		}
+		%pl.getDataBlock().hCustomNodeAppearance(%pl);
 	
 		if(isObject(%cl) && %cl.isAdmin || %cl.isSuper)
 		{
@@ -587,30 +590,49 @@ package L4B2Bots_Main
 		}		
 	}
 
+	function minigameCanDamage(%objA, %objB)
+	{	
+		if(%objA.getclassname() $= "GameConnection" || %objA.getclassname() $= "Player" || %objA.getclassname() $= "AIPlayer")
+		if(%objB.getclassname() $= "Player" || %objB.getclassname() $= "AIPlayer")
+		{
+			if(%objA !$= %objB && %objA.player !$= %objB)
+			if(%objA.hType $= %objB.hType || %objA.player.hType $= %objB.hType)
+			return;
+		}
+
+		Parent::minigameCanDamage(%objA, %objB);
+	}
+
+	function MiniGameSO::checkLastManStanding(%minigame)
+	{
+		if(%minigame.RespawnTime > 0 || isEventPending (%minigame.resetSchedule))
+		return;
+
+		for(%i = 0; %i < %minigame.numMembers; %i++)
+		{
+			%client = %minigame.member[%i];
+
+			if(isObject(%player = %client.player) && !%player.hIsInfected && %player.getdataBlock().getname() !$= "DownPlayerSurvivorArmor")
+			%livePlayerCount++;
+		}
+
+		if(%livePlayerCount <= 0)
+		{
+			if(isObject(l4b_music)) 
+			l4b_music.delete();
+			%minigame.DirectorProcessEvent("onSurvivorsLose",%client);
+			//%minigame.schedule(7000,chatMessageAll,0,'<font:impact:25>\c6Resetting minigame in 5 seconds.');
+			//%minigame.schedule(11750,chatMessageAll,0,'<font:impact:25>\c6Resetting minigame.');
+			%minigame.L4B_PlaySound("game_lose_sound");
+			%minigame.scheduleReset(12000);
+		}
+	}
+
     function MiniGameSO::Reset(%minigame,%client)
 	{
 		Parent::Reset(%minigame,%client);
 
-		if(isObject(%minigameteam = %minigame.teams))
-		{
-			%teamsammount = %minigameteam.getCount();
-			for(%i = 0; %i < %teamsammount; %i++)
-			{				
-				%teams = %minigameteam.getObject(%i);
-				
-				if(%teams.name $= "Survivors")
-				%survivorteam = %teams;
-
-				for(%j=0;%j<%minigame.numMembers;%j++)
-				{
-					if(isObject(%infectedclient = %minigame.member[%j]) && %infectedclient.getClassName() $= "GameConnection" && %infectedclient.isInInfectedTeam)
-					{
-						%survivorteam.addMember(%infectedclient, "Reset Minigame", 1, 1);
-						%infectedclient.isInInfectedTeam = 0;
-					}
-				}
-			}
-		}
+		%minigame.L4B_PlaySound("game_start_sound");
 
         %directorinterval = $Pref::L4BDirector::Director_Interval*1000;
         %directorintervalhalf = %directorinterval/2;
@@ -631,7 +653,7 @@ package L4B2Bots_Main
                 profile = %musicnum.getID();
                 isLooping= true;
                 is3D = 0;
-                volume = 1;
+                volume = 0.75;
 			    useProfileDescription = "0";
 			    type = "0";
 			    outsideAmbient = "1";
@@ -665,10 +687,10 @@ package L4B2Bots_Main
         {
             cancel(directorSpecialSchedule);
             %minigame.isDirectorEnabled = 0;
-			%minigame.DirectorTankRound = 0;
             cancel(%minigame.directorSchedule);
         }
         
+		%minigame.DirectorTankRound = 0;
         cancel(%minigame.hordeMusic);
         cancel(%minigame.hordeMusic1);
         cancel(%minigame.hordeMusic2);
@@ -683,6 +705,16 @@ package L4B2Bots_Main
     }
 };
 activatePackage(L4B2Bots_Main);
+eval("rocketLauncherItem.colorShiftColor = \"0.15 0.15 0.15 1\";");
+eval("rocketLauncherImage.colorShiftColor = rocketLauncherItem.colorShiftColor;");
+eval("rocketLauncherImage.stateSound[2]	= \"RPGFireSound\";");
+eval("rocketLauncherProjectile.muzzleVelocity = 200;");
+eval("rocketLauncherProjectile.gravityMod = 1;");
+eval("rocketExplosion.soundProfile = \"grenadeLauncherExplosionB1Sound\";");
+eval("rocketExplosion.impulseForce = 5000;");
+eval("rocketExplosion.radiusDamage = 500;");
+eval("rocketExplosion.damageRadius = 5;");
+
 
 // ============================================================
 // 2. New Zombie Infection
@@ -725,38 +757,17 @@ package L4B_ZombieInfection
 
 	function holeZombieInfect(%obj, %col)
 	{			
-		if(isObject(%minigameteam = getMinigameFromObject(%col).teams) && %col.getClassName() $= "Player")
-		{
-			%minigame = getMinigameFromObject(%col);
-			%minigame.L4B_PlaySound("survivor_turninfected" @ getRandom(1,3) @ "_sound",%col.client);
-
-			%teamsammount = %minigameteam.getCount();
-			for(%i = 0; %i < %teamsammount; %i++)
-    		{
-        		%teams = %minigameteam.getObject(%i);
-				if(%teams.name $= "Infected")
-				%infectedteam = %teams;
-
-				if(isObject(%infectedteam))
-				{
-					%infectedteam.addMember(%col.client, "No Immunity", 1, 1);
-					%clName = %col.client.name;
-
-					%col.client.isInInfectedTeam = 1;
-					L4B_checkAnyoneNotZombie(%col,%minigame);
-				 	break;
-				}
-			}
-		}
-
 		if(%col.getDataBlock().shapeFile $= "base/data/shapes/player/m.dts" || %col.getDataBlock().shapeFile $= "base/data/shapes/player/mmelee.dts")
 		{
 			%col.setDataBlock(CommonZombieHoleBot);
 
-			if(%col.getclassname() $= "AIPlayer")
+			switch$(%col.getclassname())
 			{
-				%col.hChangeBotToInfectedAppearance();
-				AIPlayer::setTeam(%obj,5,"Zombie");
+				case "AIPlayer":%col.hChangeBotToInfectedAppearance();
+
+				case "Player": %minigame = getMinigameFromObject(%col);
+							   %minigame.L4B_PlaySound("survivor_turninfected" @ getRandom(1,3) @ "_sound",%col.client);
+							   %minigame.checkLastManStanding();
 			}
 		}
 		else if(%col.getDataBlock().shapeFile $= "Add-Ons/Bot_Shark/shark.dts")
@@ -791,15 +802,15 @@ package L4B_FlashGrenadeSupport
 				if(%angle < 100 && %angle > -100 || %angle > -360 && %angle < -260 || %angle < 360 && %angle > 260)
 				{
 					if(%angle < 0)
-						%angle = mAbs(%angle);
+					%angle = mAbs(%angle);
 
 					if(%angle > 180)
-						%angle = %angle/6;
+					%angle = %angle/6;
 
 					if(%angle < 10)
-						%start = 2;
+					%start = 2;
 					else
-						%start = mFloatLength(1/%angle*25,4);
+					%start = mFloatLength(1/%angle*25,4);
 
 					if(%start < 0.2)
 					%start = 0.2;
@@ -908,7 +919,7 @@ package L4B_SWepFlamesBurnsZombs
 			if(!%pl.noFireBurning)
 			{
 				%pl.damage(%pl.lastFireAttacker,%pl.getPosition(),%dmg,%pl.lastBurnDmgType);
-				if(%pl.hZombieL4BType && %pl.hZombieL4BType < 5)
+				if(%pl.getclassname() $= "AIPlayer" && %pl.hZombieL4BType && %pl.hZombieL4BType < 5)
 				{
 					%pl.hRunAwayFromPlayer(%pl);
 					%pl.stopHoleLoop();

@@ -343,15 +343,13 @@ function sPipeBombImage::onFire(%this, %obj, %slot)
 	%obj.weaponCount--;
 	messageClient(%obj.client,'MsgItemPickup','',%currSlot,0);
 	serverCmdUnUseTool(%obj.client);
-   %obj.playthread(2, spearThrow);
+   	%obj.playthread(2, spearThrow);
 }
 
 function sPipeBombProjectile::onCollision(%this,%obj,%col,%fade,%pos,%normal)
 {
    if(%col.getClassName() !$= "Player" || %col.getClassName() !$= "AIPlayer")
-   {
-      serverPlay3D("pipebomb_bounce_sound",%obj.getTransform());
-   }
+	serverPlay3D("pipebomb_bounce_sound",%obj.getTransform());
 }
 
 
