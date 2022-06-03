@@ -60,6 +60,16 @@ function L4B_isPlayerObstructed(%viewer, %target)
     return ContainerRayCast(%viewer.getEyePoint(), %target.getHackPosition(), $TypeMasks::FxBrickObjectType | $TypeMasks::DebrisObjectType | $TypeMasks::InteriorObjectType, %viewer);
 }
 
+function L4B_DespaceString(%string)
+{
+	return strReplace(%string, " ", "!&!");
+}
+
+function L4B_RespaceString(%string)
+{
+	return strReplace(%string, "!&!", " ");
+}
+
 function L4B_SaveVictim(%obj,%target)
 {	
 	if(L4B_CheckifinMinigame(%obj,%target) && %target.getState() !$= "Dead" && !%obj.getState() !$= "Dead")
@@ -2239,4 +2249,213 @@ function Player::doMRandomTele(%obj)
 		%obj.kill();
 		return;
 	}
+}
+
+// ============================================================
+// 12. Client Logger functions.
+// ============================================================
+
+function L4B_createClientSnapshot(%playerclient)
+{
+	echo("Storing new client:" SPC %playerclient.name);
+	%clientObject = new ScriptObject()
+	{
+		name = %playerclient.name;
+		blid = %playerclient.getBLID();
+
+		accent =  %playerclient.accent;
+		hat = %playerclient.hat;
+		chest =  %playerclient.chest;
+		decalName = %playerclient.decalName;
+		pack =  %playerclient.pack;
+		secondPack =  %playerclient.secondPack;	
+		larm =  %playerclient.larm;	
+		lhand =  %playerclient.lhand;	
+		rarm =  %playerclient.rarm;
+		rhand = %playerclient.rhand;
+		hip =  %playerclient.hip;	
+		lleg =  %playerclient.lleg;	
+		rleg =  %playerclient.rleg;
+
+		accentColor = %playerclient.accentColor;
+		hatColor = %playerclient.hatColor;
+		packColor =  %playerclient.packColor;
+		secondPackColor =  %playerclient.secondPackColor;
+
+		skinColor = getWord(%playerclient.headColor,0)/2.75 SPC getWord(%playerclient.headColor,1)/1.5 SPC getWord(%playerclient.headColor,2)/2.75 SPC 1;
+	};
+	if(%playerclient.chestColor $= %playerclient.headColor)
+	{
+		%clientObject.chestColor = %clientObject.skinColor;
+	}
+	else
+	{
+		%clientObject.chestColor = %playerclient.chestColor;
+	}
+	if(%playerclient.larmColor $= %playerclient.headColor)
+	{
+		%clientObject.larmColor = %clientObject.skinColor;
+	}
+	else
+	{
+		%clientObject.larmColor = %playerclient.larmColor;
+	}
+	if(%playerclient.rarmColor $= %playerclient.headColor)
+	{
+		%clientObject.rarmColor = %clientObject.skinColor;
+	}
+	else
+	{
+		%clientObject.rarmColor = %playerclient.rarmColor;
+	}
+	if(%playerclient.rhandColor $= %playerclient.headColor)
+	{
+		%clientObject.rhandColor = %clientObject.skinColor;
+	}
+	else
+	{
+		%clientObject.rhandColor = %playerclient.rhandColor;
+	}
+	if(%playerclient.lhandColor $= %playerclient.headColor)
+	{
+		%clientObject.lhandColor = %clientObject.skinColor;
+	}
+	else
+	{
+		%clientObject.lhandColor = %playerclient.larmColor;
+	}
+	if(%playerclient.hipColor $= %playerclient.headColor)
+	{
+		%clientObject.hipColor = %clientObject.skinColor;
+	}
+	else
+	{
+		%clientObject.hipColor = %playerclient.hipColor;
+	}
+	if(%playerclient.llegColor $= %playerclient.headColor)
+	{
+		%clientObject.llegColor = %clientObject.skinColor;
+	}
+	else
+	{
+		%clientObject.llegColor = %playerclient.llegColor;
+	}
+	if(%playerclient.rlegColor $= %playerclient.headColor)
+	{
+		%clientObject.rlegColor = %clientObject.skinColor;
+	}
+	else
+	{
+		%clientObject.rlegColor = %playerclient.rlegColor;
+	}
+
+	$L4B_clientLog.add(%clientObject);
+	return %clientObject;
+}
+
+function L4B_storeLoggedClients()
+{
+	if(isFile("config/server/L4B2_Bots/loggedplayers.txt"))
+	{
+		%already_stored_clients = "";
+		//First, check clients already stored in the file.
+		%file = new fileObject();
+		%file.openForRead("config/server/L4B2_Bots/loggedplayers.txt");
+		while(!%file.isEOF())
+		{
+			%line = %file.readLine();
+			for(%i = 0; %i < $L4B_clientLog.getCount(); %i++)
+			{
+				%client_blid = $L4B_clientLog.getObject(%i).blid;
+				if(getWord(%line, 1) $= %client_blid)
+				{
+					%already_stored_clients = %already_stored_clients @ %client_blid @ " "; 
+				}
+			}
+		}
+		%file.close();
+		%file.delete();
+		echo("Already stored clients:" SPC %already_stored_clients);
+		//Next, append the file with the unstored clients.
+		%file = new fileObject();
+		%file.openForAppend("config/server/L4B2_Bots/loggedplayers.txt");
+		for(%i = 0; %i < $L4B_clientLog.getCount(); %i++)
+		{
+			%client = $L4B_clientLog.getObject(%i);
+			%is_stored = false;
+			for(%i = 0; %i < getRecordCount(%already_stored_clients); %i++)
+			{
+				if(%client.blid $= getRecordCount(%already_stored_clients, %i))
+				{
+					%is_stored = true;
+					break;
+				}
+			}
+			if(%is_stored)
+			{
+				continue;
+			}
+			//Name (spaces replaces with !&! delimiter,) BLID, then a bunch of avatar information.
+			%file.writeLine(L4B_DespaceString(%client.name) SPC %client.blid SPC %client.accent SPC %client.hat SPC %client.chest SPC %client.decalName SPC %client.pack SPC %client.secondPack SPC %client.larm SPC %client.lhand SPC %client.rarm SPC %client.rhand SPC %client.hip SPC %client.lleg SPC %client.rleg SPC %client.accentColor SPC %client.hatColor SPC %client.packColor SPC %client.secondPackColor SPC %client.skinColor);
+		}
+		%file.close();
+		%file.delete();
+	}
+	else
+	{
+		%file = new fileObject();
+		%file.openForWrite("config/server/L4B2_Bots/loggedplayers.txt");
+		for(%i = 0; %i < $L4B_clientLog.getCount(); %i++)
+		{
+			%client = $L4B_clientLog.getObject(%i);
+			//Name, BLID, then a bunch of avatar information.
+			%file.writeLine(L4B_DespaceString(%client.name) SPC %client.blid SPC %client.accent SPC %client.hat SPC %client.chest SPC %client.decalName SPC %client.pack SPC %client.secondPack SPC %client.larm SPC %client.lhand SPC %client.rarm SPC %client.rhand SPC %client.hip SPC %client.lleg SPC %client.rleg SPC %client.accentColor SPC %client.hatColor SPC %client.packColor SPC %client.secondPackColor SPC %client.skinColor);
+		}
+		%file.close();
+		%file.delete();
+	}
+}
+
+function L4B_pushZombifiedStoredAppearance(%obj, %face)
+{
+	if(!isObject($L4B_clientLog) || $L4B_clientLog.getCount() < 1)
+	{
+		return false;
+	}
+
+	%sourceClient = $L4B_clientLog.getObject(getRandom(0, $L4B_clientLog.getCount() - 1));
+	%obj.accentColor = %sourceClient.accentColor;
+	%obj.accent = %sourceClient.accent;
+	%obj.hatColor = %sourceClient.hatColor;
+	%obj.hat = %sourceClient.hat;
+	%obj.headColor = %sourceClient.skinColor;
+	%obj.faceName = %face;
+	%obj.chest =  %sourceClient.chest;
+	%obj.decalName = %sourceClient.decalName;
+	%obj.chestColor = %sourceClient.chestColor;
+	%obj.pack = %sourceClient.pack;
+	%obj.packColor = %sourceClient.packColor;
+	%obj.secondPack = %sourceClient.secondPack;
+	%obj.secondPackColor = %sourceClient.secondPackColor;
+	%obj.larm = %sourceClient.larm;
+	%obj.larmColor = %sourceClient.larmColor;
+	%obj.lhand = %sourceClient.lhand;
+	%obj.lhandColor = %sourceClient.lhandColor;
+	%obj.rarm = %sourceClient.rarm;
+	%obj.rarmColor = %sourceClient.rarmColor;
+	%obj.rhandColor = %sourceClient.rhandColor;
+	%obj.rhand = %sourceClient.rhand;
+	%obj.hip = %sourceClient.hip;
+	%obj.hipColor = %sourceClient.hipColor;
+	%obj.lleg = %sourceClient.lleg;
+	%obj.llegColor = %sourceClient.llegColor;
+	%obj.rleg = %sourceClient.rleg;
+	%obj.rlegColor = %sourceClient.rlegColor;
+	%obj.vestColor = getRandomBotRGBColor();
+
+	%obj.name = "Infected" SPC L4B_RespaceString(%sourceClient.name);
+	%obj.setShapeNameHealth();
+
+	GameConnection::ApplyBodyParts(%obj);
+	GameConnection::ApplyBodyColors(%obj);
 }

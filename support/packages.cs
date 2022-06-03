@@ -236,7 +236,7 @@ package L4B2Bots_Main
 	{
 		if(%this.directDamage && %col.getType() & $TypeMasks::PlayerObjectType)
 		{
-			if(!%obj.sourceObject.hIsInfected %col.isBeingStrangled && %col.hEater.getDataBlock().getName() $= "ZombieSmokerHoleBot")
+			if(!%obj.sourceObject.hIsInfected && %col.isBeingStrangled && %col.hEater.getDataBlock().getName() $= "ZombieSmokerHoleBot")
 			{
 				%col.isBeingStrangled = 0;
 				%col.hEater.SmokerTongueTarget = 0;
@@ -1044,3 +1044,25 @@ package ExplosivesBrickGroupToObject
     }
 };
 activatePackage(ExplosivesBrickGroupToObject);
+
+// ============================================================
+// 13. Player Name and Appearance Logger
+// ============================================================
+
+package L4B_ClientLogger
+{
+	function GameConnection::onClientEnterGame(%this)
+	{
+		parent::onClientEnterGame(%this);
+		for(%i = 0; %i < $L4B_clientLog.getCount(); %i++)
+		{
+			if($L4B_clientLog.getObject(%i).blid $= %this.getBLID())
+			{
+				return;
+			}
+		}
+		L4B_createClientSnapshot(%this);
+		L4B_storeLoggedClients();
+	}
+};
+activatePackage(L4B_ClientLogger);
