@@ -2383,9 +2383,9 @@ function L4B_storeLoggedClients()
 		{
 			%client = $L4B_clientLog.getObject(%i);
 			%is_stored = false;
-			for(%i = 0; %i < getRecordCount(%already_stored_clients); %i++)
+			for(%i = 0; %i < getWordCount(%already_stored_clients); %i++)
 			{
-				if(%client.blid $= getRecordCount(%already_stored_clients, %i))
+				if(%client.blid $= getWord(%already_stored_clients, %i))
 				{
 					%is_stored = true;
 					break;
