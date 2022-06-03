@@ -2367,7 +2367,7 @@ function L4B_storeLoggedClients()
 			for(%i = 0; %i < $L4B_clientLog.getCount(); %i++)
 			{
 				%client_blid = $L4B_clientLog.getObject(%i).blid;
-				if(getWord(%line, 1) $= %client_blid)
+				if(getField(%line, 1) $= %client_blid)
 				{
 					%already_stored_clients = %already_stored_clients @ %client_blid @ " "; 
 				}
@@ -2384,15 +2384,9 @@ function L4B_storeLoggedClients()
 		{
 			%client = $L4B_clientLog.getObject(%i);
 			%is_stored = false;
-<<<<<<< HEAD
 			for(%i = 0; %i < getFieldCount(%already_stored_clients); %i++)
 			{
 				if(%client.blid $= getField(%already_stored_clients, %i))
-=======
-			for(%i = 0; %i < getWordCount(%already_stored_clients); %i++)
-			{
-				if(%client.blid $= getWord(%already_stored_clients, %i))
->>>>>>> 9eb22ecfb9fff8ad2ffb2026ff906e87baf08b8a
 				{
 					%is_stored = true;
 					break;
