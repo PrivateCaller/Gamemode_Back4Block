@@ -28,32 +28,37 @@ function L4B_loadClientSnapshots()
 	while(!%file.isEOF())
 	{
 		%client_info = %file.readLine();
+		if(getWordCount(%client_info) < 2) 
+		{
+			//Corrupted entry, skip.
+			continue;
+		}
 		%client_object = new ScriptObject() 
 		{
-			//It is important that these are "getRecord" and not "getWord".
-			name = getRecord(%client_info, 0);
-			blid = getRecord(%client_info, 1);
+			//It is important that these are "getField" and not "getWord".
+			name = getField(%client_info, 0);
+			blid = getField(%client_info, 1);
 
-			accent = getRecord(%client_info, 2);
-			hat = getRecord(%client_info, 3);
-			chest = getRecord(%client_info, 4);
-			decalName = getRecord(%client_info, 5);
-			pack =  getRecord(%client_info, 6);
-			secondPack = getRecord(%client_info, 7);
-			larm = getRecord(%client_info, 8);
-			lhand = getRecord(%client_info, 9);
-			rarm = getRecord(%client_info, 10);
-			rhand = getRecord(%client_info, 11);
-			hip = getRecord(%client_info, 12);
-			lleg = getRecord(%client_info, 13);
-			rleg = getRecord(%client_info, 14);
+			accent = getField(%client_info, 2);
+			hat = getField(%client_info, 3);
+			chest = getField(%client_info, 4);
+			decalName = getField(%client_info, 5);
+			pack =  getField(%client_info, 6);
+			secondPack = getField(%client_info, 7);
+			larm = getField(%client_info, 8);
+			lhand = getField(%client_info, 9);
+			rarm = getField(%client_info, 10);
+			rhand = getField(%client_info, 11);
+			hip = getField(%client_info, 12);
+			lleg = getField(%client_info, 13);
+			rleg = getField(%client_info, 14);
 
-			accentColor = getRecord(%client_info, 15);
-			hatColor = getRecord(%client_info, 16);
-			packColor = getRecord(%client_info, 17);
-			secondPackColor = getRecord(%client_info, 18);
+			accentColor = getField(%client_info, 15);
+			hatColor = getField(%client_info, 16);
+			packColor = getField(%client_info, 17);
+			secondPackColor = getField(%client_info, 18);
 
-			skinColor = getRecord(%client_info, 19);
+			skinColor = getField(%client_info, 19);
 		};
 		$L4B_clientLog.add(%client_object);
 	}

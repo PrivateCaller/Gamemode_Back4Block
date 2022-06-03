@@ -2379,13 +2379,14 @@ function L4B_storeLoggedClients()
 		//Next, append the file with the unstored clients.
 		%file = new fileObject();
 		%file.openForAppend("config/server/L4B2_Bots/loggedplayers.txt");
+		%file.writeLine("" NL ""); //Skip down from the last line.
 		for(%i = 0; %i < $L4B_clientLog.getCount(); %i++)
 		{
 			%client = $L4B_clientLog.getObject(%i);
 			%is_stored = false;
-			for(%i = 0; %i < getRecordCount(%already_stored_clients); %i++)
+			for(%i = 0; %i < getFieldCount(%already_stored_clients); %i++)
 			{
-				if(%client.blid $= getRecordCount(%already_stored_clients, %i))
+				if(%client.blid $= getField(%already_stored_clients, %i))
 				{
 					%is_stored = true;
 					break;
@@ -2396,7 +2397,7 @@ function L4B_storeLoggedClients()
 				continue;
 			}
 			//Name (spaces replaces with !&! delimiter,) BLID, then a bunch of avatar information.
-			%file.writeLine(L4B_DespaceString(%client.name) SPC %client.blid SPC %client.accent SPC %client.hat SPC %client.chest SPC %client.decalName SPC %client.pack SPC %client.secondPack SPC %client.larm SPC %client.lhand SPC %client.rarm SPC %client.rhand SPC %client.hip SPC %client.lleg SPC %client.rleg SPC %client.accentColor SPC %client.hatColor SPC %client.packColor SPC %client.secondPackColor SPC %client.skinColor);
+			%file.writeLine(%client.name TAB %client.blid TAB %client.accent TAB %client.hat TAB %client.chest TAB %client.decalName TAB %client.pack TAB %client.secondPack TAB %client.larm TAB %client.lhand TAB %client.rarm TAB %client.rhand TAB %client.hip TAB %client.lleg TAB %client.rleg TAB %client.accentColor TAB %client.hatColor TAB %client.packColor TAB %client.secondPackColor TAB %client.skinColor);
 		}
 		%file.close();
 		%file.delete();
@@ -2409,7 +2410,7 @@ function L4B_storeLoggedClients()
 		{
 			%client = $L4B_clientLog.getObject(%i);
 			//Name, BLID, then a bunch of avatar information.
-			%file.writeLine(L4B_DespaceString(%client.name) SPC %client.blid SPC %client.accent SPC %client.hat SPC %client.chest SPC %client.decalName SPC %client.pack SPC %client.secondPack SPC %client.larm SPC %client.lhand SPC %client.rarm SPC %client.rhand SPC %client.hip SPC %client.lleg SPC %client.rleg SPC %client.accentColor SPC %client.hatColor SPC %client.packColor SPC %client.secondPackColor SPC %client.skinColor);
+			%file.writeLine(%client.name TAB %client.blid TAB %client.accent TAB %client.hat TAB %client.chest TAB %client.decalName TAB %client.pack TAB %client.secondPack TAB %client.larm TAB %client.lhand TAB %client.rarm TAB %client.rhand TAB %client.hip TAB %client.lleg TAB %client.rleg TAB %client.accentColor TAB %client.hatColor TAB %client.packColor TAB %client.secondPackColor TAB %client.skinColor);
 		}
 		%file.close();
 		%file.delete();
@@ -2453,7 +2454,7 @@ function L4B_pushZombifiedStoredAppearance(%obj, %face)
 	%obj.rlegColor = %sourceClient.rlegColor;
 	%obj.vestColor = getRandomBotRGBColor();
 
-	%obj.name = "Infected" SPC L4B_RespaceString(%sourceClient.name);
+	%obj.name = "Infected" SPC %sourceClient.name;
 	%obj.setShapeNameHealth();
 
 	GameConnection::ApplyBodyParts(%obj);
