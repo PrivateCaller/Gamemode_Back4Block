@@ -83,7 +83,7 @@ function ZombieSmokerHoleBot::SmokerTongueLoop(%this,%obj,%target)
 		%DistanceNormal = vectorNormalize(%DisSub);
 
 		if(L4B_IsOnGround(%target))
-		%force = 15;
+		%force = 10;
 		else %force = 5;
 
 		%target.setVelocity(vectorscale(%DistanceNormal,-%force));

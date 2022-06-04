@@ -45,125 +45,6 @@ datablock StaticShapeData(HataCylinder2Shape)
 	shapeFile = "./models/tongue.dts";
 };
 
-if(!isObject(swordExplosionParticle)) //I can't imagine how creating a datablock exactly the same as the default one could mess something up, but this should save the modified ones.
-{
-	datablock ParticleData(swordExplosionParticle) //A bash explosion doesn't need to be fancy.
-	{
-		dragCoefficient			= 2;
-		gravityCoefficient		= 1.0;
-		inheritedVelFactor		= 0.2;
-		constantAcceleration	= 0.0;
-		
-		spinRandomMin			= -90;
-		spinRandomMax			= 90;
-		
-		lifetimeMS			 	= 500;
-		lifetimeVarianceMS		= 300;
-		
-		textureName				= "base/data/particles/chunk";
-		
-		colors[0]				= "0.7 0.7 0.9 0.9";
-		colors[1]				= "0.9 0.9 0.9 0.0";
-		sizes[0]				= 0.5;
-		sizes[1]				= 0.25;
-	};
-	
-	datablock ParticleEmitterData(swordExplosionEmitter)
-	{
-		ejectionPeriodMS	= 7;
-		periodVarianceMS	= 0;
-		ejectionVelocity	= 8;
-		velocityVariance	= 1.0;
-		ejectionOffset		= 0.0;
-		thetaMin			= 0;
-		thetaMax			= 60;
-		phiReferenceVel		= 0;
-		phiVariance			= 360;
-		
-		overrideAdvance		= false;
-		
-		particles			= "swordExplosionParticle";
-
-		uiName				= "Sword Hit";
-	};
-}
-
-datablock ItemData(RiotShieldItem)
-{
-	category		= "Weapon";
-	className		= "Weapon";
-
-	shapeFile		= "./models/riotshield/Riotshield.dts";
-	rotate			= false;
-	mass			= 1;
-	density			= 0.2;
-	elasticity		= 0.2;
-	friction		= 0.6;
-	emap			= true;
-
-	uiName			= "Riot Shield";
-	iconName		= "./icons/icon_riotshield";
-	doColorShift	= false;
-
-	image			= RiotShieldImage;
-	canDrop			= true;
-};
-
-datablock ShapeBaseImageData(RiotShieldImage)
-{
-	shapeFile		= "./models/riotshield/Riotshield.dts";
-	emap							= true;
-
-	mountPoint						= 0;
-	offset							= "0 0 0";
-	eyeOffset						= 0;
-	rotation						= eulerToMatrix( "0 0 0" );
-	scale							= "3 3 3";
-	correctMuzzleVector				= true;
-
-	className						= "WeaponImage";
-	item							= " ";
-	ammo							= " ";
-	projectile						= "";
-	projectileType					= "Projectile";
-
-	melee							= false;
-	armReady						= true;
-
-	doColorShift					= false;
-	colorShiftColor					= "0.196 0.196 0.196 0.5";
-
-	stateName[0]					= "Activate";
-	stateSound[0]					= weaponSwitchSound;
-	stateTransitionOnTimeout[0]		= "Ready";
-	stateTimeoutValue[0]			= 0.5;
-
-	stateName[1]					= "Ready";
-	stateTransitionOnTriggerDown[1]	= "Attack";
-
-	stateName[2]					= "Attack";
-	stateTimeoutValue[2]			= 0.75;
-	stateScript[2]					= "onAttack";
-	stateTransitionOnTimeout[2]		= "Ready";
-};
-
-function RiotShieldImage::onAttack(%this, %obj, %slot)
-{	
-	%obj.playthread(1,"armReady");
-	%obj.doMelee();
-}
-
-datablock shapeBaseImageData( ConstructionConeSpeakerImage )
-{
-	shapefile = "./models/construction/conespeaker.dts";
-
-	mountPoint = 1;
-	offset = "0 0.18 0.25";
-	doColorShift = false;
-	className = "WeaponImage";
-	armReady = false;
-};
-
 //NOTE TO SELF: TSShapeConstructor has to be done BEFORE player datablock.
 datablock TSShapeConstructor(mMeleeDts) 
 {
@@ -279,8 +160,182 @@ datablock PlayerData(DownPlayerSurvivorArmor : SurvivorPlayerLow)
    	rechargerate = 0;
 };
 
+if(!isObject(swordExplosionParticle)) //I mean... Just in case right?
+{
+	datablock ParticleData(swordExplosionParticle)
+	{
+		dragCoefficient			= 2;
+		gravityCoefficient		= 1.0;
+		inheritedVelFactor		= 0.2;
+		constantAcceleration	= 0.0;
+		
+		spinRandomMin			= -90;
+		spinRandomMax			= 90;
+		
+		lifetimeMS			 	= 500;
+		lifetimeVarianceMS		= 300;
+		
+		textureName				= "base/data/particles/chunk";
+		
+		colors[0]				= "0.7 0.7 0.9 0.9";
+		colors[1]				= "0.9 0.9 0.9 0.0";
+		sizes[0]				= 0.5;
+		sizes[1]				= 0.25;
+	};
+	
+	datablock ParticleEmitterData(swordExplosionEmitter)
+	{
+		ejectionPeriodMS	= 7;
+		periodVarianceMS	= 0;
+		ejectionVelocity	= 8;
+		velocityVariance	= 1.0;
+		ejectionOffset		= 0.0;
+		thetaMin			= 0;
+		thetaMax			= 60;
+		phiReferenceVel		= 0;
+		phiVariance			= 360;
+		
+		overrideAdvance		= false;
+		
+		particles			= "swordExplosionParticle";
 
+		uiName				= "Sword Hit";
+	};
+}
 
+datablock ItemData(RiotShieldItem)
+{
+	category		= "Weapon";
+	className		= "Weapon";
+
+	shapeFile		= "./models/riotshield/Riotshield.dts";
+	rotate			= false;
+	mass			= 1;
+	density			= 0.2;
+	elasticity		= 0.2;
+	friction		= 0.6;
+	emap			= true;
+
+	uiName			= "Riot Shield";
+	iconName		= "./icons/icon_riotshield";
+	doColorShift	= false;
+
+	image			= RiotShieldImage;
+	canDrop			= true;
+};
+
+datablock ShapeBaseImageData(RiotShieldImage)
+{
+	shapeFile		= "./models/riotshield/Riotshield.dts";
+	emap							= true;
+
+	mountPoint						= 0;
+	offset							= "0 0 0";
+	eyeOffset						= 0;
+	rotation						= eulerToMatrix( "0 0 0" );
+	scale							= "3 3 3";
+	correctMuzzleVector				= true;
+
+	className						= "WeaponImage";
+	item							= " ";
+	ammo							= " ";
+	projectile						= "";
+	projectileType					= "Projectile";
+
+	melee							= false;
+	armReady						= true;
+
+	doColorShift					= false;
+	colorShiftColor					= "0.196 0.196 0.196 0.5";
+
+	stateName[0]					= "Activate";
+	stateSound[0]					= weaponSwitchSound;
+	stateTransitionOnTimeout[0]		= "Ready";
+	stateTimeoutValue[0]			= 0.5;
+
+	stateName[1]					= "Ready";
+	stateTransitionOnTriggerDown[1]	= "Attack";
+
+	stateName[2]					= "Attack";
+	stateTimeoutValue[2]			= 0.75;
+	stateScript[2]					= "onAttack";
+	stateTransitionOnTimeout[2]		= "Ready";
+};
+
+function RiotShieldImage::onAttack(%this, %obj, %slot)
+{	
+	%obj.playthread(1,"armReady");
+	%obj.doMelee();
+}
+
+datablock ParticleData(oxygenBubbleParticle : painMidParticle)
+{
+	dragCoefficient		= 3.0;
+	windCoefficient		= 0.0;
+	gravityCoefficient	= -2.0;
+	inheritedVelFactor	= 0.0;
+	constantAcceleration	= 0.0;
+	lifetimeMS		= 800;
+	lifetimeVarianceMS	= 0;
+	spinSpeed		= 10.0;
+	spinRandomMin		= -50.0;
+	spinRandomMax		= 50.0;
+	useInvAlpha		= false;
+	animateTexture		= false;
+
+	textureName		= "base/data/particles/bubble";
+   
+	colors[0]	= "0.2 0.6 1 0.4";
+	colors[1]	= "0.2 0.6 1 0.8";
+	colors[2]	= "0.2 0.6 1 0.8";
+	sizes[0]	= 0.2;
+	sizes[1]	= 0.4;
+	sizes[2]	= 0.0;
+	times[0]	= 0.0;
+	times[1]	= 0.8;
+   times[2]	= 1.0;
+};
+
+datablock ParticleEmitterData(oxygenBubbleEmitter : painMidEmitter)
+{
+   ejectionPeriodMS = 5;
+   periodVarianceMS = 0;
+   ejectionVelocity = 6;
+   velocityVariance = 2;
+   ejectionOffset   = 0.2;
+   thetaMin         = 0;
+   thetaMax         = 105;
+   phiReferenceVel  = 0;
+   phiVariance      = 360;
+   overrideAdvance = false;
+
+   particles = oxygenBubbleParticle;
+
+   uiName = "Oxygen Bubbles";
+};
+
+datablock ShapeBaseImageData(oxygenBubbleImage : painMidImage)
+{
+	stateTimeoutValue[1] = 0.05;
+	stateEmitter[1] = oxygenBubbleEmitter;
+	stateEmitterTime[1]	= 0.05;
+};
+
+function oxygenBubbleImage::onDone(%this,%obj,%slot)
+{
+	%obj.unMountImage(%slot);
+}
+
+datablock shapeBaseImageData( ConstructionConeSpeakerImage )
+{
+	shapefile = "./models/construction/conespeaker.dts";
+
+	mountPoint = 1;
+	offset = "0 0.18 0.25";
+	doColorShift = false;
+	className = "WeaponImage";
+	armReady = false;
+};
 
 if(!isObject(HealParticle))
 {
@@ -837,7 +892,7 @@ datablock ExplosionData(SpitAcidBallExplosion)
 
 	datablock ProjectileData(SpitterSpitProjectile)
 {
-   	directDamage        = 4;
+   	directDamage        = 1;
    	directDamageType  = $DamageType::SpitAcidBall;
    	radiusDamageType  = $DamageType::SpitAcidBall;
    	explosion           = "SpitAcidBallExplosion";
@@ -866,7 +921,7 @@ datablock ExplosionData(SpitAcidBallExplosion)
 
 	datablock ProjectileData(SpitterSpewedProjectile)
 {
-   	directDamage        = 2;
+   	directDamage        = 1;
    	directDamageType  = $DamageType::SpitAcidBall;
    	radiusDamageType  = $DamageType::SpitAcidBall;
    	explosion           = "SpitAcidBallExplosion";
@@ -1030,9 +1085,9 @@ datablock ParticleData(BoomerBoomParticle)
    lifetimeMS           = 600;
    lifetimeVarianceMS   = 500;
    textureName          = "base/data/particles/cloud";
-   colors[0]     = 33/255 SPC 158/255 SPC 11/255 SPC 0.3;
-   colors[1]     = 33/255 SPC 158/255 SPC 11/255 SPC 0.3;
-   colors[2]     = 33/255 SPC 158/255 SPC 11/255 SPC 0.3;
+   colors[0]     = "0.3 0.15 0.05 0.3";
+   colors[1]     = "0.3 0.1 0.05 0.15";
+   colors[2]     = "0.3 0.05 0.05 0";
 // colors[3]     = "0.4 0.6 0.4 0.0";
    sizes[0]      = 2.5;
    sizes[1]      = 2.25;

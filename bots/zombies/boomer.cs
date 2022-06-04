@@ -453,7 +453,7 @@ function BoomerVomitProjectile::onExplode(%obj,%this)
 
 function ZombieBoomerHoleBot::Vomit(%this, %obj)
 {
-	if(%obj.getstate() $= "Dead" || !isObject(%Obj))
+	if(!isObject(%obj) || %obj.getstate() $= "Dead")
 	return;
 
 	if(isObject(%obj.light))

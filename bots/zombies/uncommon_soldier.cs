@@ -67,6 +67,11 @@ function ZombieSoldierHoleBot::onDamage(%this,%obj)
 	CommonZombieHoleBot::OnDamage(%this,%obj);
 }
 
+function ZombieSoldierHoleBot::onDisabled(%this,%obj)
+{
+	CommonZombieHoleBot::OnDisabled(%this,%obj);
+}
+
 function ZombieSoldierHoleBot::L4BUncommonAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {	
 	%obj.suitColor = getRandomBotPantsColor();

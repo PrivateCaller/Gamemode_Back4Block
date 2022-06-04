@@ -159,10 +159,10 @@ function ZombieHunterHoleBot::onBotFollow( %this, %obj, %targ )
 		{
 			%obj.lastpounce = getsimtime();
 		
-			%obj.hCrouch(2500);
+			%obj.hCrouch(1750);
 			L4B_SpecialsWarningLight(%obj);
 			%obj.playaudio(0,"hunter_recognize" @ getrandom(1,3) @ "_sound");
-			%obj.hAbouttoattack = schedule(2000,0,L4B_HunterZombieLunge,%obj,%targ);
+			%obj.hAbouttoattack = schedule(1250,0,L4B_HunterZombieLunge,%obj,%targ);
 		}
 	}
 }

@@ -23,7 +23,7 @@ function ZombieFallenHoleBot::onAdd(%this,%obj,%style)
 {
 	Parent::onAdd(%this,%obj);
 	CommonZombieHoleBot::onAdd(%this,%obj);
-	if(getRandom(0,100) <= 25)
+	if(getRandom(0,100) <= 10)
 	{
 		switch(getRandom(0,6))
 		{
@@ -71,13 +71,6 @@ function ZombieFallenHoleBot::onDisabled(%this,%obj)
 {
 	CommonZombieHoleBot::OnDisabled(%this,%obj);
 
-	if(isObject(%weapon = %obj.getMountedImage(0)))
-	{
-		L4B_ZombieDropLoot(%obj,%weapon.item,100);
-		%obj.unMountImage(0);
-	}
-
-
 	%chancebonus = 30;
 	L4B_ZombieDropLoot(%obj,Bilebombitem,10);
 	L4B_ZombieDropLoot(%obj,sPipebombitem,10);
@@ -97,7 +90,7 @@ function ZombieFallenHoleBot::onDisabled(%this,%obj)
 
 function ZombieFallenHoleBot::L4BUncommonAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {
-	if(getRandom(1, 3) == 1 && isObject($L4B_clientLog) && $L4B_clientLog.getCount() > 0)
+	if(getRandom(1, 8) == 1 && isObject($L4B_clientLog) && $L4B_clientLog.getCount() > 0)
 	{
 		L4B_pushZombifiedStoredAppearance(%obj, %face);
 	}

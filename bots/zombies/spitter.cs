@@ -239,8 +239,17 @@ function ZombieSpitterHoleBot::Spit(%this, %obj)
 	%muzzle = vectorAdd(%obj.getMuzzlePoint(2),"0 0 0.35");
 	%velocity = vectorScale(%obj.getEyeVector(),40);
 
-	%shellcount = 4;
+	%pm = new projectile()
+	{
+		dataBlock = "SpitterSpitProjectile";
+		initialVelocity = %velocity;
+		initialPosition = %muzzle;
+		sourceObject = %obj;
+		client = %obj.client;
+	};
+	MissionCleanup.add(%pm);
 
+	%shellcount = 4;
 	for(%shell=0; %shell<%shellcount; %shell++)
 	{
 		%x = (getRandom() - 0.5) * 10 * $pi * 0.001;
@@ -251,7 +260,7 @@ function ZombieSpitterHoleBot::Spit(%this, %obj)
 
 		%p = new projectile()
 		{
-			dataBlock = "SpitterSpitProjectile";
+			dataBlock = "SpitterSpewedProjectile";
 			initialVelocity = %velocity;
 			initialPosition = %muzzle;
 			sourceObject = %obj;

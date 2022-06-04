@@ -1,4 +1,5 @@
-    function MiniGameSO::Reset(%minigame,%client)
+    //Old support for Slayer
+	function MiniGameSO::Reset(%minigame,%client)
 	{
 		Parent::Reset(%minigame,%client);
 
@@ -52,3 +53,19 @@
 
         Parent::holeZombieInfect(%obj, %col);
     }
+
+	function L4B_CheckAnyoneNotZombie(%obj,%minigame)
+	{
+		%survivorteam = "";
+		for(%i = 0; %i < %teamsammount = %minigame.teams.getCount(); %i++)
+		{
+			%teams = %minigame.teams.getObject(%i);
+			if(%teams.name $= "Survivors")
+			{
+				%survivorteam = %teams;
+				break;
+			}
+		}
+		if(%survivorteam !$= "" && %survivorteam.numMembers <= 0)
+		%minigame.endRound(%minigame.victoryCheck_Lives());
+	}

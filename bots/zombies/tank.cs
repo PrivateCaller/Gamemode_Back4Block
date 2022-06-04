@@ -53,7 +53,7 @@ datablock PlayerData(ZombieTankHoleBot : CommonZombieHoleBot)
 	hSearchFOV = 1;//if enabled disables normal hSearch
 	hMaxShootRange = 120;//The range in which the bot will shoot the player
 
-	hAttackDamage = $Pref::Server::L4B2Bots::TankMeleeDamage;
+	hAttackDamage = 24;
 	hMeleeCI = "Tank";
 
 	hMaxShootRange = 512;
@@ -134,21 +134,15 @@ function ZombieTankHoleBot::onAdd(%this,%obj)
 
 function ZombieTankHoleBot::onBotLoop(%this,%obj)
 {
-	%obj.hAttackDamage = $Pref::Server::L4B2Bots::TankMeleeDamage;
 	%obj.hLimitedLifetime();
 
 	if(!%obj.isBurning)
 	{
-		if(%obj.lastcalm+5000 < getsimtime())
-		{
-			if(!%obj.hFollowing)
-			%obj.playaudio(0,"tank_idle" @ getrandom(1,7) @ "_sound");
-			else %obj.playaudio(0,"tank_yell" @ getrandom(1,6) @ "_sound");
-
-			%obj.lastcalm = getsimtime();
-			%obj.tankDefaultSpeed = 4;
-			%obj.setMaxForwardSpeed(%obj.tankDefaultSpeed);
-		}
+		if(!%obj.hFollowing)
+		%obj.playaudio(0,"tank_idle" @ getrandom(1,7) @ "_sound");
+		else %obj.playaudio(0,"tank_yell" @ getrandom(1,6) @ "_sound");
+		%obj.tankDefaultSpeed = 4;
+		%obj.setMaxForwardSpeed(%obj.tankDefaultSpeed);
 	}
 	else
 	{

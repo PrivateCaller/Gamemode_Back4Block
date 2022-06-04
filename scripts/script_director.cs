@@ -14,13 +14,16 @@ function brickL4BDirectorData::onPlant(%this, %obj)
     {
         new SimSet(directorBricks);
         directorBricks.add(%obj);
+        MissionCleanup.add(directorBricks);
     }
-    else directorBricks.add(%obj);
+    else if(isObject(directorBricks))
+    directorBricks.add(%obj);
 }
 
-function brickL4BDirectorData::onloadPlant(%data, %brick)
+function brickL4BDirectorData::onloadPlant(%this, %obj)
 {
-	brickL4BDirectorData::onPlant(%this, %obj);
+    Parent::onloadPlant(%this,%obj);
+    %this.onPlant(%obj);
 }
 
 function brickL4BDirectorData::onDeath(%this, %obj)

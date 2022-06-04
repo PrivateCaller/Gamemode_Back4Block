@@ -72,8 +72,9 @@ function L4B_RespaceString(%string)
 
 function L4B_SaveVictim(%obj,%target)
 {	
-	if(L4B_CheckifinMinigame(%obj,%target) && %target.getState() !$= "Dead" && !%obj.getState() !$= "Dead")
-	if(%target.isBeingStrangled && !%obj.isBeingStrangled && %obj.hIsInfected)
+	
+	if(isObject(getMinigameFromObject(%obj,%target)) && %target.getState() !$= "Dead" && !%obj.getState() !$= "Dead")
+	if(%target.isBeingStrangled && !%obj.isBeingStrangled && !%obj.hIsInfected)
 	{
 		%target.isBeingStrangled = 0;
 		%target.hEater.SmokerTongueTarget = 0;
@@ -262,14 +263,14 @@ function L4B_CommonZombieAttributes(%obj)
 		%obj.setscale(%randscale);
 	}
 
-	if($Pref::Server::L4B2Bots::RockSpawning && getRandom(0,100) <= 10)
+	if(getRandom(0,100) <= 5)
 	%obj.MountImage(MxRockImage,0);
 }
 
 function Player::hDefaultL4BAppearance(%obj) //This is how the appearances are determined on the datablock's onAdd function
 {	
 	%this = %obj.getDataBlock();
-
+	
 	switch($Pref::Server::L4B2Bots::CustomStyle)//Random common appearance
 	{
 		case 0: %randmultiplier = getRandom(200,1000)*0.001;
@@ -343,26 +344,12 @@ function Player::hDefaultL4BAppearance(%obj) //This is how the appearances are d
 	%obj.setShapeNameHealth();
 }
 
-function L4B_ZombieLootInitialize(%this,%obj)
-{
-	if(!$Pref::Server::L4B2Bots::ZombieLootChance || !%obj.hZombieLoot)
-	return;
-
-	for (%n = 1; %n < 6; %n++)//This doesn't work with global variables, or at least I can't figure it out
-	{
-		L4B_ZombieDropLoot(%obj,$Pref::Server::L4B2Bots::ZombieLootItem @ %n,$Pref::Server::L4B2Bots::ZombieLootChance);
-	}
-
-}
-
 function L4B_ZombieDropLoot(%obj,%lootitem,%chance)
 {
 	if(!isObject(%lootitem))
 	return;
-	
-	if(getRandom(1,100) <= %chance)
+	else if(getRandom(1,100) <= %chance)
 	{
-		%minigame = getMinigameFromObject(%obj);
 		
 		%loot = new item()
 		{
@@ -371,14 +358,10 @@ function L4B_ZombieDropLoot(%obj,%lootitem,%chance)
 			dropped = 1;
 			canPickup = 1;
 			client = %cl;
+			minigame = getMinigameFromObject(%obj);
 		};
-
-		if(isObject(%minigame))
-		%loot.minigame = %minigame;
-
 		missionCleanup.add(%loot);
 
-		//Super long line incoming, that's for setting the item's velocity.
 		%loot.applyimpulse(%loot.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),getRandom(4/4,4)),getRandom(4*-1,4) @ " 0 " @ getRandom(6/3,6)));
 		%loot.fadeSched = %loot.schedule(8000,fadeOut);
 		%loot.delSched = %loot.schedule(8200,delete);
@@ -506,40 +489,6 @@ function L4B_ZombieLunge(%obj,%targ,%power)
 	%obj.setvelocity(%final);
 }
 
-function Player::Safehouse(%player)
-{
-	%minigame = getMiniGameFromObject(%player);
-	if(%player.hType !$= "Survivors" || isEventPending(%minigame.resetSchedule))
-	return;
-
-	%player.InSafehouse = 1;
-	cancel(%player.NoSafeHouseSchedule);
-	%player.NoSafeHouseSchedule = %player.schedule(500,NoSafeHouse);
-
-	for(%i = 0; %i < %minigame.numMembers; %i++)
-	{
-		%client = %minigame.member[%i];
-
-		if(isObject(%player = %client.player) && !%player.hIsInfected && %player.getdataBlock().getname() !$= "DownPlayerSurvivorArmor")
-		%livePlayerCount++;
-
-		if(isObject(%player) && %player.InSafehouse)
-		%safehousecount++;
-	}
-	
-	if(%safehousecount >= %livePlayerCount && isObject(%minigame))
-	{
-		%minigame.SurvivorWin();
-		return;
-	}
-}
-
-function Player::NoSafeHouse(%player)
-{
-	%player.InSafehouse = 0;
-}
-registerOutputEvent ("Player", "Safehouse");
-
 // ============================================================
 // 3. Minigame
 // ============================================================
@@ -554,59 +503,10 @@ function MinigameSO::L4B_PlaySound(%minigame,%sound,%client)
     }
 }
 
-function MinigameSO::SurvivorWin(%minigame,%client)
-{
-	if(isEventPending(%minigame.resetSchedule))	
-	return;
-	
-	if(isObject(l4b_music))
-	l4b_music.delete();
-
-	//%minigame.schedule(3000,chatMessageAll,0,'<font:impact:25>\c6Resetting minigame in 5 seconds.');
-	//%minigame.schedule(7750,chatMessageAll,0,'<font:impact:25>\c6Resetting minigame.');
-   	%minigame.scheduleReset(8000);
-	%minigame.L4B_PlaySound("game_win_sound");
-	%minigame.DirectorProcessEvent("onSurvivorsWin",%client);
-
-    for(%i=0;%i<%minigame.numMembers;%i++)
-    {
-		%member = %minigame.member[%i];
-
-		if(isObject(%member.player))
-		{
-			if(%member.player.hType $= "Survivors")
-			%member.player.emote(winStarProjectile, 1);
-
-			%member.Camera.setOrbitMode(%member.player, %member.player.getTransform(), 0, 5, 0, 1);
-			%member.setControlObject(%member.Camera);
-		}
-    }
-}
-
-registerInputEvent("fxDTSBrick", "onSurvivorsWin", "Self fxDTSBrick" TAB "MiniGame MiniGame");
-registerInputEvent("fxDTSBrick", "onSurvivorsLose", "Self fxDTSBrick" TAB "MiniGame MiniGame");
-
 function L4B_CheckifinMinigame(%target1,%target2)
 {
 	if(isObject(getMinigameFromObject(%target1,%target2)) && miniGameCanDamage(%target1,%target2))
 	return true;
-}
-
-function L4B_CheckAnyoneNotZombie(%obj,%minigame)
-{
-	%survivorteam = "";
-	for(%i = 0; %i < %teamsammount = %minigame.teams.getCount(); %i++)
-	{
-		%teams = %minigame.teams.getObject(%i);
-		if(%teams.name $= "Survivors")
-		{
-			%survivorteam = %teams;
-			break;
-		}
-	}
-	if(%survivorteam !$= "" && %survivorteam.numMembers <= 0)
-	%minigame.endRound(%minigame.victoryCheck_Lives());
-
 }
 
 // ============================================================
@@ -842,7 +742,6 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 	{
 		%shape = %col.getDataBlock().shapeFile;
 		if(L4B_CheckifinMinigame(%obj,%col) && %obj.getState() !$= "Dead" && %col.getState() !$= "Dead" && !%obj.isStrangling && !%col.isBeingStrangled && %obj.laststun+5000 < getsimtime() && %shape $= "base/data/shapes/player/m.dts" || %shape $= "base/data/shapes/player/mmelee.dts")
-		if(checkHoleBotTeams(%obj,%col))
 		{
 			%obj.laststun = getsimtime();
 			%col.isBeingStrangled = 1;
@@ -1020,56 +919,6 @@ function L4B_SpecialsWarningLight(%obj)
 }
 
 // ============================================================
-// 7. Server
-// ============================================================
-function serverCmdGetIFI(%client)
-{
-	if(%client.isAdmin || %client.isSuperAdmin)
-	{	
-		if(isObject(%client.player) && %client.player.getState() !$= "Dead")
-		{
-			for (%n = 0; %n < %client.player.getDatablock().maxTools; %n++)
-			{
-				if(isObject(%client.player.tool[%n]))
-				messageClient(%client,'ItemName',"\c2" @ %client.player.tool[%n].getName());
-			}
-		}
-		else messageClient(%client,'NoItemName',"\c6Respawn and equip items.");
-	}
-	else messageClient(%client,'NoItemName',"\c6Must be an admin to use this command.");
-}
-function serverCmdGIFI(%client)
-{
-	serverCmdGetIFI(%client);
-}
-
-function serverCmdCLEARMT(%client)
-{
-	if(%client.isAdmin || %client.isSuperAdmin)
-	{	
-		%client.currTeleSet = 0;
-		%client.centerprint("\c6Cleared Teleset data",3);
-	}
-}
-
-function serverCmdMODEMT(%client)
-{
-	if(%client.isAdmin || %client.isSuperAdmin)
-	{	
-		if(!%client.TeleSetMainMode)
-		{
-			%client.TeleSetMainMode = true;
-			%client.centerprint("\c6Telebrick Checker mode set to main",3);
-		}
-		else
-		{
-			%client.TeleSetMainMode = false;
-			%client.centerprint("\c6Telebrick Checker mode set to sub",3);
-		}
-	}
-}
-
-// ============================================================
 // 8. Event
 // ============================================================
 function fxDTSBrick::RandomizeZombieSpecial(%obj)
@@ -1164,438 +1013,6 @@ function fxDTSBrickData::onTankTouch(%data,%obj,%player)
 registerInputEvent ("fxDTSBrick", "onTankTouch", "Self fxDTSBrick" TAB "Player Player" TAB "Bot Bot" TAB 
 	"Client GameConnection" TAB "MiniGame MiniGame");
 
-// ============================================================
-// 10. Water SFX
-// ============================================================
-
-datablock ParticleData(oxygenBubbleParticle : painMidParticle)
-{
-	dragCoefficient		= 3.0;
-	windCoefficient		= 0.0;
-	gravityCoefficient	= -2.0;
-	inheritedVelFactor	= 0.0;
-	constantAcceleration	= 0.0;
-	lifetimeMS		= 800;
-	lifetimeVarianceMS	= 0;
-	spinSpeed		= 10.0;
-	spinRandomMin		= -50.0;
-	spinRandomMax		= 50.0;
-	useInvAlpha		= false;
-	animateTexture		= false;
-
-	textureName		= "base/data/particles/bubble";
-   
-	colors[0]	= "0.2 0.6 1 0.4";
-	colors[1]	= "0.2 0.6 1 0.8";
-	colors[2]	= "0.2 0.6 1 0.8";
-	sizes[0]	= 0.2;
-	sizes[1]	= 0.4;
-	sizes[2]	= 0.0;
-	times[0]	= 0.0;
-	times[1]	= 0.8;
-   times[2]	= 1.0;
-};
-
-datablock ParticleEmitterData(oxygenBubbleEmitter : painMidEmitter)
-{
-   ejectionPeriodMS = 5;
-   periodVarianceMS = 0;
-   ejectionVelocity = 6;
-   velocityVariance = 2;
-   ejectionOffset   = 0.2;
-   thetaMin         = 0;
-   thetaMax         = 105;
-   phiReferenceVel  = 0;
-   phiVariance      = 360;
-   overrideAdvance = false;
-
-   particles = oxygenBubbleParticle;
-
-   uiName = "Oxygen Bubbles";
-};
-
-datablock ShapeBaseImageData(oxygenBubbleImage : painMidImage)
-{
-	stateTimeoutValue[1] = 0.05;
-	stateEmitter[1] = oxygenBubbleEmitter;
-	stateEmitterTime[1]	= 0.05;
-};
-
-function oxygenBubbleImage::onDone(%this,%obj,%slot)
-{
-	%obj.unMountImage(%slot);
-}
-
-function Player::checkIfUnderwater(%this, %obj)
-{
-   if(%obj.getWaterCoverage() == 0)
-   {
-      if(%obj.getenergylevel() <= 5 && %obj.getState() !$= "Dead")
-      %obj.playaudio(0,"survivor_painhigh" @ getRandom(1, 4) @ "_sound");
-   
-      %obj.setenergylevel(%obj.getDatablock().maxenergy);
-   }
-   cancel(%obj.oxygenTick);
-}
-
-
-// ============================================================
-// 11. Survivor Player
-// ============================================================
-
-function SurvivorPlayerDmg(%this,%obj,%am)
-{
-	if(%obj.getstate() $= "Dead")
-	return;
-	
-	if(!%obj.getWaterCoverage() $= 1)
-	{
-		if(%am >=5 && %obj.lastdamage+500 < getsimtime())
-		{
-			%obj.playaudio(0,"survivor_pain" @ getRandom(1, 4) @ "_sound");
-
-			if(%am >= 20)
-			{
-				%obj.playaudio(0,"survivor_painmed" @ getRandom(1, 4) @ "_sound");
-
-				if(%am >= 30)
-				%obj.playaudio(0,"survivor_painhigh" @ getRandom(1, 4) @ "_sound");
-			}
-
-			%obj.lastdamage = getsimtime();
-		}
-	}
-	else %obj.playaudio(0,"survivor_pain_underwater_sound");
-
-	if(%Obj.GetDamageLevel() <= 50 && %this.getName() !$= "SurvivorPlayer")
-	{
-		%Obj.SetDataBlock("SurvivorPlayer");
-		return;
-	}
-	else if(%Obj.GetDamageLevel() >= 50 && %this.getName() !$= "SurvivorPlayerMed")
-	{
-		%Obj.SetDataBlock("SurvivorPlayerMed");
-
-		if(%obj.getdamagelevel() >= 75 && %this.getName() !$= "SurvivorPlayerLow")
-		%Obj.SetDataBlock("SurvivorPlayerLow");
-
-		return;
-	}
-}
-
-function SurvivorPlayer::onDamage(%this,%obj,%am)
-{
-	Parent::onDamage(%this,%obj,%am);
-	SurvivorPlayerDmg(%this,%obj,%am);
-}
-function SurvivorPlayerMed::OnDamage(%This,%Obj,%Am)
-{
-	SurvivorPlayer::onDamage(%this,%obj,%am);
-}
-function SurvivorPlayerLow::OnDamage(%This,%Obj,%Am)
-{
-	SurvivorPlayer::onDamage(%this,%obj,%am);
-}
-
-function SurvivorPlayer::onCollision(%this,%obj,%col,%vec,%speed)
-{
-	Parent::onCollision(%this,%obj,%col,%vec,%speed);
-
-	if(isObject(%col) && %col.getType() & $TypeMasks::PlayerObjectType)
-	L4B_SaveVictim(%obj,%col);
-}
-
-function SurvivorPlayerMed::onCollision(%this,%obj,%col)
-{
-	Parent::onCollision(%this, %obj, %col, %fade, %pos, %norm);
-	if(isObject(%col) && %col.getType() & $TypeMasks::PlayerObjectType)
-	L4B_SaveVictim(%obj,%col);
-}
-function SurvivorPlayerLow::onCollision(%this,%obj,%col)
-{
-	Parent::onCollision(%this, %obj, %col, %fade, %pos, %norm);
-	if(isObject(%col) && %col.getType() & $TypeMasks::PlayerObjectType)
-	L4B_SaveVictim(%obj,%col);
-}
-
-function SurvivorPlayer::onAdd(%this,%obj)
-{
-	%obj.client.NotifyOfImmunity = 0;
-
-	if(%obj.getClassName() $= "Player" && isObject(getMinigameFromObject(%obj)))
-	{	
-		if(!%obj.hIsImmune)
-		if(!%obj.client.NotifyOfImmunity)
-		{
-			%obj.client.Play2d("survivor_notimmune_sound");
-			%obj.client.NotifyOfImmunity = 1;
-			GameConnection::ChatMessage (%obj.client, "\c3You are not immune, find a Panacea Syringe to gain immunity from the zombie infection.");
-		}
-	}
-	
-	Parent::onAdd(%this,%obj);
-}
-
-function SurvivorPlayer::onTrigger (%this, %obj, %triggerNum, %val)
-{
-	Parent::onTrigger (%this, %obj, %triggerNum, %val);
-
-	if(%obj.getClassName() $= "Player" && %obj.getState() !$= "Dead")
-	{		
-		switch(%triggerNum)
-		{
-			case 0: if(!isObject(%obj.getMountedImage(0)))
-					{
-						if(%val)
-						{
-							%eye = %obj.getEyePoint(); //eye point
-							%scale = getWord (%obj.getScale (), 2);
-							%len = $Game::BrickActivateRange * %scale; //raycast length
-							%masks = $TypeMasks::FxBrickObjectType | $TypeMasks::PlayerObjectType | $TypeMasks::VehicleObjectType;
-							%vec = %obj.getEyeVector(); //eye vector
-							%beam = vectorScale(%vec,%len); //lengthened vector (for calculating the raycast's endpoint)
-							%end = vectorAdd(%eye,%beam); //calculated endpoint for raycast
-							%ray = containerRayCast(%eye,%end,%masks,%obj); //fire raycast
-							%ray = isObject(firstWord(%ray)) ? %ray : 0; //if raycast hit - keep ray, else set it to zero
-
-							if(!%ray) //if Beam Check fcn returned "0" (found nothing)
-							return Parent::onTrigger (%this, %obj, %triggerNum, %val); //stop here
-
-							%target = firstWord(%ray);
-
-							if(%target.getType() & $TypeMasks::PlayerObjectType)
-							L4B_SaveVictim(%obj,%target);
-
-							L4B_ReviveDowned(%obj);
-						}
-						else
-						{
-							if(%obj.issavior)
-							{
-								if(%obj.getmountedimage(0) == 0)
-								%obj.stopthread(1);
-								%obj.issavior = 0;
-								%obj.isSaving.isBeingSaved = 0;
-								%obj.isSaving = 0;
-							}
-							%obj.savetimer = 0;
-							cancel(%obj.savesched);
-						}
-					}
-			case 4: if(%val)
-					%obj.meleeTrigger();
-			default:
-		}
-	}
-}
-
-function SurvivorPlayerMed::onTrigger (%this, %obj, %triggerNum, %val)
-{
-	Parent::onTrigger (%this, %obj, %triggerNum, %val);
-	SurvivorPlayer::onTrigger (%this, %obj, %triggerNum, %val);
-}
-
-function SurvivorPlayerLow::onTrigger (%this, %obj, %triggerNum, %val)
-{
-	Parent::onTrigger (%this, %obj, %triggerNum, %val);
-	SurvivorPlayer::onTrigger (%this, %obj, %triggerNum, %val);
-}
-
-function SurvivorPlayer::onNewDataBlock(%this,%obj)
-{	
-	Parent::onNewDataBlock(%this,%obj);
-
-	if($Pref::SurvivorPlayer::SurvivorImmunity)
-	%obj.hIsImmune = 1;
-	else commandToClient(%obj.client, 'SetVignette', false, " 0 0 0 1" );
-	%obj.hType = "Survivors";
-
-	%obj.BrickScanCheck();
-}
-
-function SurvivorPlayerMed::onNewDataBlock(%this,%obj)
-{
-	Parent::onNewDataBlock(%this,%obj);
-	%obj.BrickScanCheck();
-}
-		
-function SurvivorPlayerLow::onNewDataBlock(%this,%obj)
-{
-	Parent::onNewDataBlock(%this,%obj);
-	%obj.BrickScanCheck();
-}
-
-function SurvivorPlayerLow::onDisabled(%this,%obj,%state)
-{
-	%obj.playaudio(0,"survivor_death" @ getRandom(1, 8) @ "_sound");
-
-	if(%obj.getWaterCoverage() == 1 && %obj.getenergylevel() == 0)
-	{
-		%obj.playaudio(0,"survivor_death_underwater" @ getRandom(1, 2) @ "_sound");
-		%obj.emote(oxygenBubbleImage, 1);
-		serverPlay3D("drown_bubbles_sound",%obj.getPosition());
-		serverPlay3D("die_underwater_bubbles_sound",%obj.getPosition());
-	}
-
-	Parent::onDisabled(%this,%obj,%state);
-}
-
-function SurvivorPlayerMed::onDisabled(%this,%obj,%state)
-{
-	SurvivorPlayerLow::onDisabled(%this,%obj,%state);
-	Parent::onDisabled(%this,%obj,%state);
-}
-
-function SurvivorPlayer::onDisabled(%this,%obj,%state)
-{
-	SurvivorPlayerLow::onDisabled(%this,%obj,%state);
-	Parent::onDisabled(%this,%obj,%state);
-}
-
-function Player::SurvivorDownedCheck(%obj,%damage,%damageType)
-{	
-	if(%damageType $= $DamageType::Fall)	
-	{
-		serverPlay3D("impact_fall_sound",%obj.getPosition());
-		serverPlay3D("victim_smoked_sound",%obj.getPosition());
-
-		if(isObject(ZombieHitProjectile))
-		%p = new Projectile()
-		{
-			dataBlock = "ZombieHitProjectile";
-			initialPosition = %obj.getPosition();
-			sourceObject = %obj;
-		};
-		MissionCleanup.add(%p);
-		%p.explode();
-	}
-
-	if($Pref::SurvivorPlayer::EnableDowning)
-	{
-		if(%obj.getstate() !$= "Dead" && %obj.getdamagelevel()+%damage >= %obj.getdataBlock().maxDamage && %damage <= %obj.getDatablock().maxDamage/1.333 && %obj.getWaterCoverage() != 1)
-		{
-			%obj.setdamagelevel(0);
-			%obj.setenergylevel(100);
-			%obj.isdowned = 1;
-			%obj.changedatablock("DownPlayerSurvivorArmor");
-			return 1;
-		}
-		else return 0;
-	}
-	else return 0;
-}
-
-function SurvivorPlayer::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
-{
-	if(%obj.SurvivorDownedCheck(%damage,%damageType))
-	return;
-
-	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
-}
-
-function SurvivorPlayerMed::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
-{
-	if(%obj.SurvivorDownedCheck(%damage,%damageType))
-	return;
-
-	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
-}
-
-function SurvivorPlayerLow::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
-{
-	if(%obj.SurvivorDownedCheck(%damage,%damageType))
-	return;
-
-	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
-}
-
-function energydamageloop(%obj)
-{ 
-	if(isobject(%obj) && %obj.getstate() !$= "Dead" && %obj.getdataBlock().getName() $= "DownPlayerSurvivorArmor")
-	{
-
-		if(%obj.getenergylevel() == 0 && !%obj.isBeingSaved)
-		{
-			%obj.kill();
-			return;
-		}
-
-		cancel(%obj.energydeath1);
-		cancel(%obj.energydeath2);
-		cancel(%obj.energydeath3);
-		
-		if(%obj.getClassName() $= "Player")
-		{
-			%obj.client.Play2d("survivor_heartbeat_sound");
-			%obj.setdamageflash(16/%obj.getenergylevel());
-		}
-
-		if(%obj.getenergylevel() >= 75)//1
-		{
-			%obj.energydeath1 = schedule(750,0,energydamageloop,%obj);
-
-			%obj.setenergylevel(%obj.getenergylevel()-1);
-		}
-		if(%obj.getenergylevel() <= 75)//2
-		{
-			%obj.energydeath2 = schedule(625,0,energydamageloop,%obj);
-
-			%obj.setenergylevel(%obj.getenergylevel()-1);
-		}
-		if(%obj.getenergylevel() <= 50)//3
-		{
-			%obj.setenergylevel(%obj.getenergylevel()-1);
-
-			%obj.energydeath3 = schedule(500,0,energydamageloop,%obj);
-		}
-
-		if(%obj.lastcry+10000 < getsimtime())
-		{
-			%obj.lastcry = getsimtime();
-			%obj.playaudio(0,"survivor_pain_high1_sound");
-		}
-	}
-	else 
-	{
-		%obj.kill();
-		return;
-	}
-
-}
-
-function DownPlayerSurvivorArmor::ondisabled(%this,%obj,%n)
-{	
-	%obj.playaudio(0,"survivor_death" @ getRandom(1, 8) @ "_sound");
-	commandToClient(%obj.client,'SetVignette',$EnvGuiServer::VignetteMultiply,$EnvGuiServer::VignetteColor);
-
-	Parent::onDisabled(%this, %obj);
-}
-
-function DownPlayerSurvivorArmor::onNewDataBlock(%this,%obj)
-{
-	if(%obj.getClassName() $= "Player")
-	{
-		chatMessageTeam(%obj.client,'fakedeathmessage',"<color:FFFF00><bitmapk:add-ons/package_left4block/icons/downci>" SPC %obj.client.name);
-
-		if(isObject(%obj.billboard) && $L4B_hasSelectiveGhosting)
-		Billboard_DeallocFromPlayer($L4B::Billboard_SO, %obj);
-
-		if($L4B_hasSelectiveGhosting)
-		Billboard_MountToPlayer(%obj, $L4B::Billboard_SO, incappedBillboard);
-
-		%minigame = %obj.client.minigame;
-		%minigame.L4B_PlaySound("victim_needshelp_sound");
-		%minigame.checkLastManStanding();
-	}
-
-	%obj.playthread(0,sit);
-
-	%obj.lastcry = getsimtime();
-	%obj.playaudio(0,"survivor_pain_high1_sound");
-	energydamageloop(%obj);
-	
-	Parent::onNewDataBlock(%this,%obj);
-}
 
 function centerprintcounter(%obj,%amount)
 {
@@ -1758,7 +1175,7 @@ AddDamageType("SecondaryMelee",'<bitmap:add-ons/package_left4block/icons/ci_punc
 function serverCmdSecondaryMelee(%cl)
 {
 	%pl = %cl.player;
-	if(%pl.meleeItem || %pl.hIsInfected || %pl.getDatablock().isdowned)
+	if(!isObject(%pl) || %pl.meleeItem || %pl.hIsInfected || %pl.getDatablock().isdowned)
 	return;
 
 	if($Pref::SecondaryMelee::MeleeMode == 2 || ($Pref::SecondaryMelee::MeleeMode == 1 && isObject(%cl.minigame)))
@@ -1779,9 +1196,8 @@ function player::meleeTrigger(%pl)
 		%hit = %pl.doMelee();
 		%cd = (%hit == 0 ? 500 : 0);
 		%pl.meleeCooldownRush = (%hit == 1 ? 50 : 0);
-		if($Pref::SecondaryMelee::MeleeCharges != -1)
-			if(!isEventPending(%pl.meleeCdSched))
-				%pl.meleeCdSched = %pl.schedule($Pref::SecondaryMelee::MeleeCooldownRate+%cd,meleeCooldown);
+		if($Pref::SecondaryMelee::MeleeCharges != -1 && !isEventPending(%pl.meleeCdSched))
+		%pl.meleeCdSched = %pl.schedule($Pref::SecondaryMelee::MeleeCooldownRate+%cd,meleeCooldown);
 	}
 }
 
@@ -1929,7 +1345,7 @@ function Player::doMelee(%obj)
 					%stunchance = 75;
 					%sound = "melee_slap_sound";
 					%projectile = "SecondaryMeleeProjectile";
-					%dmg = $Pref::SecondaryMelee::SlapDamage;
+					%dmg = %hit.getdatablock().maxDamage/10;
 					%hitknockback = 800;
 					%hitz = 200;
 
@@ -1940,10 +1356,12 @@ function Player::doMelee(%obj)
 					%stunchance = 20;
 					%sound = "Zombie_hit" @ getrandom(1,8) @ "_sound";
 					%projectile = "SecondaryMeleeSmallProjectile";
-					%dmg = $Pref::SecondaryMelee::MeleeDamage;
+					%dmg = %hit.getdatablock().maxDamage/12;
 					%hitknockback = 400;
 					%hitz = 150;
 				}
+				if(%hit.getdatablock().getname() $= "ZombieTankHoleBot")
+				%dmg = %hit.getdatablock().maxDamage/30; 
 
 				if(getRandom(1,100) <= %stunchance && %hit.hZombieL4BType & %hit.hZombieL4BType < 4 )
 				{
@@ -2058,197 +1476,12 @@ function ToxicityE(%Player)
          else
          {
             %Player.ToxicityCount = 0;
-            if(isObject(%Player.getMountedImage(2)) && %Player.getMountedImage(2).getName() $= "SpitAcidStatusPlayerImage")
+            if(isObject(%Player.getMountedImage(3)) && %Player.getMountedImage(3).getName() $= "SpitAcidStatusPlayerImage")
             %Player.unMountImage(3);
 
             %Player.Toxified = 0;
          }
       }
-}
-
-
-datablock fxDTSBrickData (brickTeleBrickCheckData:brick2x2fData)
-{
-	category = "Special";
-	subCategory = "Interactive";
-	uiName = "Telebrick Checker";
-	isTeleBrick = true;
-	alwaysShowWireFrame = false;
-};
-
-datablock fxDTSBrickData (brickTeleBrickData:brick4x4fData)
-{
-	category = "Special";
-	subCategory = "Interactive";
-	uiName = "Telebrick";
-	isTeleBrick = true;
-	alwaysShowWireFrame = false;
-};
-
-function brickTeleBrickData::onPlant(%data,%obj)
-{
-    Parent::onPlant(%data, %obj);
-
-	%obj.setrendering(0);
-	%obj.setcolliding(0);
-	%obj.setraycasting(0);
-
-    if(isObject(%obj.client.currTeleSet))
-	{
-		%obj.client.currTeleSet.add(%obj);
-		%obj.setNTObjectName(%obj.client.currTeleSet.ParBrick @ "_TeleventSetBrick");
-
-		if(isObject(%obj.client))
-		%obj.client.centerprint("\c2Placed tele to checker <br>" @ "\c2" @ %obj.client.currTeleSet.ParBrick,3);
-	}
-	else if(isObject(%obj.client))
-	%obj.client.centerprint("\c2No checker detected! Please set one first before placing a telebrick.",3);
-}
-
-function brickTeleBrickData::onloadPlant(%data, %obj)
-{
-	brickTeleBrickData::onPlant(%this, %obj);
-}
-
-function brickTeleBrickData::onDeath(%this,%obj)
-{
-	if(isObject(%obj.teleset))
-	{
-		%setname = strreplace(%obj.teleset.getname(), "_TeleventSet", "");
-		%obj.client.centerprint("\c2Tele removed from teleset" SPC "\c2" @ %setname,3);
-	}
-	
-	Parent::onDeath(%this, %obj);
-}
-
-function brickTeleBrickCheckData::onPlant(%data,%obj)
-{
-	Parent::onPlant(%data, %obj);
-
-	%obj.setrendering(0);
-	%obj.setcolliding(0);
-
-	if(%obj.client.TeleSetMainMode)
-	{
-    	%obj.teleset = new SimSet(%obj @ "_TeleventSet");
-		%obj.teleset.ParBrick = %obj;
-    	%obj.client.currTeleSet = %obj.teleset;
-		%obj.setNTObjectName(%obj @ "_TeleventSetCheck");
-		%obj.client.centerprint("\c2Placed new checker <br>" @ "\c2" @ %obj,3);
-	}
-	else if(!%obj.TeleSetMainMode)
-	{
-		if(isObject(%obj.client.currTeleSet))
-		{
-			%obj.teleset = %obj.client.currTeleSet;
-			%obj.setNTObjectName(%obj.client.currTeleSet.ParBrick @ "_TeleventSetSubCheck");
-
-			if(isObject(%obj.client))
-			%obj.client.centerprint("\c2Placed sub to checker <br>" @ "\c2" @ %obj.client.currTeleSet.ParBrick,3);
-		}
-		else if(isObject(%obj.client))
-		%obj.client.centerprint("\c2No checker detected! Set mode to Main before placing a sub checker.",3);
-	}
-}
-
-function brickTeleBrickCheckData::onloadPlant(%data, %obj)
-{
-	brickTeleBrickCheckData::onPlant(%this, %obj);
-}
-
-function brickTeleBrickCheckData::onDeath(%this,%obj)
-{
-	if(strstr(%obj.getName(),"TeleventSetCheck") != -1 && isObject(%obj.teleset))
-	{
-		%obj.teleset.delete();
-		%obj.client.centerprint("\c2Teleset" SPC "\c2" @ %obj SPC "\c2removed",3);
-	}
-	else if(isObject(%obj.teleset))
-	{
-		%setname = strreplace(%obj.teleset.getname(), "_TeleventSet", "");
-		%obj.client.centerprint("\c2Sub check removed from teleset" SPC "\c2" @ %setname,3);
-	}
-
-	Parent::onDeath(%this, %obj);
-}
-
-function DisableTeleporting(%brick)
-{
-    if(isObject(%brick.teleset))
-    {
-        for(%i = 0; %i < %brick.teleset.getcount(); %i++)
-        {
-            %telebrick = %brick.teleset.getObject(%i);
-
-            if(isObject(MainTeleSet) && MainTeleSet.isMember(%telebrick))
-            MainTeleSet.remove(%telebrick);
-        }
-    }
-}
-
-registerInputEvent("fxDTSBrick","onSurvivorBrickScan","Self fxDTSBrick");
-
-function Player::BrickScanCheck(%obj)
-{
-	if(!$Pref::SurvivorPlayer::BrickScanning || !isObject(%obj) || %obj.getState() $= "Dead")
-	return;
-
-	InitContainerRadiusSearch(%obj.getPosition(), 10, $TypeMasks::FxBrickObjectType);
-	while(%brick = containerSearchNext())
-	{
-		$InputTarget_["Self"] = %brick;
-		%brick.processInputEvent("onSurvivorBrickScan",%brick.getgroup().client);
-
-		if(%brick.getdataBlock().IsTeleBrick)
-    	{
-			if(isObject(%brick.teleset))
-			{
-    	    	for(%i = 0; %i < %brick.teleset.getcount(); %i++)
-    	    	{
-					%telebrick = %brick.teleset.getObject(%i);
-
-    	    		if(!isObject(MainTeleSet))
-    	    		new SimSet(MainTeleSet);
-					else if(!MainTeleSet.isMember(%telebrick))
-					MainTeleSet.add(%telebrick);
-		        }
-    	    	cancel(%brick.teleset.DisableTeleporting);
-    	    	%brick.teleset.DisableTeleporting = schedule(2500,0,DisableTeleporting,%brick);
-			}
-    	}
-	}
-
-	cancel(%obj.BrickScanCheck);
-	%obj.BrickScanCheck = %obj.schedule(2000,BrickScanCheck);
-}
-registerOutputEvent("Bot","doMRandomTele");
-registerOutputEvent("Player","doMRandomTele");
-registerInputEvent("fxDTSBrick","onMRandomTele","Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "Bot Bot" TAB "MiniGame MiniGame");
-
-function Player::doMRandomTele(%obj)
-{	
-	if(isObject(%main = MainTeleSet) && %main.getCount() > 0)
-	{	
-		%brick = %main.getObject(getRandom(0,%main.getcount()-1));
-		%obj.settransform(vectorAdd(getwords(%brick.gettransform(),0,2),"0 0 0.25"));
-		%obj.setvelocity(%obj.getvelocity());
-
-		$InputTarget_["Self"] = %brick;
-		switch$(%obj.getclassname())
-		{
-			case "Player":	$InputTarget_["Player"] = %obj;
-							$InputTarget_["Client"] = %obj;
-
-			case "AIPlayer": $InputTarget_["Bot"] = %obj;
-		}
-		$InputTarget_["MiniGame"] = getMiniGameFromObject(%obj);
-		%brick.processInputEvent("onMRandomTele",%brick.getgroup().client);
-	}
-	else
-	{
-		%obj.kill();
-		return;
-	}
 }
 
 // ============================================================

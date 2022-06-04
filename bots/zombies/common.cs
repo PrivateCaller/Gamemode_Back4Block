@@ -130,8 +130,6 @@ function CommonZombieHoleBot::onAdd(%this,%obj)
 {	
 	Parent::onAdd(%this,%obj);
 
-	//%obj.schedule(500,doMRandomTele);
-
 	%obj.onL4BDatablockAttributes();
 	%obj.hDefaultL4BAppearance();
 }
@@ -189,7 +187,6 @@ function CommonZombieHoleBot::onDisabled(%this,%obj)
 	{
 		L4B_ZombieDropLoot(%obj,%weapon.item,100);
 		%obj.unMountImage(0);
-		L4B_ZombieLootInitialize(%this,%obj);
 	}
 
 	Parent::OnDisabled(%this,%obj);
@@ -259,53 +256,22 @@ function CommonZombieHoleBot::onBotFollow( %this, %obj, %targ )
 			%obj.raisearms = 1;
 			%obj.setMaxForwardSpeed(10);
 		}	
-
-		if($Pref::Server::L4B2Bots::ClumsyZombies && getRandom(1,100) <= 5)
-		{
-			%obj.stopHoleLoop();
-			L4B_SpazzZombieInitialize(%obj,0);
-			schedule(1000,0,serverCmdSit,%obj);
-		}
 	}
 }
 
 function CommonZombieHoleBot::onCollision(%this, %obj, %col, %fade, %pos, %norm)
 {
-	if(!$Pref::Server::L4B2Bots::HoldVictims || %obj.getstate() $= "dead" || !%obj.hLoopActive)
-	return Parent::oncollision(%this, %obj, %col, %fade, %pos, %norm);
-
-	if(strlwr(strstr(%obj.hType,"biled") != -1))
-	{
-		%obj.hIgnore = %col;
-		%obj.hFollowing = 0;
-		return Parent::oncollision(%this, %obj, %col, %fade, %pos, %norm);
-	}
-	
-	if(%obj.hLastPull+250 < getsimtime() && %col.getType() & $TypeMasks::PlayerObjectType)
-	{	
-		if(L4B_CheckifinMinigame(%obj, %col) && checkHoleBotTeams(%obj,%col) && !%col.isBeingStrangled)
-		{
-			%col.setvelocity("0 0 -.25");
-			%obj.playthread(3,"shiftdown");
-		}
-		%obj.hLastPull = getsimtime();
-	}
 	Parent::oncollision(%this, %obj, %col, %fade, %pos, %norm);
 }
 
 function CommonZombieHoleBot::onBotMelee(%this,%obj,%col)
 {		
-	%p = new Projectile()
-	{
-		dataBlock = "ZombieHitProjectile";
-		initialPosition = %col.getPosition();
-		sourceObject = %obj;
-		client = %obj.client;
-	};
-	MissionCleanup.add(%p);
-	%p.explode();
+	if(%obj.hIsInfected $= "1" && %col.getDamageLevel() >= %col.getDataBlock().maxDamage/1.333 && !%col.hIsImmune && !%col.hIsInfected)
+	holeZombieInfect(%obj,%col);
 
 	%meleeimpulse = mClamp(%obj.hLastMeleeDamage, 1, 10);
+
+	%col.spawnExplosion("ZombieHitProjectile",%meleeimpulse/4);
 	%col.applyimpulse(%col.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),getrandom(100,100*%meleeimpulse)),"0" SPC "0" SPC getrandom(100,100*%meleeimpulse)));
 	%col.playthread(3,"plant");
 	%obj.playaudio(1,"zombie_hit" @ getrandom(1,8) @ "_sound");

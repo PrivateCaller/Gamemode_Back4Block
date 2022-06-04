@@ -3,13 +3,6 @@
 // ============================================================
 package L4B2Bots_Main
 {	
-	function rocketLauncherImage::onFire(%this,%obj)
-	{
-		%obj.playaudio(1,"RPGFireSound");
-		%obj.playthread(2,"shotgunfire1");
-		parent::onFire(%this,%obj);
-	}
-
 	function serverLoadSaveFile_End()
 	{
 		parent::serverLoadSaveFile_End();
@@ -21,17 +14,6 @@ package L4B2Bots_Main
 		for(%i=0;%i<%count;%i++)
         {
 			%brick = $LoadingBricks_BrickGroup.getObject(%i);
-		
-            if(%brick.getDatablock().getName() $= "brickL4BDirectorData")
-			{
-                if(!isObject(directorBricks))
-                {
-                    new SimSet(directorBricks);
-                    directorBricks.add(%brick);
-                }
-                else if(!directorBricks.isMember(%brick))
-				directorBricks.add(%brick);
-            }
 
 			if(%brick.getdataBlock().IsTeleBrick)
 			{
@@ -50,9 +32,59 @@ package L4B2Bots_Main
 		}
 	}
 
+	function AIPlayer::hMeleeAttack(%obj,%col)
+	{		
+		if(%obj.getState() $= "Dead")
+		return;
+
+		if(%col.getType() & $TypeMasks::VehicleObjectType || %col.getType() & $TypeMasks::PlayerObjectType)
+		{
+			if(%obj.hState $= "Following" || %obj.Distraction )//Make sure it can damage even if it has a distraction it's following
+			{
+				if(isObject(%col.getmountedimage(0)) && %col.getMountedImage(0) == RiotShieldimage.getID())
+				{
+					%reflect = (vectorDot(%col.getForwardVector(), %obj.getForwardVector()) < 0);
+					if(%reflect)
+					{
+						%obj.playthread(2,activate2);
+						serverPlay3d("riotshield_block_sound",%col.getposition());
+						return;
+					}
+					else
+					{
+						if(%obj.getDataBlock().hMelee $= "2")
+						%obj.getDataBlock().onBotMelee(%obj,%col);//Used for L4B zombie bots
+						%obj.playthread(2,activate2);
+
+						%damage = %obj.hAttackDamage*getWord(%obj.getScale(),0);
+						%damagefinal = getRandom(%damage/4,%damage);
+
+						%col.damage(%obj.hFakeProjectile, %col.getposition(), %damagefinal, %obj.hDamageType);
+
+						%obj.hlastmeleedamage = %damagefinal;
+						%obj.lastattacked = getsimtime()+1000;
+					}
+				}
+				else
+				{
+					if(%obj.getDataBlock().hMelee $= "2")
+					%obj.getDataBlock().onBotMelee(%obj,%col);//Used for L4B zombie bots
+					%obj.playthread(2,activate2);
+
+					%damage = %obj.hAttackDamage*getWord(%obj.getScale(),0);
+					%damagefinal = getRandom(%damage/4,%damage);
+
+					%col.damage(%obj.hFakeProjectile, %col.getposition(), %damagefinal, %obj.hDamageType);
+
+					%obj.hlastmeleedamage = %damagefinal;
+					%obj.lastattacked = getsimtime()+1000;
+				}
+			}
+		}
+	}
+
 	function checkTeleAndSubCheckBricks(%mainbrick,%name)
 	{
-		//Probably going to... Kill the server by doing so many for loops lol, but the server loads anyways right??? RIGHT???
 		%count = $LoadingBricks_BrickGroup.getCount();
 		for(%i=0;%i<%count;%i++)
         {
@@ -67,7 +99,6 @@ package L4B2Bots_Main
 			}
 		}
 	}
-
 	
 	function fxDTSBrick::onActivate (%obj, %player, %client, %pos, %vec)
 	{
@@ -90,113 +121,6 @@ package L4B2Bots_Main
 		else serverPlay3D("impact_hard" @ getRandom(1,3) @ "_sound",%obj.getPosition());
 		Parent::onImpact(%this, %obj, %col, %vec, %force);
 	}
-
-	function AIPlayer::hMeleeAttack( %obj, %col )
-	{		
-		if(%obj.getState() $= "Dead")
-		return;
-
-		if(%col.getType() & $TypeMasks::VehicleObjectType || %col.getType() & $TypeMasks::PlayerObjectType)
-		{
-			if(%obj.hState $= "Following" || %obj.Distraction )//Make sure it can damage even if it has a distraction it's following
-			{
-				if(%obj.getDataBlock().hMelee $= "2")
-				%obj.getDataBlock().onBotMelee(%obj,%col);//Used for L4B zombie bots
-
-				%client = %col.client;
-				%name = %col.client.name;
-				%obj.playthread(2,activate2);
-				%damage = %obj.hAttackDamage*getWord(%obj.getScale(),0);
-				%damagefinal = getRandom(%damage/4,%damage);
-				%col.damage(%obj.hFakeProjectile, %col.getposition(), %damagefinal, %obj.hDamageType);
-				%obj.hlastmeleedamage = %damagefinal;
-				%obj.lastattacked = getsimtime()+1000;
-			}
-		}
-	}
-
-	function fxDTSBrick::playSound (%obj, %soundData)
-	{
-		Parent::playSound (%obj, %soundData);
-		//talk(%soundData.getName());
-	}
-	
-	function Armor::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
-	{
-		Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
-
-		%obj.lastdamagetype = %type;
-		%obj.DamageReceived = %damage;
-
-		%target = %sourceObject.sourceObject;
-
-		if(isObject(%target) && %obj != %target)
-		{
-			%obj.hAttacker = %target;
-		
-			if(%target.getType() & $TypeMasks::PlayerObjectType && (%target.isZombie || (%target.isHoleBot && %target.hMelee)))
-			{
-				%sVec = %target.getForwardVector();
-				%aimVec = %obj.getForwardVector();
-				%reflect = (vectorDot(%sVec, %aimVec) < 0);
-
-				if(!(%obj.getType() & $TypeMasks::PlayerObjectType) || (%obj.getMountedImage(0) != RiotShieldimage.getID()))
-				{
-					Parent::damage(%this, %obj, %source, %pos, %amount, %type);
-					return;
-				}
-				else if(%reflect)
-				{
-					serverPlay3d("riotshield_block_sound",%pos);
-					return;
-				}
-			}
-		}
-	}
-
-   function Armor::onEnterLiquid(%this, %obj, %cov, %type)
-   {
-      cancel(%obj.oxygenTick);
-      %obj.oxygenTick = %obj.schedule(2500, oxygenTick);
-      
-      parent::onEnterLiquid(%this, %obj, %cov, %type);
-   }
-   
-   function player::oxygenTick(%obj)
-   {   
-      if(!isObject(%obj) && %obj.getState() $= "Dead")
-      return;
-      
-      if(%obj.getWaterCoverage() == 1)
-      {
-         %obj.lastwatercoverage = getsimtime();
-
-         %obj.setenergylevel(%obj.getenergylevel()-12.5);
-         %obj.emote(oxygenBubbleImage, 1);
-         serverPlay3D("drown_bubbles_sound",%obj.getPosition());
-         %obj.playthread(3,plant);
-
-         if(%obj.getenergylevel() == 0)
-         %obj.Damage(%obj, %obj.getPosition (), 25, $DamageType::Suicide);
-      }
-      else 
-      {
-         if(%obj.getenergylevel() <= 5 && %obj.getState() !$= "Dead")
-         %obj.playaudio(0,"survivor_painhigh" @ getRandom(1, 4) @ "_sound");
-
-         %obj.setenergylevel(%obj.getDatablock().maxenergy);
-      }
-      
-      cancel(%obj.oxygenTick);
-      %obj.oxygenTick = %obj.schedule(2500, oxygenTick);
-   }
-   
-   function Armor::onLeaveLiquid(%this, %obj, %type)
-   {
-      %obj.schedule(150,checkIfUnderwater,%obj);
-      
-      parent::onLeaveLiquid(%this, %obj, %cov, %type);
-   }
 
 	function Projectile::onAdd(%obj)
 	{
@@ -232,49 +156,12 @@ package L4B2Bots_Main
 		else %obj.processInputEvent ("onTankTouch");	
 	}
 
-	function ProjectileData::onCollision (%this, %obj, %col, %fade, %pos, %normal, %velocity)
-	{
-		if(%this.directDamage && %col.getType() & $TypeMasks::PlayerObjectType)
-		{
-			if(!%obj.sourceObject.hIsInfected && %col.isBeingStrangled && %col.hEater.getDataBlock().getName() $= "ZombieSmokerHoleBot")
-			{
-				%col.isBeingStrangled = 0;
-				%col.hEater.SmokerTongueTarget = 0;
-				L4B_SpecialsPinCheck(%col.hEater,%col);
-				%col.hEater.damage(%obj, %pos, %this.directDamage/2, %this.directDamageType);
-			}
-		}
-
-		if(%col.getClassName() $= "Player" || %col.getClassName() $= "AIPlayer") //If they aren't holding a shield or carrying one on their back...
-		{
-			if(%col.getMountedImage(0) != RiotShieldimage.getID())
-			return Parent::onCollision(%this,%obj,%col,%fade,%pos,%normal,%velocity); //Play it normally and leave.
-
-			else
-			{
-				%aimVec = %col.getForwardVector();
-				%reflect = ((vectorDot(vectorNormalize(%obj.getVelocity()),%aimVec) < 0 && %col.getMountedImage(0) == RiotShieldimage.getID())); //If the shield is facing the projectile...
-
-				if(!%reflect)
-				return Parent::onCollision(%this,%obj,%col,%fade,%pos,%normal,%velocity);
-				else 
-				{
-					serverPlay3d("riotshield_block_sound",%pos); //Play a sound.
-					return;
-				}
-			}
-		}
-		Parent::onCollision (%this, %obj, %col, %fade, %pos, %normal, %velocity);
-	}
-
 	function ProjectileData::damage(%this,%obj,%col,%fade,%pos,%normal) //Blocking damage. Original script by Space Guy. I've gutted out a few major bits and added in my own.
-	{
-		if(%col.getClassName() $= "Player" || %col.getClassName() $= "AIPlayer") //If they aren't holding a shield or carrying one on their back...
+	{		
+		if(%col.getType() & $TypeMasks::PlayerObjectType) //If they aren't holding a shield or carrying one on their back...
 		{
 			if(%col.getMountedImage(0) != RiotShieldimage.getID())
-			{
-				return Parent::damage(%this,%obj,%col,%fade,%pos,%normal); //Play it normally and leave.
-			}
+			return Parent::damage(%this,%obj,%col,%fade,%pos,%normal); //Play it normally and leave.
 			else
 			{
 				%aimVec = %col.getForwardVector();
@@ -292,11 +179,44 @@ package L4B2Bots_Main
 		Parent::damage(%this,%obj,%col,%fade,%pos,%normal); //Play it normally and leave.
 	}
 
-	function serverCmdUseTool(%client, %tool)
+	function ProjectileData::onCollision (%this, %obj, %col, %fade, %pos, %normal, %velocity)
 	{
-		%obj = %client.player;
+		if(%this.directDamage && %col.getType() & $TypeMasks::PlayerObjectType)
+		{
+			if(!%obj.sourceObject.hIsInfected && %col.isBeingStrangled && %col.hEater.getDataBlock().getName() $= "ZombieSmokerHoleBot")
+			{
+				%col.isBeingStrangled = 0;
+				%col.hEater.SmokerTongueTarget = 0;
+				L4B_SpecialsPinCheck(%col.hEater,%col);
+				%col.hEater.damage(%obj, %pos, %this.directDamage/2, %this.directDamageType);
+			}
+		}		
 		
-		if(!%obj.isBeingStrangled)
+		if(%col.getType() & $TypeMasks::PlayerObjectType) //If they aren't holding a shield or carrying one on their back...
+		{
+			if(%col.getMountedImage(0) != RiotShieldimage.getID())
+			return Parent::onCollision(%this, %obj, %col, %fade, %pos, %normal, %velocity); //Play it normally and leave.
+			else
+			{
+				%aimVec = %col.getForwardVector();
+				%reflect = ((vectorDot(vectorNormalize(%obj.getVelocity()),%aimVec) < 0 && %col.getMountedImage(0) == RiotShieldimage.getID())); //If the shield is facing the projectile...
+
+				if(!%reflect)
+				return Parent::onCollision(%this, %obj, %col, %fade, %pos, %normal, %velocity);
+				else 
+				{
+					serverPlay3d("riotshield_block_sound",%pos); //Play a sound.
+					return;
+				}
+			}
+		}
+
+		Parent::onCollision(%this, %obj, %col, %fade, %pos, %normal, %velocity);
+	}
+
+	function serverCmdUseTool(%client, %tool)
+	{		
+		if(!%client.player.isBeingStrangled)
 		return parent::serverCmdUseTool(%client, %tool);
 	}
 
@@ -312,10 +232,7 @@ package L4B2Bots_Main
 	{
 		Parent::ServerCmdPlantBrick (%client);
 
-		%obj = %client.Player;
-
-		if(%obj.spawnTime+5000 > getSimTime())
-		if(isObject (%obj) && %obj.hIsInfected)
+		if(isObject(%obj = %client.player) && %obj.hIsInfected && %obj.spawnTime+5000 > getSimTime())
 		{
 			%client.setZombieBlock = 1;
 			%client.spawnPlayer();
@@ -621,8 +538,6 @@ package L4B2Bots_Main
 			if(isObject(l4b_music)) 
 			l4b_music.delete();
 			%minigame.DirectorProcessEvent("onSurvivorsLose",%client);
-			//%minigame.schedule(7000,chatMessageAll,0,'<font:impact:25>\c6Resetting minigame in 5 seconds.');
-			//%minigame.schedule(11750,chatMessageAll,0,'<font:impact:25>\c6Resetting minigame.');
 			%minigame.L4B_PlaySound("game_lose_sound");
 			%minigame.scheduleReset(12000);
 		}
@@ -704,17 +619,13 @@ package L4B2Bots_Main
         l4b_music.delete();
     }
 };
-activatePackage(L4B2Bots_Main);
-eval("rocketLauncherItem.colorShiftColor = \"0.15 0.15 0.15 1\";");
-eval("rocketLauncherImage.colorShiftColor = rocketLauncherItem.colorShiftColor;");
-eval("rocketLauncherImage.stateSound[2]	= \"RPGFireSound\";");
-eval("rocketLauncherProjectile.muzzleVelocity = 200;");
-eval("rocketLauncherProjectile.gravityMod = 1;");
-eval("rocketExplosion.soundProfile = \"grenadeLauncherExplosionB1Sound\";");
-eval("rocketExplosion.impulseForce = 5000;");
-eval("rocketExplosion.radiusDamage = 500;");
-eval("rocketExplosion.damageRadius = 5;");
 
+if(isPackage(BotHolePackage))
+{
+	deactivatePackage(BotHolePackage);
+	activatePackage(BotHolePackage);
+	activatePackage(L4B2Bots_Main);
+}
 
 // ============================================================
 // 2. New Zombie Infection
@@ -722,15 +633,8 @@ eval("rocketExplosion.damageRadius = 5;");
 
 package L4B_ZombieInfection
 {
-	function ZombieHoleBot::onNewDatablock(%this,%obj)
-	{
-		Parent::onNewDatablock(%this,%obj);
-
-		%obj.schedule(1,setDataBlock,CommonZombieHoleBot);
-	}
-
 	function Armor::onNewDatablock(%this, %obj)
-	{
+	{		
 		Parent::onNewDatablock(%this, %obj);
 
 		if(%this.hType !$= "Zombie")
@@ -740,19 +644,10 @@ package L4B_ZombieInfection
 
 			if(%obj.getdatablock().hType)
 			%obj.hType = %obj.getdatablock().hType;
-		
+
 			if(isObject(%obj.client))
 			commandToClient( %obj.client, 'SetVignette', $EnvGuiServer::VignetteMultiply, $EnvGuiServer::VignetteColor );
 		}
-	}
-
-	function Armor::onCollision(%this, %obj, %col, %vec, %speed)
-	{			
-		if(%obj.hIsInfected $= "1" && %obj.getState() !$= "Dead")
-		if(isObject(%col) && %col.getType() & $TypeMasks::PlayerObjectType && %col.getDamageLevel() >= %col.getDataBlock().maxDamage/1.333 && %col.getState() !$= "Dead" && !%col.hIsImmune && !%col.hIsInfected)
-		holeZombieInfect(%obj,%col);
-
-		Parent::onCollision(%this, %obj, %col, %vec, %speed);
 	}
 
 	function holeZombieInfect(%obj, %col)
@@ -779,10 +674,10 @@ package L4B_ZombieInfection
 	}
 
 };
-
-if(LoadRequiredAddOn("Bot_Zombie") == $Error::None)
-deactivatePackage(holeZombiePackage);
 activatePackage(L4B_ZombieInfection);
+
+if(isPackage(holeZombiePackage))
+deactivatePackage(holeZombiePackage);
 
 // ============================================================
 // 4. Flash Grenade Support
@@ -937,20 +832,18 @@ package L4B_SWepFlamesBurnsZombs
 	{
 		Parent::molotov_explode(%pos,%obj,%cl);
 
-		for (%n = 0; %n < 2; %n++)
-		schedule(3500 * %n, 0, createFireCircle, %pos,30,40,%cl,%obj,$DamageType::Molotov);
+		//for (%n = 0; %n < 2; %n++)
+		//schedule(3500 * %n, 0, createFireCircle, %pos,30,40,%cl,%obj,$DamageType::Molotov);
 	}
 
 	function flamerProjectile::damage(%this,%obj,%col,%fade,%pos,%normal)
 	{
-		if(%col.getType() & $TypeMasks::PlayerObjectType)
 		if(!%col.getDatablock().noBurning)
 		Parent::damage(%this,%obj,%col,%fade,%pos,%normal);
 	}
 
 	function molotovProjectile::damage(%this,%obj,%col,%fade,%pos,%normal)
 	{
-		if(%col.getType() & $TypeMasks::PlayerObjectType)
 		if(!%col.getDatablock().noBurning)
 		Parent::damage(%this,%obj,%col,%fade,%pos,%normal);	
 	}
