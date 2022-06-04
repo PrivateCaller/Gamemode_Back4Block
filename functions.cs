@@ -1600,7 +1600,7 @@ function L4B_storeLoggedClients()
 			for(%i = 0; %i < $L4B_clientLog.getCount(); %i++)
 			{
 				%client_blid = $L4B_clientLog.getObject(%i).blid;
-				if(getWord(%line, 1) $= %client_blid)
+				if(getField(%line, 1) $= %client_blid)
 				{
 					%already_stored_clients = %already_stored_clients @ %client_blid @ " "; 
 				}
