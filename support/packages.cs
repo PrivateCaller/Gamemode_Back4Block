@@ -356,25 +356,3 @@ if(isPackage(BotHolePackage))
 
 if(isPackage(holeZombiePackage))
 deactivatePackage(holeZombiePackage);//New function was made for this add-on, should disable that old package or things go kablooey
-
-//// ============================================================
-//// 3. Player Name and Appearance Logger
-//// ============================================================
-
-package L4B_ClientLogger
-{
-	function GameConnection::onClientEnterGame(%this)
-	{
-		parent::onClientEnterGame(%this);
-		for(%i = 0; %i < $L4B_clientLog.getCount(); %i++)
-		{
-			if($L4B_clientLog.getObject(%i).blid $= %this.getBLID())
-			{
-				return;
-			}
-		}
-		L4B_createClientSnapshot(%this);
-		L4B_storeLoggedClients();
-	}
-};
-activatePackage(L4B_ClientLogger);
