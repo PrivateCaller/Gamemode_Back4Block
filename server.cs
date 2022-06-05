@@ -1,21 +1,21 @@
 if(loadRequiredAddOn("Bot_Hole") == $Error::None)
 {
-	//These are giving me too many issues right now
+
 	
-	//exec("./support/billboards/billboards.cs");
-	//if(isFunction(NetObject, setNetFlag))
-	//{
-	//	exec("./support/billboards_wrapper.cs");
-	//	$L4B_hasSelectiveGhosting = true;
-	//}
-	//else
-	//{
-	//	$L4B_hasSelectiveGhosting = false;
-	//	error("ERROR: The Selective Ghosting DLL is required for Package_Left4Block's billboards to work.");
-	//	schedule(1000, 0, messageAll, 'MsgError', "\c0ERROR: The Selective Ghosting DLL is required for Package_Left4Block's billboards to work.");
-	//}
-	//exec("./support/afk_system.cs");
-	//exec("./bots/survivors/bot_survivor.cs");
+	exec("./support/billboards/billboards.cs");
+	if(isFunction(NetObject, setNetFlag))
+	{
+		exec("./support/billboards_wrapper.cs");
+		$L4B_hasSelectiveGhosting = true;
+	}
+	else
+	{
+		$L4B_hasSelectiveGhosting = false;
+		error("ERROR: The Selective Ghosting DLL is required for Package_Left4Block's billboards to work.");
+		schedule(1000, 0, messageAll, 'MsgError', "\c0ERROR: The Selective Ghosting DLL is required for Package_Left4Block's billboards to work.");
+	}
+	exec("./support/afk_system.cs");
+	exec("./bots/survivors/bot_survivor.cs");
 
 	exec("./support/jettison.cs");
 	exec("./support/clientlogger.cs");
