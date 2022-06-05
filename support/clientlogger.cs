@@ -86,7 +86,8 @@ function L4B_storeClientSnapshots()
 
 function L4B_loadClientSnapshots()
 {
-    %root_object = jettisonReadFile("config/server/L4B2_Bots/loggedplayers.json");
+	jettisonReadFile("config/server/L4B2_Bots/loggedplayers.json");
+    %root_object = $JSON::Value;
     echo("Loading" SPC %root_object.keyCount SPC "clients...");
     for(%i = 0; %i < %root_object.keyCount; %i++)
     {
@@ -139,6 +140,11 @@ function L4B_loadClientSnapshots()
         $L4B_clientLog.add(%clientObject);
         return %clientObject;
     }
+	//No longer needed, save some RAM.
+	if($JSON::Type $= "object") 
+	{
+		$JSON::Value.delete();
+	}
 }
 
 function L4B_pushClientSnapshot(%obj, %sourceClient)
