@@ -2,6 +2,10 @@ $L4B_clientLog = new ScriptGroup(L4B_clientLog) {};
 
 function L4B_createClientSnapshot(%playerclient)
 {
+	if(!isObject(%playerclient))
+	{
+		return;
+	}
 	echo("Identified new client:" SPC %playerclient.name);
 	%clientObject = new ScriptObject()
 	{
@@ -52,7 +56,7 @@ function L4B_storeClientSnapshots()
         %snapshot = $L4B_clientLog.getObject(%i);
         %sub_object = %root_object.set(%snapshot.blid, "object", JettisonObject());
         %sub_object.set("name", "string", %snapshot.name);
-        %sub_object.set("blid", "number", %snapshot.blid); //Redundent, but I'll use it anyway.
+        %sub_object.set("blid", "string", %snapshot.blid); //Redundent, but I'll use it anyway.
         %sub_object.set("headColor", "string", %snapshot.headColor);
         %sub_object.set("accent", "string", %snapshot.accent);
         %sub_object.set("hat", "string", %snapshot.hat);
@@ -86,7 +90,12 @@ function L4B_storeClientSnapshots()
 
 function L4B_loadClientSnapshots()
 {
-	jettisonReadFile("config/server/L4B2_Bots/loggedplayers.json");
+	//The "jettisonReadFile" call here sets the "$JSON::Value" variable you see below.
+	//Regardless of the changes that could happen, that needs to be called.
+	if(!isFile("config/server/L4B2_Bots/loggedplayers.json") || jettisonReadFile("config/server/L4B2_Bots/loggedplayers.json"))
+	{
+		return true;
+	}
     %root_object = $JSON::Value;
     echo("Loading" SPC %root_object.keyCount SPC "clients...");
     for(%i = 0; %i < %root_object.keyCount; %i++)

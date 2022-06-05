@@ -16,9 +16,6 @@ if(loadRequiredAddOn("Bot_Hole") == $Error::None)
 	}
 	exec("./support/afk_system.cs");
 	exec("./bots/survivors/bot_survivor.cs");
-
-	exec("./support/jettison.cs");
-	exec("./support/clientlogger.cs");
 	
 	exec("./scripts/script_newplayerdatablock.cs");
 	exec("./datablocks.cs");
@@ -49,6 +46,9 @@ if(loadRequiredAddOn("Bot_Hole") == $Error::None)
 	exec("./scripts/items/item_healing.cs");
 	exec("./scripts/items/weapon_throwableexplosives.cs");
 	exec("./scripts/items/weapon_distractions.cs");
+
+	exec("./support/jettison.cs");
+	exec("./support/clientlogger.cs");
 	
 	exec("./bots/zombies/common.cs");
 	exec("./bots/zombies/uncommon_soldier.cs");
@@ -68,4 +68,5 @@ if(loadRequiredAddOn("Bot_Hole") == $Error::None)
 	exec("./bots/zombies/spitter.cs");
 	exec("./bots/zombies/tank.cs");
 	exec("./bots/zombies/witch.cs");
+
 }
