@@ -1,9 +1,9 @@
-//datablock fxDTSBrickData (BrickZombieFallen_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
-//{
-//	uiName = "Fallen Zombie Hole";
-//	holeBot = "ZombieFallenHoleBot";
-//	iconName = "Add-Ons/Package_Left4Block/icons/icon_fallen";
-//};
+// datablock fxDTSBrickData (BrickZombieFallen_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
+// {
+// 	uiName = "Fallen Zombie Hole";
+// 	holeBot = "ZombieFallenHoleBot";
+// 	iconName = "Add-Ons/Package_Left4Block/icons/icon_fallen";
+// };
 
 datablock PlayerData(ZombieFallenHoleBot : CommonZombieHoleBot)
 {
@@ -92,7 +92,7 @@ function ZombieFallenHoleBot::L4BUncommonAppearance(%this,%obj,%skinColor,%face,
 {
 	if(getRandom(1, 8) == 1 && isObject($L4B_clientLog) && $L4B_clientLog.getCount() > 0)
 	{
-		L4B_pushZombifiedStoredAppearance(%obj, %face);
+		L4B_pushZombifiedSnapshot(%obj);
 	}
 	else
 	{

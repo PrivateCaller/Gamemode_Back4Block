@@ -15,8 +15,10 @@ if(loadRequiredAddOn("Bot_Hole") == $Error::None)
 	//	schedule(1000, 0, messageAll, 'MsgError', "\c0ERROR: The Selective Ghosting DLL is required for Package_Left4Block's billboards to work.");
 	//}
 	//exec("./support/afk_system.cs");
-	//exec("./script/script_clientsnapshot.cs");
 	//exec("./bots/survivors/bot_survivor.cs");
+
+	exec("./support/jettison.cs");
+	exec("./support/clientlogger.cs");
 	
 	exec("./scripts/script_newplayerdatablock.cs");
 	exec("./datablocks.cs");
