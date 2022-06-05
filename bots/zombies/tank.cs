@@ -1,10 +1,10 @@
-datablock fxDTSBrickData (BrickZombieTankBot_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
-{
-	uiName = "Zombie Tank Hole";
-	iconName = "Add-Ons/Package_Left4Block/icons/icon_Tank";
-	
-	holeBot = "ZombieTankHoleBot";
-};
+//datablock fxDTSBrickData (BrickZombieTankBot_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
+//{
+//	uiName = "Zombie Tank Hole";
+//	iconName = "Add-Ons/Package_Left4Block/icons/icon_Tank";
+//	
+//	holeBot = "ZombieTankHoleBot";
+//};
 
 datablock PlayerData(ZombieTankHoleBot : CommonZombieHoleBot)
 {
@@ -92,6 +92,14 @@ function ZombieTankHoleBot::onImpact(%this, %obj, %col, %vec, %force)
 	%oScale = 2*getWord(%obj.getScale(),0);
 	%obj.spawnExplosion(pushBroomProjectile,%oScale SPC %oScale SPC %oScale);
 
+	//%exp = new Explosion()
+	//{
+	//	dataBlock = spearExplosion;
+	//	Position = %obj.getPosition();
+	//	minigame = getMiniGamefromObject(%obj);
+	//	sourceObject = %obj.getgroup().client;
+	//};
+
 	if(%force >= 25)
 	{
 		%obj.spawnExplosion(TankLandProjectile,%oScale SPC %oScale SPC %oScale);
@@ -168,7 +176,9 @@ function ZombieTankHoleBot::onDisabled(%this,%obj)
 {
 	%obj.playaudio(0,"tank_death" @ getrandom(1,4) @ "_sound");
 	Parent::OnDisabled(%this,%obj);
-
+	
+	if(isObject(%minigame = getMiniGamefromObject(%obj)))
+	%minigame.TankRoundEnd();
 
 	if(isObject(%rock = %obj.getMountedImage(0)) && %rock.getName() $= "BoulderImage")
 	{

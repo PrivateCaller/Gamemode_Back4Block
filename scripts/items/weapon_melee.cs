@@ -4,14 +4,14 @@ datablock ItemData(crowbarItem)
 {
 	category = "Weapon";  // Mission editor category
 	className = "Weapon"; // For inventory system
-	shapeFile = "./models/melee/crowbar.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/melee/crowbar.dts";
 	mass = 1;
 	density = 0.2;
 	elasticity = 0.2;
 	friction = 0.6;
 	emap = true;
 	uiName = "Crowbar";
-	iconName = "./icons/icon_crowbar";
+	iconName = "Add-Ons/Package_Left4Block/icons/icon_crowbar";
 	doColorShift = true;
 	colorShiftColor = "0.5 0.5 0.5 1";
 	image = crowbarImage;
@@ -20,7 +20,7 @@ datablock ItemData(crowbarItem)
 
 datablock ShapeBaseImageData(crowbarImage)
 {
-	shapeFile = "./models/melee/crowbar.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/melee/crowbar.dts";
 	emap = true;
 	mountPoint = 0;
 	offset = "0 0.05 0.25";
@@ -82,7 +82,6 @@ datablock ShapeBaseImageData(crowbarImage)
 
 function MeleeSwingCheck(%obj,%this,%slot)
 {   
-
 	%pos = %obj.getMuzzlePoint(%slot);
 	%radius = 2;
 	%searchMasks = $TypeMasks::StaticObjectType | $TypeMasks::PlayerObjectType | $TypeMasks::VehicleObjectType | $TypeMasks::FxBrickObjectType;
@@ -94,13 +93,13 @@ function MeleeSwingCheck(%obj,%this,%slot)
 	
       	%len = 2 * getWord(%obj.getScale (), 2);
       	%vec = %obj.getMuzzleVector(%slot);
-      	%beam = vectorScale(%vec,%len); //lengthened vector (for calculating the raycast's endpoint)
-      	%end = vectorAdd(%pos,%beam); //calculated endpoint for raycast
+      	%beam = vectorScale(%vec,%len);
+      	%end = vectorAdd(%pos,%beam);
       	%ray = containerRayCast(%pos,%end,%searchMasks,%obj); //fire raycast
-      	%line = vectorNormalize(vectorSub(%pos,posFromRaycast(%ray)));
+      	//%line = vectorNormalize(vectorSub(%pos,posFromRaycast(%ray)));
 		//%dot = vectorDot(%vec,%line);
 
-     	if(vectorDist(%pos,posFromRaycast(%ray)) > %this.meleeDistanceMin)// || %dot > -0.25)
+     	if(vectorDist(%pos,posFromRaycast(%ray)) > %this.meleeDistanceMin)
 		continue;
 
      	if(%ray.getType() & $TypeMasks::FxBrickObjectType || %ray.getType() & $TypeMasks::StaticObjectType)
@@ -120,7 +119,7 @@ function MeleeSwingCheck(%obj,%this,%slot)
      	{
      	   	%damage = mClamp(%target.getdatablock().maxDamage/15, 30, %target.getdatablock().maxDamage/2);     	   	
 
-			if(minigameCanDamage(%obj,%target))
+			if(L4B_CheckifinMinigame(%obj,%target))
 			{
      	   		%target.damage(%obj, %target.getposition(), %damage, $DamageType::Default);
 				%target.applyimpulse(posFromRaycast(%ray),vectoradd(vectorscale(%vec,2000),"0 0 750"));
@@ -167,7 +166,7 @@ function MeleeSwingCheck(%obj,%this,%slot)
 			else %damageclamp = mClamp(%damagepower, %this.meleeDamage, %target.getdatablock().maxDamage);
 			serverPlay3D(%this.meleeHitPlSound @ "_hitpl" @ getRandom(1,2) @ "_sound",posFromRaycast(%ray));
 			
-			if(minigameCanDamage(%obj,%target))
+			if(L4B_CheckifinMinigame(%obj,%target))
 			{
 				if(%target.getMountedImage(0) == RiotShieldimage.getID())
 				{					
@@ -214,7 +213,6 @@ function MeleeSwingCheck(%obj,%this,%slot)
 						schedule(1000,0,serverCmdSit,%target);
 					}
 				}
-
 			}
 		}
    } 
@@ -263,16 +261,16 @@ function crowbarImage::onStopFire(%this, %obj, %slot)
 
 datablock ItemData(macheteItem : crowbarItem)
 {
-	shapeFile = "./models/melee/machete.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/melee/machete.dts";
 	uiName = "Steel Machete";
-	iconName = "./icons/icon_machete";
+	iconName = "Add-Ons/Package_Left4Block/icons/icon_machete";
 	colorShiftColor = "0.5 0.5 0.5 1";
 	image = macheteImage;
 };
 
 datablock ShapeBaseImageData(macheteImage : crowbarImage)
 {
-	shapeFile = "./models/melee/machete.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/melee/machete.dts";
 	offset = "0 -0.025 0.1825";
 	item = macheteItem;
 	doColorShift = macheteItem.doColorShift;
@@ -303,16 +301,16 @@ function macheteImage::onStopFire(%this, %obj, %slot)
 
 datablock ItemData(hatchetItem : crowbarItem)
 {
-	shapeFile = "./models/melee/hatchet.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/melee/hatchet.dts";
 	uiName = "Steel Hatchet";
-	iconName = "./icons/icon_hatchet";
+	iconName = "Add-Ons/Package_Left4Block/icons/icon_hatchet";
 	colorShiftColor = "0.6 0.6 0.6 1";
 	image = hatchetImage;
 };
 
 datablock ShapeBaseImageData(hatchetImage : crowbarImage)
 {
-   	shapeFile = "./models/melee/hatchet.dts";
+   	shapeFile = "Add-Ons/Package_Left4Block/models/melee/hatchet.dts";
    	offset = "0 -0.01 0.4";
    	item = hatchetItem;
    	doColorShift = hatchetItem.doColorShift;
@@ -343,16 +341,16 @@ function hatchetImage::onStopFire(%this, %obj, %slot)
 
 datablock ItemData(pipewrenchItem : crowbarItem)
 {
-	shapeFile = "./models/melee/pipewrench.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/melee/pipewrench.dts";
 	uiName = "Pipewrench";
-	iconName = "./icons/icon_pipewrench";
+	iconName = "Add-Ons/Package_Left4Block/icons/icon_pipewrench";
 	colorShiftColor = "0.35 0.35 0.35 1";
 	image = pipewrenchImage;
 };
 
 datablock ShapeBaseImageData(pipewrenchImage : crowbarImage)
 {
-  	shapeFile = "./models/melee/pipewrench.dts";
+  	shapeFile = "Add-Ons/Package_Left4Block/models/melee/pipewrench.dts";
   	offset = "0 0.02 -0.05`";
   	item = pipewrenchItem;
   	doColorShift = pipewrenchItem.doColorShift;
@@ -383,16 +381,16 @@ function pipewrenchImage::onStopFire(%this, %obj, %slot)
 
 datablock ItemData(baseballbatItem : crowbarItem)
 {
-	shapeFile = "./models/melee/baseballbat.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/melee/baseballbat.dts";
 	uiName = "Baseball Bat";
-	iconName = "./icons/icon_baseballbat";
+	iconName = "Add-Ons/Package_Left4Block/icons/icon_baseballbat";
 	colorShiftColor = "0.45 0.35 0.25 1";
 	image = baseballbatImage;
 };
 
 datablock ShapeBaseImageData(baseballbatImage : crowbarImage)
 {
-  	shapeFile = "./models/melee/baseballbat.dts";
+  	shapeFile = "Add-Ons/Package_Left4Block/models/melee/baseballbat.dts";
   	offset = "0 0.02 -0.05`";
   	item = baseballbatItem;
   	doColorShift = baseballbatItem.doColorShift;
@@ -423,16 +421,16 @@ function baseballbatImage::onStopFire(%this, %obj, %slot)
 
 datablock ItemData(fryingpanItem : crowbarItem)
 {
-	shapeFile = "./models/melee/fryingpan.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/melee/fryingpan.dts";
 	uiName = "Frying Pan";
-	iconName = "./icons/icon_fryingpan";
+	iconName = "Add-Ons/Package_Left4Block/icons/icon_fryingpan";
 	colorShiftColor = "0.25 0.25 0.25 1";
 	image = fryingpanImage;
 };
 
 datablock ShapeBaseImageData(fryingpanImage : crowbarImage)
 {
-   	shapeFile = "./models/melee/fryingpan.dts";
+   	shapeFile = "Add-Ons/Package_Left4Block/models/melee/fryingpan.dts";
    	offset = "0 0.02 -0.05`";
    	item = fryingpanItem;
    	doColorShift = fryingpanItem.doColorShift;
@@ -463,16 +461,16 @@ function fryingpanImage::onStopFire(%this, %obj, %slot)
 
 datablock ItemData(tireironItem : crowbarItem)
 {
-	shapeFile = "./models/melee/tireiron.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/melee/tireiron.dts";
 	uiName = "Tire Iron";
-	iconName = "./icons/icon_tireiron";
+	iconName = "Add-Ons/Package_Left4Block/icons/icon_tireiron";
 	colorShiftColor = "0.3 0.3 0.3 1";
 	image = tireironImage;
 };
 
 datablock ShapeBaseImageData(tireironImage : crowbarImage)
 {
-   	shapeFile = "./models/melee/tireiron.dts";
+   	shapeFile = "Add-Ons/Package_Left4Block/models/melee/tireiron.dts";
    	offset = "0 0.02 -0.2";
    	item = tireironItem;
    	doColorShift = tireironItem.doColorShift;
@@ -503,16 +501,16 @@ function tireironImage::onStopFire(%this, %obj, %slot)
 
 datablock ItemData(paddleItem : crowbarItem)
 {
-	shapeFile = "./models/melee/paddle.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/melee/paddle.dts";
 	uiName = "Paddle";
-	iconName = "./icons/icon_paddle";
+	iconName = "Add-Ons/Package_Left4Block/icons/icon_paddle";
 	colorShiftColor = "0.3 0.3 0.3 1";
 	image = paddleImage;
 };
 
 datablock ShapeBaseImageData(paddleImage : crowbarImage)
 {
-   	shapeFile = "./models/melee/paddle.dts";
+   	shapeFile = "Add-Ons/Package_Left4Block/models/melee/paddle.dts";
    	offset = "0 0.02 0.25";
    	item = paddleItem;
    	doColorShift = paddleItem.doColorShift;
@@ -543,16 +541,16 @@ function paddleImage::onStopFire(%this, %obj, %slot)
 
 datablock ItemData(batonItem : crowbarItem)
 {
-	shapeFile = "./models/melee/baton.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/melee/baton.dts";
 	uiName = "Baton";
-	iconName = "./icons/icon_baton";
+	iconName = "Add-Ons/Package_Left4Block/icons/icon_baton";
 	colorShiftColor = "0.125 0.125 0.125 1";
 	image = batonImage;
 };
 
 datablock ShapeBaseImageData(batonImage : crowbarImage)
 {
-   	shapeFile = "./models/melee/baton.dts";
+   	shapeFile = "Add-Ons/Package_Left4Block/models/melee/baton.dts";
    	offset = "0 -0.25 0.35";
    	item = batonItem;
    	doColorShift = batonItem.doColorShift;
@@ -583,16 +581,16 @@ function batonImage::onStopFire(%this, %obj, %slot)
 
 datablock ItemData(icepickItem : crowbarItem)
 {
-	shapeFile = "./models/melee/icepick.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/melee/icepick.dts";
 	uiName = "Icepick";
-	iconName = "./icons/icon_icepick";
+	iconName = "Add-Ons/Package_Left4Block/icons/icon_icepick";
 	colorShiftColor = "0.5 0.25 0.25 1";
 	image = icepickImage;
 };
 
 datablock ShapeBaseImageData(icepickImage : crowbarImage)
 {
-   	shapeFile = "./models/melee/icepick.dts";
+   	shapeFile = "Add-Ons/Package_Left4Block/models/melee/icepick.dts";
    	offset = "0 0.05 0.5";
    	item = icepickItem;
    	doColorShift = icepickItem.doColorShift;
@@ -623,16 +621,16 @@ function icepickImage::onStopFire(%this, %obj, %slot)
 
 datablock ItemData(leadpipeItem : crowbarItem)
 {
-	shapeFile = "./models/melee/leadpipe.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/melee/leadpipe.dts";
 	uiName = "Leadpipe";
-	iconName = "./icons/icon_leadpipe";
+	iconName = "Add-Ons/Package_Left4Block/icons/icon_leadpipe";
 	colorShiftColor = "0.2 0.2 0.2 1";
 	image = leadpipeImage;
 };
 
 datablock ShapeBaseImageData(leadpipeImage : crowbarImage)
 {
-   	shapeFile = "./models/melee/leadpipe.dts";
+   	shapeFile = "Add-Ons/Package_Left4Block/models/melee/leadpipe.dts";
    	offset = "0 0.025 0.325";
    	item = leadpipeItem;
    	doColorShift = leadpipeItem.doColorShift;
@@ -663,16 +661,16 @@ function leadpipeImage::onStopFire(%this, %obj, %slot)
 
 datablock ItemData(shovelItem : crowbarItem)
 {
-	shapeFile = "./models/melee/shovel.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/melee/shovel.dts";
 	uiName = "Shovel";
-	iconName = "./icons/icon_shovel";
+	iconName = "Add-Ons/Package_Left4Block/icons/icon_shovel";
 	colorShiftColor = "0.35 0.35 0.35 1";
 	image = shovelImage;
 };
 
 datablock ShapeBaseImageData(shovelImage : crowbarImage)
 {
-   	shapeFile = "./models/melee/shovel.dts";
+   	shapeFile = "Add-Ons/Package_Left4Block/models/melee/shovel.dts";
    	offset = "0 0 0.5";
    	item = shovelItem;
    	doColorShift = shovelItem.doColorShift;
@@ -703,16 +701,16 @@ function shovelImage::onStopFire(%this, %obj, %slot)
 
 datablock ItemData(spikebatItem : crowbarItem)
 {
-	shapeFile = "./models/melee/spikebat.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/melee/spikebat.dts";
 	uiName = "Spikebat";
-	iconName = "./icons/icon_spikebat";
+	iconName = "Add-Ons/Package_Left4Block/icons/icon_spikebat";
 	colorShiftColor = "0.25 0.45 0.35 1";
 	image = spikebatImage;
 };
 
 datablock ShapeBaseImageData(spikebatImage : crowbarImage)
 {
-   	shapeFile = "./models/melee/spikebat.dts";
+   	shapeFile = "Add-Ons/Package_Left4Block/models/melee/spikebat.dts";
    	offset = "0 0 0.5";
    	item = spikebatItem;
    	doColorShift = spikebatItem.doColorShift;
@@ -743,16 +741,16 @@ function spikebatImage::onStopFire(%this, %obj, %slot)
 
 datablock ItemData(golfclubItem : crowbarItem)
 {
-	shapeFile = "./models/melee/golfclub.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/melee/golfclub.dts";
 	uiName = "Golfclub";
-	iconName = "./icons/icon_golfclub";
+	iconName = "Add-Ons/Package_Left4Block/icons/icon_golfclub";
 	colorShiftColor = "0.5 0.5 0.5 1";
 	image = golfclubImage;
 };
 
 datablock ShapeBaseImageData(golfclubImage : crowbarImage)
 {
-   	shapeFile = "./models/melee/golfclub.dts";
+   	shapeFile = "Add-Ons/Package_Left4Block/models/melee/golfclub.dts";
    	offset = "0 0 0.25";
    	item = golfclubItem;
    	doColorShift = golfclubItem.doColorShift;
@@ -782,16 +780,16 @@ function golfclubImage::onStopFire(%this, %obj, %slot)
 
 datablock ItemData(blackhammerItem : crowbarItem)
 {
-	shapeFile = "./models/melee/hammer.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/melee/hammer.dts";
 	uiName = "Black Hammer";
-	iconName = "./icons/icon_hammer";
+	iconName = "Add-Ons/Package_Left4Block/icons/icon_hammer";
 	colorShiftColor = "0.5 0.5 0.5 1";
 	image = blackhammerImage;
 };
 
 datablock ShapeBaseImageData(blackhammerImage : crowbarImage)
 {
-   	shapeFile = "./models/melee/hammer.dts";
+   	shapeFile = "Add-Ons/Package_Left4Block/models/melee/hammer.dts";
    	offset = "0 0 0.6";
    	item = blackhammerItem;
    	doColorShift = blackhammerItem.doColorShift;

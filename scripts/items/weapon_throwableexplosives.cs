@@ -3,7 +3,7 @@ datablock ItemData(PropaneTankItem)
 	category = "Weapon";
 	className = "Weapon";
 
-	shapeFile = "./models/throwables/propanetankbox.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/throwables/propanetankbox.dts";
 	rotate = false;
 	mass = 1;
 	density = 0.2;
@@ -37,7 +37,7 @@ function PropaneTankItem::onPickup(%this, %obj, %user, %amount)
 
 datablock ShapeBaseImageData(PropaneTankImage)
 {
-   	shapeFile = "./models/throwables/propanetank.dts";
+   	shapeFile = "Add-Ons/Package_Left4Block/models/throwables/propanetank.dts";
    	emap = true;
    	vehicle = PropaneTankCol;
 
@@ -46,7 +46,6 @@ datablock ShapeBaseImageData(PropaneTankImage)
    	rotation = "0 0 1 180";
 
    	correctMuzzleVector = true;
-
    	className = "WeaponImage";
 
    	item = PropaneTankItem;
@@ -167,11 +166,11 @@ datablock WheeledVehicleData(PropaneTankCol)
 {
 	category = "Vehicles";
 	displayName = "";
-	shapeFile = "./models/throwables/PropaneTankCol.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/throwables/PropaneTankCol.dts";
 	emap = true;
 	minMountDist = 0;
    
-   numMountPoints = 0;
+   	numMountPoints = 0;
 
 	image = PropaneTankImage;
 	maxDamage = 1;
@@ -344,7 +343,7 @@ datablock ItemData(GasCanItem)
 	className = "Weapon"; // For inventory system
 
 	 // Basic Item Properties
-	shapeFile = "./models/throwables/GasCan.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/throwables/GasCan.dts";
 	mass = 1;
 	density = 0.2;
 	elasticity = 0.2;
@@ -368,7 +367,7 @@ function GasCanItem::onPickup(%this, %obj, %player)
 
 datablock ShapeBaseImageData(GasCanImage)
 {
-	shapeFile = "./models/throwables/GasCan.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/throwables/GasCan.dts";
 	emap = true;
 
 	mountPoint = 0;
@@ -417,7 +416,7 @@ function GasCanImage::onFire(%this, %obj, %slot)
 }
 datablock WheeledVehicleData(GasCanCol : PropaneTankCol)
 {
-	shapeFile = "./models/throwables/GasCanCol.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/throwables/GasCanCol.dts";
 	image = GasCanImage;
 };
 function GasCanCol::onAdd(%this,%obj)
@@ -451,7 +450,7 @@ datablock ItemData(BileOGasItem)
 	className = "Weapon"; // For inventory system
 
 	 // Basic Item Properties
-	shapeFile = "./models/throwables/Jug.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/throwables/Jug.dts";
 	mass = 1;
 	density = 0.2;
 	elasticity = 0.2;
@@ -475,7 +474,7 @@ function BileOGasItem::onPickup(%this, %obj, %player)
 
 datablock ShapeBaseImageData(BileOGasImage)
 {
-	shapeFile = "./models/throwables/Jug.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/throwables/Jug.dts";
 	emap = true;
 
 	mountPoint = 0;
@@ -524,7 +523,7 @@ function BileOGasImage::onFire(%this, %obj, %slot)
 }
 datablock WheeledVehicleData(BileOGasCol : PropaneTankCol)
 {
-	shapeFile = "./models/throwables/JugCol.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/throwables/JugCol.dts";
 	image = BileOGasImage;
 	DistractionRadius = 100;
 };
@@ -610,7 +609,7 @@ datablock ItemData(OxygenTankItem)
 	className = "Weapon"; // For inventory system
 
 	 // Basic Item Properties
-	shapeFile = "./models/throwables/OxygenTank.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/throwables/OxygenTank.dts";
 	mass = 1;
 	density = 0.2;
 	elasticity = 0.2;
@@ -635,7 +634,7 @@ function OxygenTankItem::onPickup(%this, %obj, %player)
 
 datablock ShapeBaseImageData(OxygenTankImage)
 {
-	shapeFile = "./models/throwables/OxygenTank.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/throwables/OxygenTank.dts";
 	emap = true;
 
 	mountPoint = 0;
@@ -685,7 +684,7 @@ function OxygenTankImage::onFire(%this, %obj, %slot)
 
 datablock WheeledVehicleData(OxygenTankCol : PropaneTankCol)
 {
-	shapeFile = "./models/throwables/OxygenTankCol.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/throwables/OxygenTankCol.dts";
 	maxDamage = 50;
 	image = OxygenTankImage;
 	DistractionRadius = 50;

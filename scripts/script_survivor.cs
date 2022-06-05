@@ -505,3 +505,105 @@ function Player::checkIfUnderwater(%this, %obj)
    }
    cancel(%obj.oxygenTick);
 }
+
+function L4B_SaveVictim(%obj,%target)
+{	
+	if(isObject(getMinigameFromObject(%obj,%target)) && %target.getState() !$= "Dead" && !%obj.getState() !$= "Dead")
+	if(%target.isBeingStrangled && !%obj.isBeingStrangled && !%obj.hIsInfected)
+	{
+		%target.isBeingStrangled = 0;
+		%target.hEater.SmokerTongueTarget = 0;
+		%obj.playthread(3,activate2);
+		%target.playthread(3,plant);
+
+		if(%target.isHoleBot)
+		%target.resetHoleLoop();
+
+		if(%target.getClassName() $= "Player" && %obj.getClassName() $= "Player" && $Pref::Server::L4B2Bots::VictimSavedMessages)
+		{
+			chatMessageTeam(%target.client,'fakedeathmessage',"<color:00FF00>" @ %obj.client.name SPC "<bitmapk:add-ons/package_left4block/icons/CI_VictimSaved>" SPC %target.client.name);
+			%target.client.centerprint("<color:FFFFFF>You were saved by " @ %obj.client.name,5);
+			%obj.client.centerprint("<color:FFFFFF>You saved " @ %target.client.name,5);
+
+			if(isObject(%minigame = %obj.client.minigame))
+			%minigame.L4B_PlaySound("victim_saved_sound");
+		}
+
+		if(%target.hEater.getDataBlock().getName() !$= "ZombieChargerHoleBot")
+		L4B_SpecialsPinCheck(%target.hEater,%target);
+		else return;
+	}
+}
+
+function centerprintcounter(%obj,%amount)
+{
+	%client = %obj.client;
+	%per = %amount/4*100;
+	%maxcounters = 20;
+	%char = "|";for(%a =0; %a<%per/10; %a++){%fchar = %char @ %fchar;}
+	centerprint(%client,"<just:center><color:00fa00>Get Up! <color:FFFFFF>: <just:left><color:FFFF00>" @ %fchar,1);
+}
+
+function L4B_ReviveDowned(%obj)
+{
+	if(%obj.getDatablock().getName() !$= "DownPlayerSurvivorArmor")
+	{
+		%eyeVec = %obj.getEyeVector();
+		%startPos = %obj.getEyePoint();
+		%endPos = VectorAdd(%startPos,vectorscale(%eyeVec,3));
+
+		%mask = $TypeMasks::PlayerObjectType;
+		%target = ContainerRayCast(%startPos, %endPos, %mask,%obj);
+		if(%target)
+		{
+			if(%target.isdowned)
+			{	
+				if(%obj.savetimer < 4)
+				{
+					%obj.savetimer += 1;
+					%target.isBeingSaved = %obj;
+					if(%obj.issavior != 1)
+					{
+						%obj.issavior = 1;
+						%obj.isSaving = %target;
+						%obj.playthread(1,"armreadyright");
+					}
+					centerprintcounter(%obj,%obj.savetimer);
+					centerprintcounter(%target,%obj.savetimer);
+					%obj.savesched = schedule(1000,0,L4B_ReviveDowned,%obj);
+				}
+				else
+				{
+					centerprintcounter(%obj,%obj.savetimer);
+					%obj.savetimer = 0;
+					%target.isdowned = 0;
+					%obj.isSaving = 0;
+					%target.lastdamage = getsimtime();
+					%target.sethealth(25);
+
+					%target.SetDataBlock("SurvivorPlayerLow");
+
+					if(isObject(%target.billboard) && $L4B_hasSelectiveGhosting)
+					Billboard_DeallocFromPlayer($L4B::Billboard_SO, %target);
+
+					%target.playthread(0,root);
+					%obj.playthread(1,root);
+					
+					cancel(%target.energydeath1);
+					cancel(%target.energydeath2);
+					cancel(%target.energydeath3);
+
+					if(%target.getClassName() $= "Player")
+					{
+						%target.client.centerprint("<color:00fa00>You were saved by " @ %obj.client.name,5);
+						chatMessageTeam(%target.client,'fakedeathmessage',"<color:00fa00>" @ %obj.client.name SPC "<bitmapk:add-ons/package_left4block/icons/CI_VictimSaved>" SPC %target.client.name);
+						%target.client.play2d("victim_revived_sound");
+						%obj.client.play2d("victim_revived_sound");
+					}
+
+					return;
+				}
+			}
+		}
+	}
+}

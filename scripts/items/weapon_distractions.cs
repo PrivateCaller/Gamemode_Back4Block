@@ -142,7 +142,7 @@ datablock ProjectileData(sPipeBombProjectile)
 	isDistraction = 1;
 	distractionFunction = PipeBombDistract;
 	distractionDelay = 1000;
-	projectileShapeName = "./Models/Pipebomb/sPipeBombProjectile.dts";
+	projectileShapeName = "Add-Ons/Package_Left4Block/models/Pipebomb/sPipeBombProjectile.dts";
 	directDamage        = 0;
 	explosion           = sPipeBombExplosion;
 	particleEmitter     = sPipeBombTrailEmitter;   
@@ -199,7 +199,7 @@ datablock ItemData(sPipeBombItem)
 	category = "Weapon";
 	className = "Weapon";
 
-	shapeFile = "./Models/Pipebomb/sPipeBombItem.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/Pipebomb/sPipeBombItem.dts";
 	mass = 1;
 	density = 0.2;
 	elasticity = 0.2;
@@ -207,7 +207,7 @@ datablock ItemData(sPipeBombItem)
 	emap = true;
 
 	uiName = "Pipe Bomb";
-	iconName = "./icons/icon_PipeBomb";
+	iconName = "Add-Ons/Package_Left4Block/icons/icon_PipeBomb";
 	doColorShift = true;
 	colorShiftColor = "1 1 1 1";
 
@@ -217,8 +217,7 @@ datablock ItemData(sPipeBombItem)
 
 datablock ShapeBaseImageData(sPipeBombImage)
 {
-
-   shapeFile = "./Models/Pipebomb/sPipeBombWeapon.dts";
+   shapeFile = "Add-Ons/Package_Left4Block/models/Pipebomb/sPipeBombWeapon.dts";
    emap = true;
    mountPoint = 0;
    offset = "0.1 -0.1 0.7";
@@ -352,9 +351,6 @@ function sPipeBombProjectile::onCollision(%this,%obj,%col,%fade,%pos,%normal)
 	serverPlay3D("pipebomb_bounce_sound",%obj.getTransform());
 }
 
-
-
-
 datablock ParticleData(Disease3Spores)
 {
 	dragCoefficient      = 4;
@@ -421,7 +417,7 @@ datablock ExplosionData(Disease3SporeExplosion)
 //Bile
 datablock ProjectileData(BileBombProjectile)
 {
-		projectileShapeName				= "./Models/Bilebomb/BileBombProjectile.dts";
+		projectileShapeName				= "Add-Ons/Package_Left4Block/models/Bilebomb/BileBombProjectile.dts";
 		directDamage					= 0;
 		
 		brickExplosionImpact			= false;
@@ -492,7 +488,7 @@ datablock ItemData(BileBombItem)
 	className = "Weapon"; // For inventory system
 
 	 // Basic Item Properties
-	shapeFile = "./Models/Bilebomb/BileBombItem.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/Bilebomb/BileBombItem.dts";
 	mass = 1;
 	density = 0.2;
 	elasticity = 0.2;
@@ -501,7 +497,7 @@ datablock ItemData(BileBombItem)
 
 	//gui stuff
 	uiName = "Bile Bomb";
-	iconName = "./icons/icon_BileBomb";
+	iconName = "Add-Ons/Package_Left4Block/icons/icon_BileBomb";
 	doColorShift = true;
 	colorShiftColor = "1 1 1 1";
 
@@ -513,7 +509,7 @@ datablock ItemData(BileBombItem)
 datablock ShapeBaseImageData(BileBombImage)
 {
    // Basic Item properties
-   shapeFile = "./Models/Bilebomb/BileBombItem.dts";
+   shapeFile = "Add-Ons/Package_Left4Block/models/Bilebomb/BileBombItem.dts";
    emap = true;
 
    // Specify mount point & offset for 3rd person, and eye offset

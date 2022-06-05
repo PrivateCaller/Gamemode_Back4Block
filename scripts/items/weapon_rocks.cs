@@ -2,7 +2,7 @@ datablock DebrisData(boulder1debris)
 {
    emitters = "";
 
-	shapeFile = "./models/boulderpiece1.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/boulderpiece1.dts";
 	lifetime = 10;
 	spinSpeed			= 2000.0;
 	minSpinSpeed = -100.0;
@@ -35,7 +35,7 @@ datablock DebrisData(boulder2debris)
 {
    emitters = "";
 
-	shapeFile = "./models/boulderpiece2.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/boulderpiece2.dts";
 	lifetime = 10;
 	spinSpeed			= 2000.0;
 	minSpinSpeed = -100.0;
@@ -68,7 +68,7 @@ datablock DebrisData(boulder3debris)
 {
    emitters = "";
 
-	shapeFile = "./models/boulderpiece3.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/boulderpiece3.dts";
 	lifetime = 10;
 	spinSpeed			= 2000.0;
 	minSpinSpeed = -100.0;
@@ -101,7 +101,7 @@ datablock DebrisData(boulder4debris)
 {
    emitters = "";
 
-	shapeFile = "./models/boulderpiece4.dts";
+	shapeFile = "Add-Ons/Package_Left4Block/models/boulderpiece4.dts";
 	lifetime = 10;
 	spinSpeed			= 2000.0;
 	minSpinSpeed = -100.0;
@@ -225,7 +225,7 @@ AddDamageType("BoulderDirect",   '<bitmap:add-ons/Package_Left4Block/icons/CI_Bo
 AddDamageType("BoulderRadius",   '<bitmap:add-ons/Package_Left4Block/icons/CI_Boulder> %1', '%2 <bitmap:add-ons/Package_Left4Block/icons/CI_Boulder> %1',1,0);
 datablock ProjectileData(BoulderProjectile)
 {
-   projectileShapeName = "./models/BoulderProjectile.dts";
+   projectileShapeName = "Add-Ons/Package_Left4Block/models/BoulderProjectile.dts";
    directDamage        = 30;
    directDamageType  = $DamageType::BoulderDirect;
    radiusDamageType  = $DamageType::BoulderRadius;
@@ -257,7 +257,7 @@ datablock ProjectileData(BoulderProjectile)
 
 datablock ProjectileData(TankLandProjectile)
 {
-   projectileShapeName = "./models/BoulderProjectile.dts";
+   projectileShapeName = "Add-Ons/Package_Left4Block/models/BoulderProjectile.dts";
    directDamage        = 24;
    directDamageType  = $DamageType::Tank;
    radiusDamageType  = $DamageType::Tank;
@@ -301,19 +301,12 @@ datablock ProjectileData(BoulderProjectile1 : BoulderProjectile)
 
 datablock ShapeBaseImageData(BoulderImage)
 {
-
-   shapeFile = "./Models/Boulder.dts";
+   shapeFile = "Add-Ons/Package_Left4Block/models/Boulder.dts";
    emap = true;
-
-
    mountPoint = 0;
    offset = "-1.625 0 0";
    rotation				= eulerToMatrix( "90 0 90" );
-
-
    correctMuzzleVector = true;
-
-
    className = "WeaponImage";
 
    // Projectile && Ammo.
@@ -333,14 +326,6 @@ datablock ShapeBaseImageData(BoulderImage)
    doColorShift = true;
    colorShiftColor = "0.400 0.196 0 1.000";
 
-   // Images have a state system which controls how the animations
-   // are run, which sounds are played, script callbacks, etc. This
-   // state system is downloaded to the client so that clients can
-   // predict state changes and animate accordingly.  The following
-   // system supports basic ready->fire->reload transitions as
-   // well as a no-ammo->dryfire idle state.
-
-   // Initial start up state
 	stateName[0]			= "Activate";
 	stateTimeoutValue[0]		= 1.5;
 	stateTransitionOnTimeout[0]	= "Ready";
@@ -369,7 +354,6 @@ function BoulderImage::onActivate(%this, %obj, %slot)
    %obj.playthread(1, spearReady);
    %obj.spawnExplosion(BoulderProjectile1,1); //boom
    %obj.setenergylevel(0);
-   //%obj.setMoveSpeed( 0.5 );
 }
 
 function BoulderProjectile::onExplode(%this,%obj)
@@ -404,8 +388,6 @@ function BoulderImage::onFire(%this, %obj, %slot)
 
 function Player::TankThrowBoulder(%obj)
 {
-   //%obj.spawnExplosion(pushBroomProjectile,1);
-   //%obj.spawnExplosion(BoulderProjectile1,1);
    %obj.playthread(2, "activate2");
    %obj.playthread(3, "activate2");
    %obj.playthread(0, "jump");
@@ -440,7 +422,7 @@ AddDamageType("MxRockDirect",   '<bitmap:add-ons/Package_Left4Block/icons/CI_MxR
 AddDamageType("MxRockRadius",   '<bitmap:add-ons/Package_Left4Block/icons/CI_MxRock> %1', '%2 <bitmap:add-ons/Package_Left4Block/icons/CI_MxRock> %1',1,0);
 datablock ProjectileData(MxRockProjectile)
 {
-   projectileShapeName = "./models/MxRockProjectile.dts";
+   projectileShapeName = "Add-Ons/Package_Left4Block/models/MxRockProjectile.dts";
    directDamage        = 10;
    directDamageType  = $DamageType::MxRockDirect;
    radiusDamageType  = $DamageType::MxRockRadius;
@@ -466,45 +448,20 @@ datablock ProjectileData(MxRockProjectile)
    uiName = "";
 };
 
-datablock ItemData(MxRockItem)
-{
-	category = "Weapon";  // Mission editor category
-	className = "Weapon"; // For inventory system
-
-	 // Basic Item Properties
-	shapeFile = "./models/MxRock.dts";
-	mass = 1;
-	density = 0.2;
-	elasticity = 0.2;
-	friction = 0.6;
-	emap = true;
-
-	//gui stuff
-	uiName = "Rock";
-	iconName = "./models/icon/icon_MxRock";
-	doColorShift = true;
-	colorShiftColor = "1.000 1.000 1.00 1.000";
-
-	 // Dynamic properties defined by the scripts
-	image = MxRockImage;
-	canDrop = true;
-};
-
 datablock ShapeBaseImageData(MxRockImage)
 {
 
-   shapeFile = "./Models/MxRock.dts";
+   shapeFile = "Add-Ons/Package_Left4Block/models/MxRock.dts";
    emap = true;
 
    mountPoint = 0;
    offset = "0 0 0";
    correctMuzzleVector = true;
 
-
    className = "WeaponImage";
 
    // Projectile && Ammo.
-   item = MxRockItem;
+   item = "";
    ammo = " ";
    projectile = MxRockProjectile;
    projectileType = Projectile;

@@ -1,9 +1,9 @@
-datablock fxDTSBrickData (BrickZombieJimmy_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
-{
-	uiName = "Jimmy Zombie Hole";
-	holeBot = "ZombieJimmyHoleBot";
-	iconName = "Add-Ons/Package_Left4Block/icons/icon_jimmy";
-};
+//datablock fxDTSBrickData (BrickZombieJimmy_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
+//{
+//	uiName = "Jimmy Zombie Hole";
+//	holeBot = "ZombieJimmyHoleBot";
+//	iconName = "Add-Ons/Package_Left4Block/icons/icon_jimmy";
+//};
 
 datablock PlayerData(ZombieJimmyHoleBot : CommonZombieHoleBot)
 {

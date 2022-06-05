@@ -1,3 +1,54 @@
+package L4B2Bots_RadiusTeleporting
+{	
+	function serverLoadSaveFile_End()
+	{
+		parent::serverLoadSaveFile_End();
+
+	    %count = $LoadingBricks_BrickGroup.getCount();
+        if(%count < 1) 
+		return;
+        
+		for(%i=0;%i<%count;%i++)
+        {
+			%brick = $LoadingBricks_BrickGroup.getObject(%i);
+
+			if(%brick.getdataBlock().IsTeleBrick)
+			{
+				if(strstr(%brick.getName(),"SetCheck") != -1)
+				{
+					%bricknamefix1 = strreplace(%brick.getName(), "_TeleventSetCheck", "");
+					%bricknamefix2 = strreplace(%bricknamefix1, "_", "");
+					%name = %bricknamefix2 @ "_TeleventSet";
+
+					%brick.teleset = new SimSet(%name);
+					missionCleanup.add(%brick.teleset);
+					%brick.teleset.ParBrick = %brick;
+					%mainbrick = %brick;
+					checkTeleAndSubCheckBricks(%mainbrick,%name);
+				}
+			}
+		}
+	}
+
+	function checkTeleAndSubCheckBricks(%mainbrick,%name)
+	{
+		%count = $LoadingBricks_BrickGroup.getCount();
+		for(%i=0;%i<%count;%i++)
+        {
+			%brick = $LoadingBricks_BrickGroup.getObject(%i);
+			if(%brick.getdataBlock().IsTeleBrick && strstr(%brick.getname(),%name) != -1)
+			{
+				if(strstr(%brick.getName(),"SetBrick") != -1)
+				%mainbrick.teleset.add(%brick);
+
+				if(strstr(%brick.getName(),"SetSubCheck") != -1)
+				%brick.teleset = %mainbrick.teleset;
+			}
+		}
+	}
+};
+activatePackage(L4B2Bots_RadiusTeleporting);
+
 function serverCmdCLEARMT(%client)
 {
 	if(%client.isAdmin || %client.isSuperAdmin)
@@ -167,6 +218,7 @@ function Player::BrickScanCheck(%obj)
     	    		if(!isObject(MainTeleSet))
     	    		new SimSet(MainTeleSet);
 					else if(!MainTeleSet.isMember(%telebrick))
+					missionCleanup.add(MainTeleSet);
 					MainTeleSet.add(%telebrick);
 		        }
     	    	cancel(%brick.teleset.DisableTeleporting);

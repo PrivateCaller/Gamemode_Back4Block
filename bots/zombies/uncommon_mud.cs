@@ -165,7 +165,7 @@ AddDamageType("mudRadius",   '<bitmap:add-ons/Package_Left4Block/icons/CI_snowba
 
 datablock ProjectileData(mud_Projectile)
 {
-	projectileShapeName = "./models/mudball.dts";
+	projectileShapeName = "add-ons/Package_Left4Block/models/mudball.dts";
 	directDamage = 1;
 	directDamageType = $DamageType::mudDirect;
 	radiusDamageType = $DamageType::mudRadius;
@@ -202,7 +202,7 @@ datablock ProjectileData(mud_Projectile)
 
 datablock ShapeBaseImageData(mud_Image)
 {
-	shapeFile  = "./models/mudball.dts";
+	shapeFile  = "add-ons/Package_Left4Block/models/mudball.dts";
 	emap = true;
 	mountPoint = 0;
 	offset = "0 0 0";
@@ -407,12 +407,12 @@ datablock ShapeBaseImageData(MudStatusPlayerImage)
 	//stateSound[1]                  = FireShotSound;	//No sound
 };
 
-datablock fxDTSBrickData (BrickMudZombie_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
-{
-	uiName = "Mud Zombie Hole";
-	holeBot = "MudZombieHoleBot";
-	iconName = "Add-Ons/Package_Left4Block/icons/icon_mudman";
-};
+//datablock fxDTSBrickData (BrickMudZombie_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
+//{
+//	uiName = "Mud Zombie Hole";
+//	holeBot = "MudZombieHoleBot";
+//	iconName = "Add-Ons/Package_Left4Block/icons/icon_mudman";
+//};
 
 datablock PlayerData(MudZombieHoleBot : CommonZombieHoleBot)
 {

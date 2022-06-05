@@ -2,8 +2,8 @@ datablock fxDTSBrickData (BrickCommonZombie_HoleSpawnData)
 {
 	brickFile = "Add-ons/Bot_Hole/4xSpawn.blb";
 	category = "Special";
-	subCategory = "Holes - L4B";
-	uiName = "Common Zombie Hole";
+	subCategory = "Holes";
+	uiName = "L4B Zombie Hole";
 	iconName = "Add-Ons/Package_Left4Block/icons/icon_zombie";
 
 	bricktype = 2;
@@ -12,8 +12,28 @@ datablock fxDTSBrickData (BrickCommonZombie_HoleSpawnData)
 	indestructable = 1;
 
 	isBotHole = 1;
+	isZombieBrick = 1;
 	holeBot = "CommonZombieHoleBot";
 };
+
+function BrickCommonZombie_HoleSpawnData::onPlant(%this, %obj)
+{
+	if(!isObject(directorBricks))
+    {
+        new SimSet(directorBricks);
+        directorBricks.add(%obj);
+        MissionCleanup.add(directorBricks);
+    }
+    else if(isObject(directorBricks))
+    directorBricks.add(%obj);
+
+	Parent::onPlant(%this,%obj);
+}
+
+function BrickCommonZombie_HoleSpawnData::onloadPlant(%this, %obj)
+{
+	BrickCommonZombie_HoleSpawnData::onPlant(%this,%obj);
+}
 
 datablock PlayerData(CommonZombieHoleBot : PlayerMeleeAnims)
 {

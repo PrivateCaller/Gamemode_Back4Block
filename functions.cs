@@ -2,26 +2,6 @@
 // 1. General
 // ============================================================
 
-function Player::setShapeNameHealth(%obj)
-{
-	if(!isObject(%obj))
-	return;
-
-	if(%obj.getState() $= "Dead")
-	{
-		%obj.setShapeName("", 8564862);
-		return;
-	}
-
-	if(%obj.getClassName() $= "Player")
-	%name = %obj.name SPC %obj.client.name;
-	else %name = %obj.name;
-	
-	%obj.setShapeName(%name SPC "|" SPC %obj.getDataBlock().MaxDamage-mFloatLength(%obj.getDamageLevel(), 0), 8564862);
-	%obj.setShapeNameColor("1 0 0");
-	%obj.setShapeNameDistance(%obj.getdataBlock().ShapeNameDistance);
-}
-
 function L4B_IsOnGround(%obj)
 {
 	%eyeVec = "0 0 -1";
@@ -70,34 +50,65 @@ function L4B_RespaceString(%string)
 	return strReplace(%string, "!&!", " ");
 }
 
-function L4B_SaveVictim(%obj,%target)
-{	
-	
-	if(isObject(getMinigameFromObject(%obj,%target)) && %target.getState() !$= "Dead" && !%obj.getState() !$= "Dead")
-	if(%target.isBeingStrangled && !%obj.isBeingStrangled && !%obj.hIsInfected)
+function Player::MeleePlayerBloodify(%obj,%percent)
+{
+	if(getRandom(1,100) <= %percent)
 	{
-		%target.isBeingStrangled = 0;
-		%target.hEater.SmokerTongueTarget = 0;
-		%obj.playthread(3,activate2);
-		%target.playthread(3,plant);
-
-		if(%target.isHoleBot)
-		%target.resetHoleLoop();
-
-		if(%target.getClassName() $= "Player" && %obj.getClassName() $= "Player" && $Pref::Server::L4B2Bots::VictimSavedMessages)
-		{
-			chatMessageTeam(%target.client,'fakedeathmessage',"<color:00FF00>" @ %obj.client.name SPC "<bitmapk:add-ons/package_left4block/icons/CI_VictimSaved>" SPC %target.client.name);
-			%target.client.centerprint("<color:FFFFFF>You were saved by " @ %obj.client.name,5);
-			%obj.client.centerprint("<color:FFFFFF>You saved " @ %target.client.name,5);
-
-			if(isObject(%minigame = %obj.client.minigame))
-			%minigame.L4B_PlaySound("victim_saved_sound");
-		}
-
-		if(%target.hEater.getDataBlock().getName() !$= "ZombieChargerHoleBot")
-		L4B_SpecialsPinCheck(%target.hEater,%target);
-		else return;
+		%obj.unhidenode(LShoe_blood);
+		%obj.bloody["lshoe"] = true;
 	}
+	if(getRandom(1,100) <= %percent)
+	{
+		%obj.unhidenode(Rshoe_blood);
+		%obj.bloody["rshoe"] = true;
+	}
+	if(getRandom(1,100) <= %percent)
+	{
+		%obj.unhidenode(Lhand_blood);
+		%obj.bloody["lhand"] = true;
+	}
+	if(getRandom(1,100) <= %percent)
+	{
+		%obj.unhidenode(Rhand_blood);
+		%obj.bloody["rhand"] = true;
+	}
+	if(getRandom(1,100) <= %percent)
+	{
+		if(%obj.chest $= 0)
+		{
+			%obj.unhidenode(chest_blood_front);
+			%obj.unhidenode(chest_blood_back);
+		}
+		else
+		{
+			%obj.unhidenode(femchest_blood_front);
+			%obj.unhidenode(femchest_blood_back);
+		}
+		%obj.bloody["chest_front"] = true;
+		%obj.bloody["chest_back"] = true;
+		%obj.bloody["chest_lside"] = true;
+		%obj.bloody["chest_rside"] = true;
+	}
+}
+
+function Player::setShapeNameHealth(%obj)
+{
+	if(!isObject(%obj))
+	return;
+
+	if(%obj.getState() $= "Dead")
+	{
+		%obj.setShapeName("", 8564862);
+		return;
+	}
+
+	if(%obj.getClassName() $= "Player")
+	%name = %obj.name SPC %obj.client.name;
+	else %name = %obj.name;
+	
+	%obj.setShapeName(%name SPC "|" SPC %obj.getDataBlock().MaxDamage-mFloatLength(%obj.getDamageLevel(), 0), 8564862);
+	%obj.setShapeNameColor("1 0 0");
+	%obj.setShapeNameDistance(%obj.getdataBlock().ShapeNameDistance);
 }
 
 // ============================================================
@@ -152,63 +163,6 @@ function AIPlayer::hLimitedLifetime(%obj)
 	%obj.kill();
 }
 
-function L4B_SpazzZombieInitialize(%obj,%count)
-{
-	if(!isObject(%obj) || %obj.hLoopActive || %obj.isBurning || %obj.getstate() $= "Dead" || %obj.SpazzOff >= 5)
-	{
-		if(isObject(%obj))
-		{
-			if(%obj.getclassname() $= "AIPlayer")
-			%obj.startHoleLoop();
-
-			%obj.unMountImage(1);
-			%obj.unMountImage(2);
-			%obj.SpazzOff = 0;
-		}
-
-		return;
-	}
-
-	%obj.MaxSpazzClick = getrandom(8,16);
-
-	if(%obj.getClassName() $= "Player")
-	%time = 1000;
-	else %time = getRandom(5000,8000);
-	cancel(%obj.L4B_SpazzZombieInitialize);
-	%obj.L4B_SpazzZombieInitialize = schedule(%time,0,L4B_SpazzZombieInitialize,%obj,%count+1);
-	%obj.L4B_SpazzZombie = schedule(%time,0,L4B_SpazzZombie,%obj,0);
-
-	%obj.raisearms = 0;
-	%obj.playthread(1,"root");
-	%obj.emote(winStarProjectile, 1);
-	%obj.mountImage(stunImage,2);
-	%obj.SpazzOff++;
-	
-	if(%obj.getclassname() $= "AIPlayer")
-	{
-		%obj.stopHoleLoop();
-		%obj.hClearMovement();
-		serverCmdSit(%obj);
-	}
-}
-
-function L4B_SpazzZombie(%obj,%count)
-{
-	if(!isObject(%obj) || %obj.isBurning || %obj.getstate() $= "Dead" || %count >= %obj.MaxSpazzClick)
-	return;
-
-	if(!%obj.hLoopActive && %obj.lastheadshake+getrandom(250,750) < getsimtime())
-	{
-		%obj.playthread(0,undo);
-		%obj.lastheadshake = getsimtime();
-	}
-	%obj.activateStuff();
-
-	cancel(%obj.L4B_SpazzZombie);
-	%time = getRandom(100,200);
-	%obj.L4B_SpazzZombie = schedule(%time,0,L4B_SpazzZombie,%obj,%count+1);
-}
-
 function Player::onL4BDatablockAttributes(%obj)
 {
 	%this = %obj.getdataBlock();
@@ -252,19 +206,6 @@ function Player::onL4BDatablockAttributes(%obj)
 	%obj.name = "Infected" SPC %obj.name;
 
 	%obj.setShapeNameHealth();
-}
-
-
-function L4B_CommonZombieAttributes(%obj)
-{
-	if($Pref::Server::L4B2Bots::ZombieRandomScale && %obj.hZombieL4BType && %obj.hZombieL4BType < 5)
-	{
-		%randscale = getRandom(85,115)*0.01 SPC getRandom(85,115)*0.01 SPC getRandom(85,115)*0.01;
-		%obj.setscale(%randscale);
-	}
-
-	if(getRandom(0,100) <= 5)
-	%obj.MountImage(MxRockImage,0);
 }
 
 function Player::hDefaultL4BAppearance(%obj) //This is how the appearances are determined on the datablock's onAdd function
@@ -344,13 +285,80 @@ function Player::hDefaultL4BAppearance(%obj) //This is how the appearances are d
 	%obj.setShapeNameHealth();
 }
 
+function L4B_SpazzZombieInitialize(%obj,%count)
+{
+	if(!isObject(%obj) || %obj.hLoopActive || %obj.isBurning || %obj.getstate() $= "Dead" || %obj.SpazzOff >= 5)
+	{
+		if(isObject(%obj))
+		{
+			if(%obj.getclassname() $= "AIPlayer")
+			%obj.startHoleLoop();
+
+			%obj.unMountImage(1);
+			%obj.unMountImage(2);
+			%obj.SpazzOff = 0;
+		}
+		return;
+	}
+
+	%obj.MaxSpazzClick = getrandom(8,16);
+
+	if(%obj.getClassName() $= "Player")
+	%time = 1000;
+	else %time = getRandom(5000,8000);
+	cancel(%obj.L4B_SpazzZombieInitialize);
+	%obj.L4B_SpazzZombieInitialize = schedule(%time,0,L4B_SpazzZombieInitialize,%obj,%count+1);
+	%obj.L4B_SpazzZombie = schedule(%time,0,L4B_SpazzZombie,%obj,0);
+
+	%obj.raisearms = 0;
+	%obj.playthread(1,"root");
+	%obj.emote(winStarProjectile, 1);
+	%obj.mountImage(stunImage,2);
+	%obj.SpazzOff++;
+	
+	if(%obj.getclassname() $= "AIPlayer")
+	{
+		%obj.stopHoleLoop();
+		%obj.hClearMovement();
+		serverCmdSit(%obj);
+	}
+}
+
+function L4B_SpazzZombie(%obj,%count)
+{
+	if(!isObject(%obj) || %obj.isBurning || %obj.getstate() $= "Dead" || %count >= %obj.MaxSpazzClick)
+	return;
+
+	if(!%obj.hLoopActive && %obj.lastheadshake+getrandom(250,750) < getsimtime())
+	{
+		%obj.playthread(0,undo);
+		%obj.lastheadshake = getsimtime();
+	}
+	%obj.activateStuff();
+
+	cancel(%obj.L4B_SpazzZombie);
+	%time = getRandom(100,200);
+	%obj.L4B_SpazzZombie = schedule(%time,0,L4B_SpazzZombie,%obj,%count+1);
+}
+
+function L4B_CommonZombieAttributes(%obj)
+{
+	if($Pref::Server::L4B2Bots::ZombieRandomScale && %obj.hZombieL4BType && %obj.hZombieL4BType < 5)
+	{
+		%randscale = getRandom(85,115)*0.01 SPC getRandom(85,115)*0.01 SPC getRandom(85,115)*0.01;
+		%obj.setscale(%randscale);
+	}
+
+	if(getRandom(0,100) <= 5)
+	%obj.MountImage(MxRockImage,0);
+}
+
 function L4B_ZombieDropLoot(%obj,%lootitem,%chance)
 {
 	if(!isObject(%lootitem))
 	return;
 	else if(getRandom(1,100) <= %chance)
 	{
-		
 		%loot = new item()
 		{
 			dataBlock = %lootitem;
@@ -365,7 +373,6 @@ function L4B_ZombieDropLoot(%obj,%lootitem,%chance)
 		%loot.applyimpulse(%loot.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),getRandom(4/4,4)),getRandom(4*-1,4) @ " 0 " @ getRandom(6/3,6)));
 		%loot.fadeSched = %loot.schedule(8000,fadeOut);
 		%loot.delSched = %loot.schedule(8200,delete);
-
 	}
 }
 
@@ -430,47 +437,6 @@ function AIPlayer::hZombieBotToPlayerApearance(%obj,%playerclient)
 	%obj.rlegColor = %zskin;	
 }
 
-function Player::MeleePlayerBloodify(%obj,%percent)
-{
-	if(getRandom(1,100) <= %percent)
-	{
-		%obj.unhidenode(LShoe_blood);
-		%obj.bloody["lshoe"] = true;
-	}
-	if(getRandom(1,100) <= %percent)
-	{
-		%obj.unhidenode(Rshoe_blood);
-		%obj.bloody["rshoe"] = true;
-	}
-	if(getRandom(1,100) <= %percent)
-	{
-		%obj.unhidenode(Lhand_blood);
-		%obj.bloody["lhand"] = true;
-	}
-	if(getRandom(1,100) <= %percent)
-	{
-		%obj.unhidenode(Rhand_blood);
-		%obj.bloody["rhand"] = true;
-	}
-	if(getRandom(1,100) <= %percent)
-	{
-		if(%obj.chest $= 0)
-		{
-			%obj.unhidenode(chest_blood_front);
-			%obj.unhidenode(chest_blood_back);
-		}
-		else
-		{
-			%obj.unhidenode(femchest_blood_front);
-			%obj.unhidenode(femchest_blood_back);
-		}
-		%obj.bloody["chest_front"] = true;
-		%obj.bloody["chest_back"] = true;
-		%obj.bloody["chest_lside"] = true;
-		%obj.bloody["chest_rside"] = true;
-	}
-}
-
 function L4B_ZombieLunge(%obj,%targ,%power)
 {
 	if(!isObject(%obj) || !isObject(%targ) || !L4B_IsOnGround(%obj) || %obj.getState() $= "Dead")
@@ -487,6 +453,53 @@ function L4B_ZombieLunge(%obj,%targ,%power)
 	%mp = %power;
 	%final = vectorscale(%eye,%mp);
 	%obj.setvelocity(%final);
+}
+
+function Player::PlayerZombieMeleeAttack(%obj,%col)
+{
+	if(%obj.getState() $= "Dead")
+	return;
+
+	if(isEventPending(%obj.L4B_SpazzZombieInitialize))
+	return;
+
+	if(%col.getType() & $TypeMasks::VehicleObjectType || %col.getType() & $TypeMasks::PlayerObjectType && %obj.lasthit+250 < getsimtime())
+	{
+		%obj.lasthit = getsimtime();
+
+		if(%obj.getdataBlock().getName() !$= "ZombieChargerHoleBot")
+		{
+			%damage = 5*getWord(%obj.getScale(),0);
+			%damage = %damage*1.5;
+			%damagefinal = getRandom(%damage/2,%damage);
+
+			%col.damage(%obj.hFakeProjectile, %col.getposition(), %damagefinal, %obj.hDamageType);
+			%meleeimpulse = mClamp(%damagefinal, 1, 7.5);
+
+			if(%obj.getDataBlock().getName() !$= "ZombieHunterHoleBot")
+			%obj.playaudio(1,"zombie_hit" @ getrandom(1,8) @ "_sound");
+			else %obj.playaudio(2,"hunter_hit" @ getrandom(1,3) @ "_sound");
+
+			%p = new Projectile()
+			{
+				dataBlock = "ZombieHitProjectile";
+				initialPosition = %col.getPosition();
+				sourceObject = %obj;
+				client = %obj.client;
+			};
+			MissionCleanup.add(%p);
+			%p.explode();
+
+			%col.applyimpulse(%col.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),getrandom(100,100*%meleeimpulse)),"0" SPC "0" SPC getrandom(100,100*%meleeimpulse)));
+			%col.playthread(3,"plant");
+			%obj.playthread(1,"activate2");
+			%obj.playthread(2,"jump");
+
+			if(%col.getType() & $TypeMasks::PlayerObjectType && %col.getState() !$= "Dead" && %col.getDamageLevel() >= %col.getDataBlock().maxDamage/1.333 && !%col.hIsInfected && !%col.hIsImmune)
+			holeZombieInfect(%obj,%col);
+		}
+		else %obj.bigZombieMelee();
+	}
 }
 
 // ============================================================
@@ -664,57 +677,6 @@ function Projectile::SmokerExplosionCoughEffect(%obj)
 	}
 	%obj.schedule(750,L4B_SmokerCoughEffect,%obj);
 }
-
-// ============================================================
-// 5. Player
-// ============================================================
-function Player::PlayerZombieMeleeAttack(%obj,%col)
-{
-	if(%obj.getState() $= "Dead")
-	return;
-
-	if(isEventPending(%obj.L4B_SpazzZombieInitialize))
-	return;
-
-	if(%col.getType() & $TypeMasks::VehicleObjectType || %col.getType() & $TypeMasks::PlayerObjectType && %obj.lasthit+250 < getsimtime())
-	{
-		%obj.lasthit = getsimtime();
-
-		if(%obj.getdataBlock().getName() !$= "ZombieChargerHoleBot")
-		{
-			%damage = 5*getWord(%obj.getScale(),0);
-			%damage = %damage*1.5;
-			%damagefinal = getRandom(%damage/2,%damage);
-
-			%col.damage(%obj.hFakeProjectile, %col.getposition(), %damagefinal, %obj.hDamageType);
-			%meleeimpulse = mClamp(%damagefinal, 1, 7.5);
-
-			if(%obj.getDataBlock().getName() !$= "ZombieHunterHoleBot")
-			%obj.playaudio(1,"zombie_hit" @ getrandom(1,8) @ "_sound");
-			else %obj.playaudio(2,"hunter_hit" @ getrandom(1,3) @ "_sound");
-
-			%p = new Projectile()
-			{
-				dataBlock = "ZombieHitProjectile";
-				initialPosition = %col.getPosition();
-				sourceObject = %obj;
-				client = %obj.client;
-			};
-			MissionCleanup.add(%p);
-			%p.explode();
-
-			%col.applyimpulse(%col.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),getrandom(100,100*%meleeimpulse)),"0" SPC "0" SPC getrandom(100,100*%meleeimpulse)));
-			%col.playthread(3,"plant");
-			%obj.playthread(1,"activate2");
-			%obj.playthread(2,"jump");
-
-			if(%col.getType() & $TypeMasks::PlayerObjectType && %col.getState() !$= "Dead" && %col.getDamageLevel() >= %col.getDataBlock().maxDamage/1.333 && !%col.hIsInfected && !%col.hIsImmune)
-			holeZombieInfect(%obj,%col);
-		}
-		else %obj.bigZombieMelee();
-	}
-}
-
 
 // ============================================================
 // 6. Specials
@@ -916,572 +878,6 @@ function L4B_SpecialsWarningLight(%obj)
 			%obj.light.attachToObject(%obj);
 		}
 	}
-}
-
-// ============================================================
-// 8. Event
-// ============================================================
-function fxDTSBrick::RandomizeZombieSpecial(%obj)
-{
-	%type[ %ntype++ ] = "ZombieChargerHoleBot";
-	%type[ %ntype++ ] = "ZombieBoomerHoleBot";
-	%type[ %ntype++ ] = "ZombieSpitterHoleBot";
-	%type[ %ntype++ ] = "ZombieHunterHoleBot";
-	%type[ %ntype++ ] = "ZombieSmokerHoleBot";
-	%type[ %ntype++ ] = "ZombieJockeyHoleBot";
-	%type = %type[ getRandom( 1, %ntype ) ];
-	%obj.hBotType = %type;	
-}
-registerOutputEvent(fxDTSBrick, "RandomizeZombieSpecial");
-
-function fxDTSBrick::RandomizeZombieUncommon(%obj)
-{
-	%type[ %ntype++ ] = "ZombieConstructionHoleBot";
-	%type[ %ntype++ ] = "ZombieFallenHoleBot";
-	%type[ %ntype++ ] = "ZombieCedaHoleBot";
-	%type[ %ntype++ ] = "ZombieSoldierHoleBot";
-	%type[ %ntype++ ] = "MudZombieHoleBot";
-	%type[ %ntype++ ] = "ZombieClownHoleBot";
-	%type[ %ntype++ ] = "ZombieJimmyHoleBot";
-
-	//if($AddOn__Bot_Zombie_L4B2_EXT2 $= "1")
-	//{
-	//	%type[ %ntype++ ] = "ToxicZombieHoleBot";
-	//	%type[ %ntype++ ] = "ZombieNaziHoleBot";
-	//	%type[ %ntype++ ] = "ZombieSpaceHoleBot";
-	//	%type[ %ntype++ ] = "ZombiePirateHoleBot";
-	//	%type[ %ntype++ ] = "BurningZombieHoleBot";
-	//	%type[ %ntype++ ] = "HeadcrabZombieHoleBot";
-	//}
-//
-	//if($AddOn__Bot_SkeletonRev $= "1")
-	//%type[ %ntype++ ] = "RandomSkeletonHoleBot";
-
-	%type = %type[ getRandom( 1, %ntype ) ];
-	%obj.hBotType = %type;
-
-}
-registerOutputEvent(fxDTSBrick, "RandomizeZombieUncommon");
-
-function fxDTSBrick::enableZombieLoot( %obj, %on )
-{
-	if(isObject(%obj.hBot))
-	%obj = %obj.hbot;
-
-	if(!isObject(%obj))
-	return;
-	
-	%obj.hZombieLoot = %on;
-}
-registerOutputEvent( fxDTSBrick, "enableZombieLoot", "bool" );
-
-function fxDTSBrickData::onZombieTouch(%data,%obj,%player)
-{
-	$InputTarget_["Self"] = %obj;
-
-	if(isObject(%player.client))
-	{
-	$InputTarget_["Player"] = %player;
-	$InputTarget_["Client"] = %player.client;
-	}
-
-	if ( $Server::LAN )
-	{
-		$InputTarget_["MiniGame"] = getMiniGameFromObject (%player.client);
-	}
-	else if ( getMiniGameFromObject(%obj) == getMiniGameFromObject(%player.client) )
-	{
-		$InputTarget_["MiniGame"] = getMiniGameFromObject (%obj);
-	}
-	else
-	{
-		$InputTarget_["MiniGame"] = 0;
-	}
-
-	if ( !isObject(%player.client) )
-	{
-		$InputTarget_["Bot"] = %player;
-	}
-}
-registerInputEvent ("fxDTSBrick", "onZombieTouch", "Self fxDTSBrick" TAB "Player Player" TAB "Bot Bot" TAB 
-	"Client GameConnection" TAB "MiniGame MiniGame");
-
-function fxDTSBrickData::onTankTouch(%data,%obj,%player)
-{
-	fxDTSBrickData::onZombieTouch(%data,%obj,%player);
-}
-registerInputEvent ("fxDTSBrick", "onTankTouch", "Self fxDTSBrick" TAB "Player Player" TAB "Bot Bot" TAB 
-	"Client GameConnection" TAB "MiniGame MiniGame");
-
-
-function centerprintcounter(%obj,%amount)
-{
-	%client = %obj.client;
-	%per = %amount/4*100;
-	%maxcounters = 20;
-	%char = "|";for(%a =0; %a<%per/10; %a++){%fchar = %char @ %fchar;}
-	centerprint(%client,"<just:center><color:00fa00>Get Up! <color:FFFFFF>: <just:left><color:FFFF00>" @ %fchar,1);
-}
-
-function L4B_ReviveDowned(%obj)
-{
-	if(%obj.getDatablock().getName() !$= "DownPlayerSurvivorArmor")
-	{
-		%eyeVec = %obj.getEyeVector();
-		%startPos = %obj.getEyePoint();
-		%endPos = VectorAdd(%startPos,vectorscale(%eyeVec,3));
-
-		%mask = $TypeMasks::PlayerObjectType;
-		%target = ContainerRayCast(%startPos, %endPos, %mask,%obj);
-		if(%target)
-		{
-			if(%target.isdowned)
-			{	
-				if(%obj.savetimer < 4)
-				{
-					%obj.savetimer += 1;
-					%target.isBeingSaved = %obj;
-					if(%obj.issavior != 1)
-					{
-						%obj.issavior = 1;
-						%obj.isSaving = %target;
-						%obj.playthread(1,"armreadyright");
-					}
-					centerprintcounter(%obj,%obj.savetimer);
-					centerprintcounter(%target,%obj.savetimer);
-					%obj.savesched = schedule(1000,0,L4B_ReviveDowned,%obj);
-				}
-
-				if(%obj.savetimer == 4)
-				{
-					centerprintcounter(%obj,%obj.savetimer);
-					%obj.savetimer = 0;
-					%target.isdowned = 0;
-					%obj.isSaving = 0;
-					%target.lastdamage = getsimtime();
-					%target.sethealth(25);
-
-					%target.SetDataBlock("SurvivorPlayerLow");
-
-					if(isObject(%target.billboard) && $L4B_hasSelectiveGhosting)
-					Billboard_DeallocFromPlayer($L4B::Billboard_SO, %target);
-
-					%target.playthread(0,root);
-					%obj.playthread(1,root);
-					
-					cancel(%target.energydeath1);
-					cancel(%target.energydeath2);
-					cancel(%target.energydeath3);
-
-					if(%target.getClassName() $= "Player")
-					{
-						%target.client.centerprint("<color:00fa00>You were saved by " @ %obj.client.name,5);
-						chatMessageTeam(%target.client,'fakedeathmessage',"<color:00fa00>" @ %obj.client.name SPC "<bitmapk:add-ons/package_left4block/icons/CI_VictimSaved>" SPC %target.client.name);
-						%target.client.play2d("victim_revived_sound");
-						%obj.client.play2d("victim_revived_sound");
-					}
-
-					return;
-				}
-			}
-		}
-	}
-}
-
-datablock ParticleData(SecondaryMeleeFlashParticle)
-{
-	dragCoefficient      = 3;
-	gravityCoefficient   = -0.5;
-	inheritedVelFactor   = 0.2;
-	constantAcceleration = 0.0;
-	lifetimeMS           = 80;
-	lifetimeVarianceMS   = 15;
-	textureName          = "base/data/particles/star1";
-	spinSpeed		= 10.0;
-	spinRandomMin		= -500.0;
-	spinRandomMax		= 500.0;
-	colors[0]     = "0.6 0.6 0.1 0.9";
-	colors[1]     = "0.6 0.6 0.6 0.0";
-	sizes[0]      = 2.0;
-	sizes[1]      = 3.0;
-
-	useInvAlpha = false;
-};
-datablock ParticleData(SecondaryMeleeFlashSmallParticle : SecondaryMeleeFlashParticle)
-{
-	sizes[0]      = 1.0;
-	sizes[1]      = 2.0;
-};
-datablock ParticleEmitterData(SecondaryMeleeFlashEmitter)
-{
-	ejectionPeriodMS = 3;
-	periodVarianceMS = 0;
-	ejectionVelocity = 1.0;
-	velocityVariance = 1.0;
-	ejectionOffset   = 0.0;
-	thetaMin         = 0;
-	thetaMax         = 90;
-	phiReferenceVel  = 0;
-	phiVariance      = 360;
-	overrideAdvance = false;
-	particles = SecondaryMeleeFlashParticle;
-};
-
-datablock ParticleEmitterData(SecondaryMeleeFlashSmallEmitter : SecondaryMeleeFlashEmitter)
-{
-	particles = SecondaryMeleeFlashSmallParticle;
-};
-datablock ExplosionData(SecondaryMeleeExplosion)
-{
-	soundProfile = "";
-	lifeTimeMS = 150;
-
-	particleEmitter = SecondaryMeleeFlashEmitter;
-	particleDensity = 5;
-	particleRadius = 0.2;
-
-	faceViewer     = true;
-	explosionScale = "1 1 1";
-
-	shakeCamera = true;
-	camShakeFreq = "5 5 5";
-	camShakeAmp = "1.0 1.0 1.0";
-	camShakeDuration = 1;
-	camShakeRadius = 10.0;
-
-	lightStartRadius = 0;
-	lightEndRadius = 0;
-	lightStartColor = "0 0 0";
-	lightEndColor = "0 0 0";
-};
-datablock ExplosionData(SecondaryMeleeSmallExplosion : SecondaryMeleeExplosion)
-{
-	camShakeFreq = "3 3 3";
-	camShakeAmp = "0.6 0.6 0.6";
-	particleEmitter = SecondaryMeleeFlashSmallEmitter;
-};
-datablock ProjectileData(SecondaryMeleeProjectile)
-{
-	lifeTime = 1;
-	explodeOnDeath = true;
-	explosion = SecondaryMeleeExplosion;
-};
-datablock ProjectileData(SecondaryMeleeSmallProjectile : SecondaryMeleeProjectile)
-{
-	explosion = SecondaryMeleeSmallExplosion;
-};
-AddDamageType("SecondaryMelee",'<bitmap:add-ons/package_left4block/icons/ci_punch> %1','%2 <bitmap:add-ons/package_left4block/icons/ci_punch> %1',0,1);
-
-function serverCmdSecondaryMelee(%cl)
-{
-	%pl = %cl.player;
-	if(!isObject(%pl) || %pl.meleeItem || %pl.hIsInfected || %pl.getDatablock().isdowned)
-	return;
-
-	if($Pref::SecondaryMelee::MeleeMode == 2 || ($Pref::SecondaryMelee::MeleeMode == 1 && isObject(%cl.minigame)))
-	if(!%pl.disabledMelee)
-	%pl.meleeTrigger();		
-}
-	
-function player::meleeTrigger(%pl)
-{
-	if(%pl.getstate() $= "Dead" || %pl.meleeItem || %pl.hIsInfected || %pl.getDatablock().getName() $= "DownPlayerSurvivorArmor" || %pl.isBeingStrangled)
-	if(%pl.disabledMelee)
-	return;
-
-	if(!isObject(%pl.getObjectMount()) && getSimTime()-%pl.lastMelee > 400-%pl.meleeCooldownRush && (%pl.meleeTick < $Pref::SecondaryMelee::MeleeCharges || $Pref::SecondaryMelee::MeleeCharges == -1))
-	{
-		%pl.lastMelee = getSimTime();
-		%pl.meleeTick++;
-		%hit = %pl.doMelee();
-		%cd = (%hit == 0 ? 500 : 0);
-		%pl.meleeCooldownRush = (%hit == 1 ? 50 : 0);
-		if($Pref::SecondaryMelee::MeleeCharges != -1 && !isEventPending(%pl.meleeCdSched))
-		%pl.meleeCdSched = %pl.schedule($Pref::SecondaryMelee::MeleeCooldownRate+%cd,meleeCooldown);
-	}
-}
-
-function Player::bigZombieMelee(%obj)
-{
-	%this = %obj.getdataBlock();
-	%oscale = getWord(%obj.getScale(),2);
-	%mask = $TypeMasks::PlayerObjectType | $TypeMasks::VehicleObjectType | $TypeMasks::FxBrickObjectType;
-	initContainerRadiusSearch(%obj.getEyePoint(),10,%mask);
-	while(%hit = containerSearchNext())
-	{
-		if(%hit == %obj)
-		continue;
-
-		%obscure = containerRayCast(%obj.getEyePoint(),vectorAdd(%hit.getPosition(),"0 0 1.9"),$TypeMasks::InteriorObjectType | $TypeMasks::TerrainObjectType | $TypeMasks::FxBrickObjectType, %obj);
-		if(isObject(%obscure))
-		continue;
-
-		%line = vectorNormalize( vectorSub( %obj.getposition(), %hit.getposition()));
-		%dot = vectorDot( %obj.getEyeVector(), %line );
-
-		if(ContainerSearchCurrRadiusDist() < 2 && %dot < -0.5)
-		{
-			if(%hit.getType() & $TypeMasks::PlayerObjectType && checkHoleBotTeams(%obj,%hit))
-			{
-				if(%hit.getstate() $= "Dead")
-				continue;
-
-				%obj.playaudio(3,%this.hBigMeleeSound);
-				%obj.playthread(1,"activate2");
-				%hit.applyimpulse(%hit.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),2000),"0 0 500"));
-				%hit.damage(%obj.hFakeProjectile, %hit.getposition(), $Pref::Server::L4B2Bots::SpecialsDamage*%oScale, %obj.hDamageType);
-
-				%p = new Projectile()
-				{
-					dataBlock = "BigZombieHitProjectile";
-					initialPosition = %hit.getPosition();
-					sourceObject = %obj;
-					client = %obj.client;
-				};
-				MissionCleanup.add(%p);
-				%p.explode();
-
-				%c = new Projectile()
-				{
-					dataBlock = "pushBroomProjectile";
-					initialPosition = %hit.getPosition();
-					sourceObject = %obj;
-					client = %obj.client;
-				};
-				MissionCleanup.add(%c);
-				%c.explode();
-				%c.setScale("2 2 2");
-			}
-			if(%hit.getType() & $TypeMasks::VehicleObjectType)
-			{
-				%obj.playaudio(3,%this.hBigMeleeSound);
-				%obj.playthread(2,"activate2");
-
-				%muzzlepoint = vectorSub(%obj.getHackPosition(),"0 0 0.5");
-				%muzzlevector = vectorScale(%obj.getEyeVector(),2.5);
-				%muzzlepoint = VectorAdd (%muzzlepoint, %muzzlevector);
-				%hit.setTransform (%muzzlepoint @ " " @ rotFromTransform(%hit.getTransform()));
-				%impulse = VectorNormalize(VectorAdd (%obj.getEyeVector(), "0 0 0.2"));
-				%force = %hit.getDataBlock ().mass * 25;
-				%scaleRatio = getWord (%obj.getScale (), 2) / getWord (%hit.getScale (), 2);
-				%force *= %scaleRatio;
-				%impulse = VectorScale (%impulse, %force);
-				%hit.schedule(50,applyImpulse,%hit.getPosition(),%impulse);
-				%hit.damage(%obj.hFakeProjectile, %hit.getposition(), 50*getWord(%obj.getScale(),0), $DamageType::Tank);
-
-				%c = new Projectile()
-				{
-					dataBlock = "pushBroomProjectile";
-					initialPosition = %hit.getPosition();
-					sourceObject = %obj;
-					client = %obj.client;
-				};
-				MissionCleanup.add(%c);
-				%c.explode();
-				%c.setScale("2 2 2");
-			}
-		}
-	}
-}
-	
-function Player::doMelee(%obj)
-{
-	%obj.playThread(3,"activate2");
-	serverPlay3D("melee_swing" @ getRandom(1,2) @ "_sound",%obj.getPosition());
-
-	%pos = %obj.getEyePoint();
-	%masks = $TypeMasks::StaticObjectType | $TypeMasks::PlayerObjectType | $TypeMasks::VehicleObjectType | $TypeMasks::FxBrickObjectType;
-	initContainerRadiusSearch(%pos,5,%masks);
-	while(%hit = containerSearchNext())
-	{
-      	if(%hit == %obj)
-      	continue;
-	
-      	%len = 5 * getWord(%obj.getScale (), 2);
-      	%vec = %obj.getEyeVector();
-      	%beam = vectorScale(%vec,%len); //lengthened vector (for calculating the raycast's endpoint)
-      	%end = vectorAdd(%pos,%beam); //calculated endpoint for raycast
-      	%ray = containerRayCast(%pos,%end,%masks,%obj); //fire raycast
-		
-      	%line = vectorNormalize(vectorSub(%pos,%hit.getposition()));
-		%dot = vectorDot(%vec,%line);
-
-     	if(vectorDist(%pos,%hit.getposition()) > 3.75 || %dot > -0.4)
-		continue;
-
-		if(isObject(%ray))
-        if(%ray.getType() & $TypeMasks::StaticObjectType || %ray.getType() & $TypeMasks::FxBrickObjectType || %ray.getType() & $TypeMasks::VehicleObjectType)
-     	{
-			serverPlay3D(%MeleeType @ "HitEnv_Sound",posFromRaycast(%ray));
-			%p = new projectile()
-			{
-				datablock = "SecondaryMeleeSmallProjectile";
-				initialPosition = posFromRaycast(%ray);
-			};
-			return;
-     	}
-
-		%obscure = containerRayCast(%obj.getEyePoint(),vectorAdd(%hit.getPosition(),"0 0 1.9"),$TypeMasks::VehicleObjectType | $TypeMasks::StaticObjectType | $TypeMasks::FxBrickObjectType, %obj);
-		if(isObject(%obscure))
-		continue;
-
-		if(%hit.getType() & $TypeMasks::PlayerObjectType)
-		{
-			if(minigameCanDamage(%obj,%hit))
-			{
-				if(getSimTime()-%hit.punchedTime[%obj] > 2500)
-				%hit.punched[%obj] = 0;
-
-				%hit.punched[%obj]++;
-				%hit.punchedTime[%obj] = getSimTime();
-				if(%hit.punched[%obj] != 0 && %hit.punched[%obj]%3 == 0 && getSimTime()-%obj.lastSlap > 1500)
-				{
-					%slap = true;
-					%obj.lastSlap = getSimTime();
-				}
-
-				if(%slap)//Do the good stuff
-				{
-					%stunchance = 75;
-					%sound = "melee_slap_sound";
-					%projectile = "SecondaryMeleeProjectile";
-					%dmg = %hit.getdatablock().maxDamage/10;
-					%hitknockback = 800;
-					%hitz = 200;
-
-					%obj.playThread(3,jump);
-				}
-				else
-				{
-					%stunchance = 20;
-					%sound = "Zombie_hit" @ getrandom(1,8) @ "_sound";
-					%projectile = "SecondaryMeleeSmallProjectile";
-					%dmg = %hit.getdatablock().maxDamage/12;
-					%hitknockback = 400;
-					%hitz = 150;
-				}
-				if(%hit.getdatablock().getname() $= "ZombieTankHoleBot")
-				%dmg = %hit.getdatablock().maxDamage/30; 
-
-				if(getRandom(1,100) <= %stunchance && %hit.hZombieL4BType & %hit.hZombieL4BType < 4 )
-				{
-					if(%hit.isHoleBot)
-					%hit.stopHoleLoop();
-					
-					%hit.emote(winStarProjectile, 1);
-					L4B_SpazzZombieInitialize(%hit,1);
-					%hit.mountImage(stunImage,2);
-					schedule(1000,0,serverCmdSit,%hit);
-				}
-
-
-				serverPlay3D(%sound,%hit.getHackPosition());
-
-				%hscale = %hit.getScale();
-				%p = new projectile()
-				{
-					datablock = %projectile;
-					initialPosition = %hit.getHackPosition();
-				};
-
-				%sVec = %hit.getForwardVector();
-				%aimVec = %obj.getForwardVector();
-				%reflect = (vectorDot(%sVec, %aimVec) < 0);
-
-				if(%hit.getMountedImage(0) == RiotShieldimage.getID())
-				{
-					serverPlay3d("riotshield_hit_sound",%hit.getHackPosition());
-
-					if(!%reflect)
-					{
-						%hit.applyimpulse(%hit.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),%hitknockback*$Pref::SecondaryMelee::MeleeForce),"0" SPC "0" SPC %hitz*$Pref::SecondaryMelee::MeleeForce));
-						if(minigameCanDamage(%obj,%hit))
-						%hit.damage(%obj,%hit.getPosition(),%dmg,$DamageType::SecondaryMelee);
-					}
-					else
-					{
-						%hitknockback = 200;
-						%hitz = 75;
-						%hit.applyimpulse(%hit.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),%hitknockback*$Pref::SecondaryMelee::MeleeForce),"0" SPC "0" SPC %hitz*$Pref::SecondaryMelee::MeleeForce));
-						serverPlay3d("riotshield_block_sound",%obj.getPosition());
-					}
-				}
-				else
-				{
-					%hit.applyimpulse(%hit.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),%hitknockback*$Pref::SecondaryMelee::MeleeForce),"0" SPC "0" SPC %hitz*$Pref::SecondaryMelee::MeleeForce));
-					if(minigameCanDamage(%obj,%hit))
-					%hit.damage(%obj,%hit.getPosition(),%dmg,$DamageType::SecondaryMelee);
-				}
-			}
-		}
-	}
-}
-	
-function player::meleeCooldown(%pl)
-{
-	cancel(%pl.meleeCdSched);
-	%pl.meleeTick--;
-	if(!%pl.meleeTick)
-		return;
-	%pl.meleeCdSched = %pl.schedule(1000,meleeCooldown);
-}
-
-function Player::ToxifyHealth ( %Player, %amt )
-{
-	if ( %Player.getDamagePercent() >= 1.0 )
-	{
-		return;
-	}
-
-	if ( %amt > 0.0 && %Player.isToxic == 0)
-	{
-		%Player.setDamageLevel (%Player.getDamageLevel() - %amt);
-		if(!%Player.Toxified)
-		{
-		   schedule(500,0,ToxicityE,%Player);
-		   %Player.Toxified = 1;
-		}
-	}
-	else if(%Player.isToxic == 0)
-	{
-		%Player.Damage (%Player.hFakeProjectile, %Player.getPosition(), %amt * -1, $DamageType::Default);
-				if(!%Player.Toxified)
-		{
-		schedule(500,0,ToxicityE,%Player);
-		%Player.Toxified = 1;
-		}
-	}
-}
-registerOutputEvent ("Player", "ToxifyHealth", "int -1000 1000 25");
-registerOutputEvent ("Bot", "ToxifyHealth", "int -1000 1000 25");
-
-function ToxicityE(%Player)
-{
-      if(isObject(%Player) && %Player.getState() !$= "Dead" && %Player.Toxified)//For bots/Players that aren't part of the team the obj is in   
-      {
-         if(%Player.ToxicityCount <= "16")
-         {
-            %Player.ToxicityCount++;
-            %Player.ToxicESchedule = schedule(500,0,ToxicityE,%Player);
-            %Player.mountImage(SpitAcidStatusPlayerImage, 3);
-
-			%Player.damage(%Player, %Player.getposition(), 2, $DamageType::Toxic);
-
-            if(%Player.hCanDistract)
-            %Player.hRunAwayFromPlayer(%Player);
-
-            else if(!isObject(%Player))
-            return;
-         }
-         else
-         {
-            %Player.ToxicityCount = 0;
-            if(isObject(%Player.getMountedImage(3)) && %Player.getMountedImage(3).getName() $= "SpitAcidStatusPlayerImage")
-            %Player.unMountImage(3);
-
-            %Player.Toxified = 0;
-         }
-      }
 }
 
 // ============================================================

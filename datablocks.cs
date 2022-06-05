@@ -45,23 +45,6 @@ datablock StaticShapeData(HataCylinder2Shape)
 	shapeFile = "./models/tongue.dts";
 };
 
-//NOTE TO SELF: TSShapeConstructor has to be done BEFORE player datablock.
-datablock TSShapeConstructor(mMeleeDts) 
-{
-	baseShape = "base/data/shapes/player/mmelee.dts";
-	sequence0 = "base/data/shapes/player/default.dsq";
-	sequence1 = "base/data/shapes/player/melee.dsq";
-	sequence2 = "base/data/shapes/player/actions.dsq";
-};
-
-datablock PlayerData(PlayerMeleeAnims : PlayerStandardArmor)
-{
-	shapeFile = "base/data/shapes/player/mMelee.dts";
-	uniformCompatible = true;
-	canJet = 0;
-	uiName = "";
-};
-
 datablock PlayerData(SurvivorPlayer : PlayerMeleeAnims)
 {
 	canPhysRoll = true;
@@ -504,18 +487,10 @@ datablock ProjectileData(SmokerSporeProjectile)
 {
    projectileShapeName				= "base/data/shapes/empty.dts";
    directDamage        = 0;
-   directDamageType = $DamageType::RocketDirect;
-   radiusDamageType = $DamageType::RocketRadius;
-   //impactImpulse	   = 1000;
-   //verticalImpulse	   = 1000;
    explosion           = "";
    particleEmitter     = "SmokerSporeEmitter";
 
-   brickExplosionRadius = 0;
    brickExplosionImpact = false;
-   brickExplosionForce  = 0;             
-   brickExplosionMaxVolume = 0;
-   brickExplosionMaxVolumeFloating = 0;
 
    sound = "smoker_explode_sound";
 
@@ -529,12 +504,7 @@ datablock ProjectileData(SmokerSporeProjectile)
    bounceElasticity    = 0;
    bounceFriction      = 0;
    isBallistic         = true;
-   gravityMod = 0.02;
-
-   hasLight    = false;
-   lightRadius = 1.0;
-   lightColor  = "0 0 0";
-
+   gravityMod = 0;
    uiName = "";
 };
 
@@ -636,7 +606,6 @@ datablock ShapeBaseImageData(ZombieSmokerConstrictImage)
    colorShiftColor = "1 0 0 1";
 };
 
-//Spitter Datablocks
 datablock ParticleData(SpitAcidBallHitParticle)
 {
 	dragCoefficient      = 4;
@@ -654,7 +623,6 @@ datablock ParticleData(SpitAcidBallHitParticle)
 	sizes[1]      = 0.18;
 	times[0]	  = 0.0;
 	times[1]	  = 1.0;
-
 };
 
 datablock ParticleEmitterData(SpitAcidBallHitEmitter)
@@ -686,17 +654,13 @@ datablock ParticleData(SpitAcidBallParticle)
 	lifetimeVarianceMS   = 200;
 	textureName          = "base/data/particles/dot";
 	colors[0]     = "0.6 0.790 0.4 0.1";
-//	colors[1]     = "0.435 0.676 0.472 0.2";
 	colors[1]     = "0.5 0.770 0.300 0.0";
 	sizes[0]      = 0.8;
 	sizes[1]      = 0.0;
-//	sizes[2]      = 0.0;
 	times[0]	  = 0.0;
 	times[1]	  = 1;
-//	times[2]	  = 1.0;
 
 	useInvAlpha		= false;
-
 };
 
 datablock ParticleData(SpitAcidBallTrailParticle)
@@ -737,7 +701,6 @@ datablock ParticleEmitterData(SpitAcidBallTrailEmitter)
    phiVariance      = 180;
    overrideAdvance = false;
    particles = "SpitAcidBallTrailParticle SpitAcidBallParticle";
-
    uiName = "";
 };
 
@@ -755,21 +718,17 @@ datablock ParticleData(SpitAcidStatusParticle)
 	colors[0]     = "0.6 0.7 0.3 0.3";
 	colors[1]     = "0.75 0.8 0.4 0.4";
 	colors[2]     = "0.3 0.79 0.2 0.0";
-//	colors[3]     = "0.4 0.6 0.4 0.0";
 	sizes[0]      = 0.01;
 	sizes[1]      = 0.25;
 	sizes[2]      = 0.05;
-//	sizes[3]      = 0.0;
 	times[0]	  = 0.0;
 	times[1]	  = 0.3;
 	times[2]	  = 1;
-//	times[3]	  = 1.0;
-
 };
 
 datablock ParticleEmitterData(SpitAcidStatusEmitter)
 {
-   ejectionPeriodMS = 30;	//7
+   ejectionPeriodMS = 30;
    periodVarianceMS = 2;
    ejectionVelocity = 0;
    velocityVariance = 0.0;
@@ -780,7 +739,6 @@ datablock ParticleEmitterData(SpitAcidStatusEmitter)
    phiVariance      = 360;
    overrideAdvance = false;
    particles = "SpitAcidStatusParticle";
-
    uiName = "";
 };
 
@@ -817,55 +775,44 @@ datablock ParticleEmitterData(SpitAcidPulseEmitter)
    phiVariance      = 360;
    overrideAdvance = false;
    particles = "SpitAcidPulseParticle";
-
    uiName = "";
 };
 
 datablock ShapeBaseImageData(SpitAcidStatusPlayerImage)
 {
-   shapeFile = "base/data/shapes/empty.dts";
-   emap = true;
+   	shapeFile = "base/data/shapes/empty.dts";
+   	emap = true;
 
-   mountPoint = 2;
-   offset = "0 -0.25 -0.75";
-   eyeOffset = 0;
-   rotation = "0 0 0";
+   	mountPoint = 2;
+   	offset = "0 -0.25 -0.75";
+   	eyeOffset = 0;
+   	rotation = "0 0 0";
 
-   correctMuzzleVector = true;
+   	correctMuzzleVector = true;
 
-   className = "WeaponImage";
+   	className = "WeaponImage";
 
-   item = "";
-   ammo = " ";
-   projectile = "";
-   projectileType = Projectile;
-   
-   isPoison = 1;
+   	item = "";
+   	ammo = " ";
+   	projectile = "";
+   	projectileType = Projectile;
 
-   melee = false;
-   armReady = false;
+   	melee = false;
+   	armReady = false;
 
-   doColorShift = false;
-   colorShiftColor = "1 1 1 1";
-
-	//lightType = "ConstantLight";
-	//lightColor = "0 1 0";
-	//lightRadius = 4;
+   	doColorShift = false;
 
 	stateName[0]                   = "Wait";
 	stateTimeoutValue[0]           = 0.3;
 	stateEmitter[0]                = SpitAcidStatusEmitter;
 	stateEmitterTime[0]            = 1;
 	stateTransitionOnTimeout[0]    = "Poison";
-	//stateSound[0]                  = SpitAcidPulseSound;
 
 	stateName[1]                   = "Poison";
-	//stateScript[1]                 = "Damage";
 	stateEmitter[1]                = SpitAcidPulseEmitter;
 	stateEmitterTime[1]            = 0.6;
 	stateTimeoutValue[1]           = 0.1;
 	stateTransitionOnTimeout[1]    = "Wait";
-	//stateSound[1]                  = FireShotSound;	//No sound
 };
 
 datablock ExplosionData(SpitAcidBallExplosion)

@@ -84,3 +84,7 @@ $hZombieSpecialType[%e++] = "ZombieSmokerHoleBot";
 $hZombieSpecialType[%e++] = "ZombieJockeyHoleBot";
 $hZombieSpecialType[%e++] = "ZombieTankHoleBot";
 $hZombieSpecialTypeAmount = %e;
+
+if(LoadRequiredAddOn("Weapon_SWeps_EXT") == $Error::None)
+$Item_Explosives_isSWepsExtOn = 1;
+else $Item_Explosives_isSWepsExtOn = 0;
