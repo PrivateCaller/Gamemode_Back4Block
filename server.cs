@@ -1,7 +1,5 @@
 if(loadRequiredAddOn("Bot_Hole") == $Error::None)
 {
-
-	
 	exec("./support/billboards/billboards.cs");
 	if(isFunction(NetObject, setNetFlag))
 	{
@@ -14,8 +12,6 @@ if(loadRequiredAddOn("Bot_Hole") == $Error::None)
 		error("ERROR: The Selective Ghosting DLL is required for Package_Left4Block's billboards to work.");
 		schedule(1000, 0, messageAll, 'MsgError', "\c0ERROR: The Selective Ghosting DLL is required for Package_Left4Block's billboards to work.");
 	}
-	exec("./support/afk_system.cs");
-	exec("./bots/survivors/bot_survivor.cs");
 	
 	exec("./scripts/script_newplayerdatablock.cs");
 	exec("./datablocks.cs");
@@ -49,6 +45,11 @@ if(loadRequiredAddOn("Bot_Hole") == $Error::None)
 
 	exec("./support/jettison.cs");
 	exec("./support/clientlogger.cs");
+
+	if(LoadRequiredAddOn("Support_BotHolePlus") == $Error::None)
+	//exec("Add-Ons/Support_BotHolePlus/server.cs");
+	exec("./support/afk_system.cs");
+	exec("./bots/survivors/bot_survivor.cs");
 	
 	exec("./bots/zombies/common.cs");
 	exec("./bots/zombies/uncommon_soldier.cs");
@@ -68,5 +69,4 @@ if(loadRequiredAddOn("Bot_Hole") == $Error::None)
 	exec("./bots/zombies/spitter.cs");
 	exec("./bots/zombies/tank.cs");
 	exec("./bots/zombies/witch.cs");
-
 }

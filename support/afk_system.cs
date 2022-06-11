@@ -10,20 +10,29 @@ datablock PlayerData(AFKPlayerHoleBot : PlayerMeleeAnims)
     hooks_guardAtSpawn = -1;
 };
 
-function L4B_generateItemString(%client)
+//
+// Item saving and loading functions.
+//
+
+function L4B_generateItemString(%player)
 {
-	if(!isObject(%client) || !isObject(%client.player))
+	if(!isObject(%player))
 	{
 		return;
 	}
 	%itemString = "";
 	for(%i = 0; %i < %player.getDatablock().maxTools; %i++)
 	{
-		if(isObject(%player.tool[%i]))
-		{
-			%itemString = %itemString SPC %player.tool[%i];
-		}
+        if(%itemString $= "")
+        {
+            %itemString = %player.tool[%i].image;
+        }
+        else
+        {
+            %itemString = %itemString SPC %player.tool[%i].image;
+        }
 	}
+    return %itemString;
 }
 
 function L4B_loadItemString(%player, %string)
@@ -33,20 +42,17 @@ function L4B_loadItemString(%player, %string)
 		return;
 	}
 	%player.clearTools();
-	for(%i = 0; %i < getRecordCount(%string); %i++)
+	for(%i = 0; %i < getWordCount(%string); %i++)
 	{
-		%id = nameToID(getRecord(%string, %i));
-		if(isObject(%id))
-		{
-			%player.tool[%i] = %id;
-			%player.weaponCount++;
-			messageClient(%client,'MsgItemPickup','', %i, %id);
-			if(%i == 0)
-			{
-				%player.updateArm(%id);
-				%player.mountImage(%id, 0);
-			}
-		}
+		%id = getWord(%string, %i).getID();
+        %player.tool[%i] = %id;
+        %player.weaponCount++;
+        messageClient(%client, 'MsgItemPickup', "", %i, %id, 1);
+        if(%i == 0)
+        {
+            %player.mountImage(%id, 0);
+            %player.updateArm(%id);
+        }
 	}
 }
 
@@ -109,13 +115,16 @@ function L4B_AFKReplacePlayer(%target)
         {
             L4B_loadItemString(%obj, %target.client.afkItemString);
         }
-
-        if(isObject(%item))
+        else if(isObject(%item))
 		{
             //Give the bot their item.
 			%image = %item.getDataBlock().image;
 			%obj.setWeapon(%image);
         }
+
+        //Apply the appearance of the AFKing player.
+        //Not really the way this function was meant to be used, but ^\(0v0)/^
+        %obj.fixAppearance(%target.client);
 
         //Fake projectile is so they can correctly damage using melee
         //Thanks for breaking my Hit Direction Indicator. :P
@@ -174,17 +183,21 @@ function serverCmdAFK(%client)
     if(isObject(%client.afkBot))
     {
         //Already AFK, return them back to normal.
-        %player = %client.player;
         %bot = %client.afkBot;
+        %transform = %bot.getTransform();
+        %velocity = %bot.getVelocity();
+        %damageLevel = %bot.getDamageLevel();
+        %damageFlash = %bot.getDamageFlash();
+        %energyLevel = %bot.getEnergyLevel();
+        %client.afkBot.delete();
 
         %client.spawnPlayer();
-        %client.camera.setControlObject(%player);
-        %player.setTransform(%bot.getTransform());
-        %player.setVelocity(%bot.getVelocity());
-        %player.setDamageLevel(%bot.getDamageLevel());
-        %player.setDamageFlash(%bot.getDamageFlash());
-        %player.setEnergyLevel(%bot.getEnergyLevel());
-        %client.afkBot.delete();
+        %player = %client.player;
+        %player.setTransform(%transform);
+        %player.setVelocity(%velocity);
+        %player.setEnergyLevel(%energyLevel);
+        %player.setDamageLevel(%damageLevel);
+        %player.setDamageFlash(%damageFlash);
         if(strLen(%client.afkItemString))
         {
             L4B_loadItemString(%player, %client.afkItemString);
@@ -193,15 +206,28 @@ function serverCmdAFK(%client)
     else if(!isObject(%client.afkBot) && isObject(%client.player))
     {
         //Not AFK, run the process.
-        %client.afkItemString = L4B_generateItemString(%client);
+        %client.afkItemString = L4B_generateItemString(%client.player);
         %client.afkBot = L4B_AFKReplacePlayer(%client.player);
 
         %camera = %client.camera;
-		%camera.mode = "Observer";
-		%camera.setOrbitMode(%client.afkBot, %client.afkBot.getEyeTransform(), 5, 30, 30, 1);
+		%camera.setMode("Observer");
+		%camera.setOrbitMode(%client.afkBot, %client.afkBot.getEyeTransform(), 5, 15, 15, 1);
 		%client.setControlObject(%camera);
     }
 }
+
+package Package_Left4Block_AFKSystem
+{
+    function Observer::onTrigger(%this, %obj, %trigger, %state)
+    {
+        if(isObject(%obj.getControllingClient().afkBot))
+        {
+            return;
+        }
+        parent::onTrigger(%this, %obj, %trigger, %state);
+    }
+};
+activatePackage(Package_Left4Block_AFKSystem);
 
 //
 // hLoop and derivitives.
@@ -247,7 +273,6 @@ function AFKPlayerHoleBot_loop(%obj)
     {
         return;
     }
-
     HoleBot_init(%obj);
 
     //Lay out all the options we have so we can alter them as the function progresses
