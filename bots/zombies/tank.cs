@@ -1,16 +1,8 @@
-//datablock fxDTSBrickData (BrickZombieTankBot_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
-//{
-//	uiName = "Zombie Tank Hole";
-//	iconName = "Add-Ons/Package_Left4Block/icons/icon_Tank";
-//	
-//	holeBot = "ZombieTankHoleBot";
-//};
-
 datablock PlayerData(ZombieTankHoleBot : CommonZombieHoleBot)
 {
 	uiName = "Tank Infected";
 	shapeFile = "Add-ons/Package_Left4Block/models/tank/zTank.dts";
-	maxDamage = $hTankHealth;//Health
+	maxDamage = $L4B_TankHealth;//Health
 	mass = 1000;
 
 	runforce = 48 * 220;
@@ -53,7 +45,7 @@ datablock PlayerData(ZombieTankHoleBot : CommonZombieHoleBot)
 	hSearchFOV = 1;//if enabled disables normal hSearch
 	hMaxShootRange = 120;//The range in which the bot will shoot the player
 
-	hAttackDamage = 24;
+	hAttackDamage = $L4B_SpecialsDamage*2.5;
 	hMeleeCI = "Tank";
 
 	hMaxShootRange = 512;
@@ -113,10 +105,10 @@ function ZombieTankHoleBot::onImpact(%this, %obj, %col, %vec, %force)
 
 function ZombieTankHoleBot::onBotFollow( %this, %obj, %targ )
 {
-	if(getRandom(1,100) <= $Pref::Server::L4B2Bots::TankLunge)
+	if(getRandom(1,100) <= $L4B_TankChance)
 	schedule(2000,0,L4B_ZombieLunge,%obj,%targ,10);
 
-	if(getRandom(1,100) <= $Pref::Server::L4B2Bots::TankBoulders && L4B_IsOnGround(%obj) && vectorDist(%obj.getPosition(),%targ.getPosition()) >= 35)
+	if(getRandom(1,100) <= $L4B_TankChance && L4B_IsOnGround(%obj) && vectorDist(%obj.getPosition(),%targ.getPosition()) >= 35)
 	{
 		%obj.setaimobject(%targ);
 		%obj.mountImage(BoulderImage,0);

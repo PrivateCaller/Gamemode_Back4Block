@@ -1,11 +1,3 @@
-//datablock fxDTSBrickData (BrickZombieWitch_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
-//{
-//    uiName = "Zombie Witch Hole";
-//    iconName = "Add-Ons/Package_Left4Block/icons/icon_witch";
-//    
-//    holeBot = "ZombieWitchHoleBot";
-//};
-
 datablock PlayerData(ZombieWitchHoleBot : CommonZombieHoleBot)
 {
     uiName = "";
@@ -17,7 +9,7 @@ datablock PlayerData(ZombieWitchHoleBot : CommonZombieHoleBot)
 
 	ShapeNameDistance = 100;
     hCustomNodeAppearance = 1;
-    hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage*4;//15;//Melee Damage
+    hAttackDamage = $L4B_SpecialsDamage*5;//15;//Melee Damage
 };
 
 function ZombieWitchHoleBot::onAdd(%this,%obj)
@@ -73,7 +65,7 @@ function ZombieWitchHoleBot::onBotMelee(%this,%obj,%col)
 function ZombieWitchHoleBot::onBotLoop(%this,%obj)
 {
         %obj.hLimitedLifetime();
-        %obj.hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage*4;
+        %obj.hAttackDamage = $L4B_SpecialsDamage*5;
 
         if(%obj.hMelee)
         {

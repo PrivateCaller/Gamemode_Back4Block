@@ -78,7 +78,7 @@ function serverCmdMODEMT(%client)
 datablock fxDTSBrickData (brickTeleBrickCheckData:brick2x2fData)
 {
 	category = "Special";
-	subCategory = "Interactive";
+	subCategory = "Left 4 BLock";
 	uiName = "Telebrick Checker";
 	isTeleBrick = true;
 	alwaysShowWireFrame = false;
@@ -87,7 +87,7 @@ datablock fxDTSBrickData (brickTeleBrickCheckData:brick2x2fData)
 datablock fxDTSBrickData (brickTeleBrickData:brick4x4fData)
 {
 	category = "Special";
-	subCategory = "Interactive";
+	subCategory = "Left 4 BLock";
 	uiName = "Telebrick";
 	isTeleBrick = true;
 	alwaysShowWireFrame = false;

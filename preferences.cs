@@ -80,58 +80,6 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 		requireRestart = false;
 	};
 
-    new ScriptObject(Preference)
-	{
-		className      = "L4B Director";
-
-		addon          = "Package_Left4Block";
-		category       = "Director (Minigame Only)";
-		title          = "Director interval (seconds)";
-
-		type           = "num";
-		params         = "0 120 0";
-
-		variable       = "$Pref::L4BDirector::Director_Interval";
-
-		defaultValue   = "30";
-
-		updateCallback = "";
-		loadCallback   = "";
-
-		hostOnly       = false;
-		secret         = false;
-
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-    new ScriptObject(Preference)
-	{
-		className      = "L4B Director";
-
-		addon          = "Package_Left4Block";
-		category       = "Director (Minigame Only)";
-		title          = "Max tank rounds";
-
-		type           = "num";
-		params         = "0 10 0";
-
-		variable       = "$Pref::L4BDirector::TankRounds";
-
-		defaultValue   = "2";
-
-		updateCallback = "";
-		loadCallback   = "";
-
-		hostOnly       = false;
-		secret         = false;
-
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
 	new ScriptObject(Preference)
 	{
 		className      = "Package_left4block";
@@ -196,32 +144,6 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 		params         = "";
 
 		variable       = "$Pref::SurvivorPlayer::EnableDowning";
-
-		defaultValue   = "1";
-
-		updateCallback = "";
-		loadCallback   = "";
-
-		hostOnly       = false;
-		secret         = false;
-
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "Package_left4block";
-
-		addon          = "Package_left4block";
-		category       = "Survivor";
-		title          = "Survivor infection immunity";
-
-		type           = "bool";
-		params         = "";
-
-		variable       = "$Pref::SurvivorPlayer::SurvivorImmunity";
 
 		defaultValue   = "1";
 
@@ -361,6 +283,25 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 
 	new ScriptObject(Preference)
 	{
+		className      = "Package_left4block_Difficulty";
+		addon          = "Package_left4block";
+		category       = "Bots Main";
+		title          = "Difficulty";
+		type           = "dropdown";
+		params         = "Easy 0 Normal 1 Advanced 2 Expert 3";
+		variable       = "$Pref::Server::L4B2Bots::Difficulty";
+		defaultValue   = "Normal 1";
+		updateCallback = "";
+		loadCallback   = "";
+		hostOnly       = false;
+		secret         = false;
+		loadNow        = false;
+		noSave         = false;
+		requireRestart = false;
+	};
+
+	new ScriptObject(Preference)
+	{
 		className      = "Package_left4block";
 		addon          = "Package_left4block";
 		category       = "Bots Main";
@@ -407,25 +348,6 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 		params         = "0 1000 0";
 		variable       = "$Pref::Server::L4B2Bots::NeedHelpCutsceneLength";
 		defaultValue   = "200";
-		updateCallback = "";
-		loadCallback   = "";
-		hostOnly       = false;
-		secret         = false;
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "L4B2Bots_NormalDamage";
-		addon          = "Package_left4block";
-		category       = "Bots Normal";
-		title          = "Normal zombies damage amount";
-		type           = "num";
-		params         = "0 100 0";
-		variable       = "$Pref::Server::L4B2Bots::NormalsDamage";
-		defaultValue   = "5";
 		updateCallback = "";
 		loadCallback   = "";
 		hostOnly       = false;
@@ -548,252 +470,74 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 		noSave         = false;
 		requireRestart = false;
 	};
-
-
-	new ScriptObject(Preference)
-	{
-		className      = "Package_left4block";
-		addon          = "Package_left4block";
-		category       = "Bot Specials";
-		title          = "Specials zombies pinned damage amount";
-		type           = "num";
-		params         = "0 100 0";
-		variable       = "$Pref::Server::L4B2Bots::SpecialsPinDamage";
-		defaultValue   = "12";
-		updateCallback = "";
-		loadCallback   = "";
-		hostOnly       = false;
-		secret         = false;
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "L4B2Bots_SpecialDamage";
-		addon          = "Package_left4block";
-		category       = "Bot Specials";
-		title          = "Specials zombies damage amount";
-		type           = "num";
-		params         = "0 100 0";
-		variable       = "$Pref::Server::L4B2Bots::SpecialsDamage";
-		defaultValue   = "6";
-		updateCallback = "";
-		loadCallback   = "";
-		hostOnly       = false;
-		secret         = false;
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "Package_left4block";
-		addon          = "Package_left4block";
-		category       = "Bot Tank";
-		title          = "Tank boulders chance";
-		type           = "num";
-		params         = "0 100 0";
-		variable       = "$Pref::Server::L4B2Bots::TankBoulders";
-		defaultValue   = "50";
-		updateCallback = "";
-		loadCallback   = "";
-		hostOnly       = false;
-		secret         = false;
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "Package_left4block";
-		addon          = "Package_left4block";
-		category       = "Bot Tank";
-		title          = "Tank lunge chance";
-		type           = "num";
-		params         = "0 100 0";
-		variable       = "$Pref::Server::L4B2Bots::TankLunge";
-		defaultValue   = "25";
-		updateCallback = "";
-		loadCallback   = "";
-		hostOnly       = false;
-		secret         = false;
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "Package_left4block";
-		addon          = "Package_left4block";
-		category       = "Bot Loot";
-		title          = "Normal Zombie Loot Chance";
-		type           = "num";
-		params         = "0 50 0";
-		variable       = "$Pref::Server::L4B2Bots::ZombieLootChance";
-		defaultValue   = "15";
-		updateCallback = "";
-		loadCallback   = "";
-		hostOnly       = false;
-		secret         = false;
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "Package_left4block";
-		addon          = "Package_left4block";
-		category       = "Bot Loot";
-		title          = "Normal zombie loot item 1 (use /gifi or /getifi)";
-		type           = "string";
-		params         = "50 1";
-		variable       = "$Pref::Server::L4B2Bots::ZombieLootItem1";
-		defaultValue   = "None";
-		updateCallback = "";
-		loadCallback   = "";
-		hostOnly       = false;
-		secret         = false;
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "Package_left4block";
-		addon          = "Package_left4block";
-		category       = "Bot Loot";
-		title          = "Normal zombie loot item 2";
-		type           = "string";
-		params         = "50 1";
-		variable       = "$Pref::Server::L4B2Bots::ZombieLootItem2";
-		defaultValue   = "None";
-		updateCallback = "";
-		loadCallback   = "";
-		hostOnly       = false;
-		secret         = false;
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-	new ScriptObject(Preference)
-	{
-		className      = "Package_left4block";
-		addon          = "Package_left4block";
-		category       = "Bot Loot";
-		title          = "Normal zombie loot item 3";
-		type           = "string";
-		params         = "50 1";
-		variable       = "$Pref::Server::L4B2Bots::ZombieLootItem3";
-		defaultValue   = "None";
-		updateCallback = "";
-		loadCallback   = "";
-		hostOnly       = false;
-		secret         = false;
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "Package_left4block";
-		addon          = "Package_left4block";
-		category       = "Bot Loot";
-		title          = "Normal zombie loot item 4";
-		type           = "string";
-		params         = "50 1";
-		variable       = "$Pref::Server::L4B2Bots::ZombieLootItem4";
-		defaultValue   = "None";
-		updateCallback = "";
-		loadCallback   = "";
-		hostOnly       = false;
-		secret         = false;
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-	
-	new ScriptObject(Preference)
-	{
-		className      = "Package_left4block";
-		addon          = "Package_left4block";
-		category       = "Bot Loot";
-		title          = "Normal zombie loot item 5";
-		type           = "string";
-		params         = "50 1";
-		variable       = "$Pref::Server::L4B2Bots::ZombieLootItem5";
-		defaultValue   = "None";
-		updateCallback = "";
-		loadCallback   = "";
-		hostOnly       = false;
-		secret         = false;
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "Package_left4block";
-		addon          = "Package_left4block";
-		category       = "Bot Loot";
-		title          = "Fallen zombie loot item bonus";
-		type           = "string";
-		params         = "50 1";
-		variable       = "$Pref::Server::L4B2Bots::ZombieLootItemFallen";
-		defaultValue   = "None";
-		updateCallback = "";
-		loadCallback   = "";
-		hostOnly       = false;
-		secret         = false;
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
 }
 else
 {
 	$Pref::L4BDirector::EnableOnMG = 0;
     $Pref::L4BDirector::Director_Message_Prefix = "<color:FFFF00>";
-    $Pref::L4BDirector::Director_Interval = 30;
 	$Pref::L4BDirector::AllowMGMessages = 1;
 	$Pref::L4BDirector::EnableCues = 1;
-	$Pref::L4BDirector::TankRounds = 2;
     $Pref::SurvivorPlayer::BrickScanning = 1;
     $Pref::SurvivorPlayer::EnableDowning = 1;
-	$Pref::SurvivorPlayer::SurvivorImmunity = 1;
 	$Pref::SecondaryMelee::MeleeMode = 1;
 	$Pref::SecondaryMelee::MeleeForce = 1;
 	$Pref::SecondaryMelee::MeleeCharges = 3;
 	$Pref::SecondaryMelee::MeleeCooldownRate = 1000;
 	
 	$Pref::Server::L4B2Bots::CustomStyle = 0;
+	$Pref::Server::L4B2Bots::Difficulty = 1;
 	$Pref::Server::L4B2Bots::SpecialsCue = 1;
-	$Pref::Server::L4B2Bots::SmokerTongueDist = 50;
-	$Pref::Server::L4B2Bots::SpecialsPinDamage = 12;
-	$Pref::Server::L4B2Bots::SpecialsDamage = 6;
 	$Pref::Server::L4B2Bots::LimitedLifetime = 1;
 	$Pref::Server::L4B2Bots::MinigameMessages = 1;
 	$Pref::Server::L4B2Bots::ZombieRandomScale = 1;
 	$Pref::Server::L4B2Bots::SpecialsWarnLight = 0;
-	$Pref::Server::L4B2Bots::TankBoulders = 50;
-	$Pref::Server::L4B2Bots::NormalsDamage = 5;
-	$Pref::Server::L4B2Bots::TankLunge = 25;
 	$Pref::Server::L4B2Bots::UncommonWarningLight = 0;
-	$Pref::Server::L4B2Bots::ZombieLootChance = 15;
-	$Pref::Server::L4B2Bots::ZombieLootItem1 = "None";
-	$Pref::Server::L4B2Bots::ZombieLootItem2 = "None";
-	$Pref::Server::L4B2Bots::ZombieLootItem3 = "None";
-	$Pref::Server::L4B2Bots::ZombieLootItem4 = "None";
-	$Pref::Server::L4B2Bots::ZombieLootItem5 = "None";
-	$Pref::Server::L4B2Bots::ZombieLootItemFallen = "None";
 	$Pref::Server::L4B2Bots::VictimSavedMessages = 1;
-	$Pref::Server::L4B2Bots::ZombieBurnerCollision = 1;	
+	$Pref::Server::L4B2Bots::ZombieBurnerCollision = 1;
+}
+
+function Package_left4block_Difficulty::onLoad(%this, %val) 
+{
+	switch($Pref::Server::L4B2Bots::Difficulty)
+	{
+		case 0: $L4B_NormalDamage = 2;
+				$L4B_SpecialsDamage = 4;
+				$L4B_TankChance = 15;
+				$L4B_TankRounds = 0;
+				$L4B_TankHealth = 2000;
+				$L4B_DirectorInterval = 45;
+				$L4B_SurvivorImmunity = 1;
+
+		case 1: $L4B_NormalDamage = 6;
+				$L4B_SpecialsDamage = 12;
+				$L4B_TankChance = 30;
+				$L4B_TankRounds = 1;
+				$L4B_TankHealth = 2000;
+				$L4B_DirectorInterval = 30;
+				$L4B_SurvivorImmunity = 1;
+
+		case 2: $L4B_NormalDamage = 8;
+				$L4B_SpecialsDamage = 16;
+				$L4B_TankChance = 50;
+				$L4B_TankRounds = 1;
+				$L4B_TankHealth = 4000;
+				$L4B_DirectorInterval = 30;
+				$L4B_SurvivorImmunity = 0;
+
+		case 3: $L4B_NormalDamage = 16;
+				$L4B_SpecialsDamage = 32;
+				$L4B_TankChance = 75;
+				$L4B_TankRounds = 2;
+				$L4B_TankHealth = 5000;
+				$L4B_DirectorInterval = 20;
+				$L4B_SurvivorImmunity = 0;
+
+		default:
+	}
+
+	eval("ZombieTankHoleBot.maxDamage =" @ $L4B_TankHealth @ ";");
+}
+function Package_left4block_Difficulty::onUpdate(%this, %val) 
+{
+	Package_left4block_Difficulty::onLoad(%this, %val);
 }

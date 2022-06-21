@@ -1,11 +1,3 @@
-//datablock fxDTSBrickData (BrickZombieJockey_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
-//{
-//	uiName = "Zombie Jockey Hole";
-//	iconName = "Add-Ons/Package_Left4Block/icons/icon_Jockey";
-//
-//	holeBot = "ZombieJockeyHoleBot";
-//};
-
 datablock PlayerData(ZombieJockeyHoleBot : CommonZombieHoleBot)
 {
 	uiName = "Jockey Infected";
@@ -33,7 +25,7 @@ datablock PlayerData(ZombieJockeyHoleBot : CommonZombieHoleBot)
 	hTickRate = 5000;
 
 	hName = "Jockey";//cannot contain spaces
-	hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
+	hAttackDamage = $L4B_SpecialsDamage;
 
 	ShapeNameDistance = 100;
 	hIsInfected = 2;
@@ -68,7 +60,7 @@ function L4B_holeJockeyKill(%obj,%col)
 		if(%obj.getClassName() $= "AIPlayer")
 		%obj.hRunAwayFromPlayer(%col);
 
-		%col.damage(%obj.hFakeProjectile, %col.getposition(), $Pref::Server::L4B2Bots::SpecialsPinDamage/2, $DamageType::Jockey);
+		%col.damage(%obj.hFakeProjectile, %col.getposition(), $L4B_SpecialsDamage/2, $DamageType::Jockey);
 		%col.playaudio(1,"zombie_hit" @ getrandom(1,8) @ "_sound");
 		%obj.playThread(2,shiftdown);
 		%obj.playThread(3,talk);
@@ -101,7 +93,7 @@ function L4B_holeJockeyKill(%obj,%col)
 	function ZombieJockeyHoleBot::onBotLoop(%this,%obj)
 {
 	%obj.hLimitedLifetime();
-	%obj.hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
+	%obj.hAttackDamage = $L4B_SpecialsDamage;
 
 	if(%obj.hEating)
 	return;

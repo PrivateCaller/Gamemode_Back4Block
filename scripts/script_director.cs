@@ -2,7 +2,7 @@
 LoadRequiredAddOn("Brick_Halloween");
 datablock fxDTSBrickData (brickL4BDirectorData : brickSkullData)
 {
-	subCategory = "Interactive";
+	subCategory = "Left 4 BLock";
 	uiName = "Director Block";
 };
 
@@ -77,7 +77,7 @@ function MiniGameSO::removeZombieBots(%minigame, %mode, %client)
 
 function MinigameSO::director(%minigame,%choice,%client)
 {   
-    %directorinterval = $Pref::L4BDirector::Director_Interval*1000;
+    %directorinterval = $L4B_DirectorInterval*1000;
     %directorintervalhalf = %directorinterval/2;
     
     switch(%choice)
@@ -134,11 +134,11 @@ function MiniGameSO::directorSpecial(%minigame,%client)
     if(!%minigame.isDirectorEnabled)
     return;
     
-    %directorinterval = $Pref::L4BDirector::Director_Interval*1000;
+    %directorinterval = $L4B_DirectorInterval*1000;
     %directorintervalhalf = %directorinterval/2;
 
     %minigame.spawnZombies("Special",15000,getRandom(8000,12000),8,%client);
-    %minigame.spawnZombies("Wander",25000,getRandom(2000,4000),8,%client);
+    %minigame.spawnZombies("Wander",25000,1000,8,%client);
 
     cancel(directorSpecialSchedule);
     %minigame.directorSpecialSchedule = %minigame.schedule(%directorintervalhalf,directorSpecial,%client);
@@ -150,16 +150,15 @@ function MiniGameSO::directorChoose(%minigame,%client)
     if(!%minigame.isDirectorEnabled)
     return;
 
-    %directorinterval = $Pref::L4BDirector::Director_Interval*1000;
+    %directorinterval = $L4B_DirectorInterval*1000;
     %directorintervalhalf = %directorinterval/2;
     %minigame.DirectorProcessEvent("onDirectorInterval",%client);
 
     cancel(%minigame.directorSchedule);
-    %minigame.directorSchedule = %minigame.schedule($Pref::L4BDirector::Director_Interval*1000,directorChoose,%client);
+    %minigame.directorSchedule = %minigame.schedule($L4B_DirectorInterval*1000,directorChoose,%client);
 
-	%tankhealthscale = %minigame.numMembers*1000;
-	$hTankHealth = 2000+%tankhealthscale;
-	eval("ZombieTankHoleBot.maxDamage =" @ $hTankHealth @ ";");
+	%membermultiply = %minigame.numMembers * 1000;
+    eval("ZombieTankHoleBot.maxDamage =" @ $L4B_TankHealth + %membermultiply @ ";");
 
 	for(%i=0;%i<%minigame.numMembers;%i++)
 	{
@@ -228,7 +227,7 @@ function MiniGameSO::SmallHorde(%minigame,%client)
         }
     }
 
-    %directorinterval = $Pref::L4BDirector::Director_Interval*1000;
+    %directorinterval = $L4B_DirectorInterval*1000;
 
     if($Pref::L4BDirector::AllowMGMessages)
     MiniGameSO::ChatMsgAll(%minigame,"\c3Director <bitmapk:add-ons/package_left4block/icons/ci_skull2> \c3Small Horde",%client);
@@ -243,7 +242,7 @@ function MiniGameSO::LargeHorde(%minigame,%client)
     if(!%minigame.isDirectorEnabled)
     return;
 
-    %directorinterval = $Pref::L4BDirector::Director_Interval*1000;
+    %directorinterval = $L4B_DirectorInterval*1000;
     
     if($Pref::L4BDirector::EnableCues)
     {
@@ -268,7 +267,7 @@ function MiniGameSO::LargeHorde(%minigame,%client)
 
 function MiniGameSO::hordeMusic(%minigame,%client)
 {
-    %directorinterval = $Pref::L4BDirector::Director_Interval*1000;
+    %directorinterval = $L4B_DirectorInterval*1000;
     %directorintervalhalf = %directorinterval/2;
 
     %minigame.DirectorMusic("musicData_L4D_drum_suspense" @ getRandom(1,2),%client);
@@ -296,7 +295,7 @@ function MinigameSO::TankRound(%minigame,%client)
     if(!%minigame.isDirectorEnabled)
     return;
 
-    if(%minigame.directorTankRound < $Pref::L4BDirector::TankRounds)
+    if(%minigame.directorTankRound < $L4B_TankRounds)
     {
         %minigame.directorTankRound++;
 
@@ -325,7 +324,7 @@ function MinigameSO::TankRoundEnd(%minigame,%client)
 
     %minigame.isDirectorEnabled = 1;
     cancel(%minigame.directorSchedule);
-    %minigame.directorSchedule = %minigame.schedule($Pref::L4BDirector::Director_Interval*1000,directorChoose,%client);
+    %minigame.directorSchedule = %minigame.schedule($L4B_DirectorInterval*1000,directorChoose,%client);
 }
 
 function MinigameSO::PanicRound(%minigame,%client)
@@ -355,7 +354,7 @@ function MinigameSO::PanicRoundEnd(%minigame,%client)
 
     %minigame.isDirectorEnabled = 1;
     cancel(%minigame.directorSchedule);
-    %minigame.directorSchedule = %minigame.schedule($Pref::L4BDirector::Director_Interval*1000,directorChoose,%client);
+    %minigame.directorSchedule = %minigame.schedule($L4B_DirectorInterval*1000,directorChoose,%client);
 }
 
 //Reusable functions
@@ -381,8 +380,7 @@ function MinigameSO::spawnZombies(%minigame,%type,%respawntime,%delayTime,%amoun
         {
             %brick = directorBricks.getObject(%i);
 
-            if(%brick.getdatablock().isZombieBrick)
-            if(strstr(%brick.getname(), %type) != -1)
+            if(%brick.getdatablock().isZombieBrick && strstr(%brick.getname(), %type) != -1)
             {
                 %brick.itemRespawnTime = %respawntime;
                 

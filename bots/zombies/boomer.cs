@@ -1,10 +1,3 @@
-//datablock fxDTSBrickData (BrickZombieBoomer_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
-//{
-//	uiName = "Zombie Boomer Hole";
-//	iconName = "Add-Ons/Package_Left4Block/icons/icon_boomer";
-//	holeBot = "ZombieBoomerHoleBot";
-//};
-
 datablock PlayerData(ZombieBoomerHoleBot : CommonZombieHoleBot)
 {
 	uiName = "Boomer Infected";
@@ -45,7 +38,7 @@ datablock PlayerData(ZombieBoomerHoleBot : CommonZombieHoleBot)
 	hMoveSlowdown = 1;
 
 	hName = "Boomer";//cannot contain spaces
-	hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
+	hAttackDamage = $L4B_SpecialsDamage;
 
 	rechargeRate = 1.25;
 	maxenergy = 100;
@@ -92,7 +85,7 @@ function ZombieBoomerHoleBot::onBotMelee(%this,%obj,%col)
 
 	function ZombieBoomerHoleBot::onBotLoop(%this,%obj)
 {
-	%obj.hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
+	%obj.hAttackDamage = $L4B_SpecialsDamage;
 	%obj.hLimitedLifetime();
 
 	%obj.playthread(3,plant);

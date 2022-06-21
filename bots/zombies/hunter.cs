@@ -1,11 +1,3 @@
-//datablock fxDTSBrickData (BrickHunter_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
-//{
-//	uiName = "Hunter Zombie Hole";
-//	iconName = "Add-Ons/Package_Left4Block/icons/icon_hunter";
-//
-//	holeBot = "ZombieHunterHoleBot";
-//};
-
 datablock PlayerData(ZombieHunterHoleBot : CommonZombieHoleBot)
 {
 	uiName = "Hunter Infected";
@@ -38,7 +30,7 @@ datablock PlayerData(ZombieHunterHoleBot : CommonZombieHoleBot)
 
 	hName = "Hunter";//cannot contain spaces
 	hStrafe = 0;//Randomly strafe while following player
-	hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
+	hAttackDamage = $L4B_SpecialsDamage;
 
 	rechargeRate = 1.75;
 	maxenergy = 100;
@@ -71,7 +63,7 @@ function L4B_holeHunterKill(%obj,%col)
 		
 		%obj.HunterHurt = schedule(1000,0,L4B_holeHunterKill,%obj,%col);
 		%obj.unmount();
-		%col.damage(%obj.hFakeProjectile, %col.getposition(), $Pref::Server::L4B2Bots::SpecialsPinDamage, $DamageType::Hunter);
+		%col.damage(%obj.hFakeProjectile, %col.getposition(), $L4B_SpecialsDamage/2, $DamageType::Hunter);
 	}
 }
 
@@ -125,7 +117,7 @@ function ZombieHunterHoleBot::onDisabled(%this,%obj)
 
 function ZombieHunterHoleBot::onBotLoop(%this,%obj)
 {
-	%obj.hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
+	%obj.hAttackDamage = $L4B_SpecialsDamage;
 	%obj.hLimitedLifetime();
 	
 	if(!%obj.hFollowing)

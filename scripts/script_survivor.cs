@@ -266,7 +266,7 @@ function SurvivorPlayer::onNewDataBlock(%this,%obj)
 {	
 	Parent::onNewDataBlock(%this,%obj);
 
-	if($Pref::SurvivorPlayer::SurvivorImmunity)
+	if($L4B_SurvivorImmunity)
 	%obj.hIsImmune = 1;
 
 	%obj.hType = "Survivors";

@@ -1,10 +1,3 @@
-//datablock fxDTSBrickData (BrickZombieCeda_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
-//{
-//	uiName = "Ceda Zombie Hole";
-//	holeBot = "ZombieCedaHoleBot";
-//	iconName = "Add-Ons/Package_Left4Block/icons/icon_ceda";
-//};
-
 datablock PlayerData(ZombieCedaHoleBot : CommonZombieHoleBot)
 {
 	uiName = "";

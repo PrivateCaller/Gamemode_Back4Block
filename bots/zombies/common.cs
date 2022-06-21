@@ -1,40 +1,3 @@
-datablock fxDTSBrickData (BrickCommonZombie_HoleSpawnData)
-{
-	brickFile = "Add-ons/Bot_Hole/4xSpawn.blb";
-	category = "Special";
-	subCategory = "Holes";
-	uiName = "L4B Zombie Hole";
-	iconName = "Add-Ons/Package_Left4Block/icons/icon_zombie";
-
-	bricktype = 2;
-	cancover = 0;
-	orientationfix = 1;
-	indestructable = 1;
-
-	isBotHole = 1;
-	isZombieBrick = 1;
-	holeBot = "CommonZombieHoleBot";
-};
-
-function BrickCommonZombie_HoleSpawnData::onPlant(%this, %obj)
-{
-	if(!isObject(directorBricks))
-    {
-        new SimSet(directorBricks);
-        directorBricks.add(%obj);
-        MissionCleanup.add(directorBricks);
-    }
-    else if(isObject(directorBricks))
-    directorBricks.add(%obj);
-
-	Parent::onPlant(%this,%obj);
-}
-
-function BrickCommonZombie_HoleSpawnData::onloadPlant(%this, %obj)
-{
-	BrickCommonZombie_HoleSpawnData::onPlant(%this,%obj);
-}
-
 datablock PlayerData(CommonZombieHoleBot : PlayerMeleeAnims)
 {
 	canJet = false;
@@ -110,7 +73,7 @@ datablock PlayerData(CommonZombieHoleBot : PlayerMeleeAnims)
 
 	//Attack Options
 	hMelee = 2;//Melee
-	hAttackDamage = $Pref::Server::L4B2Bots::NormalsDamage;
+	hAttackDamage = $L4B_NormalDamage;
 	hShoot = 1;
 	hWep = "";
 	hShootTimes = 4;
@@ -147,8 +110,23 @@ datablock ProjectileData(ZombieHitProjectile)
 };
 
 function CommonZombieHoleBot::onAdd(%this,%obj)
-{	
+{			
 	Parent::onAdd(%this,%obj);
+
+	if(strstr(%obj.spawnbrick.getName(), "Special") != -1)
+	%obj.spawnbrick.RandomizeZombieSpecial();
+	
+	else if(strstr(%obj.spawnbrick.getName(), "Uncommon") != -1)
+	%obj.spawnbrick.RandomizeZombieUncommon();
+
+	else if(strstr(%obj.spawnbrick.getName(), "Tank") != -1)
+	%obj.spawnbrick.hBotType = "ZombieTankHoleBot";
+
+	else if(strstr(%obj.spawnbrick.getName(), "Witch") != -1)
+	%obj.spawnbrick.hBotType = "ZombieWitchHoleBot";
+
+	else if(strstr(%obj.spawnbrick.getName(), "Horde") != -1 || strstr(%obj.spawnbrick.getName(), "Wander") != -1)
+	%obj.spawnbrick.hBotType = "CommonZombieHoleBot";
 
 	%obj.onL4BDatablockAttributes();
 	%obj.hDefaultL4BAppearance();
@@ -214,7 +192,7 @@ function CommonZombieHoleBot::onDisabled(%this,%obj)
 
 function CommonZombieHoleBot::onBotLoop(%this,%obj)
 {
-	%obj.hAttackDamage = $Pref::Server::L4B2Bots::NormalsDamage;
+	%obj.hAttackDamage = $L4B_NormalDamage;
 	%obj.hLimitedLifetime();
 
 	if(!isObject(%obj.distraction))
@@ -254,8 +232,8 @@ function CommonZombieHoleBot::onBotFollow( %this, %obj, %targ )
 
 		switch(%obj.hZombieL4BType)
 		{
-			case 1: %obj.setMaxForwardSpeed(20);
-					%obj.setmaxUnderwaterForwardSpeed(20);
+			case 1: %obj.setMaxForwardSpeed(15);
+					%obj.setmaxUnderwaterForwardSpeed(15);
 
 			case 3: %obj.setMaxForwardSpeed(4);
 					%obj.setmaxUnderwaterForwardSpeed(2);
@@ -404,7 +382,7 @@ function CommonZombieHoleBot::L4BCommonAppearance(%this,%obj,%skinColor,%face,%d
 	%obj.rleg =  0;
 	%obj.rlegColor = %rLegColor;
 
-	if(%obj.getClassName() $= "AIPlayer" && getRandom(1,1000) < 5)//Chance to become zombie version of player
+	if(%obj.getClassName() $= "AIPlayer" && getRandom(1,16) == 1)//Chance to become zombie version of player
 	{
 		if(isObject(%playerclient = ClientGroup.getObject(getRandom(ClientGroup.getCount()-1))))
 		%obj.hZombieBotToPlayerApearance(%playerclient);
@@ -469,7 +447,7 @@ function CommonZombieHoleBot::L4BCommonFastAppearance(%this,%obj,%skinColor,%fac
 	%obj.rleg =  0;
 	%obj.rlegColor = %rLegColor;
 
-	if(%obj.getClassName() $= "AIPlayer" && getRandom(1,1000) < $Pref::Server::L4B2Bots::ZombifiedPlayerBotAppearance*10)//Chance to become zombie version of player
+	if(%obj.getClassName() $= "AIPlayer" && getRandom(1,16) == 1)//Chance to become zombie version of player
 	{
 		if(isObject(%playerclient = ClientGroup.getObject(getRandom(ClientGroup.getCount()-1))))
 		%obj.hZombieBotToPlayerApearance(%playerclient);

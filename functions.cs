@@ -129,7 +129,7 @@ function Player::hChangeBotToInfectedAppearance(%obj)
 	%obj.hSight = %this.hSight;
 	%obj.hSearchFov = %this.hSearchFov;
 	%obj.hSuperStacker = %this.hSuperStacker;
-	%obj.hAttackDamage = $Pref::Server::L4B2Bots::NormalsDamage;
+	%obj.hAttackDamage = $L4B_NormalDamage;
 	%obj.hMelee = %this.hMelee;
 
 	for(%a = 0; %a <= $aCL; %a++)

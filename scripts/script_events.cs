@@ -20,13 +20,14 @@ function fxDTSBrick::RandomizeZombieUncommon(%obj)
 	%type[ %ntype++ ] = "MudZombieHoleBot";
 	%type[ %ntype++ ] = "ZombieClownHoleBot";
 	%type[ %ntype++ ] = "ZombieJimmyHoleBot";
+	%type[ %ntype++ ] = "ToxicZombieHoleBot";
+	%type[ %ntype++ ] = "ZombiePirateHoleBot";
 
 	//if($AddOn__Bot_Zombie_L4B2_EXT2 $= "1")
 	//{
 	//	%type[ %ntype++ ] = "ToxicZombieHoleBot";
 	//	%type[ %ntype++ ] = "ZombieNaziHoleBot";
 	//	%type[ %ntype++ ] = "ZombieSpaceHoleBot";
-	//	%type[ %ntype++ ] = "ZombiePirateHoleBot";
 	//	%type[ %ntype++ ] = "BurningZombieHoleBot";
 	//	%type[ %ntype++ ] = "HeadcrabZombieHoleBot";
 	//}
@@ -39,18 +40,6 @@ function fxDTSBrick::RandomizeZombieUncommon(%obj)
 
 }
 registerOutputEvent(fxDTSBrick, "RandomizeZombieUncommon");
-
-function fxDTSBrick::enableZombieLoot( %obj, %on )
-{
-	if(isObject(%obj.hBot))
-	%obj = %obj.hbot;
-
-	if(!isObject(%obj))
-	return;
-	
-	%obj.hZombieLoot = %on;
-}
-registerOutputEvent( fxDTSBrick, "enableZombieLoot", "bool" );
 
 function fxDTSBrickData::onZombieTouch(%data,%obj,%player)
 {
@@ -192,10 +181,10 @@ function Player::ToxifyHealth ( %Player, %amt )
 	else if(%Player.isToxic == 0)
 	{
 		%Player.Damage (%Player.hFakeProjectile, %Player.getPosition(), %amt * -1, $DamageType::Default);
-				if(!%Player.Toxified)
+		if(!%Player.Toxified)
 		{
-		schedule(500,0,ToxicityE,%Player);
-		%Player.Toxified = 1;
+			schedule(500,0,ToxicityE,%Player);
+			%Player.Toxified = 1;
 		}
 	}
 }

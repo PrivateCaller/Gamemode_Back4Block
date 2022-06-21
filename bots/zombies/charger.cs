@@ -1,11 +1,3 @@
-//datablock fxDTSBrickData (BrickZombieCharger_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
-//{
-//	uiName = "Zombie Charger Hole";
-//	iconName = "Add-Ons/Package_Left4Block/icons/icon_charger";
-//
-//	holeBot = "ZombieChargerHoleBot";
-//};
-
 datablock PlayerData(ZombieChargerHoleBot : CommonZombieHoleBot)
 {
 	uiName = "Charger Infected";
@@ -17,7 +9,7 @@ datablock PlayerData(ZombieChargerHoleBot : CommonZombieHoleBot)
 	hName = "Charger";//cannot contain spaces
 	hTickRate = 5000;
 	hMeleeCI = "Charger";
-	hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
+	hAttackDamage = $L4B_SpecialsDamage;
 
 	cameramaxdist = 4;
     cameraVerticalOffset = 1;
@@ -78,7 +70,7 @@ function L4B_holeChargerKill(%obj,%col)
 		%obj.schedule(100,playThread,2,shiftdown);
 		%obj.schedule(100,playaudio,3,"charger_smash_sound");
 		%col.schedule(100,playThread,2,plant);
-		%col.schedule(100,damage,%obj.hFakeProjectile, %col.getposition(), $Pref::Server::L4B2Bots::SpecialsPinDamage, $DamageType::Charger);
+		%col.schedule(100,damage,%obj.hFakeProjectile, %col.getposition(), $L4B_SpecialsDamage/2, $DamageType::Charger);
 		%obj.schedule(100,spawnExplosion,pushBroomProjectile,"0.5 0.5 0.5");
 		%obj.hSharkEatDelay = schedule(2000,0,L4B_holeChargerKill,%obj,%col);
 		%obj.playaudio(0,"charger_pummel" @ getrandom(1,4) @ "_sound");
@@ -118,7 +110,7 @@ function L4B_Charging(%obj,%targ)
 
 function ZombieChargerHoleBot::onBotLoop(%this,%obj)
 {
-	%obj.hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
+	%obj.hAttackDamage = $L4B_SpecialsDamage;
 	%obj.hLimitedLifetime();
 	
 	if(!%obj.hFollowing)

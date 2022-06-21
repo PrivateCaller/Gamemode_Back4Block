@@ -1,11 +1,3 @@
-//datablock fxDTSBrickData (BrickZombieSmoker_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
-//{
-//	uiName = "Zombie Smoker Hole";
-//	iconName = "Add-Ons/Package_Left4Block/icons/icon_smoker";
-//
-//	holeBot = "ZombieSmokerHoleBot";
-//};
-
 datablock PlayerData(ZombieSmokerHoleBot : CommonZombieHoleBot)
 {
 	uiName = "Smoker Infected";
@@ -15,7 +7,7 @@ datablock PlayerData(ZombieSmokerHoleBot : CommonZombieHoleBot)
 	maxdamage = 100;//Health
 
 	hName = "Smoker";//cannot contain spaces
-	hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
+	hAttackDamage = $L4B_SpecialsDamage;
 	hTickRate = 5000;
 
     maxForwardSpeed = 8;
@@ -95,7 +87,7 @@ function ZombieSmokerHoleBot::SmokerTongueLoop(%this,%obj,%target)
 
 function ZombieSmokerHoleBot::onBotLoop(%this,%obj)
 {
-	%obj.hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
+	%obj.hAttackDamage = $L4B_SpecialsDamage;
 	%obj.hLimitedLifetime();
 
 	if(!%obj.hFollowing && %obj.lastidle+5000 < getsimtime() && %obj.getstate() !$= "Dead" && !%obj.isstrangling)

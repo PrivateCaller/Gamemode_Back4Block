@@ -198,8 +198,6 @@ datablock ProjectileData(mud_Projectile)
 	uiName = "";
 };
 
-
-
 datablock ShapeBaseImageData(mud_Image)
 {
 	shapeFile  = "add-ons/Package_Left4Block/models/mudball.dts";
@@ -385,34 +383,19 @@ datablock ShapeBaseImageData(MudStatusPlayerImage)
    armReady = false;
 
    doColorShift = false;
-   colorShiftColor = "1 1 1 1";
-
-	//lightType = "ConstantLight";
-	//lightColor = "0 1 0";
-	//lightRadius = 4;
 
 	stateName[0]                   = "Wait";
 	stateTimeoutValue[0]           = 0.2;
 	stateEmitter[0]                = MudStatusEmitter;
 	stateEmitterTime[0]            = 1;
 	stateTransitionOnTimeout[0]    = "Poison";
-	//stateSound[0]                  = MudPulseSound;
 
 	stateName[1]                   = "Poison";
-	//stateScript[1]                 = "Damage";
 	stateEmitter[1]                = MudPulseEmitter;
 	stateEmitterTime[1]            = 0.2;
 	stateTimeoutValue[1]           = 0.1;
 	stateTransitionOnTimeout[1]    = "Wait";
-	//stateSound[1]                  = FireShotSound;	//No sound
 };
-
-//datablock fxDTSBrickData (BrickMudZombie_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
-//{
-//	uiName = "Mud Zombie Hole";
-//	holeBot = "MudZombieHoleBot";
-//	iconName = "Add-Ons/Package_Left4Block/icons/icon_mudman";
-//};
 
 datablock PlayerData(MudZombieHoleBot : CommonZombieHoleBot)
 {

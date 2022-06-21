@@ -215,7 +215,7 @@ package L4B2Bots_Main
 		if(%objA.getclassname() $= "GameConnection" || %objA.getclassname() $= "Player" || %objA.getclassname() $= "AIPlayer")
 		if(%objB.getclassname() $= "Player" || %objB.getclassname() $= "AIPlayer")
 		{
-			if(%objA !$= %objB && %objA.player !$= %objB)
+			if(%objA !$= %objB && %objA.player !$= %objB && %objB.htype && %objA.htype && %objA.player.hType)
 			if(%objA.hType $= %objB.hType || %objA.player.hType $= %objB.hType)
 			return;
 		}

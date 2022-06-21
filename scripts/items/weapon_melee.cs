@@ -65,7 +65,7 @@ datablock ShapeBaseImageData(crowbarImage)
 	stateAllowImageChange[3]        = false;
 	stateSequence[3]                = "Fire";
 	stateScript[3]                  = "onFire";
-	stateTimeoutValue[3]            = 0.21;
+	stateTimeoutValue[3]            = 0.1925;
 	stateSound[3]					= "melee_swing_sound";
 
 	stateName[4]			= "CheckFire";
