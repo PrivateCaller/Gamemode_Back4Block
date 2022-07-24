@@ -201,7 +201,7 @@ function Player::BrickScanCheck(%obj)
 	if(!$Pref::SurvivorPlayer::BrickScanning || !isObject(%obj) || %obj.getState() $= "Dead")
 	return;
 
-	InitContainerRadiusSearch(%obj.getPosition(), 10, $TypeMasks::FxBrickObjectType);
+	InitContainerRadiusSearch(%obj.getPosition(), 15, $TypeMasks::FxBrickObjectType);
 	while(%brick = containerSearchNext())
 	{
 		$InputTarget_["Self"] = %brick;
@@ -222,7 +222,7 @@ function Player::BrickScanCheck(%obj)
 					MainTeleSet.add(%telebrick);
 		        }
     	    	cancel(%brick.teleset.DisableTeleporting);
-    	    	%brick.teleset.DisableTeleporting = schedule(2500,0,DisableTeleporting,%brick);
+    	    	%brick.teleset.DisableTeleporting = schedule(3000,0,DisableTeleporting,%brick);
 			}
     	}
 	}
@@ -239,6 +239,7 @@ function Player::doMRandomTele(%obj)
 	if(isObject(%main = MainTeleSet) && %main.getCount() > 0)
 	{	
 		%brick = %main.getObject(getRandom(0,%main.getcount()-1));
+
 		%obj.settransform(vectorAdd(getwords(%brick.gettransform(),0,2),"0 0 0.25"));
 		%obj.setvelocity(%obj.getvelocity());
 

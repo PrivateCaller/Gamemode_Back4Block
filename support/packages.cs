@@ -3,6 +3,15 @@
 // ============================================================
 package L4B2Bots_Main
 {
+	function player::pickup(%obj,%item)
+	{
+		Parent::pickup(%obj,%item);
+
+		if(isObject(getMiniGameFromObject(%obj)) && %obj.getDatablock().isSurvivor)
+		if(isObject(%item))
+		%item.delete();
+	}
+	
 	function Armor::onImpact(%this, %obj, %col, %vec, %force)
 	{
 		if(%force < 40)
@@ -110,13 +119,6 @@ package L4B2Bots_Main
 	function fxDTSBrickData::onPlayerTouch(%data,%obj,%player)
 	{
 		Parent::onPlayerTouch(%data,%obj,%player);
-	
-		if(%player.getDatablock().getName() !$= "ZombieTankHoleBot")
-		{
-			if(%player.hZombieL4BType)
-			%obj.processInputEvent ("onZombieTouch");
-		}
-		else %obj.processInputEvent ("onTankTouch");	
 	}
 
 	function Projectile::onAdd(%obj)
@@ -215,7 +217,6 @@ package L4B2Bots_Main
 		if(%objA.getclassname() $= "GameConnection" || %objA.getclassname() $= "Player" || %objA.getclassname() $= "AIPlayer")
 		if(%objB.getclassname() $= "Player" || %objB.getclassname() $= "AIPlayer")
 		{
-			if(%objA !$= %objB && %objA.player !$= %objB && %objB.htype && %objA.htype && %objA.player.hType)
 			if(%objA.hType $= %objB.hType || %objA.player.hType $= %objB.hType)
 			return;
 		}
@@ -249,12 +250,24 @@ package L4B2Bots_Main
     function MiniGameSO::Reset(%minigame,%client)
 	{
 		Parent::Reset(%minigame,%client);
+		L4B_DifficultyAdjustment();
 
-		%minigame.schedule(5,removeZombieBots,"Clear",%client);
+		if(isObject(directorBricks))
+		for (%i = 0; %i < directorBricks.getCount(); %i++) 
+        {
+            %brick = directorBricks.getObject(%i);
+
+            if(%brick.getdatablock().isZombieBrick)
+            {
+                cancel(%brick.spawnBots);
+                %brick.BotHoleAmount = 0;
+            }
+        }
+
+		%minigame.schedule(10,removeZombieBots,"Clear",%client);
 		%minigame.L4B_PlaySound("game_start_sound");
 
         %directorinterval = $Pref::L4BDirector::Director_Interval*1000;
-        %directorintervalhalf = %directorinterval/2;
 
         if(isObject(l4b_music)) 
         l4b_music.delete();
@@ -284,28 +297,20 @@ package L4B2Bots_Main
 
         if($Pref::L4BDirector::EnableOnMG)
         {
-            %minigame.isDirectorEnabled = 1;
+            %minigame.DirectorStatus = 1;
             cancel(%minigame.directorSchedule);
 
-            cancel(directorSpecialSchedule);
-            %minigame.directorSpecialSchedule = %minigame.schedule($Pref::L4BDirector::Director_Interval/2,directorSpecial,%client);
-
-            %minigame.schedule(%directorinterval,directorChoose,%client);
-            %minigame.schedule(%directorintervalhalf,directorSpecial,%client);
+            %minigame.schedule(%directorinterval,directorAI,%client);
 
             if($Pref::L4BDirector::EnableCues)
             %minigame.directorPlaySound("hordeincoming" @ getrandom(1,9) @ "_sound",%client);
-
-            if($Pref::L4BDirector::AllowMGMessages)
-            MiniGameSO::ChatMsgAll (%minigame, "\c3Director activated.", %client);
 
             if(isObject(l4b_music)) 
             l4b_music.delete();
         }
         else
         {
-            cancel(directorSpecialSchedule);
-            %minigame.isDirectorEnabled = 0;
+            %minigame.DirectorStatus = 0;
             cancel(%minigame.directorSchedule);
         }
         
@@ -313,7 +318,7 @@ package L4B2Bots_Main
         cancel(%minigame.hordeMusic);
         cancel(%minigame.hordeMusic1);
         cancel(%minigame.hordeMusic2);
-        cancel(%minigame.TriggerHordeEndEvent);
+        cancel(%minigame.hordeEndShed);
 	}
 
     function MiniGameSO::endGame(%minigame)
@@ -321,6 +326,17 @@ package L4B2Bots_Main
         Parent::endGame(%minigame);
         if(isObject(l4b_music)) 
         l4b_music.delete();
+		
+		for (%i = 0; %i < directorBricks.getCount(); %i++) 
+        {
+            %brick = directorBricks.getObject(%i);
+
+            if(%brick.getdatablock().isZombieBrick)
+            {
+                cancel(%brick.spawnBots);
+                %brick.BotHoleAmount = 0;
+            }
+        }
     }
 
 	function holeZombieInfect(%obj, %col)

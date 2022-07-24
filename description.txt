@@ -1,4 +1,2 @@
 Author: Davow, Robbinson Block
-Gamemode package for Left 4 Block Gamemode, multiple add-ons and packages in one add-on
-
-So let's go kill some zombies, shall we?
+Left 4 Dead styled gamemode, iterating from the previous ZAPT and Gamemode_Zombie variant, including multiple add-ons and packages
