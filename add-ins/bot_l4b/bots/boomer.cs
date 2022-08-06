@@ -38,7 +38,7 @@ datablock PlayerData(ZombieBoomerHoleBot : CommonZombieHoleBot)
 	hMoveSlowdown = 1;
 
 	hName = "Boomer";//cannot contain spaces
-	hAttackDamage = $L4B_SpecialsDamage;
+	hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
 
 	rechargeRate = 1.25;
 	maxenergy = 100;
@@ -85,7 +85,7 @@ function ZombieBoomerHoleBot::onBotMelee(%this,%obj,%col)
 
 	function ZombieBoomerHoleBot::onBotLoop(%this,%obj)
 {
-	%obj.hAttackDamage = $L4B_SpecialsDamage;
+	%obj.hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
 	%obj.hLimitedLifetime();
 
 	%obj.playthread(3,plant);

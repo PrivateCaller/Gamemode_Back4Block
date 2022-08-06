@@ -1,4 +1,3 @@
-
 LoadRequiredAddOn("Brick_Halloween");
 datablock fxDTSBrickData (brickL4BDirectorData : brickSkullData)
 {
@@ -52,8 +51,8 @@ function fxDTSBrick::spawnHoleBots(%obj,%count)
         %setcheck = "Bot_" @ %obj.lastTypeSpawned;
         switch$(%obj.lastTypeSpawned)
         {
-            case "Horde": %maxcheck = $L4B_MaxHorde;
-            case "Special": %maxcheck = $L4B_MaxSpecial;
+            case "Horde": %maxcheck = $Pref::Server::L4B2Bots::MaxHorde;
+            case "Special": %maxcheck = $Pref::Server::L4B2Bots::MaxSpecial;
 
         }
 
@@ -66,15 +65,15 @@ function fxDTSBrick::spawnHoleBots(%obj,%count)
     }
 
     cancel(%obj.spawnBots);
-    %obj.spawnBots = %obj.schedule(250,spawnHoleBots,%count++);
+    %obj.spawnBots = %obj.schedule(500,spawnHoleBots,%count++);
 }
 
 registerInputEvent("fxDTSBrick", "onDirectorInterval", "Self fxDTSBrick" TAB "MiniGame MiniGame");
-registerOutputEvent(Minigame, "Director", "List Disable 0 Enable 1 HordeS 2 HordeL 3 Tank 4 Panic 5",0);
+registerOutputEvent(Minigame, "Director", "List Disable 0 Enable 1 Horde 2 Tank 3 Panic 4",0);
 registerOutputEvent(Minigame, "RoundEnd");
 
 function MinigameSO::director(%minigame,%choice,%client)
-{       
+{
     switch(%choice)
     {
         case 0: if(isObject(l4b_music))
@@ -104,15 +103,12 @@ function MinigameSO::director(%minigame,%choice,%client)
                     %minigame.directorSchedule = %minigame.schedule(10000,directorAI,%client);
                 }
         case 2: if(%minigame.DirectorStatus)
-                %minigame.HordeRound(%client);
-
-        case 3: if(%minigame.DirectorStatus)
-                %minigame.HordeRound(%client);
+                %minigame.HordeRound(getRandom(1,2),%client);
                 
-        case 4: if(%minigame.DirectorStatus)
+        case 3: if(%minigame.DirectorStatus)
                 %minigame.TankRound(%client);
 
-        case 5: if(%minigame.DirectorStatus)
+        case 4: if(%minigame.DirectorStatus)
                 %minigame.PanicRound(%client);
     }
 
@@ -120,6 +116,14 @@ function MinigameSO::director(%minigame,%choice,%client)
 
 function MiniGameSO::directorAI(%minigame,%directorInterval,%client)
 {    
+    if(%directorInterval > 3)
+    %directorInterval = 0;
+
+    %minigame.DirectorProcessEvent("onDirectorInterval",%client);
+
+    cancel(%minigame.directorSchedule);
+    %minigame.directorSchedule = %minigame.schedule(10000,directorAI,%directorInterval++,%client);
+    
     switch(%directorInterval)
     {
         case 1: %minigame.spawnZombies("Special",1,%client);
@@ -128,8 +132,7 @@ function MiniGameSO::directorAI(%minigame,%directorInterval,%client)
                 if(%minigame.DirectorStatus == 2)
                 %minigame.spawnZombies("Horde",25,%client);
 
-        case 3: %directorInterval = 0;
-                switch(%minigame.DirectorStatus)
+        case 3: switch(%minigame.DirectorStatus)
                 {
                     case 0: return;
 
@@ -155,18 +158,14 @@ function MiniGameSO::directorAI(%minigame,%directorInterval,%client)
                             switch(%round)
                             {
                                 case 0: %minigame.BreakRound(%client);
-                                case 1: %minigame.HordeRound(%client);
-                                case 2: %minigame.HordeRound(%client);
+                                case 1: %minigame.HordeRound(getRandom(1,2),%client);
+                                case 2: %minigame.HordeRound(getRandom(1,2),%client);
                                 case 3: %minigame.TankRound(%client);
                             }
 
-                    case 2: return;   
+                    case 2:   
                 }
     }
-
-    %minigame.DirectorProcessEvent("onDirectorInterval",%client);
-    cancel(%minigame.directorSchedule);
-    %minigame.directorSchedule = %minigame.schedule(10000,directorAI,%directorInterval++,%client);
 }
 
 function MinigameSO::BreakRound(%minigame,%client)
@@ -197,7 +196,7 @@ function MinigameSO::TankRound(%minigame,%client)
     if(!%minigame.DirectorStatus)
     return;
 
-    if(%minigame.directorTankRound < $L4B_TankRounds)
+    if(%minigame.directorTankRound < $Pref::Server::L4B2Bots::TankRounds)
     {
         %minigame.directorTankRound++;
         %minigame.DirectorStatus = 2;
@@ -229,9 +228,11 @@ function MiniGameSO::HordeRound(%minigame,%type,%client)
     if(!%minigame.DirectorStatus)
     return;
 
+    %minigame.DirectorStatus = 2;
+
     switch(%type)
     {
-        case 0: if($Pref::L4BDirector::EnableCues)
+        case 1: if($Pref::L4BDirector::EnableCues)
                 {
                     %minigame.directorPlaySound("hordeincoming" @ getrandom(1,9) @ "_sound",%client);
 
@@ -244,20 +245,7 @@ function MiniGameSO::HordeRound(%minigame,%type,%client)
 
                 %minigame.spawnZombies("Horde",50,%client);
 
-        case 1: if(getRandom(1,100) <= 50)
-                {
-                    if($Pref::L4BDirector::EnableCues)
-                    {
-                        %minigame.directorPlaySound("zombiechoir_0" @ getrandom(1,6) @ "_sound",%client);
-
-                        cancel(%minigame.choirSFX);
-                        %minigame.choirSFX = %minigame.schedule(15000,directorPlaySound,"zombiechoir_0" @ getrandom(1,6) @ "_sound",%client);
-
-                        %minigame.DirectorMusic("musicdata_L4D_background" @ getRandom(1,3),%client);
-                        l4b_music.schedule(30000,delete);
-                    }
-                }
-                %minigame.spawnZombies("Horde",25,%client);
+        case 2: %minigame.spawnZombies("Horde",25,%client);
     }
 }
 

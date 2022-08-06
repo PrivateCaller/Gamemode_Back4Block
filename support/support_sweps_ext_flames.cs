@@ -33,6 +33,9 @@ package L4B_SWepFlamesBurnsZombs
 				{
 					%pl.hRunAwayFromPlayer(%pl);
 					%pl.stopHoleLoop();
+						
+					%pl.MaxSpazzClick = getrandom(16,32);
+					L4B_SpazzZombie(%pl,0);
 				}
 				%pl.playThread(2,plant);
 			}

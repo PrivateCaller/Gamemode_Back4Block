@@ -410,11 +410,7 @@ function ZombiePillsImage::onUnUse(%this, %obj, %slot)
 		%heal = %maxDamage / 2;
 
 		%obj.playAudio(1,"heal_pills_pop_sound");
-		
-		    if(%obj.getenergylevel() < 100 && %obj.getDatablock().getName() $= "DownPlayerSurvivorArmor")
-  		{
-    		%obj.setenergylevel(%obj.getenergylevel()/0.85);
-  		}
+    	%obj.setenergylevel(%obj.getenergylevel()/0.65);
 
 		%obj.setDamageLevel(%obj.getDamageLevel()/1.3);
 		%obj.emote(HealImage, 1);
@@ -423,9 +419,7 @@ function ZombiePillsImage::onUnUse(%this, %obj, %slot)
 		%obj.setWhiteOut((%maxDamage - %damage) / %maxDamage);
 		
 		if(isObject(%client = %obj.client))
-		{
-			messageClient(%client, 'MsgItemPickup', '', %obj.currTool, 0);
-		}
+		messageClient(%client, 'MsgItemPickup', '', %obj.currTool, 0);
 		
 		%obj.tool[%obj.currTool] = 0;
 		%obj.weaponCount--;
@@ -520,9 +514,7 @@ function RedPotionImage::onFire(%data, %obj, %slot)
 		serverCmdUnUseTool(%obj.client);
       
 		if(%obj.getenergylevel() < 100 && %obj.getDatablock().getName() $= "DownPlayerSurvivorArmor")
-  		{
-    	  %obj.setenergylevel(%obj.getenergylevel()/0.8);
-  		}
+		%obj.setenergylevel(%obj.getenergylevel()/0.8);
 	}
 }
 
@@ -777,7 +769,7 @@ function coughsyrupImage::onFire(%data, %obj, %slot)
 	if(%obj.getDamageLevel() < 5 && %obj.getDatablock().getName() !$= "DownPlayerSurvivorArmor")
 	{
 		if(isObject(%client))
-			commandToClient(%client, 'centerPrint', "\c5You are not injured.", 1);
+		commandToClient(%client, 'centerPrint', "\c5You are not injured.", 1);
 	}
 	else
 	{
@@ -792,11 +784,7 @@ function coughsyrupImage::onFire(%data, %obj, %slot)
 		%obj.weaponCount--;
 		messageClient(%obj.client,'MsgItemPickup','',%currSlot,0);
 		serverCmdUnUseTool(%obj.client);
-      
-		if(%obj.getenergylevel() < 100 && %obj.getDatablock().getName() $= "DownPlayerSurvivorArmor")
-  		{
-    	  %obj.setenergylevel(%obj.getenergylevel()/0.775);
-  		}
+      	%obj.setenergylevel(%obj.getenergylevel()/0.25);
 	}
 }
 
@@ -888,24 +876,24 @@ function gc_SyringePanaceaImage::onSelfUse(%this,%obj,%slot)
 	%obj.weaponCount--;
 	messageClient(%obj.client,'MsgItemPickup','',%currSlot,0);
 	serverCmdUnUseTool(%obj.client);
-
+	%obj.setenergylevel(%obj.getenergylevel()/0.35);
 
 	if(%obj.getDatablock().getName() $= "DownPlayerSurvivorArmor")
 	{
-	centerprintcounter(%obj,%obj.savetimer);
-	%obj.isdowned = 0;
-	%obj.SetDataBlock("SurvivorPlayerLow");
-	SurvivorPlayer_HeartBeat(%obj.client,1);
-	%obj.lastdamage = getsimtime();
-	%obj.sethealth(25);
+		centerprintcounter(%obj,%obj.savetimer);
+		%obj.isdowned = 0;
+		%obj.SetDataBlock("SurvivorPlayerLow");
+		SurvivorPlayer_HeartBeat(%obj.client,1);
+		%obj.lastdamage = getsimtime();
+		%obj.sethealth(25);
 
-	%obj.playthread(0,root);
-	%obj.client.centerprint("<color:00fa00>You were saved by yourself",5);
-	//chatMessageTeam(%target.client,'fakedeathmessage',"<color:00fa00>" @ %this.client.name SPC "<bitmap:add-ons/player_Survivor/Reviver><bitmap:add-ons/player_Survivor/Revived>" SPC %target.client.name);
-	%obj.savetimer = 0;
-	cancel(%obj.energydeath1);
-	cancel(%obj.energydeath2);
-	cancel(%obj.energydeath3);
+		%obj.playthread(0,root);
+		%obj.client.centerprint("<color:00fa00>You were saved by yourself",5);
+		//chatMessageTeam(%target.client,'fakedeathmessage',"<color:00fa00>" @ %this.client.name SPC "<bitmap:add-ons/player_Survivor/Reviver><bitmap:add-ons/player_Survivor/Revived>" SPC %target.client.name);
+		%obj.savetimer = 0;
+		cancel(%obj.energydeath1);
+		cancel(%obj.energydeath2);
+		cancel(%obj.energydeath3);
 	}
 }
 

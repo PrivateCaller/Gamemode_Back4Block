@@ -21,23 +21,11 @@ function fxDTSBrick::RandomizeZombieUncommon(%obj)
 	%type[ %ntype++ ] = "ZombieFallenHoleBot";
 	%type[ %ntype++ ] = "ZombieCedaHoleBot";
 	%type[ %ntype++ ] = "ZombieSoldierHoleBot";
-	%type[ %ntype++ ] = "MudZombieHoleBot";
-	%type[ %ntype++ ] = "ZombieClownHoleBot";
-	%type[ %ntype++ ] = "ZombieJimmyHoleBot";
-	%type[ %ntype++ ] = "ToxicZombieHoleBot";
-	%type[ %ntype++ ] = "ZombiePirateHoleBot";
-
-	//if($AddOn__Bot_Zombie_L4B2_EXT2 $= "1")
-	//{
-	//	%type[ %ntype++ ] = "ToxicZombieHoleBot";
-	//	%type[ %ntype++ ] = "ZombieNaziHoleBot";
-	//	%type[ %ntype++ ] = "ZombieSpaceHoleBot";
-	//	%type[ %ntype++ ] = "BurningZombieHoleBot";
-	//	%type[ %ntype++ ] = "HeadcrabZombieHoleBot";
-	//}
-//
-	//if($AddOn__Bot_SkeletonRev $= "1")
-	//%type[ %ntype++ ] = "RandomSkeletonHoleBot";
+	//%type[ %ntype++ ] = "MudZombieHoleBot";
+	//%type[ %ntype++ ] = "ZombieClownHoleBot";
+	//%type[ %ntype++ ] = "ZombieJimmyHoleBot";
+	//%type[ %ntype++ ] = "ToxicZombieHoleBot";
+	//%type[ %ntype++ ] = "ZombiePirateHoleBot";
 
 	%type = %type[ getRandom( 1, %ntype ) ];
 	%obj.hBotType = %type;
@@ -202,8 +190,15 @@ function AIPlayer::hLimitedLifetime(%obj)
 	}
 
 	%obj.hLimitLife++;
-	if(%obj.hLimitLife >= "20")
-	%obj.kill();
+
+	if(%obj.hLimitLife >= 5)
+	{
+		%obj.doMRandomTele();
+		%obj.hLimitLife = 0;
+	}
+
+	//if(%obj.hLimitLife >= "10")
+	//%obj.kill();
 }
 
 function Player::onL4BDatablockAttributes(%obj)
@@ -356,7 +351,10 @@ function L4B_SpazzZombieInitialize(%obj,%count)
 			if(%obj.getclassname() $= "AIPlayer")
 			%obj.startHoleLoop();
 
+			if(isObject(%obj.getMountedImage(1)))
 			%obj.unMountImage(1);
+
+			if(isObject(%obj.getMountedImage(2)))
 			%obj.unMountImage(2);
 			%obj.SpazzOff = 0;
 		}
@@ -388,7 +386,7 @@ function L4B_SpazzZombieInitialize(%obj,%count)
 
 function L4B_SpazzZombie(%obj,%count)
 {
-	if(!isObject(%obj) || %obj.isBurning || %obj.getstate() $= "Dead" || %count >= %obj.MaxSpazzClick)
+	if(!isObject(%obj) || %obj.getstate() $= "Dead" || %count >= %obj.MaxSpazzClick)
 	return;
 
 	if(!%obj.hLoopActive && %obj.lastheadshake+getrandom(250,750) < getsimtime())
@@ -830,7 +828,7 @@ function L4B_SpecialsSpawnMusic(%obj)
 {
 	if($Pref::Server::L4B2Bots::SpecialsCue && isObject(getMinigameFromObject(%obj)))
 	{
-		%special = strlwr(%obj.getDataBlock().name);
+		%special = strlwr(%obj.name);
 		%obj.playaudio(3,%special @ "_spawn" @ getRandom(1,2) @ "_sound");
 	}
 }

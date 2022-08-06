@@ -7,7 +7,7 @@ datablock PlayerData(ZombieSmokerHoleBot : CommonZombieHoleBot)
 	maxdamage = 100;//Health
 
 	hName = "Smoker";//cannot contain spaces
-	hAttackDamage = $L4B_SpecialsDamage;
+	hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
 	hTickRate = 5000;
 
     maxForwardSpeed = 8;
@@ -87,7 +87,7 @@ function ZombieSmokerHoleBot::SmokerTongueLoop(%this,%obj,%target)
 
 function ZombieSmokerHoleBot::onBotLoop(%this,%obj)
 {
-	%obj.hAttackDamage = $L4B_SpecialsDamage;
+	%obj.hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
 	%obj.hLimitedLifetime();
 
 	if(!%obj.hFollowing && %obj.lastidle+5000 < getsimtime() && %obj.getstate() !$= "Dead" && !%obj.isstrangling)
@@ -264,7 +264,6 @@ function ZombieSmokerHoleBot::ShootTongue(%this, %obj)
 	%obj.light.delete();
 	
 	%obj.setenergylevel(0);
-	%obj.SmokerTongueTarget = 0;
 	if(isObject(%obj.GHRope))
 	%obj.GHRope.delete();
 
@@ -272,24 +271,31 @@ function ZombieSmokerHoleBot::ShootTongue(%this, %obj)
 	%obj.playthread(2,"Plant");
 	%obj.playaudio(1,"smoker_launch_tongue_sound");
 
-	%muzzle = vectorAdd(%obj.getMuzzlePoint(2),"0 0 0.35");
-	%velocity = vectorScale(%obj.getEyeVector(),500);
-
 	%p = new Projectile()
 	{
 		dataBlock = "SmokerTongueProjectile";
-		initialVelocity = %velocity;
-		initialPosition = %muzzle;
+		initialVelocity = vectorScale(%obj.getEyeVector(),500);
+		initialPosition = vectorAdd(%obj.getMuzzlePoint(2),"0 0 0.35");
 		sourceObject = %obj;
 		client = %obj.client;
 	};
 	MissionCleanup.add(%p);
-	%obj.TongueProj = %p;
 
-	SmokerTongueHangLoop(%obj);
+	%tongue = new StaticShape()
+	{
+		dataBlock = SmokerTongueShape;
+		source = %obj;
+		end = %p;
+	};	
+	%obj.tongue = %tongue;
+	%p.tongue = %tongue;
+}
 
-	cancel(%obj.SmokerTongueReturn);
-	%obj.SmokerTongueReturn = schedule(1000,0,SmokerTongueRelease,%obj);
+function SmokerTongueShape::onAdd(%this,%obj)
+{
+	Parent::onAdd(%this,%obj);
+	%obj.setNodeColor("ALL","1 0 0 1");
+	%this.onTongueLoop(%obj);
 }
 
 function ZombieSmokerHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
@@ -312,6 +318,48 @@ function ZombieSmokerHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
 		}
 	}
 	Parent::onTrigger (%this, %obj, %triggerNum, %val);
+}
+
+function SmokerTongueShape::onTongueLoop(%this,%obj)
+{		
+	%smoker = %obj.source;
+	%end = %obj.end;
+	
+	if(!isObject(%obj) || !isObject(%smoker) || %smoker.getState() $= "Dead" || !isObject(%end))//In case one of these are false, return the function and delete the shape
+	if(isObject(%obj))
+	{
+		if(isObject(%smoker))//Just in case the smoker is still around
+		{
+			%smoker.playaudio(3,"smoker_tongue_reel_sound");
+
+			if(%smoker.getstate() !$= "Dead" && %smoker.getclassname() $= "AIPlayer")
+			{
+				%smoker.startHoleLoop();
+				%smoker.hRunAwayFromPlayer(%smoker);
+			}
+		}
+
+		%obj.delete();
+		return;
+	}
+
+	switch$(%end.getClassName())
+	{
+		case "Projectile": %endpos = %end.getPosition();
+		case "Player": %endpos = %end.getHackPosition();
+		case "AIPlayer": %endpos = %end.getHackPosition();
+	}
+
+	//Calculate the position and scale between the smoker and victim
+	%head = %smoker.getmuzzlePoint(2);
+	%vector = vectorNormalize(vectorSub(%endpos,%head));
+	%relative = "0 1 0";
+	%xyz = vectorNormalize(vectorCross(%relative,%vector));
+	%u = mACos(vectorDot(%relative,%vector)) * -1;
+	%obj.setTransform(vectorScale(vectorAdd(vectorAdd(%head,"0 0 0.5"),%endpos),0.5) SPC %xyz SPC %u);
+	%obj.setScale(0.2 SPC vectorDist(%head,%endpos) * 2 SPC 0.2);
+
+	%obj.TongueLoop = %this.schedule(25,onTongueLoop,%obj);
 }
 
 datablock ProjectileData(SmokerTongueProjectile)
@@ -344,81 +392,9 @@ function SmokerTongueProjectile::onCollision(%this,%proj,%col,%fade,%pos,%normal
 	if(%col.getType() & $Typemasks::PlayerObjectType && checkHoleBotTeams(%obj,%col))
 	{
 		%col.dismount();
-		%obj.SmokerTongueTarget = %col;
+		%obj.tongue.end = %col;
 		%obj.SpecialPinAttack(%col);
 	}
 
 	Parent::onCollision(%this,%proj,%col,%fade,%pos,%normal);
-}
-
-function SmokerTongueRelease(%obj)
-{
-	if(isObject(%obj.GHRope))
-	%obj.GHRope.delete();
-	%obj.SmokerTongueTarget = 0;
-
-	if(isObject(%obj))
-	{
-		%obj.playaudio(3,"smoker_tongue_reel_sound");
-
-		if(%obj.getstate() !$= "Dead" && %obj.getclassname() $= "AIPlayer")
-		{
-			%obj.startHoleLoop();
-			%obj.hRunAwayFromPlayer(%obj);
-		}
-	}
-}
-
-function SmokerTongueHangLoop(%obj)
-{
-	if(isObject(%obj) && %obj.getstate() !$= "Dead") 
-	{
-		if(isObject(%col = %obj.SmokerTongueTarget))
-		{
-			if(L4B_SpecialsPinCheck(%obj,%col))
-			{
-				SmokerTongueRopeCheck(%obj,%col.getHackPosition());
-				%obj.SmokerTongueHangLoop = schedule(25,0,SmokerTongueHangLoop,%obj);
-			}
-			else 
-			{
-				SmokerTongueRelease(%obj);
-				return;
-			}
-
-		}
-		else if(isObject(%proj = %obj.TongueProj))
-		{
-			SmokerTongueRopeCheck(%obj,%proj.getPosition());
-			%obj.SmokerTongueHangLoop = schedule(25,0,SmokerTongueHangLoop,%obj);
-		}
-		else SmokerTongueRelease(%obj);
-	}
-	else SmokerTongueRelease(%obj);
-}
-
-//Rope FX Check
-function SmokerTongueRopeCheck(%obj,%pos)
-{
-	if(!isObject(%obj.GHRope))
-	{
-		%obj.GHRope = new StaticShape()
-		{
-			dataBlock = HataCylinder2Shape;
-		};
-		MissionCleanup.add(%obj.GHRope);
-		%obj.GHRope.setNodeColor("ALL","1 0 0 1");
-	}
-	else
-	{
-		%hand = %obj.getmuzzlePoint(2);
-		%size = 0.2;
-		%vector = vectorNormalize(vectorSub(%pos,%hand));
-		%relative = "0 1 0";
-		%xyz = vectorNormalize(vectorCross(%relative,%vector));
-		%u = mACos(vectorDot(%relative,%vector)) * -1;
-
-		%obj.GHRope.setTransform(vectorScale(vectorAdd(vectorAdd(%hand,"0 0 0.5"),%pos),0.5) SPC %xyz SPC %u);
-		%obj.GHRope.setScale(%size SPC vectorDist(%hand,%pos) * 2 SPC %size);
-	}
 }

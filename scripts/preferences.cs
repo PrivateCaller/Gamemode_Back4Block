@@ -111,8 +111,8 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 		className      = "Gamemode_Left4Block";
 
 		addon          = "Gamemode_Left4Block";
-		category       = "Melee";
-		title          = "Enable survivor melee";
+		category       = "Survivor";
+		title          = "Enable melee";
 
 		type           = "bool";
 		params         = "";
@@ -120,84 +120,6 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 		variable       = "$Pref::SecondaryMelee::MeleeMode";
 
 		defaultValue   = "1";
-
-		updateCallback = "";
-		loadCallback   = "";
-
-		hostOnly       = false;
-		secret         = false;
-
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "Gamemode_Left4Block";
-
-		addon          = "Gamemode_Left4Block";
-		category       = "Melee";
-		title          = "Meelee force";
-
-		type           = "num";
-		params         = "0 10 0";
-
-		variable       = "$Pref::SecondaryMelee::MeleeForce";
-
-		defaultValue   = "2";
-
-		updateCallback = "";
-		loadCallback   = "";
-
-		hostOnly       = false;
-		secret         = false;
-
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "Gamemode_Left4Block";
-
-		addon          = "Gamemode_Left4Block";
-		category       = "Melee";
-		title          = "Melee charges";
-
-		type           = "num";
-		params         = "-1 10 0";
-
-		variable       = "$Pref::SecondaryMelee::MeleeCharges";
-
-		defaultValue   = "-1";
-
-		updateCallback = "";
-		loadCallback   = "";
-
-		hostOnly       = false;
-		secret         = false;
-
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "Gamemode_Left4Block";
-
-		addon          = "Gamemode_Left4Block";
-		category       = "Melee";
-		title          = "Melee charges cooldown Rate";
-
-		type           = "num";
-		params         = "0 500 0";
-
-		variable       = "$Pref::SecondaryMelee::MeleeCooldownRate";
-
-		defaultValue   = "250";
 
 		updateCallback = "";
 		loadCallback   = "";
@@ -426,9 +348,6 @@ else
     $Pref::SurvivorPlayer::BrickScanning = 1;
     $Pref::SurvivorPlayer::EnableDowning = 1;
 	$Pref::SecondaryMelee::MeleeMode = 1;
-	$Pref::SecondaryMelee::MeleeForce = 1;
-	$Pref::SecondaryMelee::MeleeCharges = 3;
-	$Pref::SecondaryMelee::MeleeCooldownRate = 1000;
 	
 	$Pref::Server::L4B2Bots::CustomStyle = 0;
 	$Pref::Server::L4B2Bots::Difficulty = 1;
@@ -440,58 +359,67 @@ else
 	$Pref::Server::L4B2Bots::UncommonWarningLight = 0;
 	$Pref::Server::L4B2Bots::VictimSavedMessages = 1;
 	$Pref::Server::L4B2Bots::ZombieBurnerCollision = 1;
+
+	$Pref::Server::L4B2Bots::NormalDamage = 2;
+	$Pref::Server::L4B2Bots::SpecialsDamage = 4;
+	$Pref::Server::L4B2Bots::TankChance = 15;
+	$Pref::Server::L4B2Bots::TankRounds = 0;
+	$Pref::Server::L4B2Bots::TankHealth = 2000;
+	$Pref::Server::L4B2Bots::SurvivorImmunity = 1;
+	$Pref::Server::L4B2Bots::MaxSpecial = 4;
+	$Pref::Server::L4B2Bots::MaxHorde = 40;
+	$Pref::Server::L4B2Bots::MaxTank = 1;
 }
 
 function L4B_DifficultyAdjustment()
 {
 	switch($Pref::Server::L4B2Bots::Difficulty)
 	{
-		case 0: $L4B_NormalDamage = 2;
-				$L4B_SpecialsDamage = 4;
-				$L4B_TankChance = 15;
-				$L4B_TankRounds = 0;
-				$L4B_TankHealth = 2000;
-				$L4B_SurvivorImmunity = 1;
-				$L4B_MaxSpecial = 4;
-				$L4B_MaxHorde = 40;
-				$L4B_MaxTank = 1;
+		case 0: $Pref::Server::L4B2Bots::NormalDamage = 2;
+				$Pref::Server::L4B2Bots::SpecialsDamage = 4;
+				$Pref::Server::L4B2Bots::TankChance = 15;
+				$Pref::Server::L4B2Bots::TankRounds = 0;
+				$Pref::Server::L4B2Bots::TankHealth = 2000;
+				$Pref::Server::L4B2Bots::SurvivorImmunity = 1;
+				$Pref::Server::L4B2Bots::MaxSpecial = 4;
+				$Pref::Server::L4B2Bots::MaxHorde = 40;
+				$Pref::Server::L4B2Bots::MaxTank = 1;
 
-		case 1: $L4B_NormalDamage = 6;
-				$L4B_SpecialsDamage = 12;
-				$L4B_TankChance = 30;
-				$L4B_TankRounds = 1;
-				$L4B_TankHealth = 2000;
-				$L4B_SurvivorImmunity = 1;
-				$L4B_MaxSpecial = 4;
-				$L4B_MaxHorde = 75;
-				$L4B_MaxTank = 2;
+		case 1: $Pref::Server::L4B2Bots::NormalDamage = 4;
+				$Pref::Server::L4B2Bots::SpecialsDamage = 15;
+				$Pref::Server::L4B2Bots::TankChance = 30;
+				$Pref::Server::L4B2Bots::TankRounds = 1;
+				$Pref::Server::L4B2Bots::TankHealth = 2000;
+				$Pref::Server::L4B2Bots::SurvivorImmunity = 1;
+				$Pref::Server::L4B2Bots::MaxSpecial = 4;
+				$Pref::Server::L4B2Bots::MaxHorde = 50;
+				$Pref::Server::L4B2Bots::MaxTank = 1;
 
-		case 2: $L4B_NormalDamage = 8;
-				$L4B_SpecialsDamage = 16;
-				$L4B_TankChance = 50;
-				$L4B_TankRounds = 1;
-				$L4B_TankHealth = 4000;
-				$L4B_SurvivorImmunity = 0;
-				$L4B_MaxSpecial = 6;
-				$L4B_MaxHorde = 75;
-				$L4B_MaxTank = 2;
+		case 2: $Pref::Server::L4B2Bots::NormalDamage = 5;
+				$Pref::Server::L4B2Bots::SpecialsDamage = 20;
+				$Pref::Server::L4B2Bots::TankChance = 50;
+				$Pref::Server::L4B2Bots::TankRounds = 1;
+				$Pref::Server::L4B2Bots::TankHealth = 4000;
+				$Pref::Server::L4B2Bots::SurvivorImmunity = 0;
+				$Pref::Server::L4B2Bots::MaxSpecial = 4;
+				$Pref::Server::L4B2Bots::MaxHorde = 60;
+				$Pref::Server::L4B2Bots::MaxTank = 1;
 
-		case 3: $L4B_NormalDamage = 16;
-				$L4B_SpecialsDamage = 32;
-				$L4B_TankChance = 75;
-				$L4B_TankRounds = 2;
-				$L4B_TankHealth = 5000;
-				$L4B_SurvivorImmunity = 0;
-				$L4B_MaxSpecial = 8;
-				$L4B_MaxHorde = 100;
-				$L4B_MaxTank = 3;
+		case 3: $Pref::Server::L4B2Bots::NormalDamage = 10;
+				$Pref::Server::L4B2Bots::SpecialsDamage = 30;
+				$Pref::Server::L4B2Bots::TankChance = 75;
+				$Pref::Server::L4B2Bots::TankRounds = 2;
+				$Pref::Server::L4B2Bots::TankHealth = 5000;
+				$Pref::Server::L4B2Bots::SurvivorImmunity = 0;
+				$Pref::Server::L4B2Bots::MaxSpecial = 8;
+				$Pref::Server::L4B2Bots::MaxHorde = 75;
+				$Pref::Server::L4B2Bots::MaxTank = 2;
 
 		default:
 	}
 
-	eval("ZombieTankHoleBot.maxDamage =" @ $L4B_TankHealth @ ";");
+	eval("ZombieTankHoleBot.maxDamage =" @ $Pref::Server::L4B2Bots::TankHealth @ ";");
 }
-
 
 function Gamemode_Left4Block_Difficulty::onUpdate(%this, %val) 
 {

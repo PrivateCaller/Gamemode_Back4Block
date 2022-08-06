@@ -25,7 +25,7 @@ datablock PlayerData(ZombieJockeyHoleBot : CommonZombieHoleBot)
 	hTickRate = 5000;
 
 	hName = "Jockey";//cannot contain spaces
-	hAttackDamage = $L4B_SpecialsDamage;
+	hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
 
 	ShapeNameDistance = 100;
 	hIsInfected = 2;
@@ -60,7 +60,7 @@ function L4B_holeJockeyKill(%obj,%col)
 		if(%obj.getClassName() $= "AIPlayer")
 		%obj.hRunAwayFromPlayer(%col);
 
-		%col.damage(%obj.hFakeProjectile, %col.getposition(), $L4B_SpecialsDamage/2, $DamageType::Jockey);
+		%col.damage(%obj.hFakeProjectile, %col.getposition(), $Pref::Server::L4B2Bots::SpecialsDamage/2, $DamageType::Jockey);
 		%col.playaudio(1,"zombie_hit" @ getrandom(1,8) @ "_sound");
 		%obj.playThread(2,shiftdown);
 		%obj.playThread(3,talk);
@@ -93,7 +93,7 @@ function L4B_holeJockeyKill(%obj,%col)
 	function ZombieJockeyHoleBot::onBotLoop(%this,%obj)
 {
 	%obj.hLimitedLifetime();
-	%obj.hAttackDamage = $L4B_SpecialsDamage;
+	%obj.hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
 
 	if(%obj.hEating)
 	return;

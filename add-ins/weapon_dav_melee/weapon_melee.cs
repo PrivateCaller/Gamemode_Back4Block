@@ -140,9 +140,11 @@ function MeleeSwingCheck(%obj,%this,%slot)
 
 			%p = new projectile()
 			{
-				datablock = "SecondaryMeleeSmallProjectile";
+				datablock = "SecondaryMeleeProjectile";
 				initialPosition = posFromRaycast(%ray);
 			};
+			%p.explode();
+
 			return;
      	}
 		 
@@ -150,18 +152,19 @@ function MeleeSwingCheck(%obj,%this,%slot)
      	{
      	   	%damage = mClamp(%target.getdatablock().maxDamage/15, 30, %target.getdatablock().maxDamage/2);     	   	
 
-			if(L4B_CheckifinMinigame(%obj,%target))
+			if(isObject(getMiniGameFromObject(%obj,%target)))
 			{
-     	   		%target.damage(%obj, %target.getposition(), %damage, $DamageType::Default);
+     	   		%target.damage(%obj, posFromRaycast(%ray), %damage, $DamageType::Default);
 				%target.applyimpulse(posFromRaycast(%ray),vectoradd(vectorscale(%vec,2000),"0 0 750"));
 			}
      	   	serverPlay3D(%this.meleeHitEnvSound @ "_hitenv" @ getRandom(1,2) @ "_sound",posFromRaycast(%ray));
 
 			%p = new projectile()
 			{
-				datablock = "SecondaryMeleeSmallProjectile";
+				datablock = "SecondaryMeleeProjectile";
 				initialPosition = posFromRaycast(%ray);
 			};
+			%p.explode();
      	}
 
 		if(%target.getType() & $TypeMasks::PlayerObjectType)
@@ -174,74 +177,36 @@ function MeleeSwingCheck(%obj,%this,%slot)
 			{
 				%damagepower = %damage+%target.getdatablock()/4;
 				%obj.MeleePowerSwing = 0;
+			}
+			else %damagepower = %damage;
 
-				%p = new projectile()
-				{
-					datablock = "SecondaryMeleeProjectile";
-					initialPosition = posFromRaycast(%ray);
-				};
-			}
-			else 
+			%p = new projectile()
 			{
-				%p = new projectile()
-				{
-					datablock = "SecondaryMeleeSmallProjectile";
-					initialPosition = posFromRaycast(%ray);
-				};
-				%damagepower = %damage;
-			}
+				datablock = "SecondaryMeleeProjectile";
+				initialPosition = posFromRaycast(%ray);
+			};
+			%p.explode();
 
 			if(vectorDot(%target.getforwardvector(),%obj.getforwardvector()) > 0.65)         
 			%damageclamp = mClamp(%damagepower*1.5, %this.meleeDamage, %target.getdatablock().maxDamage);
 			else %damageclamp = mClamp(%damagepower, %this.meleeDamage, %target.getdatablock().maxDamage);
 			serverPlay3D(%this.meleeHitPlSound @ "_hitpl" @ getRandom(1,2) @ "_sound",posFromRaycast(%ray));
 			
-			if(L4B_CheckifinMinigame(%obj,%target))
+			if(isObject(getMiniGameFromObject(%obj,%target)) && checkHoleBotTeams(%obj,%target))
 			{
-				if(%target.getMountedImage(0) == RiotShieldimage.getID())
-				{					
-					%sVec = %target.getForwardVector();
-					%aimVec = %obj.getForwardVector();
-					%reflect = (vectorDot(%sVec, %aimVec) < 0);
+				%target.damage(%obj, posFromRaycast(%ray), %damageclamp, $DamageType::Default);
+				%target.applyimpulse(posFromRaycast(%ray),vectoradd(vectorscale(%vec,1000),"0 0 750"));
+				serverPlay3D(%this.meleeHitPlSound @ "_hitpl" @ getRandom(1,2) @ "_sound",posFromRaycast(%ray));
 
-					if(!%reflect)
-					{
-						%target.damage(%obj, %target.getposition(), %damageclamp, $DamageType::Default);
-						%target.applyimpulse(posFromRaycast(%ray),vectoradd(vectorscale(%vec,1000),"0 0 750"));
-
-						if(getRandom(1,100) <= %this.meleeZombieStunChance && %target.hZombieL4BType & %target.hZombieL4BType < 5)
-						{
-							if(%target.getclassName() $= "AIPlayer")
-							%target.stopHoleLoop();
-					
-							%target.emote(winStarProjectile, 1);
-							L4B_SpazzZombieInitialize(%target,1);
-							%target.mountImage(stunImage,2);
-							schedule(1000,0,serverCmdSit,%target);
-						}
-					}
-					else
-					{
-						%target.applyimpulse(posFromRaycast(%ray),vectoradd(vectorscale(%vec,250),"0 0 187"));
-						serverPlay3d("riotshield_block_sound",%obj.getPosition());
-					}
-				}
-				else
+				if(getRandom(1,100) <= %this.meleeZombieStunChance && %target.hZombieL4BType & %target.hZombieL4BType < 5)
 				{
-					%target.damage(%obj, %target.getposition(), %damageclamp, $DamageType::Default);
-					%target.applyimpulse(posFromRaycast(%ray),vectoradd(vectorscale(%vec,1000),"0 0 750"));
-					serverPlay3D(%this.meleeHitPlSound @ "_hitpl" @ getRandom(1,2) @ "_sound",posFromRaycast(%ray));
-
-					if(getRandom(1,100) <= %this.meleeZombieStunChance && %target.hZombieL4BType & %target.hZombieL4BType < 5)
-					{
-						if(%target.getclassName() $= "AIPlayer")
-						%target.stopHoleLoop();
-				
-						%target.emote(winStarProjectile, 1);
-						L4B_SpazzZombieInitialize(%target,1);
-						%target.mountImage(stunImage,2);
-						schedule(1000,0,serverCmdSit,%target);
-					}
+					if(%target.getclassName() $= "AIPlayer")
+					%target.stopHoleLoop();
+			
+					%target.emote(winStarProjectile, 1);
+					L4B_SpazzZombieInitialize(%target,1);
+					%target.mountImage(stunImage,2);
+					schedule(1000,0,serverCmdSit,%target);
 				}
 			}
 		}
@@ -586,7 +551,7 @@ datablock ShapeBaseImageData(batonImage : crowbarImage)
    	doColorShift = batonItem.doColorShift;
    	colorShiftColor = batonItem.colorShiftColor;
 
-	meleeDamage = 30;
+	meleeDamage = 20;
 	meleeHitEnvSound = "baseballbat";
 	meleeHitPlSound = "crowbar";
 	meleeDistanceMin = 1.25;
@@ -746,7 +711,7 @@ datablock ShapeBaseImageData(spikebatImage : crowbarImage)
    	doColorShift = spikebatItem.doColorShift;
    	colorShiftColor = spikebatItem.colorShiftColor;
 
-	meleeDamage = 70;
+	meleeDamage = 80;
 	meleeHitEnvSound = "baseballbat";
 	meleeHitPlSound = "spikebat";
 	meleeDistanceMin = 2;

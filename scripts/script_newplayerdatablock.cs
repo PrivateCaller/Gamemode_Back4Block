@@ -5,6 +5,7 @@ datablock TSShapeConstructor(mMeleeDts)
 	sequence0 = "base/data/shapes/player/default.dsq";
 	sequence1 = "base/data/shapes/player/melee.dsq";
 	sequence2 = "base/data/shapes/player/actions.dsq";
+	sequence3 = "base/data/shapes/player/taunts.dsq";
 };
 
 datablock PlayerData(PlayerMeleeAnims : PlayerStandardArmor)

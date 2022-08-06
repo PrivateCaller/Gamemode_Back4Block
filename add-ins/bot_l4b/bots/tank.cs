@@ -2,7 +2,7 @@ datablock PlayerData(ZombieTankHoleBot : CommonZombieHoleBot)
 {
 	uiName = "Tank Infected";
 	shapeFile = "add-ons/gamemode_left4block/add-ins/bot_l4b/models/zTank.dts";
-	maxDamage = $L4B_TankHealth;//Health
+	maxDamage = $Pref::Server::L4B2Bots::TankHealth;//Health
 	mass = 1000;
 
 	runforce = 48 * 220;
@@ -45,7 +45,7 @@ datablock PlayerData(ZombieTankHoleBot : CommonZombieHoleBot)
 	hSearchFOV = 1;//if enabled disables normal hSearch
 	hMaxShootRange = 120;//The range in which the bot will shoot the player
 
-	hAttackDamage = $L4B_SpecialsDamage*1.5;
+	hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage*2;
 	hMeleeCI = "Tank";
 
 	hMaxShootRange = 512;
@@ -84,18 +84,8 @@ function ZombieTankHoleBot::onImpact(%this, %obj, %col, %vec, %force)
 	%oScale = 2*getWord(%obj.getScale(),0);
 	%obj.spawnExplosion(pushBroomProjectile,%oScale SPC %oScale SPC %oScale);
 
-	//%exp = new Explosion()
-	//{
-	//	dataBlock = spearExplosion;
-	//	Position = %obj.getPosition();
-	//	minigame = getMiniGamefromObject(%obj);
-	//	sourceObject = %obj.getgroup().client;
-	//};
-
 	if(%force >= 25)
 	{
-		%obj.spawnExplosion(TankLandProjectile,%oScale SPC %oScale SPC %oScale);
-
 		if(%obj.getClassName() $= "AIPlayer")
 		%obj.setcrouching(1);
 	}
@@ -105,7 +95,7 @@ function ZombieTankHoleBot::onImpact(%this, %obj, %col, %vec, %force)
 
 function ZombieTankHoleBot::onBotFollow( %this, %obj, %targ )
 {
-	if(getRandom(1,100) <= $L4B_TankChance && L4B_IsOnGround(%obj) && vectorDist(%obj.getPosition(),%targ.getPosition()) >= 35)
+	if(getRandom(1,100) <= $Pref::Server::L4B2Bots::TankChance && L4B_IsOnGround(%obj) && vectorDist(%obj.getPosition(),%targ.getPosition()) >= 35)
 	{
 		%obj.setaimobject(%targ);
 		%obj.mountImage(BoulderImage,0);

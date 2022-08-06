@@ -30,7 +30,7 @@ datablock PlayerData(ZombieHunterHoleBot : CommonZombieHoleBot)
 
 	hName = "Hunter";//cannot contain spaces
 	hStrafe = 0;//Randomly strafe while following player
-	hAttackDamage = $L4B_SpecialsDamage;
+	hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
 
 	rechargeRate = 1.75;
 	maxenergy = 100;
@@ -63,7 +63,7 @@ function L4B_holeHunterKill(%obj,%col)
 		
 		%obj.HunterHurt = schedule(1000,0,L4B_holeHunterKill,%obj,%col);
 		%obj.unmount();
-		%col.damage(%obj.hFakeProjectile, %col.getposition(), $L4B_SpecialsDamage/2, $DamageType::Hunter);
+		%col.damage(%obj.hFakeProjectile, %col.getposition(), $Pref::Server::L4B2Bots::SpecialsDamage/2, $DamageType::Hunter);
 	}
 }
 
@@ -117,7 +117,7 @@ function ZombieHunterHoleBot::onDisabled(%this,%obj)
 
 function ZombieHunterHoleBot::onBotLoop(%this,%obj)
 {
-	%obj.hAttackDamage = $L4B_SpecialsDamage;
+	%obj.hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
 	%obj.hLimitedLifetime();
 	
 	if(!%obj.hFollowing)
@@ -174,7 +174,7 @@ function L4B_HunterZombieLunge(%obj,%targ)
 	%obj.playthread(0,jump);
 
 	%dissub = VectorSub(%targ.getposition(),%obj.getposition());
-	%dis = vectordist(%targ.getposition(),%obj.getposition())*0.5;
+	%dis = vectordist(%targ.getposition(),%obj.getposition())*0.65;
 	%normVec = VectorNormalize(vectoradd(%dissub,"0 0" SPC 0.125*vectordist(%targ.getposition(),%obj.getposition())));
 	%eye = vectorscale(%normVec,50+%dis);
 	%obj.setvelocity(%eye);
@@ -195,7 +195,18 @@ function ZombieHunterHoleBot::onBotMelee(%this,%obj,%col)
 	%forcescale = %oscale+%force/50;
 	%obj.spawnExplosion(pushBroomProjectile,%forcescale SPC %forcescale SPC %forcescale);
 	%obj.setMaxForwardSpeed(9);
+	
+	if(%force >= 50)
+	{
+		if(!%obj.hEating)
+		{
+			if(%obj.getclassname() $= "AIPlayer")
+			%obj.stopHoleLoop();
 
+			L4B_SpazzZombieInitialize(%obj,0);
+		}
+	}
+	
 	if(%oScale >= 0.9 && %obj.getstate() !$= "Dead")
 	%obj.SpecialPinAttack(%col,%force);
 

@@ -1,9 +1,9 @@
-%pattern = "add-ons/gamemode_left4block/add-ins/weapon_dav_melee/sound/*.wav";//Too lazy to write datablock files for the sounds, just took this from the Disease Gamemode
+%pattern = "add-ons/gamemode_left4block/add-ins/script_secondary_melee/sound/*.wav";//Too lazy to write datablock files for the sounds, just took this from the Disease Gamemode
 %file = findFirstFile(%pattern);
 while(%file !$= "")
 {
 	%soundName = strlwr(%file);
-	%soundName = strreplace(%soundName, "add-ons/gamemode_left4block/add-ins/weapon_dav_melee/sound/", "");
+	%soundName = strreplace(%soundName, "add-ons/gamemode_left4block/add-ins/script_secondary_melee/sound/", "");
 	%soundName = strreplace(%soundName, "/", "");
 	%soundName = strreplace(%soundName, ".wav", "");
 	%soundName = strreplace(%soundName, "quiet", "");
@@ -43,15 +43,10 @@ datablock ParticleData(SecondaryMeleeFlashParticle)
 	spinRandomMax		= 500.0;
 	colors[0]     = "0.6 0.6 0.1 0.9";
 	colors[1]     = "0.6 0.6 0.6 0.0";
-	sizes[0]      = 2.0;
-	sizes[1]      = 3.0;
-
-	useInvAlpha = false;
-};
-datablock ParticleData(SecondaryMeleeFlashSmallParticle : SecondaryMeleeFlashParticle)
-{
 	sizes[0]      = 1.0;
 	sizes[1]      = 2.0;
+
+	useInvAlpha = false;
 };
 datablock ParticleEmitterData(SecondaryMeleeFlashEmitter)
 {
@@ -68,16 +63,11 @@ datablock ParticleEmitterData(SecondaryMeleeFlashEmitter)
 	particles = SecondaryMeleeFlashParticle;
 };
 
-datablock ParticleEmitterData(SecondaryMeleeFlashSmallEmitter : SecondaryMeleeFlashEmitter)
-{
-	particles = SecondaryMeleeFlashSmallParticle;
-};
 datablock ExplosionData(SecondaryMeleeExplosion)
 {
 	soundProfile = "";
 	lifeTimeMS = 150;
 
-	particleEmitter = SecondaryMeleeFlashEmitter;
 	particleDensity = 5;
 	particleRadius = 0.2;
 
@@ -85,62 +75,23 @@ datablock ExplosionData(SecondaryMeleeExplosion)
 	explosionScale = "1 1 1";
 
 	shakeCamera = true;
-	camShakeFreq = "5 5 5";
-	camShakeAmp = "1.0 1.0 1.0";
 	camShakeDuration = 1;
 	camShakeRadius = 10.0;
+
+	camShakeFreq = "3 3 3";
+	camShakeAmp = "0.6 0.6 0.6";
+	particleEmitter = SecondaryMeleeFlashEmitter;
 
 	lightStartRadius = 0;
 	lightEndRadius = 0;
 	lightStartColor = "0 0 0";
 	lightEndColor = "0 0 0";
 };
-datablock ExplosionData(SecondaryMeleeSmallExplosion : SecondaryMeleeExplosion)
-{
-	camShakeFreq = "3 3 3";
-	camShakeAmp = "0.6 0.6 0.6";
-	particleEmitter = SecondaryMeleeFlashSmallEmitter;
-};
 datablock ProjectileData(SecondaryMeleeProjectile)
 {
-	lifeTime = 1;
-	explodeOnDeath = true;
 	explosion = SecondaryMeleeExplosion;
 };
-datablock ProjectileData(SecondaryMeleeSmallProjectile : SecondaryMeleeProjectile)
-{
-	explosion = SecondaryMeleeSmallExplosion;
-};
 AddDamageType("SecondaryMelee",'<bitmap:add-ons/Gamemode_Left4Block/add-ins/script_secondary_melee/icons/ci_punch> %1','%2 <bitmap:add-ons/Gamemode_Left4Block/add-ins/script_secondary_melee/icons/ci_punch> %1',0,1);
-
-function serverCmdSecondaryMelee(%cl)
-{
-	%pl = %cl.player;
-	if(!isObject(%pl) || %pl.meleeItem || %pl.hIsInfected || %pl.getDatablock().isdowned)
-	return;
-
-	if($Pref::SecondaryMelee::MeleeMode == 2 || ($Pref::SecondaryMelee::MeleeMode == 1 && isObject(%cl.minigame)))
-	if(!%pl.disabledMelee)
-	%pl.meleeTrigger();		
-}
-	
-function player::meleeTrigger(%pl)
-{
-	if(%pl.getstate() $= "Dead" || %pl.meleeItem || %pl.hIsInfected || %pl.getDatablock().getName() $= "DownPlayerSurvivorArmor" || %pl.isBeingStrangled)
-	if(%pl.disabledMelee)
-	return;
-
-	if(!isObject(%pl.getObjectMount()) && getSimTime()-%pl.lastMelee > 400-%pl.meleeCooldownRush && (%pl.meleeTick < $Pref::SecondaryMelee::MeleeCharges || $Pref::SecondaryMelee::MeleeCharges == -1))
-	{
-		%pl.lastMelee = getSimTime();
-		%pl.meleeTick++;
-		%hit = %pl.doMelee();
-		%cd = (%hit == 0 ? 500 : 0);
-		%pl.meleeCooldownRush = (%hit == 1 ? 50 : 0);
-		if($Pref::SecondaryMelee::MeleeCharges != -1 && !isEventPending(%pl.meleeCdSched))
-		%pl.meleeCdSched = %pl.schedule($Pref::SecondaryMelee::MeleeCooldownRate+%cd,meleeCooldown);
-	}
-}
 
 function Player::doMelee(%obj)
 {
@@ -164,18 +115,20 @@ function Player::doMelee(%obj)
       	%line = vectorNormalize(vectorSub(%pos,%hit.getposition()));
 		%dot = vectorDot(%vec,%line);
 
-     	if(vectorDist(%pos,%hit.getposition()) > 3.75 || %dot > -0.4)
+     	if(vectorDist(%pos,%hit.getposition()) > 5 || %dot > -0.4)
 		continue;
 
 		if(isObject(%ray))
         if(%ray.getType() & $TypeMasks::StaticObjectType || %ray.getType() & $TypeMasks::FxBrickObjectType || %ray.getType() & $TypeMasks::VehicleObjectType)
      	{
 			serverPlay3D(%MeleeType @ "HitEnv_Sound",posFromRaycast(%ray));
+
 			%p = new projectile()
 			{
-				datablock = "SecondaryMeleeSmallProjectile";
+				datablock = "SecondaryMeleeProjectile";
 				initialPosition = posFromRaycast(%ray);
 			};
+			%p.explode();
 			return;
      	}
 
@@ -187,44 +140,23 @@ function Player::doMelee(%obj)
 		{
 			if(L4B_CheckifinMinigame(%obj,%hit))
 			{
-				if(getSimTime()-%hit.punchedTime[%obj] > 2500)
-				%hit.punched[%obj] = 0;
-
-				%hit.punched[%obj]++;
-				%hit.punchedTime[%obj] = getSimTime();
-				if(%hit.punched[%obj] != 0 && %hit.punched[%obj]%3 == 0 && getSimTime()-%obj.lastSlap > 1500)
+				%p = new projectile()
 				{
-					%slap = true;
-					%obj.lastSlap = getSimTime();
-				}
+					datablock = "SecondaryMeleeProjectile";
+					initialPosition = posFromRaycast(%ray);
+				};
+				%p.explode();
 
-				if(%slap)//Do the good stuff
-				{
-					%stunchance = 75;
-					%sound = "melee_slap_sound";
-					%projectile = "SecondaryMeleeProjectile";
-					%dmg = %hit.getdatablock().maxDamage/10;
-					%hitknockback = 800;
-					%hitz = 200;
+				serverPlay3D("melee_hit" @ getrandom(1,8) @ "_sound",posFromRaycast(%ray));
+				%dmg = %hit.getdatablock().maxDamage/4;
+				%hitknockback = 1200;
+				%hitz = 500;
 
-					%obj.playThread(3,jump);
-				}
-				else
-				{
-					%stunchance = 20;
-					%sound = "melee_hit" @ getrandom(1,8) @ "_sound";
-					%projectile = "SecondaryMeleeSmallProjectile";
-					%dmg = %hit.getdatablock().maxDamage/12;
-					%hitknockback = 400;
-					%hitz = 150;
-				}
-				if(%hit.getdatablock().getname() $= "ZombieTankHoleBot")
-				%dmg = %hit.getdatablock().maxDamage/30; 
-
-				if(getRandom(1,100) <= %stunchance && %hit.hZombieL4BType & %hit.hZombieL4BType < 4 )
+				if(getRandom(1,100) <= 25 && %hit.hZombieL4BType & %hit.hZombieL4BType < 4 )
 				{
 					if(%hit.isHoleBot)
 					%hit.stopHoleLoop();
+					%hit.playaudio(0,"zombie_shoved" @ getrandom(1,10) @ "_sound");
 					
 					%hit.emote(winStarProjectile, 1);
 					L4B_SpazzZombieInitialize(%hit,1);
@@ -232,52 +164,9 @@ function Player::doMelee(%obj)
 					schedule(1000,0,serverCmdSit,%hit);
 				}
 
-
-				serverPlay3D(%sound,%hit.getHackPosition());
-
-				%hscale = %hit.getScale();
-				%p = new projectile()
-				{
-					datablock = %projectile;
-					initialPosition = %hit.getHackPosition();
-				};
-
-				%sVec = %hit.getForwardVector();
-				%aimVec = %obj.getForwardVector();
-				%reflect = (vectorDot(%sVec, %aimVec) < 0);
-
-				if(%hit.getMountedImage(0) == RiotShieldimage.getID())
-				{
-					serverPlay3d("riotshield_hit_sound",%hit.getHackPosition());
-
-					if(!%reflect)
-					{
-						%hit.applyimpulse(%hit.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),%hitknockback*$Pref::SecondaryMelee::MeleeForce),"0" SPC "0" SPC %hitz*$Pref::SecondaryMelee::MeleeForce));
-						%hit.damage(%obj,%hit.getPosition(),%dmg,$DamageType::SecondaryMelee);
-					}
-					else
-					{
-						%hitknockback = 200;
-						%hitz = 75;
-						%hit.applyimpulse(%hit.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),%hitknockback*$Pref::SecondaryMelee::MeleeForce),"0" SPC "0" SPC %hitz*$Pref::SecondaryMelee::MeleeForce));
-						serverPlay3d("riotshield_block_sound",%obj.getPosition());
-					}
-				}
-				else
-				{
-					%hit.applyimpulse(%hit.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),%hitknockback*$Pref::SecondaryMelee::MeleeForce),"0" SPC "0" SPC %hitz*$Pref::SecondaryMelee::MeleeForce));
-					%hit.damage(%obj,%hit.getPosition(),%dmg,$DamageType::SecondaryMelee);
-				}
+				%hit.applyimpulse(posFromRaycast(%ray),vectoradd(vectorscale(%obj.getforwardvector(),%hitknockback),"0" SPC "0" SPC %hitz));
+				%hit.damage(%obj,posFromRaycast(%ray),%dmg,$DamageType::SecondaryMelee);
 			}
 		}
 	}
-}
-	
-function player::meleeCooldown(%pl)
-{
-	cancel(%pl.meleeCdSched);
-	%pl.meleeTick--;
-	if(!%pl.meleeTick)
-		return;
-	%pl.meleeCdSched = %pl.schedule(1000,meleeCooldown);
 }

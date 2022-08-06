@@ -26,7 +26,7 @@ datablock PlayerData(ZombieSpitterHoleBot : CommonZombieHoleBot)
 	hMaxShootRange = 100;//The range in which the bot will shoot the player
 	hTooCloseRange = 50;//in brick units
 	hMoveSlowdown = 1;
-	hAttackDamage = $L4B_SpecialsDamage;
+	hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
 
 	ShapeNameDistance = 100;
 	hIsInfected = 1;
@@ -305,13 +305,9 @@ function SpitterSpitProjectile::damage(%this,%obj,%col,%fade,%pos,%normal)
    %scale = getWord(%obj.getScale(), 2);
    %directDamage = mClampF(%this.directDamage, -100, 100) * %scale;
 
-	if(%col.getType() & $TypeMasks::PlayerObjectType)
-		if(checkHoleBotTeams(%obj.sourceObject,%col))
-		{
-			%col.damage(%obj, %pos, %directDamage, %damageType);
-			%col.Toxified = 1;
-			ToxicityE(%col);
-		}
+   if(%col.getType() & $TypeMasks::PlayerObjectType)
+	if(checkHoleBotTeams(%obj.sourceObject,%col))
+	%col.damage(%obj, %pos, %directDamage, %damageType);
 }
 
 function SpitterSpewedProjectile::damage(%this,%obj,%col,%fade,%pos,%normal)
@@ -322,12 +318,8 @@ function SpitterSpewedProjectile::damage(%this,%obj,%col,%fade,%pos,%normal)
    %directDamage = mClampF(%this.directDamage, -100, 100) * %scale;
 
    if(%col.getType() & $TypeMasks::PlayerObjectType)
-		if(checkHoleBotTeams(%obj.sourceObject,%col))
-		{
-			%col.damage(%obj, %pos, %directDamage, %damageType);
-			%col.Toxified = 1;
-			ToxicityE(%col);
-		}
+	if(checkHoleBotTeams(%obj.sourceObject,%col))
+	%col.damage(%obj, %pos, %directDamage, %damageType);
 }
 
 //Don't package this since we have our own damage system, which I got from Badspot's modification topic

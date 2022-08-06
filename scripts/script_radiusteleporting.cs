@@ -201,7 +201,7 @@ function Player::BrickScanCheck(%obj)
 	if(!$Pref::SurvivorPlayer::BrickScanning || !isObject(%obj) || %obj.getState() $= "Dead")
 	return;
 
-	InitContainerRadiusSearch(%obj.getPosition(), 15, $TypeMasks::FxBrickObjectType);
+	InitContainerRadiusSearch(%obj.getPosition(), 10, $TypeMasks::FxBrickObjectType);
 	while(%brick = containerSearchNext())
 	{
 		$InputTarget_["Self"] = %brick;

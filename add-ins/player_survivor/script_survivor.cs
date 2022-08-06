@@ -112,7 +112,7 @@ datablock PlayerData(DownPlayerSurvivorArmor : SurvivorPlayerLow)
 
 	uiName = "";
 	maxenergy = 100;
-	maxDamage = 100;
+	maxDamage = 200;
 	showEnergyBar = true;
 
 	jumpSound 		= "";
@@ -278,7 +278,7 @@ function SurvivorPlayer::onEnterLiquid(%this, %obj, %cov, %type)
 
 function SurvivorPlayer::onLeaveLiquid(%this, %obj, %type)
 {
-	%obj.schedule(150,checkIfUnderwater,%obj);
+	%obj.schedule(150,checkIfUnderwater);
 	
 	parent::onLeaveLiquid(%this, %obj, %cov, %type);
 }
@@ -372,8 +372,12 @@ function SurvivorPlayer::onTrigger (%this, %obj, %triggerNum, %val)
 							cancel(%obj.savesched);
 						}
 					}
-			case 4: if(%val)
-					%obj.meleeTrigger();
+			case 4: if(%val && %obj.lastmeleetime+300 < getsimtime())
+					{
+						%obj.doMelee();
+						%obj.lastmeleetime = getsimtime();
+					}
+
 			default:
 		}
 	}
@@ -395,7 +399,7 @@ function SurvivorPlayer::onNewDataBlock(%this,%obj)
 {	
 	Parent::onNewDataBlock(%this,%obj);
 
-	if($L4B_SurvivorImmunity)
+	if($Pref::Server::L4B2Bots::SurvivorImmunity)
 	%obj.hIsImmune = 1;
 
 	%obj.hType = "Survivors";
@@ -427,7 +431,7 @@ function SurvivorPlayerLow::onDisabled(%this,%obj,%state)
 {
 	%obj.playaudio(0,"survivor_death" @ getRandom(1, 8) @ "_sound");
 
-	if(%obj.getWaterCoverage() == 1 && %obj.getenergylevel() == 0)
+	if(%obj.getWaterCoverage() == 1)
 	{
 		%obj.playaudio(0,"survivor_death_underwater" @ getRandom(1, 2) @ "_sound");
 		%obj.emote(oxygenBubbleImage, 1);
@@ -457,22 +461,21 @@ function Player::oxygenTick(%obj)
 	
 	if(%obj.getWaterCoverage() == 1)
 	{
-		%obj.lastwatercoverage = getsimtime();
+		%obj.oxygenCount = mClamp(%obj.oxygenCount++, 0, 6);	
 
-		%obj.setenergylevel(%obj.getenergylevel()-12.5);
+		if(%obj.oxygenCount == 6)
+		%obj.Damage(%obj, %obj.getPosition (), 25, $DamageType::Suicide);
+		
+		%obj.lastwatercoverage = getsimtime();
+		%bubblepitch = 0.125*%obj.oxygenCount;
 		%obj.emote(oxygenBubbleImage, 1);
-		serverPlay3D("drown_bubbles_sound",%obj.getPosition());
 		%obj.playthread(3,plant);
 
-		if(%obj.getenergylevel() == 0)
-		%obj.Damage(%obj, %obj.getPosition (), 25, $DamageType::Suicide);
-	}
-	else 
-	{
-		if(%obj.getenergylevel() <= 5 && %obj.getState() !$= "Dead")
-		%obj.playaudio(0,"survivor_painhigh" @ getRandom(1, 4) @ "_sound");
-
-		%obj.setenergylevel(%obj.getDatablock().maxenergy);
+		if($oldTimescale $= "")
+		$oldTimescale = getTimescale();
+  		setTimescale(0.25+%bubblepitch);
+  		serverPlay3D("drown_bubbles_sound",%obj.getPosition());
+  		setTimescale($oldTimescale);
 	}
 	
 	cancel(%obj.oxygenTick);
@@ -496,6 +499,9 @@ function Player::SurvivorDownedCheck(%obj,%damage,%damageType)
 		MissionCleanup.add(%p);
 		%p.explode();
 	}
+
+	if(%damageType $= $DamageType::Suicide)	
+	serverPlay3D("victim_smoked_sound",%obj.getPosition());
 
 	if($Pref::SurvivorPlayer::EnableDowning)
 	{
@@ -625,14 +631,14 @@ function DownPlayerSurvivorArmor::onNewDataBlock(%this,%obj)
 	Parent::onNewDataBlock(%this,%obj);
 }
 
-function Player::checkIfUnderwater(%this, %obj)
+function Player::checkIfUnderwater(%obj)
 {
    if(%obj.getWaterCoverage() == 0)
    {
-      if(%obj.getenergylevel() <= 5 && %obj.getState() !$= "Dead")
+      if(%obj.oxygenCount == 6 && %obj.getState() !$= "Dead")
       %obj.playaudio(0,"survivor_painhigh" @ getRandom(1, 4) @ "_sound");
-   
-      %obj.setenergylevel(%obj.getDatablock().maxenergy);
+
+	  %obj.oxygenCount = 0;
    }
    cancel(%obj.oxygenTick);
 }

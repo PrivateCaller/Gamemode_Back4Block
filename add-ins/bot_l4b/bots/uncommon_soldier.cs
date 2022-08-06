@@ -21,14 +21,7 @@ function ZombieSoldierHoleBot::onAdd(%this,%obj,%style)
 	CommonZombieHoleBot::onAdd(%this,%obj);
 
 	if(getRandom(0,100) <= 5)
-	{
-		switch(getRandom(0,2))
-		{
-			case 0: %obj.mountImage(batonImage, 0);
-			case 1: %obj.mountImage(riotshieldImage, 0);
-					%obj.playthread(1,"armReadyBoth");
-		}
-	}
+	%obj.mountImage(batonImage, 0);
 }
 
 function ZombieSoldierHoleBot::onNewDataBlock(%this,%obj)

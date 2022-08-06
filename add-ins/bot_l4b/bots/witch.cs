@@ -9,7 +9,7 @@ datablock PlayerData(ZombieWitchHoleBot : CommonZombieHoleBot)
 
 	ShapeNameDistance = 100;
     hCustomNodeAppearance = 1;
-    hAttackDamage = $L4B_SpecialsDamage*5;//15;//Melee Damage
+    hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage*5;//15;//Melee Damage
 };
 
 function ZombieWitchHoleBot::onAdd(%this,%obj)
@@ -65,7 +65,7 @@ function ZombieWitchHoleBot::onBotMelee(%this,%obj,%col)
 function ZombieWitchHoleBot::onBotLoop(%this,%obj)
 {
         %obj.hLimitedLifetime();
-        %obj.hAttackDamage = $L4B_SpecialsDamage*5;
+        %obj.hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage*5;
 
         if(%obj.hMelee)
         {

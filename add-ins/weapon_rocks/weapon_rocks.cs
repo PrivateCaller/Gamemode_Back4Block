@@ -239,8 +239,8 @@ datablock ParticleEmitterData(boulderTrailEmitter)
 
 
 //projectile
-AddDamageType("BoulderDirect",   '<bitmap:./icons/CI_Boulder> %1',       '%2 <bitmap:./icons/CI_Boulder> %1',1,1);
-AddDamageType("BoulderRadius",   '<bitmap:./icons/CI_Boulder> %1', '%2 <bitmap:./icons/CI_Boulder> %1',1,0);
+AddDamageType("BoulderDirect",   '<bitmap:Add-ons/Gamemode_Left4Block/add-ins/weapon_rocks/icons/CI_Boulder> %1',       '%2 <bitmap:Add-ons/Gamemode_Left4Block/add-ins/weapon_rocks/icons/CI_Boulder> %1',1,1);
+AddDamageType("BoulderRadius",   '<bitmap:Add-ons/Gamemode_Left4Block/add-ins/weapon_rocks/icons/CI_Boulder> %1', '%2 <bitmap:Add-ons/Gamemode_Left4Block/add-ins/weapon_rocks/icons/CI_Boulder> %1',1,0);
 datablock ProjectileData(BoulderProjectile)
 {
    projectileShapeName = "./models/BoulderProjectile.dts";
@@ -270,41 +270,6 @@ datablock ProjectileData(BoulderProjectile)
    gravityMod = 1;
 
    hasLight    = false;
-   uiName = "";
-};
-
-datablock ProjectileData(TankLandProjectile)
-{
-   projectileShapeName = "./models/BoulderProjectile.dts";
-   directDamage        = 24;
-   directDamageType  = $DamageType::Tank;
-   radiusDamageType  = $DamageType::Tank;
-   impactImpulse	   = 5;
-   verticalImpulse	   = 5;
-   explosion           = BoulderExplosion;
-   particleEmitter     = "";
-
-   brickExplosionRadius = 0;
-   brickExplosionImpact = true; //destroy a brick if we hit it directly?
-   brickExplosionForce  = 0;
-   brickExplosionMaxVolume = 0;
-   brickExplosionMaxVolumeFloating = 0;
-
-   muzzleVelocity      = 20;
-   velInheritFactor    = 1;
-
-   armingDelay         = 0;
-   lifetime            = 20000;
-   fadeDelay           = 19500;
-   bounceElasticity    = 0;
-   bounceFriction      = 0;
-   isBallistic         = true;
-   gravityMod = 1.0;
-
-   hasLight    = false;
-   lightRadius = 3.0;
-   lightColor  = "0 0 0.5";
-
    uiName = "";
 };
 
@@ -411,7 +376,7 @@ function Player::TankThrowBoulder(%obj)
    %obj.playthread(0, "jump");
 
    if(isObject(%targ = %obj.hFollowing))
-   %velocity = vectorscale(%obj.getEyeVector(),50+vectorDist(%obj.getHackPosition(),%targ.getHackPosition())*0.75);
+   %velocity = vectorscale(%obj.getEyeVector(),10+vectorDist(%obj.getHackPosition(),%targ.getHackPosition())*0.75);
    else %velocity = vectorscale(%obj.getEyeVector(),75);
    
    %p = new Projectile()
@@ -436,8 +401,8 @@ datablock ExplosionData(MxRockExplosion : spearExplosion)
    damageRadius = 5;
 };
 
-AddDamageType("MxRockDirect",   '<bitmap:./icons/CI_MxRock> %1',       '%2 <bitmap:./icons/CI_MxRock> %1',1,1);
-AddDamageType("MxRockRadius",   '<bitmap:./icons/CI_MxRock> %1', '%2 <bitmap:./icons/CI_MxRock> %1',1,0);
+AddDamageType("MxRockDirect",   '<bitmap:Add-ons/Gamemode_Left4Block/add-ins/weapon_rocks/icons/CI_MxRock> %1',       '%2 <bitmap:Add-ons/Gamemode_Left4Block/add-ins/weapon_rocks/icons/CI_MxRock> %1',1,1);
+AddDamageType("MxRockRadius",   '<bitmap:Add-ons/Gamemode_Left4Block/add-ins/weapon_rocks/icons/CI_MxRock> %1', '%2 <bitmap:Add-ons/Gamemode_Left4Block/add-ins/weapon_rocks/icons/CI_MxRock> %1',1,0);
 datablock ProjectileData(MxRockProjectile)
 {
    projectileShapeName = "./models/MxRockProjectile.dts";

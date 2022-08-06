@@ -5,11 +5,17 @@ package L4B2Bots_Main
 {
 	function player::pickup(%obj,%item)
 	{
-		Parent::pickup(%obj,%item);
+		%par = Parent::pickup(%obj,%item);
 
 		if(isObject(getMiniGameFromObject(%obj)) && %obj.getDatablock().isSurvivor)
-		if(isObject(%item))
+		if(isObject(%item) && %par == 1)
 		%item.delete();
+	}
+
+	function fxDTSBrick::onPlayerTouch (%obj, %player)
+	{
+		%data = %obj.getDataBlock ();
+		%data.onPlayerTouch (%obj, %player);
 	}
 	
 	function Armor::onImpact(%this, %obj, %col, %vec, %force)
@@ -36,54 +42,31 @@ package L4B2Bots_Main
 			commandToClient( %obj.client, 'SetVignette', $EnvGuiServer::VignetteMultiply, $EnvGuiServer::VignetteColor );
 		}
 	}	
+	
+	function Armor::onBotMelee(%obj,%col)
+	{
+		//
+	}
 
 	function AIPlayer::hMeleeAttack(%obj,%col)
-	{		
+	{						
 		if(%obj.getState() $= "Dead")
 		return;
 
 		if(%col.getType() & $TypeMasks::VehicleObjectType || %col.getType() & $TypeMasks::PlayerObjectType)
 		{
-			if(%obj.hState $= "Following" || %obj.Distraction )//Make sure it can damage even if it has a distraction it's following
+			if(%obj.hState $= "Following" || %obj.Distraction)//Make sure it can damage even if it has a distraction it's following
 			{
-				if(isObject(%col.getmountedimage(0)) && %col.getMountedImage(0) == RiotShieldimage.getID())
-				{
-					%reflect = (vectorDot(%col.getForwardVector(), %obj.getForwardVector()) < 0);
-					if(%reflect)
-					{
-						%obj.playthread(2,activate2);
-						serverPlay3d("riotshield_block_sound",%col.getposition());
-						return;
-					}
-					else
-					{
-						if(%obj.getDataBlock().hMelee $= "2")
-						%obj.getDataBlock().onBotMelee(%obj,%col);//Used for L4B zombie bots
-						%obj.playthread(2,activate2);
+				%obj.getDataBlock().onBotMelee(%obj,%col);//Used for L4B zombie bots
+				%obj.playthread(2,activate2);
 
-						%damage = %obj.hAttackDamage*getWord(%obj.getScale(),0);
-						%damagefinal = getRandom(%damage/4,%damage);
+				%damage = %obj.hAttackDamage*getWord(%obj.getScale(),0);
+				%damagefinal = getRandom(%damage/4,%damage);
 
-						%col.damage(%obj.hFakeProjectile, %col.getposition(), %damagefinal, %obj.hDamageType);
+				%col.damage(%obj.hFakeProjectile, %col.getposition(), %damagefinal, %obj.hDamageType);
 
-						%obj.hlastmeleedamage = %damagefinal;
-						%obj.lastattacked = getsimtime()+1000;
-					}
-				}
-				else
-				{
-					if(%obj.getDataBlock().hMelee $= "2")
-					%obj.getDataBlock().onBotMelee(%obj,%col);//Used for L4B zombie bots
-					%obj.playthread(2,activate2);
-
-					%damage = %obj.hAttackDamage*getWord(%obj.getScale(),0);
-					%damagefinal = getRandom(%damage/4,%damage);
-
-					%col.damage(%obj.hFakeProjectile, %col.getposition(), %damagefinal, %obj.hDamageType);
-
-					%obj.hlastmeleedamage = %damagefinal;
-					%obj.lastattacked = getsimtime()+1000;
-				}
+				%obj.hlastmeleedamage = %damagefinal;
+				%obj.lastattacked = getsimtime()+1000;
 			}
 		}
 	}
@@ -116,40 +99,12 @@ package L4B2Bots_Main
 		Parent::onActivate (%obj, %player, %client, %pos, %vec);
 	}		
 
-	function fxDTSBrickData::onPlayerTouch(%data,%obj,%player)
-	{
-		Parent::onPlayerTouch(%data,%obj,%player);
-	}
-
 	function Projectile::onAdd(%obj)
 	{
 		if(%obj.getdataBlock().isDistraction)
 		%obj.schedule(%obj.getDataBlock().distractionDelay,%obj.getDataBlock().distractionFunction,0);
 
 		Parent::onAdd(%obj,%datablock);
-	}
-
-	function ProjectileData::damage(%this,%obj,%col,%fade,%pos,%normal) //Blocking damage. Original script by Space Guy. I've gutted out a few major bits and added in my own.
-	{		
-		if(%col.getType() & $TypeMasks::PlayerObjectType) //If they aren't holding a shield or carrying one on their back...
-		{
-			if(%col.getMountedImage(0) != RiotShieldimage.getID())
-			return Parent::damage(%this,%obj,%col,%fade,%pos,%normal); //Play it normally and leave.
-			else
-			{
-				%aimVec = %col.getForwardVector();
-				%reflect = ((vectorDot(vectorNormalize(%obj.getVelocity()),%aimVec) < 0 && %col.getMountedImage(0) == RiotShieldimage.getID())); //If the shield is facing the projectile...
-
-				if(!%reflect)
-				return Parent::damage(%this,%obj,%col,%fade,%pos,%normal);
-				else 
-				{
-					serverPlay3d("riotshield_block_sound",%pos); //Play a sound.
-					return;
-				}
-			}
-		}
-		Parent::damage(%this,%obj,%col,%fade,%pos,%normal); //Play it normally and leave.
 	}
 
 	function ProjectileData::onCollision (%this, %obj, %col, %fade, %pos, %normal, %velocity)
@@ -164,25 +119,6 @@ package L4B2Bots_Main
 				%col.hEater.damage(%obj, %pos, %this.directDamage/2, %this.directDamageType);
 			}
 		}		
-		
-		if(%col.getType() & $TypeMasks::PlayerObjectType) //If they aren't holding a shield or carrying one on their back...
-		{
-			if(%col.getMountedImage(0) != RiotShieldimage.getID())
-			return Parent::onCollision(%this, %obj, %col, %fade, %pos, %normal, %velocity); //Play it normally and leave.
-			else
-			{
-				%aimVec = %col.getForwardVector();
-				%reflect = ((vectorDot(vectorNormalize(%obj.getVelocity()),%aimVec) < 0 && %col.getMountedImage(0) == RiotShieldimage.getID())); //If the shield is facing the projectile...
-
-				if(!%reflect)
-				return Parent::onCollision(%this, %obj, %col, %fade, %pos, %normal, %velocity);
-				else 
-				{
-					serverPlay3d("riotshield_block_sound",%pos); //Play a sound.
-					return;
-				}
-			}
-		}
 
 		Parent::onCollision(%this, %obj, %col, %fade, %pos, %normal, %velocity);
 	}

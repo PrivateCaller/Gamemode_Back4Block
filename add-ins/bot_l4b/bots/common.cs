@@ -43,9 +43,9 @@ datablock PlayerData(CommonZombieHoleBot : PlayerMeleeAnims)
 	airControl = 0.1;
 	speedDamageScale = 2.5;
 
-    maxForwardSpeed = 11;
-    maxBackwardSpeed = 7;
-    maxSideSpeed = 8;
+    maxForwardSpeed = 9;
+    maxBackwardSpeed = 8;
+    maxSideSpeed = 7;
 
  	maxForwardCrouchSpeed = 7;
     maxBackwardCrouchSpeed = 5;
@@ -63,7 +63,7 @@ datablock PlayerData(CommonZombieHoleBot : PlayerMeleeAnims)
 	uiName = "Infected";
 	maxTools = 0;
 	maxWeapons = 0;
-	maxdamage = 35;//Health
+	maxdamage = 50;//Health
 	
 	useCustomPainEffects = true;
 	jumpSound = "JumpSound";
@@ -110,7 +110,7 @@ datablock PlayerData(CommonZombieHoleBot : PlayerMeleeAnims)
 
 	//Attack Options
 	hMelee = 2;//Melee
-	hAttackDamage = $L4B_NormalDamage;
+	hAttackDamage = $Pref::Server::L4B2Bots::NormalDamage;
 	hShoot = 1;
 	hWep = "";
 	hShootTimes = 4;
@@ -185,7 +185,7 @@ function CommonZombieHoleBot::onDamage(%this,%obj)
 	if(%obj.getstate() $= "Dead")
 	return;
 
-	if(%obj.lastdamage+1000 < getsimtime())
+	if(%obj.lastdamage+1250 < getsimtime())
 	{
 		%obj.lastdamage = getsimtime();
 
@@ -196,10 +196,25 @@ function CommonZombieHoleBot::onDamage(%this,%obj)
 			%obj.playthread(2,"plant");
 		}
 
-		switch(%obj.chest)	
+		if(%obj.isBurning)
 		{
-			case 0: %obj.playaudio(0,"zombiemale_pain" @ getrandom(1,3) @ "_sound");
-			case 1: %obj.playaudio(0,"zombiefemale_pain" @ getrandom(1,3) @ "_sound");
+			switch(%obj.chest)	
+			{
+				case 0: %obj.playaudio(0,"zombiemale_ignite" @ getrandom(1,5) @ "_sound");
+				case 1: %obj.playaudio(0,"zombiefemale_ignite1" @ getrandom(1,5) @ "_sound");
+			}
+			
+			if(!%obj.isBurningToDeath)
+			{
+				%obj.MaxSpazzClick = getrandom(16,32);
+				L4B_SpazzZombie(%obj,0);
+				%obj.isBurningToDeath = 1;
+			}
+		}
+		else switch(%obj.chest)	
+		{
+			case 0: %obj.playaudio(0,"zombiemale_pain" @ getrandom(1,8) @ "_sound");
+			case 1: %obj.playaudio(0,"zombiefemale_pain" @ getrandom(1,8) @ "_sound");
 		}
 	}
 }
@@ -208,14 +223,18 @@ function CommonZombieHoleBot::onDisabled(%this,%obj)
 {
 	if(%obj.getstate() !$= "Dead")
 	return;
+
+	Parent::OnDisabled(%this,%obj);
 	
 	if(isObject(%obj.client))
 	commandToClient( %obj.client, 'SetVignette', $EnvGuiServer::VignetteMultiply, $EnvGuiServer::VignetteColor );
 
-	switch(%obj.chest)	
+	if(%obj.headless)
+	%obj.playaudio(0,"zombie_headless" @ getrandom(1,4) @ "_sound");
+	else switch(%obj.chest)
 	{
-		case 0: %obj.playaudio(0,"zombiemale_death" @ getrandom(1,3) @ "_sound");
-		case 1: %obj.playaudio(0,"zombiefemale_death" @ getrandom(1,3) @ "_sound");
+		case 0: %obj.playaudio(0,"zombiemale_death" @ getrandom(1,10) @ "_sound");
+		case 1: %obj.playaudio(0,"zombiefemale_death" @ getrandom(1,10) @ "_sound");
 	}
 
 	if(isObject(%weapon = %obj.getMountedImage(0)))
@@ -223,13 +242,11 @@ function CommonZombieHoleBot::onDisabled(%this,%obj)
 		L4B_ZombieDropLoot(%obj,%weapon.item,100);
 		%obj.unMountImage(0);
 	}
-
-	Parent::OnDisabled(%this,%obj);
 }
 
 function CommonZombieHoleBot::onBotLoop(%this,%obj)
 {
-	%obj.hAttackDamage = $L4B_NormalDamage;
+	%obj.hAttackDamage = $Pref::Server::L4B2Bots::NormalDamage;
 	%obj.hLimitedLifetime();
 
 	if(!isObject(%obj.distraction))
@@ -248,8 +265,8 @@ function CommonZombieHoleBot::onBotLoop(%this,%obj)
 			case 1:	%obj.setMaxForwardSpeed(%obj.getDatablock().maxForwardSpeed);
 					%obj.setmaxUnderwaterForwardSpeed(%obj.getDatablock().maxForwardSpeed);		
 
-			case 3: %obj.setMaxForwardSpeed(2);
-					%obj.setmaxUnderwaterForwardSpeed(2);
+			case 3: %obj.setMaxForwardSpeed(5);
+					%obj.setmaxUnderwaterForwardSpeed(5);
 		}
 	}
 }
@@ -263,8 +280,8 @@ function CommonZombieHoleBot::onBotFollow( %this, %obj, %targ )
 	{
 		switch(%obj.chest)
 		{
-			case 0: %obj.playaudio(0,"zombiemale_attack" @ getrandom(1,4) @ "_sound");
-			case 1: %obj.playaudio(0,"zombiefemale_attack" @ getrandom(1,4) @ "_sound");
+			case 0: %obj.playaudio(0,"zombiemale_attack" @ getrandom(1,10) @ "_sound");
+			case 1: %obj.playaudio(0,"zombiefemale_attack" @ getrandom(1,12) @ "_sound");
 		}
 
 		switch(%obj.hZombieL4BType)
@@ -301,10 +318,15 @@ function CommonZombieHoleBot::onCollision(%this, %obj, %col, %fade, %pos, %norm)
 
 function CommonZombieHoleBot::onBotMelee(%this,%obj,%col)
 {		
-	if(%obj.hIsInfected $= "1" && %col.getDamageLevel() >= %col.getDataBlock().maxDamage/1.333 && !%col.hIsImmune && !%col.hIsInfected)
-	holeZombieInfect(%obj,%col);
-
 	%meleeimpulse = mClamp(%obj.hLastMeleeDamage, 1, 10);
+	
+	if(%obj.hIsInfected $= "1" && !%col.hIsImmune && !%col.hIsInfected)
+	{
+		%col.setenergylevel(%col.getEnergyLevel()-%meleeimpulse*2);
+		
+		if(%col.getEnergyLevel() < 1)
+		holeZombieInfect(%obj,%col);
+	}
 
 	%col.spawnExplosion("ZombieHitProjectile",%meleeimpulse/4);
 	%col.applyimpulse(%col.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),getrandom(100,100*%meleeimpulse)),"0" SPC "0" SPC getrandom(100,100*%meleeimpulse)));
@@ -316,6 +338,24 @@ function Player::ZombieLowerArms(%player)
 {
 	%player.playthread(2,root);
 	%player.IsZombieArmsUp = 0;
+}
+
+function CommonZombieHoleBot::onBotCollision( %this, %obj, %col, %normal, %speed )
+{	
+	if(%obj.getState() $= "Dead")
+	return;
+	
+	if(%col.getClassName() $= "Player" || %col.getClassName() $= "AIPlayer")
+	if(%col.getState() !$= "Dead" && %obj.lasthit+getRandom(250,750) < getsimtime())
+	{
+		if(!checkholebotTeams(%obj,%col))//get out of my way
+		{
+			%col.applyimpulse(%col.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),getrandom(800,1000)),"0" SPC "0" SPC getrandom(400,500)));
+			%obj.playaudio(1,"melee_shove_sound");
+			%obj.playthread(3,"activate2");
+			%obj.lasthit = getsimtime();
+		}
+	}
 }
 
 function CommonZombieHoleBot::onTrigger (%this, %obj, %triggerNum, %val)

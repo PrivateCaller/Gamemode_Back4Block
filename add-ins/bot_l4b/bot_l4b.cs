@@ -66,7 +66,7 @@ datablock TSShapeConstructor(RotZTankDts)
 };
 
 //Smoker Datablocks
-datablock StaticShapeData(HataCylinder2Shape)
+datablock StaticShapeData(SmokerTongueShape)
 {
 	shapeFile = "./models/tongue.dts";
 };
