@@ -32,8 +32,6 @@ function ZombieCedaHoleBot::onNewDataBlock(%this,%obj)
 
 function ZombieCedaHoleBot::onDamage(%this,%obj)
 {
-	%obj.setShapeNameHealth();
-
 	if(%obj.getstate() !$= "Dead" && %obj.lastdamage+500 < getsimtime())//Check if the chest is the female variant and add a 1 second cooldown
 	{
 		if(%obj.raisearms)
@@ -60,13 +58,10 @@ function ZombieCedaHoleBot::onDisabled(%this,%obj)
 	if(%obj.getstate() !$= "Dead")
 	return;
 	
-	L4B_ZombieLootInitialize(%this,%obj);
-	
 	if(isObject(%weapon = %obj.getMountedImage(0)))
 	{
 		L4B_ZombieDropLoot(%obj,%weapon.item,100);
 		%obj.unMountImage(0);
-		L4B_ZombieLootInitialize(%this,%obj);
 	}
 
     switch(%obj.chest)

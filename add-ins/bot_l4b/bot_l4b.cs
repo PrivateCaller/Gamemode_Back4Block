@@ -69,6 +69,7 @@ datablock TSShapeConstructor(RotZTankDts)
 datablock StaticShapeData(SmokerTongueShape)
 {
 	shapeFile = "./models/tongue.dts";
+	isSmokerTongue = 1;
 };
 
 datablock ParticleData(SmokerSpores)
@@ -1376,6 +1377,7 @@ exec("./bots/uncommon_jimmy_gibbs.cs");
 exec("./bots/uncommon_ceda.cs");
 exec("./bots/uncommon_toxic.cs");
 exec("./bots/uncommon_pirate.cs");
+exec("./bots/uncommon_police.cs");
 exec("./bots/boomer.cs");
 exec("./bots/charger.cs");
 exec("./bots/hunter.cs");

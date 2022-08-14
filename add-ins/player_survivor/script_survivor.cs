@@ -32,18 +32,19 @@ while(%file !$= "")
 datablock PlayerData(SurvivorPlayer : PlayerMeleeAnims)
 {
 	canPhysRoll = true;
-
 	canJet = false;
 	jumpforce = 100*8.5;
 	jumpDelay = 25;
-	minimpactspeed = 20;
+	minimpactspeed = 18;
 	speedDamageScale = 3;
+	mass = 105;
+	density = 0.7;
 
-	airControl = 0.1;
+	airControl = 0.05;
 
-	cameramaxdist = 2.5;
+	cameramaxdist = 2.25;
     cameraVerticalOffset = 1;
-    cameraHorizontalOffset = 0.8;
+    cameraHorizontalOffset = 0.75;
     cameratilt = 0;
     maxfreelookangle = 2;
 
@@ -54,6 +55,12 @@ datablock PlayerData(SurvivorPlayer : PlayerMeleeAnims)
  	maxForwardCrouchSpeed = 4;
     maxBackwardCrouchSpeed = 2;
     maxSideCrouchSpeed = 3;
+
+	groundImpactMinSpeed = 5;
+	groundImpactShakeFreq = "4.0 4.0 4.0";
+	groundImpactShakeAmp = "1.0 1.0 1.0";
+	groundImpactShakeDuration = 0.8;
+	groundImpactShakeFalloff = 15;
 
 	uiName = "Survivor Player";
 	usesL4DItems = 1;
@@ -127,16 +134,22 @@ datablock PlayerData(DownPlayerSurvivorArmor : SurvivorPlayerLow)
    	rechargerate = 0;
 };
 
-function Player::Safehouse(%player)
+function Player::Safehouse(%player,%bool)
 {
 	%minigame = getMiniGameFromObject(%player);
 	if(%player.hType !$= "Survivors" || isEventPending(%minigame.resetSchedule))
 	return;
 
+	if(%bool)
 	%player.InSafehouse = 1;
-	cancel(%player.NoSafeHouseSchedule);
-	%player.NoSafeHouseSchedule = %player.schedule(500,NoSafeHouse);
+	else %player.InSafehouse = 0;
+}
 
+registerOutputEvent ("Player", "Safehouse","bool");
+
+registerOutputEvent(Minigame, "SafehouseCheck");
+function MiniGameSO::SafehouseCheck(%minigame,%client)
+{
 	for(%i = 0; %i < %minigame.numMembers; %i++)
 	{
 		%client = %minigame.member[%i];
@@ -150,53 +163,43 @@ function Player::Safehouse(%player)
 	
 	if(%safehousecount >= %livePlayerCount && isObject(%minigame))
 	{
-		%minigame.SurvivorWin();
+		if(isEventPending(%minigame.resetSchedule))	
+		return;
+
+		if(isObject(l4b_music))
+		l4b_music.delete();
+
+   		%minigame.scheduleReset(8000);
+		%minigame.L4B_PlaySound("game_win_sound");
+
+    	for(%i=0;%i<%minigame.numMembers;%i++)
+    	{
+			%member = %minigame.member[%i];
+
+			if(isObject(%member.player))
+			{
+				if(%member.player.hType $= "Survivors")
+				%member.player.emote(winStarProjectile, 1);
+
+				%member.Camera.setOrbitMode(%member.player, %member.player.getTransform(), 0, 5, 0, 1);
+				%member.setControlObject(%member.Camera);
+			}
+    	}
 		return;
 	}
 }
-
-function Player::NoSafeHouse(%player)
-{
-	%player.InSafehouse = 0;
-}
-registerOutputEvent ("Player", "Safehouse");
-
-function MinigameSO::SurvivorWin(%minigame,%client)
-{
-	if(isEventPending(%minigame.resetSchedule))	
-	return;
-	
-	if(isObject(l4b_music))
-	l4b_music.delete();
-
-	//%minigame.schedule(3000,chatMessageAll,0,'<font:impact:25>\c6Resetting minigame in 5 seconds.');
-	//%minigame.schedule(7750,chatMessageAll,0,'<font:impact:25>\c6Resetting minigame.');
-   	%minigame.scheduleReset(8000);
-	%minigame.L4B_PlaySound("game_win_sound");
-	%minigame.DirectorProcessEvent("onSurvivorsWin",%client);
-
-    for(%i=0;%i<%minigame.numMembers;%i++)
-    {
-		%member = %minigame.member[%i];
-
-		if(isObject(%member.player))
-		{
-			if(%member.player.hType $= "Survivors")
-			%member.player.emote(winStarProjectile, 1);
-
-			%member.Camera.setOrbitMode(%member.player, %member.player.getTransform(), 0, 5, 0, 1);
-			%member.setControlObject(%member.Camera);
-		}
-    }
-}
-
-registerInputEvent("fxDTSBrick", "onSurvivorsWin", "Self fxDTSBrick" TAB "MiniGame MiniGame");
-registerInputEvent("fxDTSBrick", "onSurvivorsLose", "Self fxDTSBrick" TAB "MiniGame MiniGame");
 
 function SurvivorPlayerDmg(%this,%obj,%am)
 {
 	if(%obj.getstate() $= "Dead")
 	return;
+
+	if(%am > 0)
+	{
+		%amdiv = %am*0.25;
+		%obj.SurvivorStress += %amdiv;
+		%obj.SurvivorStress = mClampF(%obj.SurvivorStress, 0, 20);
+	}
 	
 	if(!%obj.getWaterCoverage() $= 1)
 	{
@@ -483,7 +486,7 @@ function Player::oxygenTick(%obj)
 }
 
 function Player::SurvivorDownedCheck(%obj,%damage,%damageType)
-{	
+{		
 	if(%damageType $= $DamageType::Fall)	
 	{
 		serverPlay3D("impact_fall_sound",%obj.getPosition());
@@ -499,9 +502,6 @@ function Player::SurvivorDownedCheck(%obj,%damage,%damageType)
 		MissionCleanup.add(%p);
 		%p.explode();
 	}
-
-	if(%damageType $= $DamageType::Suicide)	
-	serverPlay3D("victim_smoked_sound",%obj.getPosition());
 
 	if($Pref::SurvivorPlayer::EnableDowning)
 	{
@@ -546,40 +546,23 @@ function energydamageloop(%obj)
 { 
 	if(isobject(%obj) && %obj.getstate() !$= "Dead" && %obj.getdataBlock().getName() $= "DownPlayerSurvivorArmor")
 	{
+		%obj.setdamageflash(16/%obj.getenergylevel());
+		%obj.setenergylevel(%obj.getenergylevel()-2);
+
+		if(%obj.getClassName() $= "Player")
+		%obj.client.Play2d("survivor_heartbeat_sound");
+
 		if(%obj.getenergylevel() == 0 && !%obj.isBeingSaved)
 		{
-			%obj.kill();
-			return;
+			if(!%obj.isBeingSaved)
+			{
+				%obj.kill();
+				return;
+			}
 		}
 
-		cancel(%obj.energydeath1);
-		cancel(%obj.energydeath2);
-		cancel(%obj.energydeath3);
-		
-		if(%obj.getClassName() $= "Player")
-		{
-			%obj.client.Play2d("survivor_heartbeat_sound");
-			%obj.setdamageflash(16/%obj.getenergylevel());
-		}
-
-		if(%obj.getenergylevel() >= 75)//1
-		{
-			%obj.energydeath1 = schedule(750,0,energydamageloop,%obj);
-
-			%obj.setenergylevel(%obj.getenergylevel()-1);
-		}
-		if(%obj.getenergylevel() <= 75)//2
-		{
-			%obj.energydeath2 = schedule(625,0,energydamageloop,%obj);
-
-			%obj.setenergylevel(%obj.getenergylevel()-1);
-		}
-		if(%obj.getenergylevel() <= 50)//3
-		{
-			%obj.setenergylevel(%obj.getenergylevel()-1);
-
-			%obj.energydeath3 = schedule(500,0,energydamageloop,%obj);
-		}
+		cancel(%obj.energydeath);
+		%obj.energydeath = schedule(750,0,energydamageloop,%obj);
 
 		if(%obj.lastcry+10000 < getsimtime())
 		{
@@ -587,13 +570,7 @@ function energydamageloop(%obj)
 			%obj.playaudio(0,"survivor_pain_high1_sound");
 		}
 	}
-	else 
-	{
-		if(isObject(%obj))
-		%obj.kill();
-		
-		return;
-	}
+	else return;
 
 }
 

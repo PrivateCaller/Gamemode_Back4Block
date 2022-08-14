@@ -1,3 +1,7 @@
+if(LoadRequiredAddOn("Weapon_SWeps_EXT") == $Error::None)
+$Item_Explosives_isSWepsExtOn = 1;
+else $Item_Explosives_isSWepsExtOn = 0;
+
 %pattern = "add-ons/gamemode_left4block/add-ins/weapon_throwable_explosives/sound/*.wav";//Too lazy to write datablock files for the sounds, just took this from the Disease Gamemode
 %file = findFirstFile(%pattern);
 while(%file !$= "")

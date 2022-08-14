@@ -152,16 +152,10 @@ function Player::doMelee(%obj)
 				%hitknockback = 1200;
 				%hitz = 500;
 
-				if(getRandom(1,100) <= 25 && %hit.hZombieL4BType & %hit.hZombieL4BType < 4 )
+				if(%hit.hZombieL4BType & %hit.hZombieL4BType < 4 && %hit.lastdamage+1250 < getsimtime())
 				{
-					if(%hit.isHoleBot)
-					%hit.stopHoleLoop();
 					%hit.playaudio(0,"zombie_shoved" @ getrandom(1,10) @ "_sound");
-					
-					%hit.emote(winStarProjectile, 1);
-					L4B_SpazzZombieInitialize(%hit,1);
-					%hit.mountImage(stunImage,2);
-					schedule(1000,0,serverCmdSit,%hit);
+					%hit.lastdamage = getsimtime();
 				}
 
 				%hit.applyimpulse(posFromRaycast(%ray),vectoradd(vectorscale(%obj.getforwardvector(),%hitknockback),"0" SPC "0" SPC %hitz));

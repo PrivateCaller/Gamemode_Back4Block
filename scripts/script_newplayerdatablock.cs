@@ -205,8 +205,6 @@ package L4B2Bots_NewPlayerDatablock
 			%pl.setFaceName("asciiTerror");
 			else %pl.setFaceName($hZombieFace[getRandom(1,$hZombieFaceAmount)]);
 
-			%pl.MeleePlayerBloodify(50);
-
 			switch$(%pl.getDataBlock().getName())
 			{
 				case "ZombieHunterHoleBot": %pl.hideNode($hat[%cl.hat]);

@@ -104,15 +104,13 @@ function ZombieBoomerHoleBot::onBotFollow( %this, %obj, %targ )
 	{
 		%obj.getDatablock().Vomit(%obj);
 
-		for (%n = 0; %n < 4; %n++)
+		for (%n = 0; %n < 1; %n++)
 		%obj.getDatablock().schedule(750 * %n,Vomit,%obj);
 	}
 }
 
     function ZombieBoomerHoleBot::onDamage(%this,%obj,%Am)
-{
-	%obj.setShapeNameHealth();
-	
+{	
 	if(%obj.getstate() $= "Dead")
 	return;
 
@@ -124,10 +122,7 @@ function ZombieBoomerHoleBot::onBotFollow( %this, %obj, %targ )
 	}
 
 	if(%Obj.GetDamageLevel() > %obj.getDatablock().maxDamage/2)
-	{
-		L4B_SpecialsWarningLight(%obj);
-		%obj.playaudio(3,"boomer_indigestion_loop_sound");
-	}
+	%obj.playaudio(3,"boomer_indigestion_loop_sound");
 	
 	Parent::onDamage(%this,%obj,%Am);
 }
@@ -163,24 +158,6 @@ function ZombieBoomerHoleBot::onBotFollow( %this, %obj, %targ )
 		sourceObject = %obj;
 		damageType = $DamageType::Boomer;
 	};
-
-	if(isObject(%mg = getMinigameFromObject(%obj)) && %mg.BotDamage)
-	for(%i=0;%i<25;%i++)
-	{
-		%rnd = getRandom();
-		%dist = getRandom()*20;
-		%x = mCos(%rnd*$PI*5)*%dist;
-		%y = mSin(%rnd*$PI*5)*%dist;
-		%p = new projectile()
-		{
-			datablock = BoomerVomitSpewedProjectile;
-			initialPosition = %obj.getHackPosition();
-			initialVelocity = %x SPC %y SPC (getRandom()*4);
-			client = %obj.client;
-			sourceObject = %obj;
-			damageType = $DamageType::SpitAcidBall;
-		};
-	}
 
 	Parent::onDisabled(%this,%obj);
 }

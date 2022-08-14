@@ -111,7 +111,6 @@ function ZombieSpitterHoleBot::onBotFollow( %this, %obj, %targ )
 
 function ZombieSpitterHoleBot::onDamage(%this,%obj)
 {
-	%obj.setShapeNameHealth();
 
 	if(%obj.getstate() $= "Dead")
 	return;

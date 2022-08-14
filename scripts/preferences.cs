@@ -289,25 +289,6 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 		className      = "Gamemode_Left4Block";
 		addon          = "Gamemode_Left4Block";
 		category       = "Bot Specials";
-		title          = "Specials warn light";
-		type           = "dropdown";
-		params         = "Disabled 0 Red 1 Green 2 Blue 3 White 4";
-		variable       = "$Pref::Server::L4B2Bots::SpecialsWarnLight";
-		defaultValue   = "Disabled 0";
-		updateCallback = "";
-		loadCallback   = "";
-		hostOnly       = false;
-		secret         = false;
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "Gamemode_Left4Block";
-		addon          = "Gamemode_Left4Block";
-		category       = "Bot Specials";
 		title          = "Specials pinned messages";
 		type           = "bool";
 		params         = "";
@@ -355,7 +336,6 @@ else
 	$Pref::Server::L4B2Bots::LimitedLifetime = 1;
 	$Pref::Server::L4B2Bots::MinigameMessages = 1;
 	$Pref::Server::L4B2Bots::ZombieRandomScale = 1;
-	$Pref::Server::L4B2Bots::SpecialsWarnLight = 0;
 	$Pref::Server::L4B2Bots::UncommonWarningLight = 0;
 	$Pref::Server::L4B2Bots::VictimSavedMessages = 1;
 	$Pref::Server::L4B2Bots::ZombieBurnerCollision = 1;
@@ -379,7 +359,7 @@ function L4B_DifficultyAdjustment()
 				$Pref::Server::L4B2Bots::SpecialsDamage = 4;
 				$Pref::Server::L4B2Bots::TankChance = 15;
 				$Pref::Server::L4B2Bots::TankRounds = 0;
-				$Pref::Server::L4B2Bots::TankHealth = 2000;
+				$Pref::Server::L4B2Bots::TankHealth = 3000;
 				$Pref::Server::L4B2Bots::SurvivorImmunity = 1;
 				$Pref::Server::L4B2Bots::MaxSpecial = 4;
 				$Pref::Server::L4B2Bots::MaxHorde = 40;
@@ -389,7 +369,7 @@ function L4B_DifficultyAdjustment()
 				$Pref::Server::L4B2Bots::SpecialsDamage = 15;
 				$Pref::Server::L4B2Bots::TankChance = 30;
 				$Pref::Server::L4B2Bots::TankRounds = 1;
-				$Pref::Server::L4B2Bots::TankHealth = 2000;
+				$Pref::Server::L4B2Bots::TankHealth = 3000;
 				$Pref::Server::L4B2Bots::SurvivorImmunity = 1;
 				$Pref::Server::L4B2Bots::MaxSpecial = 4;
 				$Pref::Server::L4B2Bots::MaxHorde = 50;
@@ -409,7 +389,7 @@ function L4B_DifficultyAdjustment()
 				$Pref::Server::L4B2Bots::SpecialsDamage = 30;
 				$Pref::Server::L4B2Bots::TankChance = 75;
 				$Pref::Server::L4B2Bots::TankRounds = 2;
-				$Pref::Server::L4B2Bots::TankHealth = 5000;
+				$Pref::Server::L4B2Bots::TankHealth = 8000;
 				$Pref::Server::L4B2Bots::SurvivorImmunity = 0;
 				$Pref::Server::L4B2Bots::MaxSpecial = 8;
 				$Pref::Server::L4B2Bots::MaxHorde = 75;

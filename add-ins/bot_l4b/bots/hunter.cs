@@ -69,8 +69,6 @@ function L4B_holeHunterKill(%obj,%col)
 
 function ZombieHunterHoleBot::onDamage(%this,%obj)
 {
-	%obj.setShapeNameHealth();
-	
 	if(%obj.getstate() $= "Dead")
 	return;
 
@@ -152,7 +150,6 @@ function ZombieHunterHoleBot::onBotFollow( %this, %obj, %targ )
 			%obj.lastpounce = getsimtime();
 		
 			%obj.hCrouch(1750);
-			L4B_SpecialsWarningLight(%obj);
 			%obj.playaudio(0,"hunter_recognize" @ getrandom(1,3) @ "_sound");
 			%obj.hAbouttoattack = schedule(1250,0,L4B_HunterZombieLunge,%obj,%targ);
 		}
@@ -195,17 +192,6 @@ function ZombieHunterHoleBot::onBotMelee(%this,%obj,%col)
 	%forcescale = %oscale+%force/50;
 	%obj.spawnExplosion(pushBroomProjectile,%forcescale SPC %forcescale SPC %forcescale);
 	%obj.setMaxForwardSpeed(9);
-	
-	if(%force >= 50)
-	{
-		if(!%obj.hEating)
-		{
-			if(%obj.getclassname() $= "AIPlayer")
-			%obj.stopHoleLoop();
-
-			L4B_SpazzZombieInitialize(%obj,0);
-		}
-	}
 	
 	if(%oScale >= 0.9 && %obj.getstate() !$= "Dead")
 	%obj.SpecialPinAttack(%col,%force);
@@ -350,8 +336,6 @@ function ZombieHunterHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
 		{
 			case 3: if(%val)
 					{
-						L4B_SpecialsWarningLight(%obj);
-
 						%obj.playaudio(0,"hunter_recognize" @ getrandom(1,3) @ "_sound");
 						%obj.BeginPounce = 1;
 					}

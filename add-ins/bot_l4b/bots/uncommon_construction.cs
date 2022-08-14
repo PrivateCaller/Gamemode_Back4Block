@@ -18,17 +18,10 @@ function ZombieConstructionHoleBot::onAdd(%this,%obj,%style)
 
 	if(getRandom(0,100) <= 20)
 	{
-		switch(getRandom(0,6))
+		switch(getRandom(1,2))
 		{
-			case 0: %obj.mountImage(pipewrenchImage, 0);
-			case 1: %obj.mountImage(shovelImage, 0);
-			case 2: %obj.mountImage(ConstructionConeSpeakerImage, 0);
-					if($L4B2Bots::UncommonWarningLight)
-					L4B_SpecialsWarningLight(%obj);
-			case 3: serverCmdUseSprayCan(%obj,getRandom(0,27));
-			case 4: %obj.mountImage(tireIronImage, 0);
-			case 5: %obj.mountImage(crowbarImage, 0);
-			case 6: %obj.mountImage(blackhammerImage, 0);
+			case 1: %obj.mountImage(ConstructionConeSpeakerImage, 0);
+			case 2: serverCmdUseSprayCan(%obj,getRandom(0,27));
 		}
 	}
 }

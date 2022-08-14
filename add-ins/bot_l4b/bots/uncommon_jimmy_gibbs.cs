@@ -16,9 +16,6 @@ function ZombieJimmyHoleBot::onAdd(%this,%obj,%style)
 {
 	Parent::onAdd(%this,%obj);
 	CommonZombieHoleBot::onAdd(%this,%obj);
-
-	if(getRandom(0,100) <= 25)
-	%obj.MountImage(pipeWrenchImage,0);
 }
 
 function ZombieJimmyHoleBot::onNewDataBlock(%this,%obj)

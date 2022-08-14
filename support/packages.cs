@@ -4,18 +4,27 @@
 package L4B2Bots_Main
 {
 	function player::pickup(%obj,%item)
-	{
-		%par = Parent::pickup(%obj,%item);
+	{		
+		Parent::pickup(%obj,%item);
 
 		if(isObject(getMiniGameFromObject(%obj)) && %obj.getDatablock().isSurvivor)
-		if(isObject(%item) && %par == 1)
+		if(isObject(%item) && !%item.canPickup)
 		%item.delete();
 	}
 
-	function fxDTSBrick::onPlayerTouch (%obj, %player)
+	function fxDTSBrickData::onPlayerTouch(%data,%obj,%player)
 	{
-		%data = %obj.getDataBlock ();
-		%data.onPlayerTouch (%obj, %player);
+		Parent::onPlayerTouch(%data,%obj,%player);
+
+		if(%player.getDatablock().isSurvivor)
+		%obj.processInputEvent ("onSurvivorTouch");
+
+		if(%player.getDatablock().getName() !$= "ZombieTankHoleBot")
+		{
+			if(%player.hZombieL4BType)
+			%obj.processInputEvent ("onZombieTouch");
+		}
+		else %obj.processInputEvent ("onTankTouch");	
 	}
 	
 	function Armor::onImpact(%this, %obj, %col, %vec, %force)
@@ -87,7 +96,7 @@ package L4B2Bots_Main
 
 	function fxDTSBrick::onActivate (%obj, %player, %client, %pos, %vec)
 	{
-		if(%obj.getdataBlock().IsTeleBrick && %obj.getgroup().bl_id == %player.client.bl_id)
+		if(%obj.getdataBlock().IsZoneBrick && %obj.getgroup().bl_id == %player.client.bl_id)
 		{
 			if(strstr(%obj.getName(),"TeleventSetCheck") != -1 || strstr(%obj.getName(),"TeleventSetSubCheck") != -1)
 			if(%player.client.currTeleSet !$= %obj.TeleSet)
@@ -150,9 +159,9 @@ package L4B2Bots_Main
 
 	function minigameCanDamage(%objA, %objB)
 	{	
-		if(%objA.getclassname() $= "GameConnection" || %objA.getclassname() $= "Player" || %objA.getclassname() $= "AIPlayer")
-		if(%objB.getclassname() $= "Player" || %objB.getclassname() $= "AIPlayer")
+		if(%objA.player != %objB)
 		{
+			if(%objA.getclassname() $= "GameConnection" || %objA.getclassname() $= "Player" || %objA.getclassname() $= "AIPlayer" || %objB.getclassname() $= "Player" || %objB.getclassname() $= "AIPlayer")
 			if(%objA.hType $= %objB.hType || %objA.player.hType $= %objB.hType)
 			return;
 		}
@@ -177,7 +186,6 @@ package L4B2Bots_Main
 		{
 			if(isObject(l4b_music)) 
 			l4b_music.delete();
-			%minigame.DirectorProcessEvent("onSurvivorsLose",%client);
 			%minigame.L4B_PlaySound("game_lose_sound");
 			%minigame.scheduleReset(12000);
 		}
@@ -188,55 +196,67 @@ package L4B2Bots_Main
 		Parent::Reset(%minigame,%client);
 		L4B_DifficultyAdjustment();
 
-		if(isObject(directorBricks))
-		for (%i = 0; %i < directorBricks.getCount(); %i++) 
-        {
-            %brick = directorBricks.getObject(%i);
+		for(%i = 0; %i < %client.brickgroup.ntobjectcount_breakbrick; %i++)
+		{
+			if(isObject(%breakbrick = %client.brickgroup.ntobject_breakbrick_[%i]))
+			{
+				%breakbrick.setRendering(1);
+				%breakbrick.setRayCasting(1);
+				%breakbrick.setColliding(1);
+			}
+		}
 
-            if(%brick.getdatablock().isZombieBrick)
-            {
-                cancel(%brick.spawnBots);
-                %brick.BotHoleAmount = 0;
-            }
-        }
+		for(%i = 0; %i < %client.brickgroup.ntobjectcount_progress_door; %i++)
+		{
+			if(isObject(%door = %client.brickgroup.ntobject_progress_door_[%i]))
+			{
+				%door.door(close);
+			}
+		}
 
+		if(isObject(GlobalTeleSet))
+		{
+			for(%i = 0; %i < GlobalTeleSet.getCount(); %i++)
+			{
+				if(isObject(%set = GlobalTeleSet.getObject(%i)))
+				{
+					%set.firstentry = 0;
+					%setlist[%s++] = %set;
+
+					for(%j = 0; %j < %setlist[%s].getCount(); %j++)
+					{
+						if(isObject(%brick = %setlist[%s].getObject(%j)) && strstr(strlwr(%brick.getname()), "itemspawn") != -1)
+						%brick.setItem(none);
+					}
+				}
+			}
+		}
+
+		for(%i = 0; %i < %client.brickgroup.ntobjectcount_ammocrate; %i++)
+		{
+			if(isObject(%ammocrate = %client.brickgroup.ntobject_ammocrate_[%i]))
+			%ammocrate.ammocrate.AmmoSupplyCount = 0;
+		}
+
+		for(%i = 0; %i < %client.brickgroup.ntobjectcount_healthlocker; %i++)
+		{
+			if(isObject(%healthlocker = %client.brickgroup.ntobject_healthlocker_[%i]))
+			%healthlocker.healthlocker.LockerSupplyCount = 0;
+		}
+		
 		%minigame.schedule(10,removeZombieBots,"Clear",%client);
 		%minigame.L4B_PlaySound("game_start_sound");
 
-        %directorinterval = $Pref::L4BDirector::Director_Interval*1000;
-
         if(isObject(l4b_music)) 
         l4b_music.delete();
-
-        if($Pref::L4BDirector::EnableCues)
-        {
-            if(isObject(%minigame.member0.player))
-            %pos = %minigame.member0.player.getPosition();
-            else %pos = "0 0 0";
-
-            %musicnum = "musicdata_L4D_safearea";
-            new AudioEmitter(l4b_music)
-            {
-                position = %pos;
-                profile = %musicnum.getID();
-                isLooping= true;
-                is3D = 0;
-                volume = 0.75;
-			    useProfileDescription = "0";
-			    type = "0";
-			    outsideAmbient = "1";
-			    referenceDistance = "2";
-			    maxDistance = 999999;
-			    enableVisualFeedback = "0";
-            };
-        }
+        %minigame.DirectorMusic("musicdata_L4D_safearea" @ getRandom(1,4),%client);
 
         if($Pref::L4BDirector::EnableOnMG)
         {
             %minigame.DirectorStatus = 1;
-            cancel(%minigame.directorSchedule);
 
-            %minigame.schedule(%directorinterval,directorAI,%client);
+            cancel(%minigame.directorSchedule);
+            %minigame.schedule(10000,directorAI,%client);
 
             if($Pref::L4BDirector::EnableCues)
             %minigame.directorPlaySound("hordeincoming" @ getrandom(1,9) @ "_sound",%client);
@@ -250,6 +270,18 @@ package L4B2Bots_Main
             cancel(%minigame.directorSchedule);
         }
         
+		for(%i=0;%i<%minigame.numMembers;%i++)
+		{
+			if(isObject(%mgmember = %minigame.member[%i]))
+			{
+				%aliveplayer++;
+				%minigame.survivorStatHealthAverage = 100*%aliveplayer;
+				%minigame.survivorStatStressAverage = 0;
+			}
+		}
+
+    	%minigame.UrgentRound = 0;
+    	%minigame.SoldierTank = 0;
 		%minigame.DirectorTankRound = 0;
         cancel(%minigame.hordeMusic);
         cancel(%minigame.hordeMusic1);
@@ -263,16 +295,7 @@ package L4B2Bots_Main
         if(isObject(l4b_music)) 
         l4b_music.delete();
 		
-		for (%i = 0; %i < directorBricks.getCount(); %i++) 
-        {
-            %brick = directorBricks.getObject(%i);
-
-            if(%brick.getdatablock().isZombieBrick)
-            {
-                cancel(%brick.spawnBots);
-                %brick.BotHoleAmount = 0;
-            }
-        }
+		%minigame.schedule(1,removeZombieBots,"Clear",%client);
     }
 
 	function holeZombieInfect(%obj, %col)

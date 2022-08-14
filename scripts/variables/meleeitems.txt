@@ -1,0 +1,15 @@
+crowbarItem
+macheteItem
+hatchetItem
+pipewrenchItem
+baseballbatItem
+fryingpanItem
+tireironItem
+paddleItem
+batonItem
+icepickItem
+leadpipeItem
+shovelItem
+spikebatItem
+golfclubItem
+blackhammerItem

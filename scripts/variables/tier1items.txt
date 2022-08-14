@@ -1,0 +1,9 @@
+pistolItem
+DeagleItem
+m1911Item
+jericho941SingleItem
+remington870Item
+mac10Item
+vectorItem
+mp5Item
+mp7Item

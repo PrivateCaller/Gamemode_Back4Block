@@ -1,2 +1,1 @@
-Author: Davow, Robbinson Block
-Left 4 Dead styled gamemode, iterating from the previous ZAPT and Gamemode_Zombie variant, including multiple add-ons and packages
+Avoid all contacted with infected individuals? Nah, kill all sons of bitches, that's my official instructions.

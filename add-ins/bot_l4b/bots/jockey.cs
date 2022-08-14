@@ -127,9 +127,7 @@ function ZombieJockeyHoleBot::onBotFollow( %this, %obj, %targ )
 }
 
 function ZombieJockeyHoleBot::onDamage(%this,%obj,%source,%pos,%damage,%type)
-{
-	%obj.setShapeNameHealth();
-	
+{	
 	if(isObject(%obj.hEating))
 	{
 		%obj.hEating.isBeingStrangled = 0;

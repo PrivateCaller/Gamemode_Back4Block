@@ -96,7 +96,7 @@ datablock ShapeBaseImageData(crowbarImage)
 	stateAllowImageChange[3]        = false;
 	stateSequence[3]                = "Fire";
 	stateScript[3]                  = "onFire";
-	stateTimeoutValue[3]            = 0.1925;
+	stateTimeoutValue[3]            = 0.1875;
 	stateSound[3]					= "melee_swing_sound";
 
 	stateName[4]			= "CheckFire";
@@ -105,7 +105,7 @@ datablock ShapeBaseImageData(crowbarImage)
 
 	stateName[5]                    = "StopFire";
 	stateTransitionOnTimeout[5]     = "Ready";
-	stateTimeoutValue[5]            = 0.3;
+	stateTimeoutValue[5]            = 0.45;
 	stateAllowImageChange[5]        = false;
 	stateSequence[5]                = "StopFire";
 	stateScript[5]                  = "onStopFire";
@@ -197,17 +197,6 @@ function MeleeSwingCheck(%obj,%this,%slot)
 				%target.damage(%obj, posFromRaycast(%ray), %damageclamp, $DamageType::Default);
 				%target.applyimpulse(posFromRaycast(%ray),vectoradd(vectorscale(%vec,1000),"0 0 750"));
 				serverPlay3D(%this.meleeHitPlSound @ "_hitpl" @ getRandom(1,2) @ "_sound",posFromRaycast(%ray));
-
-				if(getRandom(1,100) <= %this.meleeZombieStunChance && %target.hZombieL4BType & %target.hZombieL4BType < 5)
-				{
-					if(%target.getclassName() $= "AIPlayer")
-					%target.stopHoleLoop();
-			
-					%target.emote(winStarProjectile, 1);
-					L4B_SpazzZombieInitialize(%target,1);
-					%target.mountImage(stunImage,2);
-					schedule(1000,0,serverCmdSit,%target);
-				}
 			}
 		}
    } 

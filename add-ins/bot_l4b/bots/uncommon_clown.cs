@@ -14,9 +14,6 @@ function ZombieClownHoleBot::onAdd(%this,%obj,%style)
 {
 	Parent::onAdd(%this,%obj);
 	CommonZombieHoleBot::onAdd(%this,%obj);
-
-	if($L4B2Bots::UncommonWarningLight)
-	L4B_SpecialsWarningLight(%obj);
 }
 
 function ZombieClownHoleBot::onNewDataBlock(%this,%obj)

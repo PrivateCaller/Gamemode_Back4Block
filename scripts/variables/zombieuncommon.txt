@@ -1,0 +1,9 @@
+ZombieConstructionHoleBot
+ZombieFallenHoleBot
+ZombieCedaHoleBot
+ZombieSoldierHoleBot
+ZombieClownHoleBot
+ZombieJimmyHoleBot
+MudZombieHoleBot
+ZombiePirateHoleBot
+ToxiCommonZombieHoleBot

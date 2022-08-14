@@ -49,7 +49,6 @@ function ToxiCommonZombieHoleBot::onBotLoop(%this,%obj)
 function ToxiCommonZombieHoleBot::onBotFollow( %this, %obj, %targ )
 {
 	CommonZombieHoleBot::onBotFollow( %this, %obj, %targ );
-	%obj.playaudio(0,"norm_cough" @ getrandom(1,3) @ "_sound");
 }
 
 AddDamageType("Toxic", '<bitmap:base/client/ui/CI/skull> %1', '%2 <bitmap:base/client/ui/CI/skull> %1', 0.2, 1);
@@ -72,7 +71,7 @@ function Toxicity(%col,%obj)
 		else %col.damage(%col, %col.getposition(), getrandom(1,8), $DamageType::Toxic);
 
 		if(%col.hZombieL4BType && %col.hZombieL4BType < 4)
-		%col.hRunAwayFromPlayer(%obj);
+		%col.hRunAwayFromPlayer(%col);
 	}
 	else
 	{

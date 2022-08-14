@@ -14,13 +14,6 @@ function ZombiePirateHoleBot::onAdd(%this,%obj,%style)
 {
 	Parent::onAdd(%this,%obj);
 	CommonZombieHoleBot::onAdd(%this,%obj);
-
-	if(getRandom(0,100) <= 33)
-	{
-		%obj.mountImage(macheteImage,0);
-		if($L4B2Bots::UncommonWarningLight)
-		SpecialsWarningLight(%obj);
-	}
 }
 
 function ZombiePirateHoleBot::onBotLoop(%this,%obj)
@@ -62,23 +55,21 @@ function ZombiePirateHoleBot::L4BUncommonAppearance(%this,%obj,%skinColor,%face,
 	%uniformColor2 = 0.181818*%randmultiplier SPC 0.081818*%randmultiplier SPC 0.0081818*%randmultiplier SPC 1;
 
 	if(%larmColor)
-	%larmColor = %shirtColor;
+	%larmColor = %uniformColor;
 	else %larmColor = %skinColor;
 	%rarmColor = getRandom(0,1);
 	if(%rarmColor)
-	%rarmColor = %shirtColor;
+	%rarmColor = %uniformColor2;
 	else %rarmColor = %skinColor;
-	%rLegColor = getRandom(0,1);
-	if(%rLegColor)
-	%rLegColor = %pantsColor;
-	else %rLegColor = %skinColor;
 	%lLegColor = getRandom(0,1);
 	if(%lLegColor)
-	%lLegColor = %pantsColor;
+	%lLegColor = %uniformColor2;
 	else %lLegColor = %skinColor;
 	%handColor = %skinColor;
 	%handColor = %skinColor;
 	%decal = "Archer";
+
+	%rLegColor = %uniformColor2;
 
 	//Appearance zombie
 	%obj.llegColor =  %lLegColor;

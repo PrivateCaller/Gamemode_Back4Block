@@ -16,19 +16,6 @@ function ZombieFallenHoleBot::onAdd(%this,%obj,%style)
 {
 	Parent::onAdd(%this,%obj);
 	CommonZombieHoleBot::onAdd(%this,%obj);
-	if(getRandom(0,100) <= 10)
-	{
-		switch(getRandom(0,6))
-		{
-			case 0: %obj.mountImage(leadpipeImage, 0);
-			case 1: %obj.mountImage(fryingPanImage, 0);
-			case 2: %obj.mountImage(hatchetImage, 0);
-			case 3: %obj.mountImage(spikebatImage, 0);
-			case 4: %obj.mountImage(macheteImage, 0);
-			case 5: %obj.mountImage(crowbarImage, 0);
-			case 6: %obj.mountImage(baseballbatImage, 0);
-		}
-	}
 }
 
 function ZombieFallenHoleBot::onNewDataBlock(%this,%obj)

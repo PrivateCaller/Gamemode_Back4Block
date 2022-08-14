@@ -130,7 +130,6 @@ function ZombieChargerHoleBot::onBotFollow( %this, %obj, %targ )
 	{
 		%obj.lastsaw = getsimtime();
 
-		L4B_SpecialsWarningLight(%obj);
 		%obj.AboutToCharge = schedule(1500,0,L4B_Charging,%obj,%targ);
 	
 		%obj.playthread(1,"armReadyright");
@@ -171,7 +170,6 @@ function ZombieChargerHoleBot::onImpact(%this, %obj, %col, %vec, %force)
 				if(%obj.getclassname() $= "AIPlayer")
 				%obj.stopHoleLoop();
 
-				L4B_SpazzZombieInitialize(%obj,0);
 			}
 		}
 	}
@@ -188,8 +186,6 @@ function ZombieChargerHoleBot::onBotMelee(%this,%obj,%col)
 
 function ZombieChargerHoleBot::onDamage(%this,%obj,%source,%pos,%damage,%type)
 {
-	%obj.setShapeNameHealth();
-	
 	if(%obj.getstate() $= "Dead")
 	return;
 
@@ -319,7 +315,6 @@ function ZombieChargerHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
 							if(!isEventPending(%obj.AboutToCharge))
 							{
 								%obj.playthread(1,"armReadyright");
-								L4B_SpecialsWarningLight(%obj);
 								%obj.playaudio(0,"charger_warn" @ getrandom(1,3) @ "_sound");
 								%obj.setMaxForwardSpeed(9);
 

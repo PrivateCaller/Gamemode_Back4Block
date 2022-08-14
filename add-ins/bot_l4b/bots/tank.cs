@@ -102,6 +102,15 @@ function ZombieTankHoleBot::onBotFollow( %this, %obj, %targ )
 		%obj.schedule(2500,setImageTrigger,0,1);
 	}
 
+	if(!%obj.startMusic)
+	{
+		if(isObject(%minigame = getMiniGameFromObject(%obj)))
+		if(%minigame.SoldierTank)
+		%minigame.DirectorMusic("musicdata_L4D_soldier_tank",%client);
+		else %minigame.DirectorMusic("musicdata_L4D_tank",%client);
+
+		%obj.startMusic = 1;
+	}
 }
 
 function ZombieTankHoleBot::onNewDataBlock(%this,%obj)
@@ -141,8 +150,6 @@ function ZombieTankHoleBot::onBotLoop(%this,%obj)
 function ZombieTankHoleBot::onDamage(%this,%obj,%Am,%Type )
 {
     Parent::onDamage(%this,%obj,%Am,%Type);
-
-	%obj.setShapeNameHealth();
 
 	if(%obj.getstate() !$= "Dead" && %obj.lastdamage+750 < getsimtime())//Check if the chest is the female variant and add a 1 second cooldown
 	{
@@ -270,7 +277,7 @@ function ZombieTankHoleBot::L4BSpecialAppearance(%this,%obj,%skinColor,%face,%de
 	%obj.setnodecolor("handR",%obj.rhandColor);
 	%obj.setnodecolor("handL",%obj.lhandColor);
 
-	if(getRandom(1,1000) <= 10)
+	if(isObject(getMiniGamefromObject(%obj)) && getMiniGamefromObject(%obj).SoldierTank)
 	{
 		%armorcolor = getRandomBotPantsColor();
 
@@ -282,12 +289,12 @@ function ZombieTankHoleBot::L4BSpecialAppearance(%this,%obj,%skinColor,%face,%de
 		%LegColorR = getRandom(0,1);
 		if(%LegColorR)
 		%LegColorR = %armorcolor;
-		else %LegColorR = %obj.HeadSkin1Color;
+		else %LegColorR = %skincolor;
 
 		%LegColorL = getRandom(0,1);
 		if(%LegColorL)
 		%LegColorL = %armorcolor;
-		else %LegColorL = %obj.HeadSkin1Color;
+		else %LegColorL = %skincolor;
 
 		%obj.ShoeRColor = %LegColorR;
 		%obj.ShoeLColor = %LegColorL;
@@ -299,10 +306,10 @@ function ZombieTankHoleBot::L4BSpecialAppearance(%this,%obj,%skinColor,%face,%de
 
 		%armLcolor = getRandom(0,1);
 		if(%armLcolor)
-		%armLcolor = %obj.ArmLColor;
+		%armLcolor = %skincolor;
 		else %armLcolor = %armorcolor;
 
-		%obj.ArmRColor = %armRcolor;
+		%obj.ArmRColor = %skincolor;
 		%obj.ArmLColor = %armLcolor;
 
 		//Vest

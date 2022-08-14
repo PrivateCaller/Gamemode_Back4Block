@@ -1,0 +1,7 @@
+ZombieMedpackItem
+gc_SyringeAntidoteItem
+gc_SyringePanaceaItem
+GauzeItem
+ZombiePillsItem
+RedPotionItem
+coughsyrupItem

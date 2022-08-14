@@ -3,7 +3,6 @@ if(loadRequiredAddOn("Bot_Hole") == $Error::None)
 	exec("./scripts/script_newplayerdatablock.cs");
 	exec("./scripts/datablocks.cs");
 	exec("./scripts/preferences.cs");
-	exec("./scripts/variables/variables.cs");
 	exec("./scripts/functions.cs");
 	exec("./support/packages.cs");
 	
@@ -22,11 +21,17 @@ if(loadRequiredAddOn("Bot_Hole") == $Error::None)
 	exec("./add-ins/bot_l4b/bot_l4b.cs");
 	exec("./add-ins/item_healing/item_healing.cs");
 	exec("./add-ins/script_secondary_melee/script_melee.cs");
-	exec("./add-ins/script_scavenge/script_scavenge.cs");
 	exec("./add-ins/weapon_dav_melee/weapon_melee.cs");
 	exec("./add-ins/weapon_distractions/weapon_distractions.cs");
 	exec("./add-ins/weapon_throwable_explosives/weapon_throwable_explosives.cs");
 	exec("./add-ins/weapon_rocks/weapon_rocks.cs");
+
+	configLoadL4BTXT("zombiefaces",hZombieFace);
+	configLoadL4BTXT("zombiedecals",hZombieDecal);
+	configLoadL4BTXT("zombieskin",hZombieSkin);
+	configLoadL4BTXT("zombiespecial",hZombieSpecialType);
+	configLoadL4BTXT("zombieuncommon",hZombieUncommonType);
+	configLoadL4BItemTXT();
 
 	//exec("./support/jettison.cs");
 	//exec("./support/clientlogger.cs");

@@ -140,7 +140,6 @@ function ZombieSmokerHoleBot::onBotMelee(%this,%obj,%col)
 
 function ZombieSmokerHoleBot::onDamage(%this,%obj)
 {
-	%obj.setShapeNameHealth();
 	
 	if(%obj.getstate() !$= "Dead" && %obj.lastdamage+500 < getsimtime())//Check if the chest is the female variant and add a 1 second cooldown
 	{
@@ -167,7 +166,6 @@ function ZombieSmokerHoleBot::onBotFollow( %this, %obj, %targ )
 	{
 		if(%obj.lastsaw+8000 < getsimtime() && getWord(%obj.getScale(),2) >= 1.05)
 		{
-			L4B_SpecialsWarningLight(%obj);
 			%obj.stopHoleLoop();
 			%obj.hClearMovement();
 
@@ -296,6 +294,7 @@ function SmokerTongueShape::onAdd(%this,%obj)
 	Parent::onAdd(%this,%obj);
 	%obj.setNodeColor("ALL","1 0 0 1");
 	%this.onTongueLoop(%obj);
+	MissionCleanup.add(%obj);
 }
 
 function ZombieSmokerHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
@@ -310,7 +309,6 @@ function ZombieSmokerHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
 						if(!isEventPending(%obj.ShootTongue))
 						{
 							%obj.ShootTongue = %obj.getDatablock().schedule(1500,ShootTongue,%obj);
-							L4B_SpecialsWarningLight(%obj);
 							%obj.playaudio(0,"smoker_warn" @ getrandom(1,3) @ "_sound");
 						}
 					}
@@ -397,4 +395,25 @@ function SmokerTongueProjectile::onCollision(%this,%proj,%col,%fade,%pos,%normal
 	}
 
 	Parent::onCollision(%this,%proj,%col,%fade,%pos,%normal);
+}
+
+function Projectile::SmokerExplosionCoughEffect(%obj)
+{
+	if(!isObject(%obj))
+	return;
+
+	%pos = %obj.getPosition();
+	%radius = 5;
+	%searchMasks = $TypeMasks::PlayerObjectType;
+	InitContainerRadiusSearch(%pos, %radius, %searchMasks);
+	while((%target = containerSearchNext()) != 0 )
+	{
+		if(%target.hZombieL4BType && %target.getstate() !$= "Dead")
+		{
+			%randomtime = getRandom(400,800);
+			%target.schedule(%randomtime,playaudio,2,"norm_cough" @ getrandom(1,3) @ "_sound");
+			%target.schedule(%randomtime,playthread,3,"plant");
+		}
+	}
+	%obj.schedule(750,L4B_SmokerCoughEffect,%obj);
 }

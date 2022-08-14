@@ -459,32 +459,6 @@ function MudZombieHoleBot::onBotLoop(%this,%obj)
 function MudZombieHoleBot::onBotMelee(%this,%obj,%col)
 {
 	CommonZombieHoleBot::onBotMelee(%this,%obj,%col);
-
-	if(!%col.BoomerBiled)
-	{
-		%col.mountImage(MudStatusPlayerImage, 2);
-		%col.playAudio(3,"mud_splat_sound");
-
-		%col.setMaxForwardSpeed(%col.Datablock.maxForwardSpeed-5);
-		%col.setMaxSideSpeed(%col.Datablock.MaxSideSpeed-5);
-		%col.setMaxBackwardSpeed(%col.Datablock.MaxBacwardkSpeed-5);
-
-		cancel(%col.ClearMud);
-		%col.ClearMud = schedule(5000,0,MudClear,%col,%obj);
-		%col.ZombieMud = 1;
-	}
-}
-
-function MudClear(%targetid,%obj)
-{
-	if(isObject(%targetid) && %targetid.getState !$= "Dead" && %targetid.ZombieMud)
-	{
-		%targetid.ZombieMud = 0;
-		%targetid.unMountImage(2);
-		%targetid.setMaxForwardSpeed(%col.Datablock.maxForwardSpeed);
-		%targetid.setMaxSideSpeed(%targetid.Datablock.MaxSideSpeed);
-		%targetid.setMaxBackwardSpeed(%targetid.Datablock.MaxBacwardkSpeed);
-	}
 }
 
 function MudZombieHoleBot::L4BUncommonAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)

@@ -1,7 +1,7 @@
 datablock PlayerData(ZombieWitchHoleBot : CommonZombieHoleBot)
 {
     uiName = "";
-    maxdamage = 1000;//Health
+    maxdamage = 2500;//Health
     hTickRate = 5000;
 
     hName = "Witch";//cannot contain spaces
@@ -22,7 +22,6 @@ function ZombieWitchHoleBot::onAdd(%this,%obj)
     %obj.hDefaultL4BAppearance();
     %obj.setscale("0.9 0.7 1");
     %obj.StartleLoop = %obj.getDatablock().WitchStartleLoop(%obj);
-    L4B_SpecialsWarningLight(%obj);
 
     if(getRandom(1,100) <= 95)
     %obj.stopHoleLoop();
@@ -42,7 +41,7 @@ function ZombieWitchHoleBot::onCollision(%this, %obj, %col, %fade, %pos, %norm)
         {
             if(%col.client && %col.getclassname() $= "player" && $Pref::Server::L4B2Bots::MinigameMessages)
             {
-                chatMessageTeam(%col.client,'fakedeathmessage',"<color:FFFF00>" @ %col.client.name SPC "<bitmapk:Add-Ons/Package_Left4Block/icons/ci_skull2>" SPC %obj.getDatablock().hName);
+                chatMessageTeam(%col.client,'fakedeathmessage',"<color:FFFF00>" @ %col.client.name SPC "<bitmapk:Add-Ons/Gamemode_Left4Block/add-ins/bot_l4b/icons/ci_skull2>" SPC %obj.getDatablock().hName);
                 %minigame = %col.client.minigame;
                 MinigameSO::L4B_PlaySound(%col.client.minigame,"victim_needshelp_sound");
             }
@@ -136,13 +135,20 @@ function ZombieWitchHoleBot::WitchPanicking(%this,%obj,%count)
 
 function ZombieWitchHoleBot::onBotFollow( %this, %obj, %targ )
 {
-        Parent::onBotFollow(%this,%obj,%targ);
+    Parent::onBotFollow(%this,%obj,%targ);
+
+	if(!%obj.startMusic)
+	{
+		if(isObject(%minigame = getMiniGameFromObject(%obj)))
+        %minigame.DirectorMusic("musicdata_L4D_witch",%client);
+
+		%obj.startMusic = 1;
+	}
+    
 }
 
 function ZombieWitchHoleBot::OnDamage(%this,%obj,%am)
 {
-    %obj.setShapeNameHealth();
-
     if(%obj.getstate() $= "Dead")
     return;
 
@@ -165,7 +171,7 @@ function ZombieWitchHoleBot::OnDamage(%this,%obj,%am)
 
         if(%attacker && %attacker.client && %attacker.getclassname() $= "player" && $Pref::Server::L4B2Bots::MinigameMessages && !%obj.hWhoAttacked)
         {
-            chatMessageTeam(%attacker.client,'fakedeathmessage',"<color:FFFF00>" @ %attacker.client.name SPC "<bitmapk:Add-Ons/Package_Left4Block/icons/ci_skull2>" SPC %obj.getDatablock().hName);
+            chatMessageTeam(%attacker.client,'fakedeathmessage',"<color:FFFF00>" @ %attacker.client.name SPC "<bitmapk:Add-Ons/Gamemode_Left4Block/add-ins/bot_l4b/icons/ci_skull2>" SPC %obj.getDatablock().hName);
             %minigame = %attacker.client.minigame;
             MinigameSO::L4B_PlaySound(%col.client.minigame,"victim_needshelp_sound");
             %obj.hWhoAttacked = 1;
@@ -184,6 +190,9 @@ function ZombieWitchHoleBot::onDisabled(%this,%obj)
     	return;
 
         %obj.playaudio(0,"witch_death" @ getrandom(1,3) @ "_sound");
+
+        if(isObject(%minigame = getMiniGameFromObject(%obj)))
+        %minigame.RoundEnd();
 
     	Parent::OnDisabled(%this,%obj);
 }
@@ -230,7 +239,7 @@ function ZombieWitchHoleBot::WitchStartleLoop(%this,%obj)
 
         if(%obj.hSpawnCue+15000 < getsimtime())
         {
-            L4B_SpecialsSpawnMusic(%obj);
+            %obj.playaudio(3,strlwr(%obj.name) @ "_spawn" @ getRandom(1,2) @ "_sound");
             %obj.hSpawnCue = getsimtime();
         }
     }
@@ -289,7 +298,7 @@ function ZombieWitchHoleBot::WitchStartleLoop(%this,%obj)
                             {
                                 if(%target.client && %target.getclassname() $= "player" && $Pref::Server::L4B2Bots::MinigameMessages)
                                 {
-                                    chatMessageTeam(%target.client,'fakedeathmessage',"<color:FFFF00>" @ %target.client.name SPC "<bitmapk:Add-Ons/Package_Left4Block/icons/ci_witchclose>" SPC %obj.getDatablock().hName);
+                                    chatMessageTeam(%target.client,'fakedeathmessage',"<color:FFFF00>" @ %target.client.name SPC "<bitmapk:Add-Ons/Gamemode_Left4Block/add-ins/bot_l4b/icons/ci_witchclose>" SPC %obj.getDatablock().hName);
                                     %minigame = %target.client.minigame;
                                     MinigameSO::L4B_PlaySound(%col.client.minigame,"victim_needshelp_sound");
                                 }

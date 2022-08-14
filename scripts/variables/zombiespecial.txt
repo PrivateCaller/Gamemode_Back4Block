@@ -1,0 +1,6 @@
+ZombieChargerHoleBot
+ZombieBoomerHoleBot
+ZombieSpitterHoleBot
+ZombieHunterHoleBot
+ZombieSmokerHoleBot
+ZombieJockeyHoleBot
