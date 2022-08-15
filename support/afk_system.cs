@@ -1,6 +1,10 @@
 $AFKBotSet = new SimSet(AFKBotSet);
 MissionCleanup.add($AFKBotSet);
 
+//
+// Datablock stuff. Mostly ripped from SurvivorHoleBot.
+//
+
 datablock PlayerData(AFKPlayerHoleBot : SurvivorHoleBot)
 {
     isAFKPlayer = 1;
@@ -16,6 +20,30 @@ function AFKPlayerHoleBot::onDisabled (%this, %obj, %state)
     %client = %obj.afk_client;
     %client.camera.setMode("Corpse", %obj);
     %client.setControlObject(%client.camera);
+}
+function AFKPlayerHoleBot::onAdd(%this, %obj)
+{
+    SurvivorHoleBot::onAdd(%this, %obj);
+}
+function AFKPlayerHoleBot::GiveHealingStuff(%this,%obj,%human)
+{    
+    SurvivorHoleBot::GiveHealingStuff(%this,%obj,%human);
+}
+function AFKPlayerHoleBot::onBotLoop( %this, %obj )
+{
+    SurvivorHoleBot::onBotLoop(%this, %obj);
+}
+function AFKPlayerHoleBot::onBotCollision( %this, %obj, %col, %normal, %speed )
+{
+    SurvivorHoleBot::onBotCollision(%this, %obj, %col, %normal, %speed);
+}
+function AFKPlayerHoleBot::onDamage(%this,%obj,%am)
+{
+    SurvivorHoleBot::onDamage(%this, %obj, %am);
+}
+function AFKPlayerHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
+{
+    SurvivorHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
 }
 
 //
@@ -194,6 +222,8 @@ function serverCmdAFK(%client)
     {
         if(%client.afkBot.getState() $= "Dead")
         {
+            %client.camera.setMode("Corpse", %obj);
+            %client.setControlObject(%client.camera);
             return;
         }
         //Already AFK, return them back to normal.
@@ -210,8 +240,8 @@ function serverCmdAFK(%client)
         %player.setTransform(%transform);
         %player.setVelocity(%velocity);
         %player.setEnergyLevel(%energyLevel);
-        %player.setDamageLevel(%damageLevel);
         %player.setDamageFlash(%damageFlash);
+        %player.setDamageLevel(%damageLevel);
         if(strLen(%client.afkItemString))
         {
             L4B_loadItemString(%player, %client.afkItemString);
@@ -227,6 +257,10 @@ function serverCmdAFK(%client)
 		%camera.setMode("Observer");
 		%camera.setOrbitMode(%client.afkBot, %client.afkBot.getEyeTransform(), 5, 15, 15, 1);
 		%client.setControlObject(%camera);
+    }
+    else
+    {
+        %client.setControlObject(%client.camera);
     }
 }
 
