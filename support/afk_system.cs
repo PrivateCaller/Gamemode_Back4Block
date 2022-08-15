@@ -218,6 +218,18 @@ function L4B_AFKReplacePlayer(%target)
 
 function serverCmdAFK(%client)
 {
+    %time_remaining = %client.nextAFKTime - getSimTime();
+    if(%time_remaining > 0)
+    {
+        %to_seconds = mFloor(%time_remaining / 1000) + 1;
+        commandToClient (%client, 'CenterPrint', "<color:FFFFFF>Please wait another" SPC %to_seconds SPC "seconds.", %to_seconds);
+        return;
+    }
+    else
+    {
+        %client.nextAFKTime = getSimTime() + 5000;
+    }
+
     if(isObject(%client.afkBot))
     {
         if(%client.afkBot.getState() $= "Dead")
