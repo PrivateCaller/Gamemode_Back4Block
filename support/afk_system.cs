@@ -222,7 +222,7 @@ function serverCmdAFK(%client)
     {
         if(%client.afkBot.getState() $= "Dead")
         {
-            %client.camera.setMode("Corpse", %obj);
+            %client.camera.setMode("Corpse", %client.afkBot);
             %client.setControlObject(%client.camera);
             return;
         }
