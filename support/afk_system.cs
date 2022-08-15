@@ -1,14 +1,22 @@
 $AFKBotSet = new SimSet(AFKBotSet);
 MissionCleanup.add($AFKBotSet);
 
-datablock PlayerData(AFKPlayerHoleBot : PlayerMeleeAnims)
+datablock PlayerData(AFKPlayerHoleBot : SurvivorHoleBot)
 {
     isAFKPlayer = 1;
     hName = "AFK" SPC "Player";
     //Minigame and spawnbrick dependencies need to be removed.
     hooks_hLoop = "AFKPlayerHoleBot_loop";
     hooks_guardAtSpawn = -1;
+    hooks_ifWander = "AFKPlayerHoleBot_ifWander";
 };
+function AFKPlayerHoleBot::onDisabled (%this, %obj, %state)
+{
+    parent::onDisabled(%this, %obj, %state);
+    %client = %obj.afk_client;
+    %client.camera.setMode("Corpse", %obj);
+    %client.setControlObject(%client.camera);
+}
 
 //
 // Item saving and loading functions.
@@ -25,11 +33,11 @@ function L4B_generateItemString(%player)
 	{
         if(%itemString $= "")
         {
-            %itemString = %player.tool[%i].image;
+            %itemString = %player.tool[%i];
         }
         else
         {
-            %itemString = %itemString SPC %player.tool[%i].image;
+            %itemString = %itemString SPC %player.tool[%i];
         }
 	}
     return %itemString;
@@ -42,18 +50,17 @@ function L4B_loadItemString(%player, %string)
 		return;
 	}
 	%player.clearTools();
-	for(%i = 0; %i < getWordCount(%string); %i++)
-	{
-		%id = getWord(%string, %i).getID();
-        %player.tool[%i] = %id;
-        %player.weaponCount++;
-        messageClient(%client, 'MsgItemPickup', "", %i, %id, 1);
-        if(%i == 0)
+    for(%i = 0; %i < %player.getDatablock().maxTools; %i++)
+    {
+        if(%i > getWordCount(%string))
         {
-            %player.mountImage(%id, 0);
-            %player.updateArm(%id);
+            break;
         }
-	}
+        %image = getWord(%string, %i);
+        %player.tool[%i] = %image;
+        %player.weaponCount++;
+        messageClient(%player.client,'MsgItemPickup', '', %i, %image);
+    }
 }
 
 //
@@ -63,9 +70,10 @@ function L4B_loadItemString(%player, %string)
 //Modified "spawnHoleBot" function from holes.cs to ignore pre-existing bots.
 function L4B_AFKReplacePlayer(%target)
 {
+    %data = AFKPlayerHoleBot;
     %obj = new AIPlayer()
 	{
-		dataBlock = "AFKPlayerHoleBot";
+		dataBlock = %data;
 		path = "";
 				
 		//Apply attributes to Bot
@@ -76,7 +84,7 @@ function L4B_AFKReplacePlayer(%target)
 		hSight = %data.hSight;
 		hWander = %data.hWander;
 		hGridWander = %data.hGridWander;
-		hReturnToSpawn = %data.hReturnToSpawn;
+		hReturnToSpawn = 0;
 		hSpawnDist = %data.hSpawnDist;
 		hMelee = %data.hMelee;
 		hAttackDamage = %data.hAttackDamage;
@@ -94,7 +102,7 @@ function L4B_AFKReplacePlayer(%target)
 		hAvoidObstacles = %data.hAvoidObstacles;
 		hIdleLookAtOthers = %data.hIdleLookAtOthers;
 		hIdleSpam = %data.hIdleSpam;
-		hAFKOmeter = %data.hAFKOmeter + getRandom( 0, 2 );
+		hAFKOmeter = %data.hAFKOmeter + getRandom(0, 2);
 		hHearing = %data.hHearing;
 		hIdle = %data.hIdle;
 		hSmoothWander = %data.hSmoothWander;
@@ -111,17 +119,6 @@ function L4B_AFKReplacePlayer(%target)
 	};
     if(isObject(%obj))
 	{
-        if(strLen(%target.client.afkItemString))
-        {
-            L4B_loadItemString(%obj, %target.client.afkItemString);
-        }
-        else if(isObject(%item))
-		{
-            //Give the bot their item.
-			%image = %item.getDataBlock().image;
-			%obj.setWeapon(%image);
-        }
-
         //Apply the appearance of the AFKing player.
         //Not really the way this function was meant to be used, but ^\(0v0)/^
         %obj.fixAppearance(%target.client);
@@ -149,14 +146,17 @@ function L4B_AFKReplacePlayer(%target)
 
         %obj.setMoveSlowdown(%obj.hMoveSlowdown);
 		%obj.setMoveTolerance(0.25); //Set the move tolerance to default with our wrapped function
-
 		%obj.hGridPosition = %target.getPosition();
+
+        %obj.minigame = getMiniGameFromObject(%target); //This is important.
+        %obj.afk_client = %target.client;
+        %item_string = %target.client.afkItemString;
+
         %target.delete(); //Trololololol
 
         %obj.isBot = 1;
 		//This is done so they can use certain functions meant to be called on a client
 		%obj.player = %obj;
-        %obj.isHoleBot = 1; //NOW do it.
 
         MissionCleanup.add(%obj);
         $AFKBotSet.add(%obj);
@@ -164,6 +164,16 @@ function L4B_AFKReplacePlayer(%target)
         //Finally, run the hole loop.
         %obj.hLastSpawnTime = getSimTime();
         %obj.hLoopActive = 1;
+
+        //Select a weapon for the bot to use. Really simple right now.
+        for(%i = 0; %i < getWordCount(%item_string); %i++)
+        {
+            %item = getWord(%item_string, %i);
+            if(%item.className $= "Weapon")
+            {
+                %obj.setWeapon(%item.image);
+            }
+        }
 
 		%obj.hSched = AFKPlayerHoleBot_loop(%obj);
 	    return %obj;
@@ -182,6 +192,10 @@ function serverCmdAFK(%client)
 {
     if(isObject(%client.afkBot))
     {
+        if(%client.afkBot.getState() $= "Dead")
+        {
+            return;
+        }
         //Already AFK, return them back to normal.
         %bot = %client.afkBot;
         %transform = %bot.getTransform();
@@ -428,5 +442,39 @@ function AFKPlayerHoleBot_ifSearch_FOV(%obj)
             cancel(%obj.hFOVSchedule);
             %obj.hFOVSchedule = %obj.scheduleNoQuota(%obj.vars.tickrate / 2, hDoHoleFOVCheck, %obj.hFOVRadius, 0, 1);
         }
+    }
+}
+
+function AFKPlayerHoleBot_ifWander(%obj)
+{
+    if(%obj.vars.wander)
+    {
+        %obj.hIsRunning = 0;
+        //Er again, but still...
+        %obj.setMoveObject("");
+        %obj.clearMoveY();
+        %obj.clearMoveX();
+        %obj.setImageTrigger(0, 0);
+        %obj.hResetHeadTurn();
+        
+        %avoid = 0;
+        
+        HoleBot_wanderRandomJet(%obj);
+        
+        //If we just saw a target, better act fast and irrational
+        if(HoleBot_wanderTargetCheck(%obj) == 1)
+        {
+            return 2;
+        }
+
+        //Already did return check and lost target check, set to wander
+        %obj.hState = "Wandering";
+        
+        //Grid walking
+        HoleBot_gridWander(%obj);
+        //Smooth wandering
+        HoleBot_smoothWander(%obj);
+        //More conventional bot movement, mixing between the two creates a good variety of movement
+        HoleBot_mixedWander(%obj);
     }
 }
