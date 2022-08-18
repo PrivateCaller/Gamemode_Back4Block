@@ -1,21 +1,3 @@
-datablock fxDTSBrickData (BrickCommonZombie_HoleSpawnData)
-{
-	brickFile = "Add-ons/Bot_Hole/4xSpawn.blb";
-	category = "Special";
-	subCategory = "Holes";
-	uiName = "L4B Zombie Hole";
-	iconName = "Add-Ons/Gamemode_Left4Block/add-ins/bot_l4b/icons/icon_zombie";
-
-	bricktype = 2;
-	cancover = 0;
-	orientationfix = 1;
-	indestructable = 1;
-
-	isBotHole = 1;
-	isZombieBrick = 1;
-	holeBot = "CommonZombieHoleBot";
-};
-
 function BrickCommonZombie_HoleSpawnData::onPlant(%this, %obj)
 {
 	if(!isObject(directorBricks))
@@ -149,20 +131,6 @@ datablock ProjectileData(ZombieHitProjectile)
 function CommonZombieHoleBot::onAdd(%this,%obj)
 {			
 	Parent::onAdd(%this,%obj);
-	
-	if(strstr(%obj.spawnbrick.getName(), "Special") != -1)
-	%obj.spawnbrick.RandomizeZombieSpecial();
-
-	else if(strstr(%obj.spawnbrick.getName(), "Tank") != -1)
-	%obj.spawnbrick.hBotType = "ZombieTankHoleBot";
-
-	else if(strstr(%obj.spawnbrick.getName(), "Witch") != -1)
-	%obj.spawnbrick.hBotType = "ZombieWitchHoleBot";
-
-	else if(getRandom(1,6) == 1)
-	%obj.spawnbrick.RandomizeZombieUncommon();
-	else %obj.spawnbrick.hBotType = "CommonZombieHoleBot";
-
 	%obj.onL4BDatablockAttributes();
 	%obj.hDefaultL4BAppearance();
 }
@@ -242,9 +210,9 @@ function CommonZombieHoleBot::onDisabled(%this,%obj)
 		case 1: %obj.playaudio(0,"zombiefemale_death" @ getrandom(1,10) @ "_sound");
 	}
 
-	if(isObject(%weapon = %obj.getMountedImage(0)))
+	if(isObject(%weapon = %obj.getMountedImage(0)) && %weapon.item)
 	{
-		L4B_ZombieDropLoot(%obj,%weapon.item,100);
+		L4B_ZombieDropLoot(%obj,getMountedImage(0),100);
 		%obj.unMountImage(0);
 	}
 }
@@ -348,12 +316,7 @@ function CommonZombieHoleBot::onBotMelee(%this,%obj,%col)
 		%col.setenergylevel(%col.getEnergyLevel()-%meleeimpulse*2);
 		
 		if(%col.getEnergyLevel() < 1)
-		{
-			holeZombieInfect(%obj,%col);
-
-			if(%col.getClassName() $= "Player")
-			chatMessageTeam(%col.client,'fakedeathmessage',"<color:00FF00>" @ %obj.getDatablock().hName SPC "<bitmapk:Add-Ons/Gamemode_Left4Block/add-ins/bot_l4b/icons/ci_infected>" SPC %col.client.name);
-		}
+		holeZombieInfect(%obj,%col);
 	}
 
 	if(%col.getType() & $TypeMasks::PlayerObjectType)

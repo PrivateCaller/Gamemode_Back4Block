@@ -1,215 +1,184 @@
-function brickL4BDirectorData::onPlant(%this, %obj)
-{
-    Parent::onPlant(%this, %obj);
-    
-    if(!isObject(directorBricks))
-    {
-        new SimSet(directorBricks);
-        directorBricks.add(%obj);
-        MissionCleanup.add(directorBricks);
-    }
-    else if(isObject(directorBricks))
-    directorBricks.add(%obj);
-}
 
-function brickL4BDirectorData::onloadPlant(%this, %obj)
-{
-    Parent::onloadPlant(%this,%obj);
-    %this.onPlant(%obj);
-}
-
-function brickL4BDirectorData::onDeath(%this, %obj)
-{
-	if(isObject(directorBricks) && directorBricks.isMember(%obj))
-    directorBricks.remove(%obj);
-
-	Parent::onDeath(%this,%brick);
-}
-
-function fxDTSBrick::spawnHoleBots(%obj,%count)
-{    
-    if(%count >= %obj.BotHoleAmountMax)
-    {
-        %obj.BotHoleAmountMax = 0;
-        return;
-    }
-
-    %obj.respawnBot();
-    %obj.hBot = 0;
-    %obj.BotHoleAmount++;
-
-    cancel(%obj.spawnBots);
-    %obj.spawnBots = %obj.schedule(250,spawnHoleBots,%count++);
-}
-
-registerInputEvent("fxDTSBrick", "onDirectorInterval", "Self fxDTSBrick" TAB "MiniGame MiniGame");
-registerOutputEvent(Minigame, "Director", "List Disable 0 Enable 1 Horde 2 Tank 3 Panic 4 Witch 5",0);
+registerOutputEvent(Minigame, "Director", "List Disable 0 Enable 1",0);
 registerOutputEvent(Minigame, "RoundEnd");
 
-function MinigameSO::director(%minigame,%choice,%client)
+function MinigameSO::Director(%minigame,%enabled,%interval,%client)
 {
-    switch(%choice)
+    switch(%enabled)
     {
         case 0: if(isObject(l4b_music))
                 l4b_music.delete();
-        
-                if(!%minigame.DirectorStatus)
-                return;
-                else
+
+                if(%minigame.DirectorStatus)
                 {
                     %minigame.DirectorStatus = 0;
                     cancel(%minigame.directorSchedule);
                 }
-
-        case 1: if(%minigame.DirectorStatus)
                 return;
-                else
+
+        case 1: if(!%minigame.DirectorStatus)
                 {
                     %minigame.DirectorStatus = 1;
 
                     if(isObject(l4b_music)) 
                     l4b_music.delete();
 
-                    if($Pref::L4BDirector::EnableCues)
                     %minigame.directorPlaySound("hordeincoming" @ getrandom(1,9) @ "_sound",%client);
-
-                    cancel(%minigame.directorSchedule);
-                    %minigame.directorSchedule = %minigame.schedule(10000,directorAI,0,%client);
                 }
-        case 2: if(%minigame.DirectorStatus)
-                %minigame.HordeRound(2,%client);
-                
-        case 3: if(%minigame.DirectorStatus)
-                %minigame.TankRound(%client);
-
-        case 4: if(%minigame.DirectorStatus)
-                %minigame.PanicRound(%client);
-
-        case 5: if(%minigame.DirectorStatus)
-                %minigame.WitchRound(%client);
     }
 
-}
+    if(%minigame.DirectorStatus)
+    {    
+        if(%interval > 3)
+        %interval = 0;
 
-function MiniGameSO::directorAI(%minigame,%directorInterval,%client)
-{    
-    if(%directorInterval > 3)
-    %directorInterval = 0;
+        switch(%interval)
+        {
+            case 1: %minigame.spawnZombies("Special",1,0,%client);
+            case 2: %minigame.spawnZombies("Special",1,0,%client);
 
-    %minigame.DirectorProcessEvent("onDirectorInterval",%client);
+                    if(%minigame.DirectorStatus == 2)
+                    %minigame.spawnZombies("Horde",10,0,%client);
 
-    cancel(%minigame.directorSchedule);
-    %minigame.directorSchedule = %minigame.schedule(10000,directorAI,%directorInterval++,%client);
-    
-    switch(%directorInterval)
-    {
-        case 1: %minigame.spawnZombies("Special",1,%client);
-        case 2: %minigame.spawnZombies("Special",1,%client);
-
-                if(%minigame.DirectorStatus == 2)
-                %minigame.spawnZombies("Horde",10,%client);
-
-        case 3: switch(%minigame.DirectorStatus)
-                {
-                    case 0: return;
-                    case 1: for(%i=0;%i<%minigame.numMembers;%i++)
-                            {
-                                %fixcount = %i+1;
-                                if(isObject(%mgmember = %minigame.member[%i]))
+            case 3: switch(%minigame.DirectorStatus)
+                    {
+                        case 0: return;
+                        case 1: for(%i=0;%i<%minigame.numMembers;%i++)//Calculate overall variables
                                 {
-                                    %minigame.survivorStatHealthMax = 100*%fixcount;
-                                    %minigame.survivorStressMax = 20*%fixcount;
-
-                                    //Calculate overall variables
-                                    if(isObject(%mgmember.player))
+                                    %fixcount = %i+1;
+                                    if(isObject(%mgmember = %minigame.member[%i]))
                                     {
-                                        if(%mgmember.player.getdataBlock().getName() !$= "DownPlayerSurvivorArmor")
-                                        %health += %mgmember.player.getdamagelevel();
-                                        else %health += 100;
+                                        %minigame.survivorStatHealthMax = 100*%fixcount;
+                                        %minigame.survivorStressMax = 20*%fixcount;
                                         
-                                        %stresslevel += %mgmember.player.SurvivorStress;
+                                        if(isObject(%mgmember.player))
+                                        {
+                                            if(%mgmember.player.getdataBlock().getName() $= "SurvivorPlayer")
+                                            {                                    
+                                                %minigame.survivorAreaZoneNum[%saz++] = %mgmember.player.AreaZoneNum;
+                                                %minigame.survivorAreaZoneNumPlayer[%saz] = %mgmember.player;
+
+                                                %health += %mgmember.player.getdamagelevel();
+                                                %stresslevel += %mgmember.player.survivorStress;
+                                                %mgmember.player.survivorStress = 0;
+                                            }
+                                            else
+                                            {
+                                                %health += 100;
+                                                %stresslevel += 20;
+                                            }
+                                        }
+                                        %health = mClamp(%health,0,%minigame.survivorStatHealthMax);
+                                        %stresslevel = mClamp(%stresslevel,0,%minigame.survivorStressMax);
+
+                                        %minigame.survivorStatHealthAverage = %minigame.survivorStatHealthMax-%health;
+                                        %minigame.survivorStatStressAverage = %stresslevel;
+
+                                        if(%minigame.survivorStatHealthAverage < %minigame.survivorStatHealthMax/3 || %minigame.survivorStatStressAverage > %minigame.survivorStressMax/1.5)
+                                        %stressed = 1;
                                     }
-                                    else
+                                }
+
+                            if(%saz > 1)//People who are ahead should be be shown why it's a bad idea to deviate
+                            {
+                                %highestZone = 0;
+                                for(%sazc = 1; %sazc <= %saz; %sazc++)
+                                {    
+                                    %previous = %minigame.survivorAreaZoneNum[%sazc-1];
+                                    if(%minigame.survivorAreaZoneNum[%sazc] > %highestZone)//Find whoever is in the furthest zone
                                     {
-                                        %health += 100;
-                                        %stresslevel += 20;
+                                        %highestZone = %minigame.survivorAreaZoneNum[%sazc];
+                                        %highestZonePlayer = %minigame.survivorAreaZoneNumPlayer[%sazc];
                                     }
-                                    %health = mClamp(%health,0,%minigame.survivorStatHealthMax);
-                                    %stresslevel = mClamp(%stresslevel,0,%minigame.survivorStressMax);
+                                    
+                                    if(%minigame.survivorAreaZoneNum[%sazc] == %previous)
+                                    {
+                                        %highzonecount++;
 
-                                    %minigame.survivorStatHealthAverage = %minigame.survivorStatHealthMax-%health;
-                                    %minigame.survivorStatStressAverage = %minigame.survivorStressMax-%stresslevel;
-
-                                    if(%minigame.survivorStatHealthAverage < %minigame.survivorStatHealthMax/3 || %minigame.survivorStatStressAverage < %minigame.survivorStressMax/4)
-                                    %stressed = 1;
-
-                                    if(isObject(%mgmember.player))
-                                    %mgmember.player.SurvivorStress = 0;
-                
+                                        if(%highzonecount > %saz/1.333333)
+                                        {
+                                            %highestZone = 0;
+                                            %highestZonePlayer = 0;
+                                        }
+                                    }
+                                }
+                                
+                                if(isObject(%highestZonePlayer))//Where are your friends when you need them?
+                                {
+                                    %minigame.spawnZombies(Horde,getRandom(10,15),%highestZonePlayer.currAreaZone);
+                                    %minigame.spawnZombies(Special,getRandom(1,2),%highestZonePlayer.currAreaZone);
                                 }
                             }
+                             
+                                %round = 1;
+                                if(getRandom(1,8) == 1)
+                                %round = 2;
+                                if(getRandom(1,10) == 1)
+                                %round = 3;
+                                if(getRandom(1,15) == 1)
+                                %round = 4;
 
-                            %round = getrandom(1,2);
-                            if(getRandom(1,10) == 1)
-                            %round = 3;
-                            if(getRandom(1,15) == 1)
-                            %round = 4;
+                                if(%stressed)
+                                %round = 0;
 
-                            if(%stressed)
-                            %round = 0;
+                                switch(%round)
+                                {
+                                    case 0: %minigame.BreakRound(%client);
+                                    case 1: %minigame.HordeRound(1,%client);
+                                    case 2: %minigame.HordeRound(2,%client);
+                                    case 3: %minigame.TankRound(%client);
+                                    case 4: %minigame.WitchRound(%client);
+                                }
+                        case 2:   
+                    }
+        }
 
-                            switch(%round)
-                            {
-                                case 0: %minigame.BreakRound(%client);
-                                case 1: %minigame.HordeRound(1,%client);
-                                case 2: %minigame.HordeRound(2,%client);
-                                case 3: %minigame.TankRound(%client);
-                                case 4: %minigame.WitchRound(%client);
-                            }
-
-                    case 2:   
-                }
+        cancel(%minigame.directorSchedule);
+        %minigame.directorSchedule = %minigame.schedule(10000,Director,1,%interval++,%client);
     }
 }
 
 function MinigameSO::BreakRound(%minigame,%client)
 {    
-    if($Pref::L4BDirector::EnableCues)
-    {
-        %minigame.directorPlaySound("zombiechoir_0" @ getrandom(1,6) @ "_sound",%client);
+    %minigame.directorPlaySound("zombiechoir_0" @ getrandom(1,6) @ "_sound",%client);
 
-        cancel(%minigame.choirSFX);
-        %minigame.choirSFX = %minigame.schedule(15000,directorPlaySound,"zombiechoir_0" @ getrandom(1,6) @ "_sound",%client);
+    cancel(%minigame.choirSFX);
+    %minigame.choirSFX = %minigame.schedule(15000,directorPlaySound,"zombiechoir_0" @ getrandom(1,6) @ "_sound",%client);
 
-        %minigame.DirectorMusic("musicdata_L4D_background" @ getRandom(1,3),%client);
-        l4b_music.schedule(30000,delete);
-    }
+    %minigame.DirectorMusic("musicdata_L4D_background" @ getRandom(1,3),false,1,%client);
+
+    if(isObject(l4b_music))
+    l4b_music.schedule(30000,delete);
 }
 
 function MinigameSO::WitchRound(%minigame,%client)
 {
-    for(%i = 0; %i < MainTeleSet.getCount(); %i++) 
+    if(!%minigame.DirectorStatus || !isObject(MainAreaZone))
+    return;    
+
+    for(%i = 0; %i < MainAreaZone.getCount(); %i++) 
     {				
-        if(strstr(strlwr(MainTeleSet.getObject(%i).getName()),"witch") != -1)
+        if(strstr(strlwr(MainAreaZone.getObject(%i).getName()),"witch") != -1)
         %spawn++;
     }
-    
-    if(!%minigame.DirectorStatus || !%spawn)
+    if(!%spawn)
     return;
 
-    %minigame.spawnZombies("Witch",1,%client);
+    %minigame.spawnZombies("Witch",1,0,%client);
     %minigame.DirectorStatus = 2;
 }
 
 function MinigameSO::TankRound(%minigame,%client)
 {
-    for(%i = 0; %i < MainTeleSet.getCount(); %i++) 
+    if(!%minigame.DirectorStatus || !isObject(MainAreaZone))
+    return;    
+
+    for(%i = 0; %i < MainAreaZone.getCount(); %i++) 
     {				
-        if(strstr(strlwr(MainTeleSet.getObject(%i).getName()),"tank") != -1)
+        if(strstr(strlwr(MainAreaZone.getObject(%i).getName()),"tank") != -1)
         %spawn++;
     }
-    
-    if(!%minigame.DirectorStatus || !%spawn)
+    if(!%spawn)
     return;
 
     if(%minigame.directorTankRound < $Pref::Server::L4B2Bots::TankRounds)
@@ -221,25 +190,44 @@ function MinigameSO::TankRound(%minigame,%client)
         %minigame.SoldierTank = 1;
         else %minigame.SoldierTank = 0;
 
-        %minigame.spawnZombies("Tank",1,%client);
+        %minigame.spawnZombies("Tank",1,0,%client);
     } 
 }
 
 function MinigameSO::PanicRound(%minigame,%client)
 {
+    if(!%minigame.DirectorStatus || !isObject(MainAreaZone))
+    return;    
+
+    for(%i = 0; %i < MainAreaZone.getCount(); %i++) 
+    {				
+        if(strstr(strlwr(MainAreaZone.getObject(%i).getName()),"horde") != -1)
+        %spawn++;
+    }
+    if(!%spawn)
+    return;
+    
     %minigame.DirectorStatus = 2;
 
     if($Pref::L4BDirector::EnableCues)
-    %minigame.DirectorMusic("musicdata_L4D_skin_on_our_teeth",%client);
+    %minigame.DirectorMusic("musicdata_L4D_skin_on_our_teeth",true,1,%client);
 
-    %minigame.spawnZombies("Horde",50,%client);
+    %minigame.spawnZombies("Horde",50,0,%client);
     %minigame.DirectorStatus = 0;
     cancel(%minigame.directorSchedule);
 }
 
 function MiniGameSO::HordeRound(%minigame,%type,%client)
 {
-    if(!%minigame.DirectorStatus)
+    if(!%minigame.DirectorStatus || !isObject(MainAreaZone))
+    return;    
+
+    for(%i = 0; %i < MainAreaZone.getCount(); %i++) 
+    {				
+        if(strstr(strlwr(MainAreaZone.getObject(%i).getName()),"horde") != -1)
+        %spawn++;
+    }
+    if(!%spawn)
     return;
     
     if(getRandom(1,10) == 1)
@@ -251,7 +239,7 @@ function MiniGameSO::HordeRound(%minigame,%type,%client)
 
     switch(%type)
     {
-        case 1: %minigame.spawnZombies("Horde",25,%client);
+        case 1: %minigame.spawnZombies("Horde",25,0,%client);
         case 2: %minigame.DirectorStatus = 2;
                 if(%minigame.UrgentRound)
                 {
@@ -264,28 +252,28 @@ function MiniGameSO::HordeRound(%minigame,%type,%client)
                     {
                         position = %pos;
                         profile = %musicnum.getID();
-                        isLooping= false;
+                        isLooping = false;
                         is3D = 0;
                         volume = 1;
                         useProfileDescription = "0";
-                        type = "0";
+                        type = 0;
                         outsideAmbient = "1";
                         referenceDistance = "2";
                         maxDistance = 999999;
                         enableVisualFeedback = "0";
                     };
 
-                    %minigame.schedule(4000,DirectorMusic,"musicdata_L4D_horde_combat",%client);
+                    %minigame.schedule(4000,DirectorMusic,"musicdata_L4D_horde_combat",true,1,%client);
                     %minigame.schedule(4000,directorPlaySound,"drum_suspense_end_sound",%client);
                     %minigame.directorPlaySound("zombiehorde_sound",%client);
-                    %minigame.spawnZombies("Horde",75,%client);
+                    %minigame.spawnZombies("Horde",50,0,%client);
                 }
                 else
                 {
-                    %minigame.spawnZombies("Horde",50,%client);
+                    %minigame.spawnZombies("Horde",50,0,%client);
                     %minigame.directorPlaySound("hordeincoming" @ getrandom(1,9) @ "_sound",%client);
                     
-                    %minigame.schedule(4000,DirectorMusic,"musicdata_L4D_horde_combat",%client);
+                    %minigame.schedule(4000,DirectorMusic,"musicdata_L4D_horde_combat",true,1,%client);
                     %minigame.schedule(4000,directorPlaySound,"drum_suspense_end_sound",%client);
                 }
 
@@ -298,17 +286,6 @@ function MinigameSO::RoundEnd(%minigame,%client)
 {    
     if(isObject(l4b_music))
     l4b_music.delete();
-
-    for (%i = 0; %i < directorBricks.getCount(); %i++) 
-    {
-        %brick = directorBricks.getObject(%i);
-
-        if(%brick.getdatablock().isZombieBrick)
-        {
-            cancel(%brick.spawnBots);
-            %brick.BotHoleAmount = 0;
-        }
-    }
     
     %minigame.directorPlaySound("drum_suspense_end_sound",%client);
     %minigame.DirectorStatus = 1;
@@ -316,72 +293,125 @@ function MinigameSO::RoundEnd(%minigame,%client)
     %minigame.SoldierTank = 0;
 }
 
-//Reusable functions
-function MiniGameSO::removeZombieBots(%minigame, %mode, %client)
-{
-    if(isObject(directorBricks) && directorBricks.getCount() > 0)
+function MinigameSO::spawnZombies(%minigame,%type,%amount,%spawnset,%client)
+{    
+    if(!isObject(MainAreaZone) || MainAreaZone.getCount() <= 0)
+    return;
+
+    if(!isObject(%spawnset))
     {
-        for (%i = 0; %i < directorBricks.getCount(); %i++) 
+        for (%i = 0; %i < MainAreaZone.getcount(); %i++) 
         {
-            %brick = directorBricks.getObject(%i);
-            if(%brick.getdatablock().isZombieBrick)
-            if(isObject(%brick.hBot))
-            {
-                if(%mode $= "clear")
-                {
-                    %brick.hBot.schedule(100,delete);
-                    %brick.hBot = 0;
-                    %brick.itemRespawnTime = 360000;
-                    cancel(%brick.hModS);
-                    cancel(%brick.spawnBots);
-                    %brick.BotHoleAmount = 0;
-                }
-                else if(%mode $= "dissipate")
-                {
-                    %brick.itemRespawnTime = 360000;
-                    cancel(%brick.hModS);
-                    cancel(%brick.spawnBots);
-                    %brick.BotHoleAmount = 0;
-                }
-            }
+            if(isObject(%setbrick = MainAreaZone.getObject(%i)) && strstr(strlwr(%setbrick.getName()),"_spawn") != -1)
+            if(strstr(strlwr(%setbrick.getName()),"_" @ strlwr(%type)) != -1)
+            %spawnlist[%sb++] = %setbrick;
+        }
+    }
+    else
+    {
+        for (%i = 0; %i < %spawnset.getcount(); %i++) 
+        {
+            if(isObject(%setbrick = %spawnset.getObject(%i)) && strstr(strlwr(%setbrick.getName()),"_spawn") != -1)
+            if(strstr(strlwr(%setbrick.getName()),"_" @ strlwr(%type)) != -1)
+            %spawnlist[%sb++] = %setbrick;
+        }
+    }
+
+    if(%sb)
+    for (%b = 0; %b < %amount; %b++) 
+    {
+        if(%b > %amount)
+        break;
+        
+        %spawnbrick = %spawnlist[getRandom(1,%sb)];
+
+        switch$(%type)
+        {
+            case "Horde": %bottype = "CommonZombieHoleBot";
+                          if(getRandom(1,4) == 1)
+                          %bottype = $hZombieUncommonType[getRandom(1,$hZombieUncommonTypeAmount)];
+            case "Wander": %bottype = "CommonZombieHoleBot";
+                           if(getRandom(1,4) == 1)
+                           %bottype = $hZombieUncommonType[getRandom(1,$hZombieUncommonTypeAmount)];
+            case "Tank": %bottype = "ZombieTankHoleBot";
+            case "Witch": %bottype = "ZombieWitchHoleBot";
+            case "Special": %bottype = $hZombieSpecialType[getRandom(1,$hZombieSpecialTypeAmount)];
+        }
+
+        %bot = new AIPlayer()
+        {
+            dataBlock = %bottype;
+            path = "";
+            spawnBrick = %spawnbrick;
+
+            Name = %bottype.hName;
+            hType = %bottype.hType;
+            hSearchRadius = %bottype.hSearchRadius;
+            hSearch = %bottype.hSearch;
+            hSight = %bottype.hSight;
+            hWander = %bottype.hWander;
+            hGridWander = %bottype.hGridWander;
+            hReturnToSpawn = %bottype.hReturnToSpawn;
+            hSpawnDist = %bottype.hSpawnDist;
+            hMelee = %bottype.hMelee;
+            hAttackDamage = %bottype.hAttackDamage;
+            hSpazJump = %bottype.hSpazJump;
+            hSearchFOV = %bottype.hSearchFOV;
+            hFOVRadius = %bottype.hFOVRadius;
+            hTooCloseRange = %bottype.hTooCloseRange;
+            hAvoidCloseRange = %bottype.hAvoidCloseRange;
+            hShoot = %bottype.hShoot;
+            hMaxShootRange = %bottype.hMaxShootRange;
+            hStrafe = %bottype.hStrafe;
+            hAlertOtherBots = %bottype.hAlertOtherBots;
+            hIdleAnimation = %bottype.hIdleAnimation;
+            hSpasticLook = %bottype.hSpasticLook;
+            hAvoidObstacles = %bottype.hAvoidObstacles;
+            hIdleLookAtOthers = %bottype.hIdleLookAtOthers;
+            hIdleSpam = %bottype.hIdleSpam;
+            hAFKOmeter = %bottype.hAFKOmeter + getRandom( 0, 2 );
+            hHearing = %bottype.hHearing;
+            hIdle = %bottype.hIdle;
+            hSmoothWander = %bottype.hSmoothWander;
+            hEmote = %bottype.hEmote;
+            hSuperStacker = %bottype.hSuperStacker;
+            hNeutralAttackChance = %bottype.hNeutralAttackChance;
+            hFOVRange = %bottype.hFOVRange;
+            hMoveSlowdown = %bottype.hMoveSlowdown;
+            hMaxMoveSpeed = 1.0;
+            hActivateDirection = %bottype.hActivateDirection;
+            hGridPosition = %spawnbrick.getPosition();
+            isHoleBot = 1;
+        };
+
+        $InputTarget_["Self"] = %spawnbrick;
+        switch$(%bot.getclassname())
+        {
+            case "Player":	$InputTarget_["Player"] = %spawnbrick.getgroup().client.player;
+                            $InputTarget_["Client"] = %spawnbrick.getgroup().client;
+            case "AIPlayer": $InputTarget_["Bot"] = %bot;
+        }
+        $InputTarget_["MiniGame"] = getMiniGameFromObject(%obj);
+        %spawnbrick.processInputEvent("onDirectorBotSpawn",%spawnbrick.getgroup().client);
+
+        if(strlen(%bottype.hMeleeCI))
+        eval("%bot.hDamageType = $DamageType::" @ %bottype.hMeleeCI @ ";");
+        else %bot.hDamageType = $DamageType::HoleMelee;
+        %bot.setTransform(%spawnbrick.getposition() SPC getwords(%spawnbrick.gettransform(),3,6));
+
+        if(isObject(L4B_BotSet))
+        L4B_BotSet.add(%bot);
+        else
+        {
+            new SimSet(L4B_BotSet);
+            missionCleanup.add(L4B_BotSet);
+            L4B_BotSet.add(%bot);
         }
     }
 }
+ registerInputEvent("fxDTSBrick","onDirectorBotSpawn","Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "Bot Bot" TAB "MiniGame MiniGame");
 
-function MinigameSO::DirectorProcessEvent(%minigame,%event,%client)
-{
-    if(isObject(directorBricks))
-    {
-        for(%i = 0; %i < directorBricks.getCount(); %i++)
-        {
-            %brick = directorBricks.getObject(%i);
-            %brick.processInputEvent(%event,%client);
-            %brick.setColorFX(2);
-            %brick.schedule(250,setColorFX,0);
-        }
-    }
-}
-
-function MinigameSO::spawnZombies(%minigame,%type,%amount,%client)
-{
-    if(isObject(directorBricks) && directorBricks.getCount() > 0)
-    {
-        for (%i = 0; %i < directorBricks.getCount(); %i++) 
-        {
-            %brick = directorBricks.getObject(%i);
-
-            if(%brick.getdatablock().isZombieBrick && strstr(%brick.getname(), %type) != -1)
-            {
-                %brick.BotHoleAmountMax = %amount;
-                %brick.spawnHoleBots();
-
-                break;
-            }
-        }
-    }
-}
-
-function MiniGameSO::DirectorMusic(%minigame,%music,%client)
+function MiniGameSO::DirectorMusic(%minigame,%music,%loopable,%volume,%client)
 {
     if(isObject(l4b_music)) 
     l4b_music.delete();
@@ -396,9 +426,9 @@ function MiniGameSO::DirectorMusic(%minigame,%music,%client)
         profile = %music.getID();
         isLooping= true;
         is3D = 0;
-        volume = 1;
+        volume = %volume;
         useProfileDescription = "0";
-        type = "0";
+        type = 9;
         outsideAmbient = "1";
         referenceDistance = "2";
         maxDistance = 999999;

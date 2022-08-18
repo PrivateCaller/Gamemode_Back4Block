@@ -152,6 +152,11 @@ function Player::doMelee(%obj)
 				%hitknockback = 1200;
 				%hitz = 500;
 
+				if(%hit.getdatablock().getName() $= "ZombieTankHoleBot")
+				%hit.damage(%obj,posFromRaycast(%ray),15,$DamageType::SecondaryMelee);
+				else %hit.damage(%obj,posFromRaycast(%ray),%dmg,$DamageType::SecondaryMelee);
+			}
+
 				if(%hit.hZombieL4BType & %hit.hZombieL4BType < 4 && %hit.lastdamage+1250 < getsimtime())
 				{
 					%hit.playaudio(0,"zombie_shoved" @ getrandom(1,10) @ "_sound");
@@ -159,8 +164,6 @@ function Player::doMelee(%obj)
 				}
 
 				%hit.applyimpulse(posFromRaycast(%ray),vectoradd(vectorscale(%obj.getforwardvector(),%hitknockback),"0" SPC "0" SPC %hitz));
-				%hit.damage(%obj,posFromRaycast(%ray),%dmg,$DamageType::SecondaryMelee);
-			}
 		}
 	}
 }

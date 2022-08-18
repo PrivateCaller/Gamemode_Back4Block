@@ -29,6 +29,64 @@ while(%file !$= "")
 	%file = findNextFile(%pattern);
 }
 
+datablock ParticleData(oxygenBubbleParticle : painMidParticle)
+{
+	dragCoefficient		= 3.0;
+	windCoefficient		= 0.0;
+	gravityCoefficient	= -2.0;
+	inheritedVelFactor	= 0.0;
+	constantAcceleration	= 0.0;
+	lifetimeMS		= 800;
+	lifetimeVarianceMS	= 0;
+	spinSpeed		= 10.0;
+	spinRandomMin		= -50.0;
+	spinRandomMax		= 50.0;
+	useInvAlpha		= false;
+	animateTexture		= false;
+
+	textureName		= "base/data/particles/bubble";
+   
+	colors[0]	= "0.2 0.6 1 0.4";
+	colors[1]	= "0.2 0.6 1 0.8";
+	colors[2]	= "0.2 0.6 1 0.8";
+	sizes[0]	= 0.2;
+	sizes[1]	= 0.4;
+	sizes[2]	= 0.0;
+	times[0]	= 0.0;
+	times[1]	= 0.8;
+   times[2]	= 1.0;
+};
+
+datablock ParticleEmitterData(oxygenBubbleEmitter : painMidEmitter)
+{
+   ejectionPeriodMS = 5;
+   periodVarianceMS = 0;
+   ejectionVelocity = 6;
+   velocityVariance = 2;
+   ejectionOffset   = 0.2;
+   thetaMin         = 0;
+   thetaMax         = 105;
+   phiReferenceVel  = 0;
+   phiVariance      = 360;
+   overrideAdvance = false;
+
+   particles = oxygenBubbleParticle;
+
+   uiName = "Oxygen Bubbles";
+};
+
+datablock ShapeBaseImageData(oxygenBubbleImage : painMidImage)
+{
+	stateTimeoutValue[1] = 0.05;
+	stateEmitter[1] = oxygenBubbleEmitter;
+	stateEmitterTime[1]	= 0.05;
+};
+
+function oxygenBubbleImage::onDone(%this,%obj,%slot)
+{
+	%obj.unMountImage(%slot);
+}
+
 datablock PlayerData(SurvivorPlayer : PlayerMeleeAnims)
 {
 	canPhysRoll = true;
@@ -39,6 +97,9 @@ datablock PlayerData(SurvivorPlayer : PlayerMeleeAnims)
 	speedDamageScale = 3;
 	mass = 105;
 	density = 0.7;
+
+	//renderFirstPerson = 1;
+	emap = 1;
 
 	airControl = 0.05;
 
@@ -354,11 +415,15 @@ function SurvivorPlayer::onTrigger (%this, %obj, %triggerNum, %val)
 							return Parent::onTrigger (%this, %obj, %triggerNum, %val); //stop here
 
 							%target = firstWord(%ray);
-
 							if(%target.getType() & $TypeMasks::PlayerObjectType)
 							{
 								L4B_SaveVictim(%obj,%target);
 								L4B_ReviveDowned(%obj);
+							}
+							if(%target.getType() & $TypeMasks::VehicleObjectType && %target.getdatablock().image !$= "")
+							{
+								%obj.mountImage(%target.getdatablock().image, 0);
+								%target.delete();
 							}
 						}
 						else

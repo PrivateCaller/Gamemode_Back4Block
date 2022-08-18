@@ -341,7 +341,7 @@ function BoulderImage::onActivate(%this, %obj, %slot)
 
 function BoulderProjectile::onExplode(%this,%obj)
 {
-	for(%i=0;%i<75;%i++)
+	for(%i=0;%i<15;%i++)
 	{
 		%rnd = getRandom();
 		%dist = getRandom()*15;

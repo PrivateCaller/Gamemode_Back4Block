@@ -107,7 +107,7 @@ function ZombieTankHoleBot::onBotFollow( %this, %obj, %targ )
 		if(isObject(%minigame = getMiniGameFromObject(%obj)))
 		if(%minigame.SoldierTank)
 		%minigame.DirectorMusic("musicdata_L4D_soldier_tank",%client);
-		else %minigame.DirectorMusic("musicdata_L4D_tank",%client);
+		else %minigame.DirectorMusic("musicdata_L4D_tank",true,1,%client);
 
 		%obj.startMusic = 1;
 	}

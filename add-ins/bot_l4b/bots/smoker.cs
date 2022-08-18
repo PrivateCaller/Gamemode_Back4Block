@@ -272,7 +272,7 @@ function ZombieSmokerHoleBot::ShootTongue(%this, %obj)
 	%p = new Projectile()
 	{
 		dataBlock = "SmokerTongueProjectile";
-		initialVelocity = vectorScale(%obj.getEyeVector(),500);
+		initialVelocity = vectorScale(%obj.getEyeVector(),125);
 		initialPosition = vectorAdd(%obj.getMuzzlePoint(2),"0 0 0.35");
 		sourceObject = %obj;
 		client = %obj.client;

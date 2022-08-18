@@ -1,9 +1,0 @@
-ak47Item
-M1014Item
-famasItem
-spas12Item
-ScarLItem
-G36CItem
-dbShotgunItem
-cShotgunItem
-revolverItem

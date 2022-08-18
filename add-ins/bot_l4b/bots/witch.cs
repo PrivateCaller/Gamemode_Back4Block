@@ -23,6 +23,9 @@ function ZombieWitchHoleBot::onAdd(%this,%obj)
     %obj.setscale("0.9 0.7 1");
     %obj.StartleLoop = %obj.getDatablock().WitchStartleLoop(%obj);
 
+    if(isObject(l4b_music))
+    l4b_music.delete();
+
     if(getRandom(1,100) <= 95)
     %obj.stopHoleLoop();
     serverCmdSit(%obj);
@@ -76,16 +79,6 @@ function ZombieWitchHoleBot::onBotLoop(%this,%obj)
                     %obj.raisearms = 0;
                 }
                 %obj.playthread(1,"root");
-                %obj.setMaxForwardSpeed(4);
-            }
-            else
-            {
-                %obj.setMaxForwardSpeed(20);
-                if(!%obj.raisearms)
-                {   
-                    %obj.playthread(1,"armReadyboth");
-                    %obj.raisearms = 1;
-                }
             }
         }
         else
@@ -97,7 +90,7 @@ function ZombieWitchHoleBot::onBotLoop(%this,%obj)
             %obj.hFollowing = 0;
             %obj.playthread(2,"plant");
             %obj.playthread(1,"root");
-            %obj.setMaxForwardSpeed(25);
+            %obj.setMaxForwardSpeed(15);
             %obj.hRunAwayFromPlayer(%obj);
             %obj.MaxSpazzClick = getRandom (20,40);
             %obj.getDatablock().WitchPanicking(%obj,%count);
@@ -140,11 +133,26 @@ function ZombieWitchHoleBot::onBotFollow( %this, %obj, %targ )
 	if(!%obj.startMusic)
 	{
 		if(isObject(%minigame = getMiniGameFromObject(%obj)))
-        %minigame.DirectorMusic("musicdata_L4D_witch",%client);
+        %minigame.DirectorMusic("musicdata_L4D_witch",true,1,%client);
 
 		%obj.startMusic = 1;
 	}
+
+    %obj.setMaxForwardSpeed(20);
+    if(!%obj.raisearms)
+    {   
+        %obj.playthread(1,"armReadyboth");
+        %obj.raisearms = 1;
+    }
     
+}
+
+function ZombieWitchHoleBot::OnRemove(%this,%obj)
+{
+    if(isObject(%minigame = getMiniGameFromObject(%obj)))
+    %minigame.RoundEnd();
+
+    Parent::OnRemove(%this,%obj);
 }
 
 function ZombieWitchHoleBot::OnDamage(%this,%obj,%am)
@@ -168,6 +176,9 @@ function ZombieWitchHoleBot::OnDamage(%this,%obj,%am)
 
         cancel(%obj.StartleLoop);
         %obj.getDataBlock().WitchOnLoop(%obj);
+        
+        %obj.setMaxForwardSpeed(20);
+        %obj.onBotFollow();
 
         if(%attacker && %attacker.client && %attacker.getclassname() $= "player" && $Pref::Server::L4B2Bots::MinigameMessages && !%obj.hWhoAttacked)
         {

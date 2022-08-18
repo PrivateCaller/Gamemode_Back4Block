@@ -1,0 +1,72 @@
+L4B_Ammo A: Ammo Supply
+L4B_Ammo A: 7.62x39mm Medium
+L4B_Ammo A: 7.62x51mm Heavy
+L4B_Ammo A: 5.7x28mm Defense
+L4B_Ammo A: 5.56x45mm NATO
+L4B_Ammo A: .50 Caliber BMG
+L4B_Ammo A: .408 Cheyenne Tactical
+L4B_Ammo A: 9x19mm Parabellum
+L4B_Ammo A: .45 ACP
+L4B_Ammo A: .357 Magnum
+L4B_Ammo A: 23x75mmR Heavy Shotgun
+L4B_Ammo A: 12 Gauge Shotgun
+L4B_Ammo A: 40mm Grenade
+L4B_Ammo A: Rocket L.
+L4B_Grenade Bile Bomb
+L4B_Grenade Pipe Bomb
+L4B_Grenade Molotov
+L4B_Melee Crowbar
+L4B_Melee Steel Machete
+L4B_Melee Steel Hatchet
+L4B_Melee Pipewrench
+L4B_Melee Baseball Bat
+L4B_Melee Frying Pan
+L4B_Melee Tire Iron
+L4B_Melee Paddle
+L4B_Melee Baton
+L4B_Melee Icepick
+L4B_Melee Leadpipe
+L4B_Melee Shovel
+L4B_Melee Spike Bat
+L4B_Melee Golf Club
+L4B_Melee Black Hammer
+L4B_Misc Propane Tank
+L4B_Misc Gas Can
+L4B_Misc Oxygen Tank
+L4B_Misc Propane Tank
+L4B_Medical Medpack
+L4B_Medical Gauze
+L4B_Medical Red Potion
+L4B_Medical Pills
+L4B_Medical Cough Syrup
+L4B_Medical Syringe Antidote
+L4B_Medical Syringe Panacea
+L4B_PistolT1 B&E: M1911
+L4B_PistolT1 B&E: Glock 17
+L4B_PistolT1 B&E: USP .45
+L4B_PistolT1 B&E: M9 Beretta
+L4B_PistolT1 B&E: TT-33
+L4B_PistolT2 B&E: Glock 18
+L4B_PistolT2 B&E: Colth Python
+L4B_PistolT2 B&E: M93 Raffica
+L4B_SMGT1 B&E: MP5K
+L4B_SMGT1 B&E: MAC-10
+L4B_SMGT1 B&E: TMP
+L4B_SMGT1 B&E: Uzi
+L4B_SMGT1 B&E: MP7
+L4B_SMGT1 B&E: UMP .45
+L4B_ShotgunT1 B&E: Mossberg
+L4B_ShotgunT1 B&E: 870 Express
+L4B_ShotgunT1 B&E: Ithaca 37
+L4B_ShotgunT2 B&E: AA-12
+L4B_ShotgunT2 B&E: KS-23
+L4B_ShotgunT2 B&E: SPAS-12
+L4B_ShotgunT2 B&E: Olin CAWS
+L4B_RifleT2 B&E: M1928 Thompson
+L4B_RifleT2 B&E: M16A3
+L4B_RifleT2 B&E: Falcon
+L4B_RifleT2 B&E: Intervention
+L4B_RifleT2 B&E: M4A1
+L4B_RifleT2 B&E: AUG A2
+L4B_RifleT2 B&E: G3
+L4B_RifleT2 B&E: L85A2

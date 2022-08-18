@@ -1,0 +1,20 @@
+Hammer
+Wrench
+Printer
+Toolgun
+Duplicator
+Wand
+A: Ammo Supply
+A: 7.62x39mm Medium
+A: 7.62x51mm Heavy
+A: 5.7x28mm Defense
+A: 5.56x45mm NATO
+A: .50 Caliber BMG
+A: .408 Cheyenne Tactical
+A: 9x19mm Parabellum
+A: .45 ACP
+A: .357 Magnum
+A: 23x75mmR Heavy Shotgun
+A: 12 Gauge Shotgun
+A: 40mm Grenade
+A: Rocket L.

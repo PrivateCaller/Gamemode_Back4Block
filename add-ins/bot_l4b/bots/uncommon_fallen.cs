@@ -50,22 +50,16 @@ function ZombieFallenHoleBot::onBotMelee(%this,%obj,%col)
 function ZombieFallenHoleBot::onDisabled(%this,%obj)
 {
 	CommonZombieHoleBot::OnDisabled(%this,%obj);
-
-	%chancebonus = 30;
-	L4B_ZombieDropLoot(%obj,Bilebombitem,10);
-	L4B_ZombieDropLoot(%obj,sPipebombitem,10);
-	L4B_ZombieDropLoot(%obj,ZombiePillsItem,15);
-	L4B_ZombieDropLoot(%obj,gc_SyringePanaceaItem,10);
-	L4B_ZombieDropLoot(%obj,ammoBox9mmItemA,25);
-	L4B_ZombieDropLoot(%obj,ammoBoxShotgunItemA,25);
-	L4B_ZombieDropLoot(%obj,ammoBoxRevolverItemA,25);
-	L4B_ZombieDropLoot(%obj,ammoBox556ItemA,25);
-	L4B_ZombieDropLoot(%obj,$L4B2Bots::ZombieLootItem1,$L4B2Bots::ZombieLootChance+%chancebonus/2);
-	L4B_ZombieDropLoot(%obj,$L4B2Bots::ZombieLootItem2,$L4B2Bots::ZombieLootChance+%chancebonus/2);
-	L4B_ZombieDropLoot(%obj,$L4B2Bots::ZombieLootItem3,$L4B2Bots::ZombieLootChance+%chancebonus/2);
-	L4B_ZombieDropLoot(%obj,$L4B2Bots::ZombieLootItem4,$L4B2Bots::ZombieLootChance+%chancebonus/2);
-	L4B_ZombieDropLoot(%obj,$L4B2Bots::ZombieLootItem5,$L4B2Bots::ZombieLootChance+%chancebonus/2);
-	L4B_ZombieDropLoot(%obj,$L4B2Bots::ZombieLootItemFallen,$L4B2Bots::ZombieLootChance+%chancebonus/1.5);
+	L4B_ZombieDropLoot(%obj,$L4B_Grenade[getRandom(1,$L4B_GrenadeAmount)],5);
+	L4B_ZombieDropLoot(%obj,$L4B_Grenade[getRandom(1,$L4B_GrenadeAmount)],10);
+	L4B_ZombieDropLoot(%obj,$L4B_Ammo[getRandom(1,$L4B_AmmoAmount)],15);
+	L4B_ZombieDropLoot(%obj,$L4B_Ammo[getRandom(1,$L4B_AmmoAmount)],15);
+	L4B_ZombieDropLoot(%obj,$L4B_Ammo[getRandom(1,$L4B_AmmoAmount)],15);
+	L4B_ZombieDropLoot(%obj,$L4B_Ammo[getRandom(1,$L4B_AmmoAmount)],15);
+	L4B_ZombieDropLoot(%obj,$L4B_PistolT1[getRandom(1,$L4B_PistolT1Amount)],5);
+	L4B_ZombieDropLoot(%obj,$L4B_Medical[getRandom(1,$L4B_MedicalAmount)],5);
+	L4B_ZombieDropLoot(%obj,$L4B_Medical[getRandom(1,$L4B_MedicalAmount)],10);
+	L4B_ZombieDropLoot(%obj,$L4B_Medical[getRandom(1,$L4B_MedicalAmount)],15);
 }
 
 function ZombieFallenHoleBot::L4BUncommonAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)

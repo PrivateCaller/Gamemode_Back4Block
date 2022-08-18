@@ -152,7 +152,7 @@ function MeleeSwingCheck(%obj,%this,%slot)
      	{
      	   	%damage = mClamp(%target.getdatablock().maxDamage/15, 30, %target.getdatablock().maxDamage/2);     	   	
 
-			if(isObject(getMiniGameFromObject(%obj,%target)))
+			if(isObject(getMiniGameFromObject(%obj,%target)) && minigameCanDamage(%obj,%target))
 			{
      	   		%target.damage(%obj, posFromRaycast(%ray), %damage, $DamageType::Default);
 				%target.applyimpulse(posFromRaycast(%ray),vectoradd(vectorscale(%vec,2000),"0 0 750"));
@@ -192,9 +192,12 @@ function MeleeSwingCheck(%obj,%this,%slot)
 			else %damageclamp = mClamp(%damagepower, %this.meleeDamage, %target.getdatablock().maxDamage);
 			serverPlay3D(%this.meleeHitPlSound @ "_hitpl" @ getRandom(1,2) @ "_sound",posFromRaycast(%ray));
 			
-			if(isObject(getMiniGameFromObject(%obj,%target)) && checkHoleBotTeams(%obj,%target))
+			if(minigameCanDamage(%obj,%target) && checkHoleBotTeams(%obj,%target))
 			{
-				%target.damage(%obj, posFromRaycast(%ray), %damageclamp, $DamageType::Default);
+				if(%target.getdatablock().getName() $= "ZombieTankHoleBot")
+				%target.damage(%obj,posFromRaycast(%ray),150,$damageclamp::Default);
+				else %target.damage(%obj,posFromRaycast(%ray),%damageclamp,$DamageType::Default);
+
 				%target.applyimpulse(posFromRaycast(%ray),vectoradd(vectorscale(%vec,1000),"0 0 750"));
 				serverPlay3D(%this.meleeHitPlSound @ "_hitpl" @ getRandom(1,2) @ "_sound",posFromRaycast(%ray));
 			}

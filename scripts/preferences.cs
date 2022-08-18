@@ -321,9 +321,175 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 		noSave         = false;
 		requireRestart = false;
 	};
+
+	new ScriptObject(Preference)
+	{
+		className      = "Gamemode_Left4Block";
+
+		addon          = "Gamemode_Left4Block";
+		category       = "Ammo Crate";
+		title          = "Limited supplies (Minigame only)";
+
+		type           = "bool";
+		params         = "";
+
+		variable       = "$Pref::Server::L4BAmmocrate::AmmoSupplies";
+
+		defaultValue   = "1";
+
+		updateCallback = "";
+		loadCallback   = "";
+
+		hostOnly       = false;
+		secret         = false;
+
+		loadNow        = false;
+		noSave         = false;
+		requireRestart = false;
+	};
+
+
+	new ScriptObject(Preference)
+	{
+		className      = "Gamemode_Left4Block";
+
+		addon          = "Gamemode_Left4Block";
+		category       = "Ammo Crate";
+		title          = "Supply amount";
+
+		type           = "num";
+		params         = "0 100 0";
+
+		variable       = "$Pref::Server::L4BAmmocrate::AmmoSupplyAmount";
+
+		defaultValue   = "25";
+
+		updateCallback = "";
+		loadCallback   = "";
+
+		hostOnly       = false;
+		secret         = false;
+
+		loadNow        = false;
+		noSave         = false;
+		requireRestart = false;
+	};
+
+				new ScriptObject(Preference)
+	{
+		className      = "Gamemode_Left4Block";
+
+		addon          = "Gamemode_Left4Block";
+		category       = "Ammo Crate";
+		title          = "Acquire delay (ms)";
+
+		type           = "num";
+		params         = "0 750 0";
+
+		variable       = "$Pref::Server::L4BAmmocrate::AmmoAcquireDelay";
+
+		defaultValue   = "500";
+
+		updateCallback = "";
+		loadCallback   = "";
+
+		hostOnly       = false;
+		secret         = false;
+
+		loadNow        = false;
+		noSave         = false;
+		requireRestart = false;
+	};
+
+	new ScriptObject(Preference)
+	{
+		className      = "Gamemode_Left4Block";
+
+		addon          = "Gamemode_Left4Block";
+		category       = "Health Locker";
+		title          = "Limited supplies (Minigame only)";
+
+		type           = "bool";
+		params         = "";
+
+		variable       = "$Pref::L4BHealthLocker::Supplies";
+
+		defaultValue   = "1";
+
+		updateCallback = "";
+		loadCallback   = "";
+
+		hostOnly       = false;
+		secret         = false;
+
+		loadNow        = false;
+		noSave         = false;
+		requireRestart = false;
+	};
+
+
+	new ScriptObject(Preference)
+	{
+		className      = "Gamemode_Left4Block";
+
+		addon          = "Gamemode_Left4Block";
+		category       = "Health Locker";
+		title          = "Supply amount";
+
+		type           = "num";
+		params         = "0 100 0";
+
+		variable       = "$Pref::L4BHealthLocker::SupplyAmount";
+
+		defaultValue   = "20";
+
+		updateCallback = "";
+		loadCallback   = "";
+
+		hostOnly       = false;
+		secret         = false;
+
+		loadNow        = false;
+		noSave         = false;
+		requireRestart = false;
+	};
+
+	new ScriptObject(Preference)
+	{
+		className      = "Gamemode_Left4Block";
+
+		addon          = "Gamemode_Left4Block";
+		category       = "Health Locker";
+		title          = "Acquire delay (ms)";
+
+		type           = "num";
+		params         = "0 750 0";
+
+		variable       = "$Pref::L4BHealthLocker::AcquireDelay";
+
+		defaultValue   = "500";
+
+		updateCallback = "";
+		loadCallback   = "";
+
+		hostOnly       = false;
+		secret         = false;
+
+		loadNow        = false;
+		noSave         = false;
+		requireRestart = false;
+	};
 }
 else
 {
+
+	$Pref::Server::L4BAmmocrate::Supplies = 1;
+	$Pref::Server::L4BAmmocrate::SupplyAmount = 25;
+	$Pref::Server::L4BAmmocrate::AcquireDelay = 500;
+	$Pref::L4BHealthLocker::Supplies = 1;
+	$Pref::L4BHealthLocker::SupplyAmount = 20;
+	$Pref::L4BHealthLocker::AcquireDelay = 500;
+
 	$Pref::L4BDirector::EnableOnMG = 0;
 	$Pref::L4BDirector::EnableCues = 1;
     $Pref::SurvivorPlayer::BrickScanning = 1;

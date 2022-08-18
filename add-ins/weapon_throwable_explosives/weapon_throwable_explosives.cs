@@ -53,6 +53,7 @@ datablock ItemData(PropaneTankItem)
 
 	image = PropaneTankImage;
 	canDrop = true;
+	throwableExplosive = 1;
 };
 
 function PropaneTankItem::onPickup(%this, %obj, %user, %amount)
@@ -116,17 +117,6 @@ datablock ShapeBaseImageData(PropaneTankImage)
 
 function PropaneTankImage::onFire(%this, %obj, %slot)
 {
-	if(!isObject(getMinigamefromObject(%obj)))
-	return;
-	
-	%currSlot = %obj.currTool;
-	%obj.tool[%currSlot] = 0;
-	%obj.weaponCount--;
-	messageClient(%obj.client,'MsgItemPickup','',%currSlot,0);
-	serverCmdUnUseTool(%obj.client);
-	
-	%obj.playThread(2, shiftdown);
-
 	%obj.sourcerotation = %obj.gettransform();
 	%muzzlepoint = %obj.getHackPosition();
 	%muzzlevector = vectorScale(%obj.getEyeVector(),3);
@@ -147,8 +137,9 @@ function PropaneTankImage::onFire(%this, %obj, %slot)
 	%item.setTransform (%muzzlepoint @ " " @ %playerRot);
 	%item.applyimpulse(%item.gettransform(),vectoradd(vectorscale(%obj.getEyeVector(),10000),"0" SPC "0" SPC 5000));
 
-	%obj.playThread(3,jump);
-	%obj.playThread(2,activate2);
+	%obj.droppedExplosiveVeh = 1;
+	%obj.playthread(1,root);
+	%obj.unMountImage(0);
 }
 
 function PropaneTankCol::onAdd(%this,%obj)
@@ -179,22 +170,39 @@ function PropaneTankCol::onDamage(%this,%obj)
 function PropaneTankImage::onMount(%this,%obj,%slot)
 {
 	Parent::onMount(%this,%obj,%slot);	
-	%obj.playThread(1, armreadyboth);
+	%obj.playThread(1, armReadyRight);
 }
 
 function PropaneTankImage::onUnMount(%this,%obj,%slot)
 {
-	Parent::onUnMount(%this,%obj,%slot);	
-	%obj.playThread(2, root);
-	for(%i=0;%i<%obj.getDatablock().maxTools;%i++)
+	Parent::onUnMount(%this,%obj,%slot);
+
+	if(!%obj.droppedExplosiveVeh )
 	{
-		%toolDB = %obj.tool[%i];
-		if(%toolDB $= %this.item.getID())
-		{
-			servercmdDropTool(%obj.client,%i);
-			break;
-		}
+		%obj.sourcerotation = %obj.gettransform();
+		%muzzlepoint = %obj.getHackPosition();
+		%muzzlevector = vectorScale(%obj.getEyeVector(),3);
+		%muzzlepoint = VectorAdd (%muzzlepoint, %muzzlevector);
+		%playerRot = rotFromTransform (%obj.getTransform());
+	
+		%item = new WheeledVehicle(ExplosiveItemVehicle) 
+		{  
+			rotation = getwords(%obj.sourcerotation,3,6);
+			datablock  = %this.vehicle;
+			sourceObject = %obj.client.player;
+			minigame = getMinigameFromObject(%obj);
+			brickGroup = %obj.client.brickGroup;
+		};
+	
+		%item.schedule(60000,delete);
+		%item.startfade(5000,55000,1);
+		%item.setTransform (%muzzlepoint @ " " @ %playerRot);
+		%item.applyimpulse(%item.gettransform(),vectoradd(vectorscale(%obj.getEyeVector(),10000),"0" SPC "0" SPC 5000));
 	}
+
+	%obj.playThread(3,jump);
+	%obj.playThread(2,activate2);
+	%obj.droppedExplosiveVeh = 0;
 }
 
 datablock WheeledVehicleData(PropaneTankCol)
@@ -372,77 +380,27 @@ datablock ProjectileData(PropaneTankFinalExplosionProjectile : vehicleFinalExplo
 
 
 
-datablock ItemData(GasCanItem)
+datablock ItemData(GasCanItem : PropaneTankItem)
 {
-	category = "Weapon";  // Mission editor category
-	className = "Weapon"; // For inventory system
-
-	 // Basic Item Properties
 	shapeFile = "./models/GasCan.dts";
-	mass = 1;
-	density = 0.2;
-	elasticity = 0.2;
-	friction = 0.6;
-	emap = true;
-
-	//gui stuff
 	uiName = "Gas Can";
 	iconName = "./icons/Icon_GasCan";
-	doColorShift = true;
 	colorShiftColor = "0.4 0.071 0.071 1.000";
-
-	 // Dynamic properties defined by the scripts
 	image = GasCanImage;
-	canDrop = true;
 };
 function GasCanItem::onPickup(%this, %obj, %player)
 {  
 	PropaneTankItem::onPickup(%this, %obj, %player);
 }
 
-datablock ShapeBaseImageData(GasCanImage)
+datablock ShapeBaseImageData(GasCanImage : PropaneTankImage)
 {
 	shapeFile = "./models/GasCan.dts";
-	emap = true;
-
-	mountPoint = 0;
 	offset = "-0.53 0.05 -0.7";
 	rotation = "0 0 1 90";
 	vehicle = GasCanCol;
-
-	correctMuzzleVector = true;
-	className = "WeaponImage";
-
-	// Projectile && Ammo.
 	item = GasCanItem;
-	ammo = " ";
-	projectile = gunProjectile;
-	projectileType = Projectile;
-
-	melee = false;
-	armReady = true;
-
-	doColorShift = true;
 	colorShiftColor = GasCanItem.colorShiftColor;
-
-	stateName[0]			= "Activate";
-	stateTimeoutValue[0]		= 0.1;
-	stateTransitionOnTimeout[0]	= "Ready";
-	stateSequence[0]		= "ready";
-	stateSound[0]					= weaponSwitchSound;
-
-	stateName[1]			= "Ready";
-	stateTransitionOnTriggerDown[1]	= "Fire";
-	stateAllowImageChange[1]	= true;
-
-	stateName[5]			= "Fire";
-	stateTransitionOnTimeout[5]	= "Ready";
-	stateTimeoutValue[5]		= 0.5;
-	stateFire[5]			= true;
-	stateSequence[5]		= "fire";
-	stateScript[5]			= "onFire";
-	stateWaitForTimeout[5]		= true;
-	stateAllowImageChange[5]	= false;
 };
 
 function GasCanImage::onFire(%this, %obj, %slot)
@@ -465,7 +423,7 @@ function GasCanCol::oncollision(%this, %obj, %col, %fade, %pos, %norm)
 function GasCanCol::onDamage(%this,%obj)
 {
 	if($Item_Explosives_isSWepsExtOn)
-	createFireCircle(%obj.getPosition(),30,70,%obj.sourceobject,%obj,$DamageType::Molotov);
+	createFireCircle(%obj.getPosition(),30,70,%obj.sourceobject.client,%obj,$DamageType::Molotov);
 }
 function GasCanImage::onMount(%this,%obj,%slot)
 {
@@ -479,77 +437,29 @@ function GasCanImage::onUnMount(%this,%obj,%slot)
 
 
 
-datablock ItemData(BileOGasItem)
+datablock ItemData(BileOGasItem : PropaneTankItem)
 {
-	category = "Weapon";  // Mission editor category
-	className = "Weapon"; // For inventory system
-
-	 // Basic Item Properties
 	shapeFile = "./models/Jug.dts";
-	mass = 1;
-	density = 0.2;
-	elasticity = 0.2;
-	friction = 0.6;
-	emap = true;
-
-	//gui stuff
 	uiName = "Gasbile Bottle";
 	iconName = "./icons/Icon_BileOGas";
 	doColorShift = false;
 	colorShiftColor = "0.4 0.071 0.071 1.000";
-
-	 // Dynamic properties defined by the scripts
 	image = BileOGasImage;
-	canDrop = true;
 };
 function BileOGasItem::onPickup(%this, %obj, %player)
 {  
 	PropaneTankItem::onPickup(%this, %obj, %player);
 }
 
-datablock ShapeBaseImageData(BileOGasImage)
+datablock ShapeBaseImageData(BileOGasImage : PropaneTankImage)
 {
 	shapeFile = "./models/Jug.dts";
-	emap = true;
-
-	mountPoint = 0;
 	offset = "-0.25 0 0";
 	rotation = "0 0 1 90";
 	vehicle = BileOGasCol;
-
-	correctMuzzleVector = true;
-	className = "WeaponImage";
-
-	// Projectile && Ammo.
 	item = BileOGasItem;
-	ammo = " ";
-	projectile = gunProjectile;
-	projectileType = Projectile;
-
-	melee = false;
-	armReady = true;
-
 	doColorShift = false;
 	colorShiftColor = BileOGasItem.colorShiftColor;
-
-	stateName[0]			= "Activate";
-	stateTimeoutValue[0]		= 0.1;
-	stateTransitionOnTimeout[0]	= "Ready";
-	stateSequence[0]		= "ready";
-	stateSound[0]					= weaponSwitchSound;
-
-	stateName[1]			= "Ready";
-	stateTransitionOnTriggerDown[1]	= "Fire";
-	stateAllowImageChange[1]	= true;
-
-	stateName[5]			= "Fire";
-	stateTransitionOnTimeout[5]	= "Ready";
-	stateTimeoutValue[5]		= 0.5;
-	stateFire[5]			= true;
-	stateSequence[5]		= "fire";
-	stateScript[5]			= "onFire";
-	stateWaitForTimeout[5]		= true;
-	stateAllowImageChange[5]	= false;
 };
 
 function BileOGasImage::onFire(%this, %obj, %slot)
@@ -574,7 +484,7 @@ function BileOGasCol::onAdd(%this,%obj)
 function BileOGasCol::onDamage(%this,%obj)
 {
 	if($Item_Explosives_isSWepsExtOn)
-	createFireCircle(%obj.getPosition(),10,10,%obj.sourceObject,%obj,$DamageType::Molotov);
+	createFireCircle(%obj.getPosition(),30,70,%obj.sourceobject.client,%obj,$DamageType::Molotov);
 
 	%c = new projectile()
 	{
@@ -594,6 +504,8 @@ function BileOGasCol::oncollision(%this, %obj, %col, %fade, %pos, %norm)
 function BileOGasImage::onMount(%this,%obj,%slot)
 {
 	Parent::onMount(%this,%obj,%slot);
+	%obj.playThread(1, armReadyRight);
+	%obj.playaudio(3,weaponSwitchSound);
 }
 
 function BileOGasCol::Distract(%this, %obj)
@@ -635,28 +547,13 @@ function BileOGasImage::onUnMount(%this,%obj,%slot)
 	PropaneTankImage::onUnMount(%this,%obj,%slot);
 }
 
-datablock ItemData(OxygenTankItem)
+datablock ItemData(OxygenTankItem : PropaneTankItem)
 {
-	category = "Weapon";  // Mission editor category
-	className = "Weapon"; // For inventory system
-
-	 // Basic Item Properties
 	shapeFile = "./models/OxygenTank.dts";
-	mass = 1;
-	density = 0.2;
-	elasticity = 0.2;
-	friction = 0.6;
-	emap = true;
-
-	//gui stuff
 	uiName = "Oxygen Tank";
 	iconName = "./icons/Icon_OxygenTank";
-	doColorShift = true;
 	colorShiftColor = "0.4 0.071 0.071 1.000";
-
-	 // Dynamic properties defined by the scripts
 	image = OxygenTankImage;
-	canDrop = true;
 };
 
 function OxygenTankItem::onPickup(%this, %obj, %player)
@@ -664,49 +561,14 @@ function OxygenTankItem::onPickup(%this, %obj, %player)
 	PropaneTankItem::onPickup(%this, %obj, %player);
 }
 
-datablock ShapeBaseImageData(OxygenTankImage)
+datablock ShapeBaseImageData(OxygenTankImage : PropaneTankItem)
 {
 	shapeFile = "./models/OxygenTank.dts";
-	emap = true;
-
-	mountPoint = 0;
 	offset = "-0.53 0.05 -0.7";
 	rotation = "0 0 1 90";
 	vehicle = OxygenTankCol;
-
-	correctMuzzleVector = true;
-	className = "WeaponImage";
-
-	// Projectile && Ammo.
 	item = OxygenTankItem;
-	ammo = " ";
-	projectile = gunProjectile;
-	projectileType = Projectile;
-
-	melee = false;
-	armReady = true;
-
-	doColorShift = true;
 	colorShiftColor = OxygenTankItem.colorShiftColor;
-
-	stateName[0]			= "Activate";
-	stateTimeoutValue[0]		= 0.1;
-	stateTransitionOnTimeout[0]	= "Ready";
-	stateSequence[0]		= "ready";
-	stateSound[0]					= weaponSwitchSound;
-
-	stateName[1]			= "Ready";
-	stateTransitionOnTriggerDown[1]	= "Fire";
-	stateAllowImageChange[1]	= true;
-
-	stateName[5]			= "Fire";
-	stateTransitionOnTimeout[5]	= "Ready";
-	stateTimeoutValue[5]		= 0.5;
-	stateFire[5]			= true;
-	stateSequence[5]		= "fire";
-	stateScript[5]			= "onFire";
-	stateWaitForTimeout[5]		= true;
-	stateAllowImageChange[5]	= false;
 };
 
 function OxygenTankImage::onFire(%this, %obj, %slot)

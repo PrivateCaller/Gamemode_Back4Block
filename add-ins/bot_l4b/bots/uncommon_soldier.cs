@@ -54,6 +54,11 @@ function ZombieSoldierHoleBot::onDamage(%this,%obj)
 function ZombieSoldierHoleBot::onDisabled(%this,%obj)
 {
 	CommonZombieHoleBot::OnDisabled(%this,%obj);
+
+	L4B_ZombieDropLoot(%obj,$L4B_Ammo[getRandom(1,$L4B_AmmoAmount)],25);
+	L4B_ZombieDropLoot(%obj,$L4B_Ammo[getRandom(1,$L4B_AmmoAmount)],25);
+	L4B_ZombieDropLoot(%obj,$L4B_PistolT1[getRandom(1,$L4B_PistolT2Amount)],25);
+	L4B_ZombieDropLoot(%obj,$L4B_Medical[getRandom(1,$L4B_MedicalAmount)],5);
 }
 
 function ZombieSoldierHoleBot::L4BUncommonAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
