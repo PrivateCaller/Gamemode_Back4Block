@@ -199,7 +199,7 @@ function L4B_pushClientSnapshot(%obj, %sourceClient)
 	GameConnection::ApplyBodyColors(%obj);
 }
 
-function L4B_pushZombifiedSnapshot(%obj)
+function L4B_pushZombifiedSnapshot(%obj, %sourceClient)
 {
     if(%sourceClient $= "")
     {
@@ -298,7 +298,10 @@ function L4B_pushZombifiedSnapshot(%obj)
 	%obj.vestColor = getRandomBotRGBColor();
 
 	%obj.name = "Infected" SPC %sourceClient.name;
-	%obj.setShapeNameHealth();
+	if(isFunction(AIPlayer, setShapeNameHealth))
+	{
+		%obj.setShapeNameHealth();
+	}
 
 	GameConnection::ApplyBodyParts(%obj);
 	GameConnection::ApplyBodyColors(%obj);

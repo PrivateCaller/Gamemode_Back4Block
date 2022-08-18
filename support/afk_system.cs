@@ -23,7 +23,28 @@ function AFKPlayerHoleBot::onDisabled (%this, %obj, %state)
 }
 function AFKPlayerHoleBot::onAdd(%this, %obj)
 {
-    SurvivorHoleBot::onAdd(%this, %obj);
+    //
+    // Needs to be it's own function to remove the appearance changes brought about by the SurviviorHoleBot function.
+    //
+    
+    armor::onAdd(%this, %obj);
+
+    //Can't assign the variables to the %obj.vars ScriptObject for some reason. Thanks.
+    %obj.hIsImmune = 1;
+    %obj.hHumanFellow = 0;
+    %obj.hHelpTarget = 0;
+    %obj.botherHumanCheckTimes = 8; //Needs to be moderately high to be effective. At least have it at 4 or so.
+    %obj.botherHumanDistance = 4;
+    %obj.hHelpTarget_previousHSearch = 0;
+
+    if(getMiniGameFromObject(%obj))
+    {
+        %buddy = L4B_attemptFindHuman(%obj); //Right off the bat, find a cuddle buddy.
+        if(isObject(%buddy))
+        {
+            L4B_survivorBotRunSchedule(%obj, %buddy);
+        }
+    }
 }
 function AFKPlayerHoleBot::GiveHealingStuff(%this,%obj,%human)
 {    
@@ -141,9 +162,14 @@ function L4B_AFKReplacePlayer(%target)
 		hMoveSlowdown = %data.hMoveSlowdown;
 		hMaxMoveSpeed = 1.0;
 		hActivateDirection = %data.hActivateDirection;
+
+        hooks_hLoop = "AFKPlayerHoleBot_loop";
+        hooks_guardAtSpawn = -1;
+        hooks_ifWander = "AFKPlayerHoleBot_ifWander";
 		
 		isHoleBot = 0; //These hax.
         isAFKPlayer = 1;
+        isBot = 1;
 	};
     if(isObject(%obj))
 	{
@@ -169,7 +195,7 @@ function L4B_AFKReplacePlayer(%target)
 
         %obj.setTransform(%target.getTransform());
         %obj.setVelocity(%target.getVelocity());
-        %obj.setDamageLevel(%target.getDamageLevel());
+        %obj.setDamageLevel(%target.getDamagePercent());
         %obj.setEnergyLevel(%target.getEnergyLevel());
 
         %obj.setMoveSlowdown(%obj.hMoveSlowdown);
@@ -182,7 +208,6 @@ function L4B_AFKReplacePlayer(%target)
 
         %target.delete(); //Trololololol
 
-        %obj.isBot = 1;
 		//This is done so they can use certain functions meant to be called on a client
 		%obj.player = %obj;
 
@@ -230,22 +255,22 @@ function serverCmdAFK(%client)
         %client.nextAFKTime = getSimTime() + 5000;
     }
 
-    if(isObject(%client.afkBot))
+    if(isObject(%client.afk_bot))
     {
-        if(%client.afkBot.getState() $= "Dead")
+        if(%client.afk_bot.getState() $= "Dead")
         {
-            %client.camera.setMode("Corpse", %client.afkBot);
+            %client.camera.setMode("Corpse", %client.afk_bot);
             %client.setControlObject(%client.camera);
             return;
         }
         //Already AFK, return them back to normal.
-        %bot = %client.afkBot;
+        %bot = %client.afk_bot;
         %transform = %bot.getTransform();
         %velocity = %bot.getVelocity();
-        %damageLevel = %bot.getDamageLevel();
+        %damagePercent = %bot.getDamagePercent();
         %damageFlash = %bot.getDamageFlash();
         %energyLevel = %bot.getEnergyLevel();
-        %client.afkBot.delete();
+        %client.afk_bot.delete();
 
         %client.spawnPlayer();
         %player = %client.player;
@@ -253,21 +278,21 @@ function serverCmdAFK(%client)
         %player.setVelocity(%velocity);
         %player.setEnergyLevel(%energyLevel);
         %player.setDamageFlash(%damageFlash);
-        %player.setDamageLevel(%damageLevel);
+        %player.setDamageLevel(%damagePercent);
         if(strLen(%client.afkItemString))
         {
             L4B_loadItemString(%player, %client.afkItemString);
         }
     }
-    else if(!isObject(%client.afkBot) && isObject(%client.player))
+    else if(!isObject(%client.afk_bot) && isObject(%client.player))
     {
         //Not AFK, run the process.
         %client.afkItemString = L4B_generateItemString(%client.player);
-        %client.afkBot = L4B_AFKReplacePlayer(%client.player);
+        %client.afk_bot = L4B_AFKReplacePlayer(%client.player);
 
         %camera = %client.camera;
 		%camera.setMode("Observer");
-		%camera.setOrbitMode(%client.afkBot, %client.afkBot.getEyeTransform(), 5, 15, 15, 1);
+		%camera.setOrbitMode(%client.afk_bot, %client.afk_bot.getEyeTransform(), 5, 15, 15, 1);
 		%client.setControlObject(%camera);
     }
     else
@@ -276,18 +301,34 @@ function serverCmdAFK(%client)
     }
 }
 
-package Package_Left4Block_AFKSystem
+package Gamemode_Left4Block_AFKSystem
 {
+    function GameConnection::spawnPlayer(%client)
+    {
+        if(%client.afk_bot)
+        {
+            %client.afk_bot.delete();
+        }
+        parent::spawnPlayer(%client);
+    }
     function Observer::onTrigger(%this, %obj, %trigger, %state)
     {
-        if(isObject(%obj.getControllingClient().afkBot))
+        if(isObject(%obj.getControllingClient().afk_bot))
         {
             return;
         }
         parent::onTrigger(%this, %obj, %trigger, %state);
     }
+    function holeZombieInfect(%obj, %col)
+    {
+        if(%col.isAFKPlayer)
+        {
+            return;
+        }
+        parent::holeZombieInfect(%obj, %col);
+    }
 };
-activatePackage(Package_Left4Block_AFKSystem);
+activatePackage(Gamemode_Left4Block_AFKSystem);
 
 //
 // hLoop and derivitives.
@@ -319,7 +360,7 @@ function AFKPlayerHoleBotVarArray_New(%bot)
     %object.isLookingAtPlayer = 0;
     %object.alreadyLooked = 0;
     
-    if(!%obj.vars.AFKScale)
+    if(!%object.AFKScale)
     {
         %object.AFKScale = 1;
     }
