@@ -27,7 +27,7 @@ function AFKPlayerHoleBot::onAdd(%this, %obj)
     // Needs to be it's own function to remove the appearance changes brought about by the SurviviorHoleBot function.
     //
     
-    armor::onAdd(%this, %obj);
+    Armor::onAdd(%this, %obj);
 
     //Can't assign the variables to the %obj.vars ScriptObject for some reason. Thanks.
     %obj.hIsImmune = 1;
@@ -164,8 +164,11 @@ function L4B_AFKReplacePlayer(%target)
 		hActivateDirection = %data.hActivateDirection;
 
         hooks_hLoop = "AFKPlayerHoleBot_loop";
-        hooks_guardAtSpawn = -1;
+        //The hook declarations below aren't strictly necessary, but I'm including them anyway just in case.
+        hooks_ifSearch_Radius = "AFKPlayerHoleBot_ifSearch_Radius";
+        hooks_ifSearch_FOV = "AFKPlayerHoleBot_ifSearch_FOV";
         hooks_ifWander = "AFKPlayerHoleBot_ifWander";
+        hooks_guardAtSpawn = -1;
 		
 		isHoleBot = 0; //These hax.
         isAFKPlayer = 1;
@@ -305,7 +308,7 @@ package Gamemode_Left4Block_AFKSystem
 {
     function GameConnection::spawnPlayer(%client)
     {
-        if(%client.afk_bot)
+        if(isObject(%client.afk_bot))
         {
             %client.afk_bot.delete();
         }
@@ -425,7 +428,7 @@ function AFKPlayerHoleBot_loop(%obj)
         return;
     }
     
-	%wander_result = HoleBot_ifWander(%obj);
+	%wander_result = AFKPlayerHoleBot_ifWander(%obj);
     if(%wander_result == 1)
     {
         //We're returning to our spawn.
