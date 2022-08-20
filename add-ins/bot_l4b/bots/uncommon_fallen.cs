@@ -64,6 +64,12 @@ function ZombieFallenHoleBot::onDisabled(%this,%obj)
 
 function ZombieFallenHoleBot::L4BUncommonAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {
+	//if(%obj.getClassName() $= "AIPlayer" && getRandom(1,32) == 1)//Chance to become zombie version of player
+	//{
+	//	if(isObject(%playerclient = ClientGroup.getObject(getRandom(ClientGroup.getCount()-1))))
+	//	%obj.hZombieBotToPlayerApearance(%playerclient);
+	//}
+	
 	if(getRandom(1, 8) == 1 && isObject($L4B_clientLog) && $L4B_clientLog.getCount() > 0)
 	{
 		L4B_pushZombifiedSnapshot(%obj);

@@ -1600,7 +1600,7 @@ function Player::bigZombieMelee(%obj)
 		%dot = vectorDot( %obj.getEyeVector(), %line );
 		%obscure = containerRayCast(%obj.getEyePoint(),vectorAdd(%hit.getPosition(),"0 0 1.9"),$TypeMasks::InteriorObjectType | $TypeMasks::TerrainObjectType | $TypeMasks::FxBrickObjectType, %obj);
 
-		if(isObject(%obscure) || ContainerSearchCurrRadiusDist() > 5 || %dot > -0.5)
+		if(isObject(%obscure) || ContainerSearchCurrRadiusDist() > 2 || %dot > -0.5)
 		continue;
 
 		if(%hit.getType() & $TypeMasks::PlayerObjectType && miniGameCanDamage(%obj,%hit) && checkHoleBotTeams(%obj,%hit))
@@ -1617,7 +1617,7 @@ function Player::bigZombieMelee(%obj)
 			{
 				%normVec = VectorNormalize(vectorAdd(%obj.getForwardVector(),"0" SPC "0" SPC "0.15"));
 				%eye = vectorscale(%normVec,30);
-				%hit.setvelocity(%eye);
+				%hit.setvelocity(%eye/2);
 			}
 			%hit.damage(%obj.hFakeProjectile, %hit.getposition(), $Pref::Server::L4B2Bots::SpecialsDamage*%oScale, %obj.hDamageType);
 
@@ -1719,11 +1719,6 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 	if(!isObject(%col) || !isObject(%obj))
 	return;
 
-	if(!isObject(%col.billboard) && $L4B_hasSelectiveGhosting)
-	{
-		Billboard_MountToPlayer(%col, $L4B::Billboard_SO, strangledBillboard);
-	}
-
 	if(%col.getType() & $TypeMasks::PlayerObjectType && checkHoleBotTeams(%obj,%col))
 	{	
 		%shape = %col.getDataBlock().shapeFile;
@@ -1749,7 +1744,6 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 									chatMessageTeam(%col.client,'fakedeathmessage',"<color:FFFF00>" @ %obj.getDatablock().hName SPC %obj.getdataBlock().hPinCI SPC %col.client.name);
 									%col.client.minigame.L4B_PlaySound("victim_needshelp_sound");
 								}
-								//NeedHelp_Cutscene(%col.client, strangledBillboard);
 
 								%col.client.camera.setOrbitMode(%col, %col.getTransform(), 0, 5, 0, 1);
 								%col.client.setControlObject(%col.client.camera);
@@ -1850,9 +1844,6 @@ function L4B_SpecialsPinCheck(%obj,%col)
 
 			if(isObject(%col.getMountedImage(2)) && %col.getMountedImage(2).getID() == ZombieSmokerConstrictImage.getID())
 			%col.unMountImage(2);
-
-			if(isObject(%col.billboard) && $L4B_hasSelectiveGhosting)
-			Billboard_DeallocFromPlayer($L4B::Billboard_SO, %col);
 
 			if(%col.getstate() !$= "Dead")
 			{

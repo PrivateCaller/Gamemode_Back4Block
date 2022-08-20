@@ -341,22 +341,6 @@ function BoulderImage::onActivate(%this, %obj, %slot)
 
 function BoulderProjectile::onExplode(%this,%obj)
 {
-	for(%i=0;%i<15;%i++)
-	{
-		%rnd = getRandom();
-		%dist = getRandom()*15;
-		%x = mCos(%rnd*$PI*3)*%dist;
-		%y = mSin(%rnd*$PI*3)*%dist;
-		%p = new projectile()
-		{
-			datablock = MxRockProjectile;
-			initialPosition = vectorAdd(%obj.getPosition(),"0 0 1.5");
-			initialVelocity = %x SPC %y SPC (getRandom()*4);
-			client = %obj.sourceObject.client;
-			sourceObject = %obj.sourceObject;
-			damageType = $DamageType::SpitAcidBall;
-		};
-	}
 	Parent::onExplode(%this,%obj);
 }
 

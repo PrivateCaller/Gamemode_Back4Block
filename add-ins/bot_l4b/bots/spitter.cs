@@ -246,7 +246,7 @@ function ZombieSpitterHoleBot::Spit(%this, %obj)
 	};
 	MissionCleanup.add(%pm);
 
-	%shellcount = 4;
+	%shellcount = 8;
 	for(%shell=0; %shell<%shellcount; %shell++)
 	{
 		%x = (getRandom() - 0.5) * 10 * $pi * 0.001;

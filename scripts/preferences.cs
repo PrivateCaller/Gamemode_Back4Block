@@ -524,6 +524,7 @@ function L4B_DifficultyAdjustment()
 		case 0: $Pref::Server::L4B2Bots::NormalDamage = 10;
 				$Pref::Server::L4B2Bots::SpecialsDamage = 15;
 				$Pref::Server::L4B2Bots::TankRounds = 1;
+				$Pref::Server::L4B2Bots::TankRoundChance = 4;
 				$Pref::Server::L4B2Bots::TankHealth = 5000;
 				$Pref::Server::L4B2Bots::SurvivorImmunity = 1;
 				$Pref::Server::L4B2Bots::MaxSpecial = 4;
@@ -533,6 +534,7 @@ function L4B_DifficultyAdjustment()
 		case 1: $Pref::Server::L4B2Bots::NormalDamage = 15;
 				$Pref::Server::L4B2Bots::SpecialsDamage = 25;
 				$Pref::Server::L4B2Bots::TankRounds = 2;
+				$Pref::Server::L4B2Bots::TankRoundChance = 12;
 				$Pref::Server::L4B2Bots::TankHealth = 7500;
 				$Pref::Server::L4B2Bots::SurvivorImmunity = 0;
 				$Pref::Server::L4B2Bots::MaxSpecial = 8;
