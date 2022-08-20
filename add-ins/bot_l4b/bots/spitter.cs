@@ -1,3 +1,11 @@
+datablock fxDTSBrickData (BrickZombieSpitter_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
+{
+	uiName = "Zombie Spitter Hole";
+	iconName = "Add-Ons/Gamemode_Left4Block/add-ins/bot_l4b/icons/icon_Spitter";
+
+	holeBot = "ZombieSpitterHoleBot";
+};
+
 datablock PlayerData(ZombieSpitterHoleBot : CommonZombieHoleBot)
 {
 	uiName = "Spitter Infected";
@@ -21,7 +29,7 @@ datablock PlayerData(ZombieSpitterHoleBot : CommonZombieHoleBot)
     maxfreelookangle = 2;
 
 	hName = "Spitter";//cannot contain spaces
-	hTickRate = 5000;
+	hTickRate = 2500;
 	hShoot = 1;
 	hMaxShootRange = 100;//The range in which the bot will shoot the player
 	hTooCloseRange = 50;//in brick units

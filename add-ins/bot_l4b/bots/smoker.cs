@@ -1,3 +1,11 @@
+datablock fxDTSBrickData (BrickZombieSmoker_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
+{
+	uiName = "Zombie Smoker Hole";
+	iconName = "Add-Ons/Gamemode_Left4Block/add-ins/bot_l4b/icons/icon_smoker";
+
+	holeBot = "ZombieSmokerHoleBot";
+};
+
 datablock PlayerData(ZombieSmokerHoleBot : CommonZombieHoleBot)
 {
 	uiName = "Smoker Infected";
@@ -51,38 +59,6 @@ function ZombieSmokerHoleBot::onNewDataBlock(%this,%obj)
 
 	%obj.mountImage(SmokeStatusPlayerImage, 1);
 	%obj.setscale("0.95 1 1.25");
-}
-
-function ZombieSmokerHoleBot::SmokerTongueLoop(%this,%obj,%target)
-{
-	if(L4B_SpecialsPinCheck(%obj,%target))
-	{
-		if(%obj.getClassName() $= "AIPlayer")
-		%obj.setaimlocation(%target.gethackposition());
-
-		if(getWord(%target.getVelocity(), 2) < 3 && vectordist(%obj.getposition(),%target.getposition()) >= 1)
-		{
-			if(%target.lastchokecough+getrandom(500,750) < getsimtime())
-			{
-				%target.playaudio(0,"norm_cough" @ getrandom(1,3) @ "_sound");
-				%target.playthread(2,"plant");
-				%target.lastchokecough = getsimtime();
-				%target.damage(%obj.hFakeProjectile, %target.getposition(), 3, $DamageType::SmokerConstrict);
-			}
-		}
-
-		%DisSub = vectorSub(%target.getPosition(),%obj.getposition());
-		%DistanceNormal = vectorNormalize(%DisSub);
-
-		if(L4B_IsOnGround(%target))
-		%force = 10;
-		else %force = 5;
-
-		%target.setVelocity(vectorscale(%DistanceNormal,-%force));
-
-		cancel(%obj.tongueloop);
-		%obj.tongueloop = %obj.getdatablock().schedule(250,SmokerTongueLoop,%obj,%target);
-	}
 }
 
 function ZombieSmokerHoleBot::onBotLoop(%this,%obj)
@@ -323,29 +299,91 @@ function SmokerTongueShape::onTongueLoop(%this,%obj)
 	%smoker = %obj.source;
 	%end = %obj.end;
 	
-	if(!isObject(%obj) || !isObject(%smoker) || %smoker.getState() $= "Dead" || !isObject(%end))//In case one of these are false, return the function and delete the shape
-	if(isObject(%obj))
+	if(!isObject(%obj) || !isObject(%smoker) || %smoker.getState() $= "Dead" || !isObject(%end) || isObject(%end) && (%end.getClassName() $= "Player" || %end.getClassName() $= "AIPlayer") && !L4B_SpecialsPinCheck(%smoker,%end))//In case one of these are false, return the function and delete the shape
 	{
-		if(isObject(%smoker))//Just in case the smoker is still around
+		if(isObject(%obj))
 		{
-			%smoker.playaudio(3,"smoker_tongue_reel_sound");
-
-			if(%smoker.getstate() !$= "Dead" && %smoker.getclassname() $= "AIPlayer")
+			if(isObject(%smoker))//Just in case the smoker is still around
 			{
-				%smoker.startHoleLoop();
-				%smoker.hRunAwayFromPlayer(%smoker);
-			}
-		}
+				%smoker.playaudio(3,"smoker_tongue_reel_sound");
 
-		%obj.delete();
-		return;
+				if(%smoker.getstate() !$= "Dead" && %smoker.getclassname() $= "AIPlayer")
+				{
+					%smoker.startHoleLoop();
+					%smoker.hRunAwayFromPlayer(%smoker);
+				}
+			}
+
+			if(isObject(%end) && (%end.getClassName() $= "Player" || %end.getClassName() $= "AIPlayer"))
+			{
+				if(%end.getState() !$= "Dead")
+				%end.unMountImage(2);
+				else
+				{
+					serverPlay3D("victim_smoked_sound",%end.getHackPosition());
+					%end.unMountImage(2);
+				}
+			}
+
+			%obj.delete();
+			return;
+		}
 	}
 
 	switch$(%end.getClassName())
 	{
 		case "Projectile": %endpos = %end.getPosition();
+							if(%smoker.getclassname() $= "AIPlayer")
+							%smoker.setaimlocation(%endpos);
 		case "Player": %endpos = %end.getHackPosition();
+
+						if(%smoker.getclassname() $= "AIPlayer")
+						%smoker.setaimlocation(%endpos);
+
+						if(getWord(%end.getVelocity(), 2) < 3 && vectordist(%smoker.getposition(),%end.getposition()) >= 1)
+						{
+							if(%end.lastchokecough+getrandom(500,750) < getsimtime())
+							{
+								%end.playaudio(0,"norm_cough" @ getrandom(1,3) @ "_sound");
+								%end.playthread(2,"plant");
+								%end.lastchokecough = getsimtime();
+								%end.damage(%smoker.hFakeProjectile, %end.getposition(), 3, $DamageType::SmokerConstrict);
+							}
+						}
+
+						%DisSub = vectorSub(%end.getPosition(),%smoker.getposition());
+						%DistanceNormal = vectorNormalize(%DisSub);
+
+						if(L4B_IsOnGround(%end))
+						%force = 10;
+						else %force = 5;
+
+						%end.setVelocity(vectorscale(%DistanceNormal,-%force));
+
 		case "AIPlayer": %endpos = %end.getHackPosition();
+
+						if(%smoker.getclassname() $= "AIPlayer")
+						%smoker.setaimlocation(%endpos);
+
+						 if(getWord(%end.getVelocity(), 2) < 3 && vectordist(%smoker.getposition(),%end.getposition()) >= 1)
+						 {
+						 	if(%end.lastchokecough+getrandom(500,750) < getsimtime())
+						 	{
+						 		%end.playaudio(0,"norm_cough" @ getrandom(1,3) @ "_sound");
+						 		%end.playthread(2,"plant");
+						 		%end.lastchokecough = getsimtime();
+						 		%end.damage(%smoker.hFakeProjectile, %end.getposition(), 3, $DamageType::SmokerConstrict);
+						 	}
+						 }
+ 
+						 %DisSub = vectorSub(%end.getPosition(),%smoker.getposition());
+						 %DistanceNormal = vectorNormalize(%DisSub);
+ 
+						 if(L4B_IsOnGround(%end))
+						 %force = 10;
+						 else %force = 5;
+ 
+						 %end.setVelocity(vectorscale(%DistanceNormal,-%force));
 	}
 
 	//Calculate the position and scale between the smoker and victim
@@ -387,7 +425,7 @@ function SmokerTongueProjectile::onCollision(%this,%proj,%col,%fade,%pos,%normal
 	serverPlay3D("smoker_tongue_hit_sound",%pos);
 
 	cancel(%obj.SmokerTongueReturn);
-	if(%col.getType() & $Typemasks::PlayerObjectType && checkHoleBotTeams(%obj,%col))
+	if(%col.getType() & $Typemasks::PlayerObjectType && L4B_SpecialsPinCheck(%obj,%col))
 	{
 		%col.dismount();
 		%obj.tongue.end = %col;

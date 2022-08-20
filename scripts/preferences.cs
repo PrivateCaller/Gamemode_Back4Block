@@ -4,6 +4,25 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 
 	new ScriptObject(Preference)
 	{
+		className      = "Gamemode_Left4Block_Difficulty";
+		addon          = "Gamemode_Left4Block";
+		category       = "General";
+		title          = "Difficulty";
+		type           = "dropdown";
+		params         = "Normal 0 Advanced 1";
+		variable       = "$Pref::Server::L4B2Bots::Difficulty";
+		defaultValue   = "Normal 1";
+		updateCallback = "";
+		loadCallback   = "";
+		hostOnly       = false;
+		secret         = false;
+		loadNow        = false;
+		noSave         = false;
+		requireRestart = false;
+	};
+	
+	new ScriptObject(Preference)
+	{
 		className      = "Gamemode_Left4Block";
 
 		addon          = "Gamemode_Left4Block";
@@ -142,25 +161,6 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 		params         = "Default 0 Default_Green 1 Custom_Green 2 ZAPT 3";
 		variable       = "$Pref::Server::L4B2Bots::CustomStyle";
 		defaultValue   = "Default 0";
-		updateCallback = "";
-		loadCallback   = "";
-		hostOnly       = false;
-		secret         = false;
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "Gamemode_Left4Block_Difficulty";
-		addon          = "Gamemode_Left4Block";
-		category       = "Bots Main";
-		title          = "Difficulty";
-		type           = "dropdown";
-		params         = "Easy 0 Normal 1 Advanced 2 Expert 3";
-		variable       = "$Pref::Server::L4B2Bots::Difficulty";
-		defaultValue   = "Normal 1";
 		updateCallback = "";
 		loadCallback   = "";
 		hostOnly       = false;
@@ -521,41 +521,19 @@ function L4B_DifficultyAdjustment()
 {
 	switch($Pref::Server::L4B2Bots::Difficulty)
 	{
-		case 0: $Pref::Server::L4B2Bots::NormalDamage = 2;
-				$Pref::Server::L4B2Bots::SpecialsDamage = 4;
-				$Pref::Server::L4B2Bots::TankChance = 15;
-				$Pref::Server::L4B2Bots::TankRounds = 0;
-				$Pref::Server::L4B2Bots::TankHealth = 3000;
-				$Pref::Server::L4B2Bots::SurvivorImmunity = 1;
-				$Pref::Server::L4B2Bots::MaxSpecial = 4;
-				$Pref::Server::L4B2Bots::MaxHorde = 40;
-				$Pref::Server::L4B2Bots::MaxTank = 1;
-
-		case 1: $Pref::Server::L4B2Bots::NormalDamage = 4;
+		case 0: $Pref::Server::L4B2Bots::NormalDamage = 10;
 				$Pref::Server::L4B2Bots::SpecialsDamage = 15;
-				$Pref::Server::L4B2Bots::TankChance = 30;
 				$Pref::Server::L4B2Bots::TankRounds = 1;
-				$Pref::Server::L4B2Bots::TankHealth = 3000;
+				$Pref::Server::L4B2Bots::TankHealth = 5000;
 				$Pref::Server::L4B2Bots::SurvivorImmunity = 1;
-				$Pref::Server::L4B2Bots::MaxSpecial = 4;
-				$Pref::Server::L4B2Bots::MaxHorde = 50;
-				$Pref::Server::L4B2Bots::MaxTank = 1;
-
-		case 2: $Pref::Server::L4B2Bots::NormalDamage = 5;
-				$Pref::Server::L4B2Bots::SpecialsDamage = 20;
-				$Pref::Server::L4B2Bots::TankChance = 50;
-				$Pref::Server::L4B2Bots::TankRounds = 1;
-				$Pref::Server::L4B2Bots::TankHealth = 4000;
-				$Pref::Server::L4B2Bots::SurvivorImmunity = 0;
 				$Pref::Server::L4B2Bots::MaxSpecial = 4;
 				$Pref::Server::L4B2Bots::MaxHorde = 60;
 				$Pref::Server::L4B2Bots::MaxTank = 1;
 
-		case 3: $Pref::Server::L4B2Bots::NormalDamage = 10;
-				$Pref::Server::L4B2Bots::SpecialsDamage = 30;
-				$Pref::Server::L4B2Bots::TankChance = 75;
+		case 1: $Pref::Server::L4B2Bots::NormalDamage = 15;
+				$Pref::Server::L4B2Bots::SpecialsDamage = 25;
 				$Pref::Server::L4B2Bots::TankRounds = 2;
-				$Pref::Server::L4B2Bots::TankHealth = 8000;
+				$Pref::Server::L4B2Bots::TankHealth = 7500;
 				$Pref::Server::L4B2Bots::SurvivorImmunity = 0;
 				$Pref::Server::L4B2Bots::MaxSpecial = 8;
 				$Pref::Server::L4B2Bots::MaxHorde = 75;

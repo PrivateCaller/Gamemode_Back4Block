@@ -152,7 +152,7 @@ function MeleeSwingCheck(%obj,%this,%slot)
      	{
      	   	%damage = mClamp(%target.getdatablock().maxDamage/15, 30, %target.getdatablock().maxDamage/2);     	   	
 
-			if(isObject(getMiniGameFromObject(%obj,%target)) && minigameCanDamage(%obj,%target))
+			if(minigameCanDamage(%obj,%target))
 			{
      	   		%target.damage(%obj, posFromRaycast(%ray), %damage, $DamageType::Default);
 				%target.applyimpulse(posFromRaycast(%ray),vectoradd(vectorscale(%vec,2000),"0 0 750"));

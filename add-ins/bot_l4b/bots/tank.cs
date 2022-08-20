@@ -1,3 +1,11 @@
+datablock fxDTSBrickData (BrickZombieTankBot_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
+{
+	uiName = "Zombie Tank Hole";
+	iconName = "Add-Ons/Gamemode_Left4Block/add-ins/bot_l4b/icons/icon_Tank";
+	
+	holeBot = "ZombieTankHoleBot";
+};
+
 datablock PlayerData(ZombieTankHoleBot : CommonZombieHoleBot)
 {
 	uiName = "Tank Infected";
@@ -8,13 +16,13 @@ datablock PlayerData(ZombieTankHoleBot : CommonZombieHoleBot)
 	runforce = 48 * 220;
 	drag = 0.2;
 
-    maxForwardSpeed = 6;
-    maxBackwardSpeed = 4;
-    maxSideSpeed = 5;
+    maxForwardSpeed = 4.5;
+    maxBackwardSpeed = 3.5;
+    maxSideSpeed = 2.5;
 
- 	maxForwardCrouchSpeed = 5;
-    maxBackwardCrouchSpeed = 3;
-    maxSideCrouchSpeed = 4;
+ 	maxForwardCrouchSpeed = 3;
+    maxBackwardCrouchSpeed = 2;
+    maxSideCrouchSpeed = 1;
 
     minimpactspeed = 15;
     speeddamageScale = 10;
@@ -45,7 +53,7 @@ datablock PlayerData(ZombieTankHoleBot : CommonZombieHoleBot)
 	hSearchFOV = 1;//if enabled disables normal hSearch
 	hMaxShootRange = 120;//The range in which the bot will shoot the player
 
-	hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage*2;
+	hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage*2.5;
 	hMeleeCI = "Tank";
 
 	hMaxShootRange = 512;

@@ -35,10 +35,12 @@ function MinigameSO::Director(%minigame,%enabled,%interval,%client)
         switch(%interval)
         {
             case 1: %minigame.spawnZombies("Special",1,0,%client);
-            case 2: %minigame.spawnZombies("Special",1,0,%client);
-
+            case 2: %minigame.spawnZombies("Special",getRandom(1,2),0,%client);
+            
                     if(%minigame.DirectorStatus == 2)
                     %minigame.spawnZombies("Horde",10,0,%client);
+
+                    %minigame.SpawnStalkZombies();
 
             case 3: switch(%minigame.DirectorStatus)
                     {
@@ -55,9 +57,6 @@ function MinigameSO::Director(%minigame,%enabled,%interval,%client)
                                         {
                                             if(%mgmember.player.getdataBlock().getName() $= "SurvivorPlayer")
                                             {                                    
-                                                %minigame.survivorAreaZoneNum[%saz++] = %mgmember.player.AreaZoneNum;
-                                                %minigame.survivorAreaZoneNumPlayer[%saz] = %mgmember.player;
-
                                                 %health += %mgmember.player.getdamagelevel();
                                                 %stresslevel += %mgmember.player.survivorStress;
                                                 %mgmember.player.survivorStress = 0;
@@ -67,6 +66,11 @@ function MinigameSO::Director(%minigame,%enabled,%interval,%client)
                                                 %health += 100;
                                                 %stresslevel += 20;
                                             }
+                                        }
+                                        else
+                                        {
+                                            %health += 100;
+                                            %stresslevel += 20;
                                         }
                                         %health = mClamp(%health,0,%minigame.survivorStatHealthMax);
                                         %stresslevel = mClamp(%stresslevel,0,%minigame.survivorStressMax);
@@ -78,44 +82,13 @@ function MinigameSO::Director(%minigame,%enabled,%interval,%client)
                                         %stressed = 1;
                                     }
                                 }
-
-                            if(%saz > 1)//People who are ahead should be be shown why it's a bad idea to deviate
-                            {
-                                %highestZone = 0;
-                                for(%sazc = 1; %sazc <= %saz; %sazc++)
-                                {    
-                                    %previous = %minigame.survivorAreaZoneNum[%sazc-1];
-                                    if(%minigame.survivorAreaZoneNum[%sazc] > %highestZone)//Find whoever is in the furthest zone
-                                    {
-                                        %highestZone = %minigame.survivorAreaZoneNum[%sazc];
-                                        %highestZonePlayer = %minigame.survivorAreaZoneNumPlayer[%sazc];
-                                    }
-                                    
-                                    if(%minigame.survivorAreaZoneNum[%sazc] == %previous)
-                                    {
-                                        %highzonecount++;
-
-                                        if(%highzonecount > %saz/1.333333)
-                                        {
-                                            %highestZone = 0;
-                                            %highestZonePlayer = 0;
-                                        }
-                                    }
-                                }
-                                
-                                if(isObject(%highestZonePlayer))//Where are your friends when you need them?
-                                {
-                                    %minigame.spawnZombies(Horde,getRandom(10,15),%highestZonePlayer.currAreaZone);
-                                    %minigame.spawnZombies(Special,getRandom(1,2),%highestZonePlayer.currAreaZone);
-                                }
-                            }
                              
                                 %round = 1;
-                                if(getRandom(1,8) == 1)
+                                if(getRandom(1,2) == 1)
                                 %round = 2;
-                                if(getRandom(1,10) == 1)
+                                if(getRandom(1,20) == 1)
                                 %round = 3;
-                                if(getRandom(1,15) == 1)
+                                if(getRandom(1,10) == 1)
                                 %round = 4;
 
                                 if(%stressed)
@@ -129,13 +102,74 @@ function MinigameSO::Director(%minigame,%enabled,%interval,%client)
                                     case 3: %minigame.TankRound(%client);
                                     case 4: %minigame.WitchRound(%client);
                                 }
-                        case 2:   
+                        case 2: %minigame.SpawnStalkZombies();
                     }
         }
 
         cancel(%minigame.directorSchedule);
         %minigame.directorSchedule = %minigame.schedule(10000,Director,1,%interval++,%client);
     }
+}
+
+function MinigameSO::SpawnStalkZombies(%minigame)//Go after others who are on their own
+{
+    for(%i=0;%i <= %minigame.numMembers;%i++)//Calculate overall variables
+    {    
+        if(isObject(%mgmember = %minigame.member[%i]))
+        {
+            if(isObject(%player = %mgmember.player) && %player.getdataBlock().isSurvivor)
+            {                                
+
+                %survivorcount++;
+                %survivorplayer[%sc++] = %player;
+
+                //%minigame.survivorAreaZoneNum[%saz++] = %player.AreaZoneNum;
+                //%minigame.survivorAreaZoneNumPlayer[%saz] = %player;
+            }
+        }
+    }
+
+    for (%j = 1; %j <= %sc; %j++) 
+    {
+        if(%survivorcount > 1 && %survivorplayer[%j].survivorAllyCount == 1 && %survivorplayer[%j].currAreaZone != %survivorplayer[%j+1].currAreaZone)
+        {
+            %minigame.spawnZombies(Horde,getRandom(10,20),%player.currAreaZone,%client);
+            %minigame.spawnZombies(Special,getRandom(1,2),%player.currAreaZone,%client);
+        }
+    }
+
+                    
+
+    //if(%saz > 1)//Archiving this for another time
+    //{
+    //    %highestZone = 0;
+    //    for(%sazc = 1; %sazc <= %saz; %sazc++)
+    //    {    
+    //        %previous = %minigame.survivorAreaZoneNum[%sazc-1];
+    //        if(%minigame.survivorAreaZoneNum[%sazc] > %highestZone)//Find whoever is in the furthest zone
+    //        {
+    //            %highestZone = %minigame.survivorAreaZoneNum[%sazc];
+    //            %highestZonePlayer = %minigame.survivorAreaZoneNumPlayer[%sazc];
+    //        }
+    //        
+    //        if(%minigame.survivorAreaZoneNum[%sazc] == %previous)
+    //        {
+    //            %highzonecount++;
+    //
+    //            if(%highzonecount > %saz/1.333333)
+    //            {
+    //                %highestZone = 0;
+    //                %highestZonePlayer = 0;
+    //            }
+    //        }
+    //    }
+    //    
+    //    if(isObject(%highestZonePlayer))//Where are your friends when you need them?
+    //    {
+    //        %minigame.spawnZombies(Horde,getRandom(10,20),%highestZonePlayer.currAreaZone);
+    //        %minigame.spawnZombies(Special,getRandom(1,4),%highestZonePlayer.currAreaZone);
+    //    }
+    //}
 }
 
 function MinigameSO::BreakRound(%minigame,%client)
@@ -212,7 +246,7 @@ function MinigameSO::PanicRound(%minigame,%client)
     if($Pref::L4BDirector::EnableCues)
     %minigame.DirectorMusic("musicdata_L4D_skin_on_our_teeth",true,1,%client);
 
-    %minigame.spawnZombies("Horde",50,0,%client);
+    %minigame.spawnZombies("Horde",25,0,%client);
     %minigame.DirectorStatus = 0;
     cancel(%minigame.directorSchedule);
 }
@@ -256,7 +290,7 @@ function MiniGameSO::HordeRound(%minigame,%type,%client)
                         is3D = 0;
                         volume = 1;
                         useProfileDescription = "0";
-                        type = 0;
+                        type = 9;
                         outsideAmbient = "1";
                         referenceDistance = "2";
                         maxDistance = 999999;
@@ -265,14 +299,21 @@ function MiniGameSO::HordeRound(%minigame,%type,%client)
 
                     %minigame.schedule(4000,DirectorMusic,"musicdata_L4D_horde_combat",true,1,%client);
                     %minigame.schedule(4000,directorPlaySound,"drum_suspense_end_sound",%client);
+
+                    %minigame.schedule(9000,directorPlaySound,"hordeslayer_0" @ getRandom(1,3) @ "_sound",%client);
+                    %minigame.schedule(19000,directorPlaySound,"hordeslayer_0" @ getRandom(1,3) @ "_sound",%client);
+                    %minigame.schedule(19000,directorPlaySound,"horde_danger_sound",%client);
                     %minigame.directorPlaySound("zombiehorde_sound",%client);
                     %minigame.spawnZombies("Horde",50,0,%client);
                 }
                 else
                 {
-                    %minigame.spawnZombies("Horde",50,0,%client);
+                    %minigame.spawnZombies("Horde",25,0,%client);
                     %minigame.directorPlaySound("hordeincoming" @ getrandom(1,9) @ "_sound",%client);
-                    
+
+                    %minigame.schedule(9000,directorPlaySound,"hordeslayer_0" @ getRandom(1,3) @ "_sound",%client);
+                    %minigame.schedule(19000,directorPlaySound,"hordeslayer_0" @ getRandom(1,3) @ "_sound",%client);
+                    %minigame.schedule(19000,directorPlaySound,"horde_danger_sound",%client);
                     %minigame.schedule(4000,DirectorMusic,"musicdata_L4D_horde_combat",true,1,%client);
                     %minigame.schedule(4000,directorPlaySound,"drum_suspense_end_sound",%client);
                 }

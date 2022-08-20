@@ -741,14 +741,16 @@ function Projectile::BileBombDistract(%obj, %count)
 
 	while((%targetid = containerSearchNext()) != 0 )
 	{
-		if(!%targetid.getState() !$= "Dead" && %targetid.getClassName() $= "AIPlayer" && %targetid.hZombieL4BType && %targetid.hZombieL4BType < 5 && !%targetid.isBurning)
+		if(!%targetid.getState() !$= "Dead" && %targetid.getClassName() $= "AIPlayer" && %targetid.hZombieL4BType && !%targetid.isBurning)
 		{
 			if(%count < %obj.getDatablock().distractionLifetime)
 			{
+				if(%targetid.hZombieL4BType < 5)
 				if(!%targetid.Distraction)
 				{
 					%targetid.Distraction = %obj.getID();
 					%targetid.hSearch = 0;
+					%targetid.hFollowing = 0;
 				}
 				else if(%targetid.Distraction == %obj.getID())
 				{

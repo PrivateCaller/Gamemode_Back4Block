@@ -229,7 +229,7 @@ function CommonZombieHoleBot::onBotLoop(%this,%obj)
 		if(%minigame.UrgentRound)
 		{
 			%obj.hAttackDamage = %prevdamage*3;
-			%obj.setnodeColor("gloweyes","1 0 0 1");
+			%obj.setnodeColor("gloweyes","1 1 1 1");
 		}
 		else
 		{
@@ -388,7 +388,7 @@ function CommonZombieHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
 						%target = firstWord(%ray);
 
 						if(%target.getType() & $TypeMasks::PlayerObjectType)
-						if(isObject(getMinigamefromObject(%obj,%target)) && miniGameCanDamage(%obj,%target) && checkHoleBotTeams(%obj,%target))
+						if(miniGameCanDamage(%obj,%target) && checkHoleBotTeams(%obj,%target))
 						%obj.PlayerZombieMeleeAttack(%target);
 					}
 			default:

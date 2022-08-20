@@ -5,6 +5,7 @@ if(loadRequiredAddOn("Bot_Hole") == $Error::None)
 	exec("./scripts/preferences.cs");
 	exec("./scripts/functions.cs");
 	exec("./support/packages.cs");
+	exec("./support/packages_dll.cs");
 	exec("./support/support_multipleslots.cs");
 	
 	if(LoadRequiredAddOn("Weapon_FlashGrenade") == $Error::None)
@@ -15,7 +16,6 @@ if(loadRequiredAddOn("Bot_Hole") == $Error::None)
 	
 	if(LoadRequiredAddOn("Weapon_SWeps_FlareGun") == $Error::None && LoadRequiredAddOn("Weapon_SWeps") == $Error::None)
 	exec("./support/support_sweps_flaregun.cs");
-	
 
 	exec("./scripts/script_director.cs");
 	exec("./scripts/script_areazone.cs");

@@ -93,14 +93,9 @@ datablock PlayerData(SurvivorPlayer : PlayerMeleeAnims)
 	canJet = false;
 	jumpforce = 100*8.5;
 	jumpDelay = 25;
-	minimpactspeed = 18;
-	speedDamageScale = 3;
+	minimpactspeed = 16;
+	speedDamageScale = 3.375;
 	mass = 105;
-	density = 0.7;
-
-	//renderFirstPerson = 1;
-	emap = 1;
-
 	airControl = 0.05;
 
 	cameramaxdist = 2.25;
@@ -372,7 +367,7 @@ function SurvivorPlayerLow::onLeaveLiquid(%this, %obj, %type)
 }
 
 function SurvivorPlayer::onAdd(%this,%obj)
-{
+{	
 	%obj.client.NotifyOfImmunity = 0;
 
 	if(%obj.getClassName() $= "Player" && isObject(getMinigameFromObject(%obj)))
@@ -687,7 +682,7 @@ function Player::checkIfUnderwater(%obj)
 
 function L4B_SaveVictim(%obj,%target)
 {	
-	if(isObject(getMinigameFromObject(%obj,%target)) && %target.getState() !$= "Dead" && !%obj.getState() !$= "Dead")
+	if(miniGameCanDamage(%obj,%target) && %target.getState() !$= "Dead" && !%obj.getState() !$= "Dead")
 	if(%target.isBeingStrangled && !%obj.isBeingStrangled && !%obj.hIsInfected)
 	{
 		%target.isBeingStrangled = 0;

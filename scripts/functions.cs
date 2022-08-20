@@ -250,9 +250,3 @@ function MinigameSO::L4B_PlaySound(%minigame,%sound,%client)
         %cl.play2d(%sound.getID());
     }
 }
-
-function L4B_CheckifinMinigame(%target1,%target2)
-{
-	if(isObject(getMinigameFromObject(%target1,%target2)) && miniGameCanDamage(%target1,%target2))
-	return true;
-}

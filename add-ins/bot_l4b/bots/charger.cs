@@ -1,3 +1,11 @@
+datablock fxDTSBrickData (BrickZombieCharger_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
+{
+	uiName = "Zombie Charger Hole";
+	iconName = "Add-Ons/Gamemode_Left4Block/add-ins/bot_l4b/icons/icon_charger";
+
+	holeBot = "ZombieChargerHoleBot";
+};
+
 datablock PlayerData(ZombieChargerHoleBot : CommonZombieHoleBot)
 {
 	uiName = "Charger Infected";
@@ -7,7 +15,7 @@ datablock PlayerData(ZombieChargerHoleBot : CommonZombieHoleBot)
 	ShapeNameDistance = 50;
 	maxdamage = 200;//Health
 	hName = "Charger";//cannot contain spaces
-	hTickRate = 5000;
+	hTickRate = 2500;
 	hMeleeCI = "Charger";
 	hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
 
@@ -70,7 +78,7 @@ function L4B_holeChargerKill(%obj,%col)
 		%obj.schedule(100,playThread,2,shiftdown);
 		%obj.schedule(100,playaudio,3,"charger_smash_sound");
 		%col.schedule(100,playThread,2,plant);
-		%col.schedule(100,damage,%obj.hFakeProjectile, %col.getposition(), $Pref::Server::L4B2Bots::SpecialsDamage/2, $DamageType::Charger);
+		%col.schedule(100,damage,%obj.hFakeProjectile, %col.getposition(), $Pref::Server::L4B2Bots::SpecialsDamage*2, $DamageType::Charger);
 		%obj.schedule(100,spawnExplosion,pushBroomProjectile,"0.5 0.5 0.5");
 		%obj.hSharkEatDelay = schedule(2000,0,L4B_holeChargerKill,%obj,%col);
 		%obj.playaudio(0,"charger_pummel" @ getrandom(1,4) @ "_sound");
@@ -140,13 +148,18 @@ function ZombieChargerHoleBot::onBotFollow( %this, %obj, %targ )
 	%obj.playaudio(0,"charger_recognize" @ getrandom(1,4) @ "_sound");
 }
 
+function ZombieChargerHoleBot::onCollision(%this, %obj, %col, %fade, %pos, %norm)
+{
+	Parent::oncollision(%this, %obj, %col, %fade, %pos, %norm);
+}
+
 function ZombieChargerHoleBot::onImpact(%this, %obj, %col, %vec, %force)
 {
 	if(%obj.getstate() $= "Dead")
 	return;
 
-	cancel(%obj.StartAfterCharge);
-	cancel(%obj.WalkAfterCharge);
+	//cancel(%obj.StartAfterCharge);
+	//cancel(%obj.WalkAfterCharge);
 
 	if(%obj.getclassname() $= "AIPlayer")
 	%obj.startHoleLoop();
@@ -155,33 +168,17 @@ function ZombieChargerHoleBot::onImpact(%this, %obj, %col, %vec, %force)
 	{
 		%forcecalc = %force/20;
 		%oScale = 2*getWord(%obj.getScale(),0);
-
-		if(%oScale >= 1.1)
-		%obj.SpecialPinAttack(%col,%force);
-		
-		%obj.playaudio(3,"charger_smash_sound");
-		%obj.setMaxForwardSpeed(9);
 		%obj.spawnExplosion(pushBroomProjectile,%forcecalc SPC %forcecalc SPC %forcecalc);
+		%obj.SpecialPinAttack(%col,%force);
+		%obj.playaudio(3,"charger_smash_sound");
 
-		if(%force >= 50)
-		{
-			if(!%obj.hEating)
-			{
-				if(%obj.getclassname() $= "AIPlayer")
-				%obj.stopHoleLoop();
-
-			}
-		}
+		%obj.setMaxForwardSpeed(9);
 	}
 	Parent::onImpact(%this, %obj, %col, %vec, %force);
 }
 
 function ZombieChargerHoleBot::onBotMelee(%this,%obj,%col)
 {
-	%oscale = getWord(%obj.getScale(),2);
-
-	if(%oScale >= 1.1)
-	%obj.bigZombieMelee();	
 }	
 
 function ZombieChargerHoleBot::onDamage(%this,%obj,%source,%pos,%damage,%type)
@@ -310,6 +307,7 @@ function ZombieChargerHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
 			switch(%triggerNum)
 			{
 				case 0: %obj.playthread(1,"activate2");
+						%obj.bigZombieMelee();
 				case 4: if(%obj.GetEnergyLevel() >= %this.maxenergy && %val)
 						{
 							if(!isEventPending(%obj.AboutToCharge))

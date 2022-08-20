@@ -19,9 +19,6 @@ function ZombieSoldierHoleBot::onAdd(%this,%obj,%style)
 {
 	Parent::onAdd(%this,%obj);
 	CommonZombieHoleBot::onAdd(%this,%obj);
-
-	if(getRandom(0,100) <= 5)
-	%obj.mountImage(batonImage, 0);
 }
 
 function ZombieSoldierHoleBot::onNewDataBlock(%this,%obj)

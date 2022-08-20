@@ -14,7 +14,6 @@ package L4B_AreaZones
 
 			if(%brick.getdataBlock().IsZoneBrick)
 			{
-
 				if(strstr(strlwr(%brick.getName()),"_az_main") != -1)
 				{
 					%nameposafterid = strstr(strlwr(%brick.getName()),"_az_main_ct");
@@ -51,7 +50,7 @@ package L4B_AreaZones
 		for(%i=0;%i<%count;%i++)
         {
 			%brick = $LoadingBricks_BrickGroup.getObject(%i);
-			if(%brick.getdataBlock().IsZoneBrick && strstr(%brick.getname(),%name) != -1)
+			if(strstr(%brick.getname(),%name) != -1)
 			{
 				if(strstr(strlwr(%brick.getName()),"az_spawn") != -1)
 				%mainbrick.AreaZone.add(%brick);
@@ -467,14 +466,24 @@ function Player::BrickScanCheck(%obj)
 	return;
 
 	%obj.AreaZoneNum = 0;
+	%survivorsfound = 1;
+	%obj.survivorAllyCount = %survivorsfound;
 
-	InitContainerRadiusSearch(%obj.getPosition(), 10, $TypeMasks::FxBrickObjectType);
-	while(%brick = containerSearchNext())
-	{	
-		if(%brick.getdataBlock().IsZoneBrick)
+	InitContainerRadiusSearch(%obj.getPosition(), 15, $TypeMasks::FxBrickObjectType | $TypeMasks::PlayerObjectType);
+	while(%scan = containerSearchNext())
+	{
+		if(%scan == %obj || VectorDist(getWord(%obj.getPosition(),2), getWord(%scan.getPosition(),2)) > 5)
+		continue;
+		
+		if(%scan.getType() & $TypeMasks::PlayerObjectType && %scan.getdataBlock().isSurvivor)
+		{
+			%survivorsfound++;
+			%obj.survivorAllyCount = %survivorsfound;
+		}
+
+		if(ContainerSearchCurrRadiusDist() <= 10 && %scan.getType() & $TypeMasks::FxBrickObjectType && %scan.getdataBlock().IsZoneBrick)
     	{
-			if(VectorDist(getWord(%obj.getPosition(),2), getWord(%brick.getPosition(),2)) > 5)
-			continue;
+			%brick = %scan;
 			
 			if(isObject(%brick.AreaZone))
 			{
@@ -525,7 +534,7 @@ function Player::BrickScanCheck(%obj)
     				    if(strstr(strlwr(%brick.AreaZone.getObject(%g).getName()),"_wander") != -1)
 						{
 							if(isObject(%minigame = getMiniGameFromObject(%obj)))
-							%minigame.spawnZombies("Wander",getRandom(10,15),%client);
+							%minigame.spawnZombies("Wander",getRandom(10,15),%obj.currAreaZone);
 							break;
 						}
     				}

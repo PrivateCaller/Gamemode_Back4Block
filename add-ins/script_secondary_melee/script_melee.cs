@@ -138,7 +138,7 @@ function Player::doMelee(%obj)
 
 		if(%hit.getType() & $TypeMasks::PlayerObjectType)
 		{
-			if(L4B_CheckifinMinigame(%obj,%hit))
+			if(miniGameCanDamage(%obj,%hit))
 			{
 				%p = new projectile()
 				{

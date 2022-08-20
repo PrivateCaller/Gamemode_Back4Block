@@ -1,3 +1,10 @@
+datablock fxDTSBrickData (BrickZombieBoomer_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
+{
+	uiName = "Zombie Boomer Hole";
+	iconName = "Add-Ons/Gamemode_Left4Block/add-ins/bot_l4b/icons/icon_boomer";
+	holeBot = "ZombieBoomerHoleBot";
+};
+
 datablock PlayerData(ZombieBoomerHoleBot : CommonZombieHoleBot)
 {
 	uiName = "Boomer Infected";
@@ -20,8 +27,7 @@ datablock PlayerData(ZombieBoomerHoleBot : CommonZombieHoleBot)
  	maxForwardCrouchSpeed = 6;
     maxBackwardCrouchSpeed = 4;
     maxSideCrouchSpeed = 5;
-
-	ShapeNameDistance = 100;
+	
 	hIsInfected = 1;
 	hZombieL4BType = 5;
 	hCustomNodeAppearance = 1;
@@ -181,7 +187,7 @@ function BoomerProjectile::radiusDamage(%this, %obj, %col, %distanceFactor, %pos
       {
             %col.damage(%obj, %pos, %damageAmt/2, %damageType);
 
-			if(%col.getState() !$= "Dead" && L4B_CheckifinMinigame(%obj.sourceObject, %col) && !%col.BoomerBiled) 
+			if(%col.getState() !$= "Dead" && miniGameCanDamage(%obj.sourceObject, %col) && !%col.BoomerBiled) 
 			{
 			
 			if(%col.getClassName() $= "AIPlayer" && %col.hType $= "Zombie")
@@ -375,7 +381,7 @@ function BoomerVomitSpewedProjectile::onExplode(%obj,%this)
     {
         if(%targetid.getType() & $TypeMasks::PlayerObjectType)
         {
-			if(isObject(getMinigameFromObject(%targetid,%this.sourceObject)) && checkHoleBotTeams(%this.sourceObject,%targetid) && miniGameCanDamage(%this.sourceObject,%targetid))
+			if(checkHoleBotTeams(%this.sourceObject,%targetid) && miniGameCanDamage(%this.sourceObject,%targetid))
 			{
 				%targetid.setWhiteout(2);
 

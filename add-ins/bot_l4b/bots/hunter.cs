@@ -1,3 +1,11 @@
+datablock fxDTSBrickData (BrickHunter_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
+{
+	uiName = "Hunter Zombie Hole";
+	iconName = "Add-Ons/Gamemode_Left4Block/add-ins/bot_l4b/icons/icon_hunter";
+
+	holeBot = "ZombieHunterHoleBot";
+};
+
 datablock PlayerData(ZombieHunterHoleBot : CommonZombieHoleBot)
 {
 	uiName = "Hunter Infected";
@@ -25,8 +33,8 @@ datablock PlayerData(ZombieHunterHoleBot : CommonZombieHoleBot)
 	SpecialCPMessage = "Hold shift, then press space to leap <br>\c6Pounce to pin non-infected";
 	hBigMeleeSound = "";
 
-	maxdamage = 125;//Health
-	hTickRate = 5000;
+	maxdamage = 250;//Health
+	hTickRate = 2500;
 
 	hName = "Hunter";//cannot contain spaces
 	hStrafe = 0;//Randomly strafe while following player
@@ -63,7 +71,7 @@ function L4B_holeHunterKill(%obj,%col)
 		
 		%obj.HunterHurt = schedule(1000,0,L4B_holeHunterKill,%obj,%col);
 		%obj.unmount();
-		%col.damage(%obj.hFakeProjectile, %col.getposition(), $Pref::Server::L4B2Bots::SpecialsDamage/2, $DamageType::Hunter);
+		%col.damage(%obj.hFakeProjectile, %col.getposition(), $Pref::Server::L4B2Bots::SpecialsDamage*1.25, $DamageType::Hunter);
 	}
 }
 
@@ -151,7 +159,7 @@ function ZombieHunterHoleBot::onBotFollow( %this, %obj, %targ )
 		
 			%obj.hCrouch(1750);
 			%obj.playaudio(0,"hunter_recognize" @ getrandom(1,3) @ "_sound");
-			%obj.hAbouttoattack = schedule(1250,0,L4B_HunterZombieLunge,%obj,%targ);
+			%obj.hAbouttoattack = schedule(800,0,L4B_HunterZombieLunge,%obj,%targ);
 		}
 	}
 }

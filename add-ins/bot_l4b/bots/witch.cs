@@ -1,8 +1,16 @@
+datablock fxDTSBrickData (BrickZombieWitch_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
+{
+    uiName = "Zombie Witch Hole";
+    iconName = "Add-Ons/Gamemode_Left4Block/add-ins/bot_l4b/icons/icon_witch";
+    
+    holeBot = "ZombieWitchHoleBot";
+};
+
 datablock PlayerData(ZombieWitchHoleBot : CommonZombieHoleBot)
 {
     uiName = "";
     maxdamage = 2500;//Health
-    hTickRate = 5000;
+    hTickRate = 2500;
 
     hName = "Witch";//cannot contain spaces
     hMeleeCI = "Witched";

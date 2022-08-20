@@ -1,3 +1,11 @@
+datablock fxDTSBrickData (BrickZombieJockey_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
+{
+	uiName = "Zombie Jockey Hole";
+	iconName = "Add-Ons/Gamemode_Left4Block/add-ins/bot_l4b/icons/icon_Jockey";
+
+	holeBot = "ZombieJockeyHoleBot";
+};
+
 datablock PlayerData(ZombieJockeyHoleBot : CommonZombieHoleBot)
 {
 	uiName = "Jockey Infected";
@@ -22,7 +30,7 @@ datablock PlayerData(ZombieJockeyHoleBot : CommonZombieHoleBot)
 
 	maxdamage = 125;//Health
 	jumpForce = 100 * 10; //8.3 * 90;
-	hTickRate = 5000;
+	hTickRate = 2500;
 
 	hName = "Jockey";//cannot contain spaces
 	hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
