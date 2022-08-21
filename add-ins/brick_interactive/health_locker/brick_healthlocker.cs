@@ -100,8 +100,9 @@ function GiveHealth(%obj,%col)
 
 package HealthLockerColFunctions
 {
-	function Armor::onCollision(%this,%obj,%col,%a,%b,%c,%d)
+	function Armor::onCollision(%this,%obj,%col)
 	{
+		if(isObject(%col))
 		if(%col.getdatablock().getname() $= "RHealthLockerItem")
 		{
 			if(%obj.getdamagelevel() < 5 || %obj.getstate() $= "Dead" || %obj.hIsInfected)

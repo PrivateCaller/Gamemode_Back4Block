@@ -1,3 +1,20 @@
+datablock fxDTSBrickData (BrickCommonZombie_HoleSpawnData)
+{
+	brickFile = "Add-ons/Bot_Hole/4xSpawn.blb";
+	category = "Special";
+	subCategory = "Holes - L4B";
+	uiName = "Common Zombie Hole";
+	iconName = "Add-Ons/Gamemode_Left4Block/add-ins/bot_l4b/icons/icon_zombie";
+
+	bricktype = 2;
+	cancover = 0;
+	orientationfix = 1;
+	indestructable = 1;
+
+	isBotHole = 1;
+	holeBot = "CommonZombieHoleBot";
+};
+
 function BrickCommonZombie_HoleSpawnData::onPlant(%this, %obj)
 {
 	if(!isObject(directorBricks))
@@ -452,12 +469,6 @@ function CommonZombieHoleBot::L4BCommonAppearance(%this,%obj,%skinColor,%face,%d
 	%obj.llegColor = %lLegColor;
 	%obj.rleg =  0;
 	%obj.rlegColor = %rLegColor;
-
-	if(%obj.getClassName() $= "AIPlayer" && getRandom(1,32) == 1)//Chance to become zombie version of player
-	{
-		if(isObject(%playerclient = ClientGroup.getObject(getRandom(ClientGroup.getCount()-1))))
-		%obj.hZombieBotToPlayerApearance(%playerclient);
-	}
 
 	GameConnection::ApplyBodyParts(%obj);
 	GameConnection::ApplyBodyColors(%obj);

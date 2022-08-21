@@ -16,6 +16,8 @@ function onObjectCollisionTest(%obj, %col)
 		{
 			if(%col.getdatablock().getName() !$= "ZombieChargerHoleBot")
 			{
+				%obj.SpecialPinAttack(%col,%force);
+				
 				%obj.playaudio(3,"charger_smash_sound");			
 				%forcecalc = %force/20;
 				%obj.spawnExplosion(pushBroomProjectile,%forcecalc SPC %forcecalc SPC %forcecalc);

@@ -86,9 +86,9 @@ function MinigameSO::Director(%minigame,%enabled,%interval,%client)
                                 %round = 1;
                                 if(getRandom(1,2) == 1)
                                 %round = 2;
-                                if(getRandom(1,20) == 1)
-                                %round = 3;
                                 if(getRandom(1,10) == 1)
+                                %round = 3;
+                                if(getRandom(1,16) < $Pref::Server::L4B2Bots::TankRoundChance)
                                 %round = 4;
 
                                 if(%stressed)
@@ -99,8 +99,8 @@ function MinigameSO::Director(%minigame,%enabled,%interval,%client)
                                     case 0: %minigame.BreakRound(%client);
                                     case 1: %minigame.HordeRound(1,%client);
                                     case 2: %minigame.HordeRound(2,%client);
-                                    case 3: %minigame.TankRound(%client);
-                                    case 4: %minigame.WitchRound(%client);
+                                    case 3: %minigame.WitchRound(%client);
+                                    case 4: %minigame.TankRound(%client);
                                 }
                         case 2: %minigame.SpawnStalkZombies();
                     }

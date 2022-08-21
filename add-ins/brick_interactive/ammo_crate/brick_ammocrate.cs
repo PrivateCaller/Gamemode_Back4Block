@@ -175,6 +175,7 @@ package CrateColFunctions
 {
 	function Armor::onCollision(%this,%obj,%col)
 	{	
+		if(isObject(%col))
 		if(%col.getdatablock().getname() $= "RAmmoCrateItem")
 		{
 			if(%obj.getstate() $= "Dead" || %obj.hIsInfected)

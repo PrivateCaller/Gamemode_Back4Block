@@ -235,7 +235,10 @@ package L4B2Bots_Main
 	}
 
 	function minigameCanDamage(%objA, %objB)
-	{	
+	{
+		if(!isObject(%objA) || !isObject(%objB))
+		return;
+
 		if(%objA.player !$= %objB)//Disable friendly fire
 		{
 			if((%objA.getclassname() $= "GameConnection" || %objA.getclassname() $= "Player" || %objA.getclassname() $= "AIPlayer") && (%objB.getclassname() $= "Player" || %objB.getclassname() $= "AIPlayer"))
@@ -270,6 +273,9 @@ package L4B2Bots_Main
 
     function MiniGameSO::Reset(%minigame,%client)
 	{
+		if(isObject(MainAreaZone))
+		MainAreaZone.delete();
+
 		if(isObject(L4B_BotSet))
 		{
 			for(%z = 0; %z < L4B_BotSet.getCount(); %z++)
@@ -364,13 +370,15 @@ package L4B2Bots_Main
         Parent::endGame(%minigame);
         if(isObject(l4b_music)) 
         l4b_music.delete();
+
+		if(isObject(MainAreaZone))
+		MainAreaZone.delete();
     }
 
 	function holeZombieInfect(%obj, %col)
 	{			
 		if(%col.getDataBlock().shapeFile $= "base/data/shapes/player/m.dts" || %col.getDataBlock().shapeFile $= "base/data/shapes/player/mmelee.dts")
-		{
-		
+		{		
 			switch$(%col.getclassname())
 			{
 				case "AIPlayer":%col.hChangeBotToInfectedAppearance();
