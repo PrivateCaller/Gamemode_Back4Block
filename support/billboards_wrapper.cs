@@ -1,11 +1,5 @@
 //
-// The main object that stores all of the server's billboards.
-//
-
-$L4B::Billboard_SO = AVBillboards_Create(OverheadBillboardMount, $Pref::Server::MaxPlayers);
-
-//
-// The lights(billboards) the gamemode will use.
+// The lights (billboards) the gamemode will use.
 //
 
 datablock fxLightData(strangledBillboard)
@@ -50,51 +44,58 @@ datablock fxLightData(incappedBillboard)
 // Some of my own custom functions for Monoblaster's billboard script.
 //
 
-function Billboard_ExtendGroupLimit(%group, %mountDB, %count)
+function Billboard_MountToPlayer(%target, %mode, %lightDB)
 {
-    for(%i = 0; %i < %count; %i++)
-	{
-		%billboard = Billboard_Create("LoadingBillboard",%mountDB,true);
-		%group.add(%billboard);
-	}
+    for(%i = 0; %i < ClientGroup.getCount(); %i++)
+    {
+        %client = ClientGroup.getObject(%i);
+        %group = %client.avBillboardGroup;
+        if(isObject(%group))
+        {
+            %billboard = %group.Make(%lightDB, VectorAdd(%target.getEyePoint(), "0 0 5"), %target.client.bl_id @ "_" @ %mode);
+            %target.MountObject(%billboard, 8);
+        }
+    }
 }
 
-function Billboard_MountToPlayer(%target, %group, %lightDB)
+function Billboard_DeallocFromPlayer(%target, %mode)
 {
-	%billboard = %group.Make(%lightDB, "0 0 -1000", %target.getID());
-    %target.MountObject(%billboard, 8);
-	%target.billboard = %billboard;
-}
-
-function Billboard_DeallocFromPlayer(%group, %target)
-{
-    %group.Clear(%target.getID());
+    for(%i = 0; %i < ClientGroup.getCount(); %i++)
+    {
+        ClientGroup.getObject(%i).avBillboardGroup.Clear(%target.client.bl_id @ "_" @ %mode);
+    }
 }
 
 //
 // A package for automatic management of billboards.
 //
 
-package Package_Left4Block_Billboards
+package Gamemode_Left4Block_Billboards
 {
     function GameConnection::onClientEnterGame(%client)
     {
-        parent::onClientEnterGame(%client);
-        //Load billboards onto the client when they are given a camera. This only needs to be done once.
-        $L4B::Billboard_SO.Load(%client, "0 0 -1000");
-    }
+		%r = Parent::onClientEnterGame(%client);
+		%client.avBillboardGroup = %group = AVBillboards_Create(OverheadBillboardMount, $Pref::Server::MaxPlayers * 2);
+		%group.load(%client,"0 0 1000");
+		%client.loadingbillboards = true;
+		return %r;
+	}
+    function GameConnection::onClientLeaveGame(%client)
+	{
+		if(isObject(%client.avBillboardGroup))
+		{
+			%client.avBillboardGroup.delete();
+		}
+		return Parent::onClientLeaveGame(%client);
+	}
     function Armor::onRemove(%this, %obj)
     {
         //Deallocates the billboard attached to a player when they are deleted.
-        if(isObject(%obj.billboard))
-        {
-            %obj.billboard.unmount();
-            $L4B::Billboard_SO.Clear(%obj.getID());
-        }
+        Billboard_DeallocFromPlayer(%obj);
         parent::onRemove(%this, %obj);
     }
 };
-activatePackage(Package_Left4Block_Billboards);
+activatePackage(Gamemode_Left4Block_Billboards);
 
 //
 // Finally, the function for spawning billboards on survivors that need help.
@@ -119,7 +120,7 @@ function Billboard_NeedySurvivor(%target, %mode)
         error("Billboard_NeedySurvivor :" SPC %mode SPC "is not a valid mode.");
         return; 
     }
-    Billboard_MountToPlayer(%target, $L4B::Billboard_SO, %lightDB);
+    Billboard_MountToPlayer(%target, %mode, %lightDB);
 }
 
 // INSTRUCTIONS:

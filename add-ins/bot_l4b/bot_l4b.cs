@@ -1851,8 +1851,8 @@ function L4B_SpecialsPinCheck(%obj,%col)
 			if(isObject(%col.getMountedImage(2)) && %col.getMountedImage(2).getID() == ZombieSmokerConstrictImage.getID())
 			%col.unMountImage(2);
 
-			if(isObject(%col.billboard) && $L4B_hasSelectiveGhosting)
-			Billboard_DeallocFromPlayer($L4B::Billboard_SO, %col);
+			if($L4B_hasSelectiveGhosting)
+			Billboard_DeallocFromPlayer(%col, "Strangled");
 
 			if(%col.getstate() !$= "Dead")
 			{
@@ -1867,7 +1867,11 @@ function L4B_SpecialsPinCheck(%obj,%col)
 		}
 		return false;
 	}
-	else return true;
+	else 
+	{
+		Billboard_NeedySurvivor(%col, "Strangled");
+		return true;
+	}
 }
 
 function fxDTSBrickData::onTankTouch(%data,%obj,%player)
