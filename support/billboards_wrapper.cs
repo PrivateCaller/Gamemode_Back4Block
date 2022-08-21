@@ -14,7 +14,7 @@ datablock fxLightData(strangledBillboard)
 
 	LinkFlare = false;
 	blendMode = 1;
-	flareColor = "1 0 0 1";
+	flareColor = "1 1 1 1";
 
 	AnimOffsets = true;
 	startOffset = "0 0 1.25";
@@ -33,7 +33,7 @@ datablock fxLightData(incappedBillboard)
 
 	LinkFlare = false;
 	blendMode = 0;
-	flareColor = "1 0 0 1";
+	flareColor = "1 1 1 1";
 
 	AnimOffsets = true;
 	startOffset = "0 0 1.25";
@@ -58,11 +58,39 @@ function Billboard_MountToPlayer(%target, %mode, %lightDB)
     }
 }
 
+function Billboard_refreshAll()
+{
+    for(%i = 0; %i < ClientGroup.getCount() - 1; %i++)
+    {
+        %client = ClientGroup.getObject($i);
+        if(!isObject(%client))
+        {
+            return; //Hate.
+        }
+        if(isObject(%client.avBillboardGroup))
+        {
+            %client.avBillboardGroup.delete();
+        }
+        %client.avBillboardGroup = AVBillboards_Create(OverheadBillboardMount, $Pref::Server::MaxPlayers * 2);
+        %client.avBillboardGroup.load(%client,"0 0 1000");
+    }
+}
+
 function Billboard_DeallocFromPlayer(%target, %mode)
 {
     for(%i = 0; %i < ClientGroup.getCount(); %i++)
     {
-        ClientGroup.getObject(%i).avBillboardGroup.Clear(%target.client.bl_id @ "_" @ %mode);
+        %client = ClientGroup.getObject(%i);
+        
+        if(isObject(%group = %client.avBillboardGroup))
+        for(%k = 0; %k < %group.getCount(); %k++)
+        {
+            if(%group.getObject(%k).tag $= %target.client.bl_id @ "_" @ %mode)
+            {
+                %group.Clear(%target.client.bl_id @ "_" @ %mode);
+                return;
+            }
+        }
     }
 }
 

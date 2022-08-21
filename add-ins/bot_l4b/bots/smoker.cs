@@ -316,13 +316,8 @@ function SmokerTongueShape::onTongueLoop(%this,%obj)
 
 			if(isObject(%end) && (%end.getClassName() $= "Player" || %end.getClassName() $= "AIPlayer"))
 			{
-				if(%end.getState() !$= "Dead")
-				%end.unMountImage(2);
-				else
-				{
-					serverPlay3D("victim_smoked_sound",%end.getHackPosition());
-					%end.unMountImage(2);
-				}
+				if(%end.getState() $= "Dead")
+				serverPlay3D("victim_smoked_sound",%end.getHackPosition());
 			}
 
 			%obj.delete();

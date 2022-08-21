@@ -1746,6 +1746,7 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 								}
 
 								%col.client.camera.setOrbitMode(%col, %col.getTransform(), 0, 5, 0, 1);
+								//Billboard_NeedySurvivor(%col, "Strangled");
 								%col.client.setControlObject(%col.client.camera);
 								ServerCmdUnUseTool (%target.client);
 
@@ -1845,16 +1846,16 @@ function L4B_SpecialsPinCheck(%obj,%col)
 			if(isObject(%col.getMountedImage(2)) && %col.getMountedImage(2).getID() == ZombieSmokerConstrictImage.getID())
 			%col.unMountImage(2);
 
-			if($L4B_hasSelectiveGhosting)
-			Billboard_DeallocFromPlayer(%col, "Strangled");
+			//if($L4B_hasSelectiveGhosting)
+			//Billboard_DeallocFromPlayer(%col, "Strangled");
 
 			if(%col.getstate() !$= "Dead")
 			{
 				if(isObject(%col.client))
 				%col.client.setControlObject(%col);
 				else %col.setControlObject(%col);
-				%col.playthread(0,root);
 
+				%col.playthread(0,root);
 				if(%col.getClassName() $= "AIPlayer")
 				%col.resetHoleLoop();
 			}
@@ -1863,7 +1864,6 @@ function L4B_SpecialsPinCheck(%obj,%col)
 	}
 	else 
 	{
-		Billboard_NeedySurvivor(%col, "Strangled");
 		return true;
 	}
 }

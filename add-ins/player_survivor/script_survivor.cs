@@ -648,7 +648,7 @@ function DownPlayerSurvivorArmor::onNewDataBlock(%this,%obj)
 	{
 		chatMessageTeam(%obj.client,'fakedeathmessage',"<color:FFFF00><bitmapk:add-ons/gamemode_left4block/add-ins/player_survivor/icons/downci>" SPC %obj.client.name);
 
-		if($L4B_hasSelectiveGhosting && !%obj.isBeingStrangled)
+		if($L4B_hasSelectiveGhosting)
 		Billboard_NeedySurvivor(%obj, "Incapped");
 
 		%minigame = %obj.client.minigame;
@@ -687,11 +687,11 @@ function L4B_SaveVictim(%obj,%target)
 		%obj.playthread(3,activate2);
 		%target.playthread(3,plant);
 
-		if($L4B_hasSelectiveGhosting)
-		Billboard_DeallocFromPlayer(%target, "Strangled");
-
-		if($L4B_hasSelectiveGhosting && %target.isDowned)
-		Billboard_NeedySurvivor(%obj, "Incapped");
+		//if($L4B_hasSelectiveGhosting)
+		//Billboard_DeallocFromPlayer(%target, "Strangled");
+//
+		//if($L4B_hasSelectiveGhosting && %target.getdatablock().isDowned)
+		//Billboard_NeedySurvivor(%obj, "Incapped");
 
 		if(%target.isHoleBot)
 		%target.resetHoleLoop();
@@ -760,8 +760,8 @@ function L4B_ReviveDowned(%obj)
 
 					%target.SetDataBlock("SurvivorPlayerLow");
 
-					if($L4B_hasSelectiveGhosting)
-					Billboard_DeallocFromPlayer(%col, "Incapped");
+					//if($L4B_hasSelectiveGhosting)
+					//Billboard_DeallocFromPlayer(%col, "Incapped");
 
 					%target.playthread(0,root);
 					%obj.playthread(1,root);

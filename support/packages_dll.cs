@@ -15,9 +15,7 @@ function onObjectCollisionTest(%obj, %col)
 		if(%col.getdataBlock().getName() !$= "ZombieTankHoleBot" && %obj.getdataBlock().getName() $= "ZombieChargerHoleBot" && %oScale >= 1.1 && %force > 20 && %obj.hEating != %col)
 		{
 			if(%col.getdatablock().getName() !$= "ZombieChargerHoleBot")
-			{
-				%obj.SpecialPinAttack(%col,%force);
-				
+			{				
 				%obj.playaudio(3,"charger_smash_sound");			
 				%forcecalc = %force/20;
 				%obj.spawnExplosion(pushBroomProjectile,%forcecalc SPC %forcecalc SPC %forcecalc);
@@ -27,10 +25,15 @@ function onObjectCollisionTest(%obj, %col)
 				%col.setvelocity(%eye);
 
 				if(checkHoleBotTeams(%obj,%col))
-				%col.damage(%obj.hFakeProjectile, %col.getposition(),%force/25, %obj.hDamageType);
+				%col.damage(%obj.hFakeProjectile, %col.getposition(),0.25, %obj.hDamageType);
 			}
 			return false;
 		}
 	}
 	return true;
+}
+
+function onGameTick(%dt)
+{
+	
 }
