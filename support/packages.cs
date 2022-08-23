@@ -405,9 +405,9 @@ package L4B2Bots_Main
     	%minigame.UrgentRound = 0;
     	%minigame.SoldierTank = 0;
 		%minigame.DirectorTankRound = 0;
-        cancel(%minigame.hordeMusic);
-        cancel(%minigame.hordeMusic1);
-        cancel(%minigame.hordeMusic2);
+		cancel(%minigame.spawn["Horde"]);
+		cancel(%minigame.spawn["Special"]);
+		cancel(%minigame.directorSchedule);
         cancel(%minigame.hordeEndShed);
 	}
 

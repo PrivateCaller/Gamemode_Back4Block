@@ -29,6 +29,114 @@ while(%file !$= "")
 	%file = findNextFile(%pattern);
 }
 
+if(!isObject(swordExplosionParticle)) //I mean... Just in case right?
+{
+	datablock ParticleData(swordExplosionParticle)
+	{
+		dragCoefficient			= 2;
+		gravityCoefficient		= 1.0;
+		inheritedVelFactor		= 0.2;
+		constantAcceleration	= 0.0;
+		
+		spinRandomMin			= -90;
+		spinRandomMax			= 90;
+		
+		lifetimeMS			 	= 500;
+		lifetimeVarianceMS		= 300;
+		
+		textureName				= "base/data/particles/chunk";
+		
+		colors[0]				= "0.7 0.7 0.9 0.9";
+		colors[1]				= "0.9 0.9 0.9 0.0";
+		sizes[0]				= 0.5;
+		sizes[1]				= 0.25;
+	};
+	
+	datablock ParticleEmitterData(swordExplosionEmitter)
+	{
+		ejectionPeriodMS	= 7;
+		periodVarianceMS	= 0;
+		ejectionVelocity	= 8;
+		velocityVariance	= 1.0;
+		ejectionOffset		= 0.0;
+		thetaMin			= 0;
+		thetaMax			= 60;
+		phiReferenceVel		= 0;
+		phiVariance			= 360;
+		
+		overrideAdvance		= false;
+		
+		particles			= "swordExplosionParticle";
+
+		uiName				= "Sword Hit";
+	};
+}
+
+datablock ParticleData(stunParticle)
+{
+	dragCoefficient      = 13;
+	gravityCoefficient   = 0.2;
+	inheritedVelFactor   = 1.0;
+	constantAcceleration = 0.0;
+	lifetimeMS           = 400;
+	lifetimeVarianceMS   = 0;
+	textureName          = "base/data/particles/star1";
+	spinSpeed		   = 0.0;
+	spinRandomMin		= 0.0;
+	spinRandomMax		= 0.0;
+	colors[0]     = "1 1 0.2 0.9";
+	colors[1]     = "1 1 0.4 0.5";
+	colors[2]     = "1 1 0.5 0";
+
+	sizes[0]      = 0.5;
+	sizes[1]      = 0.2;
+	sizes[2]      = 0.1;
+
+	times[0] = 0.0;
+	times[1] = 0.5;
+	times[2] = 1.0;
+
+	useInvAlpha = false;
+};
+datablock ParticleEmitterData(stunEmitter)
+{
+	ejectionPeriodMS = 12;
+	periodVarianceMS = 1;
+	ejectionVelocity = 5.25;
+	velocityVariance = 0.0;
+	ejectionOffset   = 0.25;
+	thetaMin         = 0;
+	thetaMax         = 180;
+	phiReferenceVel  = 0;
+	phiVariance      = 360;
+	overrideAdvance = false;
+	particles = stunParticle;
+};
+datablock ShapeBaseImageData(stunImage)
+{
+	shapeFile = "base/data/shapes/empty.dts";
+	emap = false;
+
+	mountPoint = $HeadSlot;
+	offset = "0 0 0.4";
+	eyeOffset = "0 0 999";
+
+	stateName[0]				= "Ready";
+	stateTimeoutValue[0]		= 0.01;
+	stateTransitionOnTimeout[0]	= "FireA";
+
+	stateName[1]				= "FireA";
+	stateEmitter[1]				= stunEmitter;
+	stateEmitterTime[1]			= 1.2;
+	stateTimeoutValue[1]		= 1.2;
+	stateTransitionOnTimeout[1]	= "Done";
+	stateWaitForTimeout[1]		= true;
+
+	stateName[2]				= "Done";
+	stateTimeoutValue[2]		= 0.01;
+	stateTransitionOnTimeout[2]	= "FireA";
+};
+
 datablock ParticleData(SecondaryMeleeFlashParticle)
 {
 	dragCoefficient      = 3;
@@ -143,18 +251,13 @@ function Player::doMelee(%obj)
 				%p = new projectile()
 				{
 					datablock = "SecondaryMeleeProjectile";
-					initialPosition = posFromRaycast(%ray);
+					initialPosition = %hit.gethackPosition();
 				};
 				%p.explode();
 
-				serverPlay3D("melee_hit" @ getrandom(1,8) @ "_sound",posFromRaycast(%ray));
-				%dmg = %hit.getdatablock().maxDamage/4;
-				%hitknockback = 1200;
+				serverPlay3D("melee_hit" @ getrandom(1,8) @ "_sound",%hit.gethackPosition());
+				%hitknockback = 1600;
 				%hitz = 500;
-
-				if(%hit.getdatablock().getName() $= "ZombieTankHoleBot")
-				%hit.damage(%obj,posFromRaycast(%ray),15,$DamageType::SecondaryMelee);
-				else %hit.damage(%obj,posFromRaycast(%ray),%dmg,$DamageType::SecondaryMelee);
 			}
 
 				if(%hit.hZombieL4BType & %hit.hZombieL4BType < 4 && %hit.lastdamage+1250 < getsimtime())

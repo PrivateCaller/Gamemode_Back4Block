@@ -1350,6 +1350,75 @@ exec("./bots/spitter.cs");
 exec("./bots/tank.cs");
 exec("./bots/witch.cs");
 
+registerInputEvent ("fxDTSBrick", "onTankTouch", "Self fxDTSBrick" TAB "Player Player" TAB "Bot Bot" TAB "Client GameConnection" TAB "MiniGame MiniGame");
+registerInputEvent ("fxDTSBrick", "onDoorClose", "Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "MiniGame MiniGame");
+registerInputEvent ("fxDTSBrick", "onDoorOpen", "Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "MiniGame MiniGame");
+registerInputEvent ("fxDTSBrick", "onZombieTouch", "Self fxDTSBrick" TAB "Player Player" TAB "Bot Bot" TAB "Client GameConnection" TAB "MiniGame MiniGame");
+registerOutputEvent ("fxDTSBrick", "zfakeKillBrick");
+
+//Ripped from Rotondo's holebot "hFOVCheck" function, then minimized.
+function L4B_isInFOV(%viewer, %target)
+{	
+	return vectorDot(%viewer.getEyeVector(), vectorNormalize(vectorSub(%target.getPosition(), %viewer.getPosition()))) >= 0.7;
+}
+
+function L4B_isPlayerObstructed(%viewer, %target)
+{
+    //Check if there's anything blocking line-of-sight between the viewer and the target, then return the result.
+    return ContainerRayCast(%viewer.getEyePoint(), %target.getHackPosition(), $TypeMasks::FxBrickObjectType | $TypeMasks::DebrisObjectType | $TypeMasks::InteriorObjectType, %viewer);
+}
+
+function L4B_DespaceString(%string)
+{
+	return strReplace(%string, " ", "!&!");
+}
+
+function L4B_RespaceString(%string)
+{
+	return strReplace(%string, "!&!", " ");
+}
+
+function fxDTSBrick::zfakeKillBrick(%obj)
+{
+	if(strstr(strlwr(%obj.getName()),"breakbrick") != -1)
+	{
+		%obj.fakeKillBrick("0 0 1", "5");
+		%obj.schedule(5100,disappear,-1);
+
+		if($oldTimescale $= "")
+		$oldTimescale = getTimescale();
+		setTimescale(getRandom(8,16)*0.1);
+		%obj.playSound(BrickBreakSound.getID());
+		setTimescale($oldTimescale);
+	}
+}
+
+function L4B_IsOnGround(%obj)
+{
+	%eyeVec = "0 0 -1";
+	%startPos = %obj.getposition();
+	%endPos = VectorAdd(%startPos,vectorscale(%eyeVec,1));
+	%mask = $TypeMasks::PlayerObjectType | $TypeMasks::FxBrickObjectType | $TypeMasks::VehicleObjectType | $TypeMasks::InteriorObjectType | $TypeMasks::TerrainObjectType;
+	%target = ContainerRayCast(%startPos, %endPos, %mask,%obj);
+
+	if(%target)
+	return true;
+	else return false;
+}
+
+function L4B_IsOnWall(%obj)
+{
+	%eyeVec = vectorsub(%obj.getforwardvector(),vectorscale(%obj.getforwardvector(),2));
+	%startPos = %obj.getposition();
+	%endPos = VectorAdd(%startPos,vectorscale(%eyeVec,1));
+	%mask = $TypeMasks::PlayerObjectType | $TypeMasks::FxBrickObjectType | $TypeMasks::VehicleObjectType | $TypeMasks::InteriorObjectType | $TypeMasks::TerrainObjectType;
+	%target = ContainerRayCast(%startPos, %endPos, %mask,%obj);
+
+	if(%target)
+	return true;
+	else return false;
+}
+
 function Player::hChangeBotToInfectedAppearance(%obj)
 {
 	%this = %obj.getdataBlock();
@@ -1394,6 +1463,9 @@ function AIPlayer::hLimitedLifetime(%obj)
 	}
 
 	%obj.hLimitLife++;
+
+	if(%obj.hLimitLife == 10)
+	%obj.doMRandomTele(%obj.spawnType);
 
 	if(%obj.hLimitLife >= 25)
 	%obj.kill();
@@ -1872,9 +1944,6 @@ function fxDTSBrickData::onTankTouch(%data,%obj,%player)
 {
 	fxDTSBrickData::onZombieTouch(%data,%obj,%player);
 }
-registerInputEvent ("fxDTSBrick", "onTankTouch", "Self fxDTSBrick" TAB "Player Player" TAB "Bot Bot" TAB "Client GameConnection" TAB "MiniGame MiniGame");
-registerInputEvent ("fxDTSBrick", "onDoorClose", "Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "MiniGame MiniGame");
-registerInputEvent ("fxDTSBrick", "onDoorOpen", "Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "MiniGame MiniGame");
 
 function fxDTSBrick::RandomizeZombieSpecial(%obj)
 {

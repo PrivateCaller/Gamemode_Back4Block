@@ -21,7 +21,6 @@ package L4B_FlareGunSupport
 	
 		parent::onCollision(%db,%proj,%hit,%fade,%pos,%normal);
 	}
-
 };
 
 activatePackage(L4B_FlareGunSupport);

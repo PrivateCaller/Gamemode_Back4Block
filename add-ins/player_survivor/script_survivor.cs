@@ -87,6 +87,12 @@ function oxygenBubbleImage::onDone(%this,%obj,%slot)
 	%obj.unMountImage(%slot);
 }
 
+datablock PlayerData(downedMount)
+{
+    shapeFile = "./models/downedmounts.dts";
+	boundingBox = vectorScale("20 20 20", 4);
+};
+
 datablock PlayerData(SurvivorPlayer : PlayerMeleeAnims)
 {
 	canPhysRoll = true;
@@ -202,8 +208,9 @@ function Player::Safehouse(%player,%bool)
 }
 
 registerOutputEvent ("Player", "Safehouse","bool");
-
+registerInputEvent ("fxDTSBrick", "onSurvivorTouch", "Self fxDTSBrick" TAB "Player Player" TAB "Bot Bot" TAB "Client GameConnection" TAB "MiniGame MiniGame");
 registerOutputEvent(Minigame, "SafehouseCheck");
+
 function MiniGameSO::SafehouseCheck(%minigame,%client)
 {
 	for(%i = 0; %i < %minigame.numMembers; %i++)
@@ -435,7 +442,7 @@ function SurvivorPlayer::onTrigger (%this, %obj, %triggerNum, %val)
 							cancel(%obj.savesched);
 						}
 					}
-			case 4: if(%val && %obj.lastmeleetime+300 < getsimtime())
+			case 4: if(%val && %obj.lastmeleetime+400 < getsimtime())
 					{
 						%obj.doMelee();
 						%obj.lastmeleetime = getsimtime();
@@ -648,8 +655,8 @@ function DownPlayerSurvivorArmor::onNewDataBlock(%this,%obj)
 	{
 		chatMessageTeam(%obj.client,'fakedeathmessage',"<color:FFFF00><bitmapk:add-ons/gamemode_left4block/add-ins/player_survivor/icons/downci>" SPC %obj.client.name);
 
-		if($L4B_hasSelectiveGhosting)
-		Billboard_NeedySurvivor(%obj, "Incapped");
+		//if($L4B_hasSelectiveGhosting)
+		//Billboard_NeedySurvivor(%obj, "Incapped");
 
 		%minigame = %obj.client.minigame;
 		%minigame.L4B_PlaySound("victim_needshelp_sound");

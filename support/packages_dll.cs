@@ -21,7 +21,7 @@ function onObjectCollisionTest(%obj, %col)
 				%obj.spawnExplosion(pushBroomProjectile,%forcecalc SPC %forcecalc SPC %forcecalc);
 				%obj.playthread(2,"activate2");
 				%normVec = VectorNormalize(vectorAdd(%obj.getForwardVector(),"0" SPC "0" SPC "0.25"));
-				%eye = vectorscale(%normVec,%force/1.5);
+				%eye = vectorscale(%normVec,%force/2);
 				%col.setvelocity(%eye);
 
 				if(checkHoleBotTeams(%obj,%col))
@@ -31,9 +31,4 @@ function onObjectCollisionTest(%obj, %col)
 		}
 	}
 	return true;
-}
-
-function onGameTick(%dt)
-{
-	
 }
