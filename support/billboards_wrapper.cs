@@ -46,52 +46,52 @@ datablock fxLightData(incappedBillboard)
 
 function Billboard_MountToPlayer(%target, %mode, %lightDB)
 {
-    for(%i = 0; %i < ClientGroup.getCount(); %i++)
-    {
-        %client = ClientGroup.getObject(%i);
-        %group = %client.avBillboardGroup;
-        if(isObject(%group))
-        {
-            %billboard = %group.Make(%lightDB, VectorAdd(%target.getEyePoint(), "0 0 5"), %target.client.bl_id @ "_" @ %mode);
-            %target.MountObject(%billboard, 8);
-        }
-    }
+    // for(%i = 0; %i < ClientGroup.getCount(); %i++)
+    // {
+    //     %client = ClientGroup.getObject(%i);
+    //     %group = %client.avBillboardGroup;
+    //     if(isObject(%group))
+    //     {
+    //         %billboard = %group.Make(%lightDB, VectorAdd(%target.getEyePoint(), "0 0 5"), %target.client.bl_id @ "_" @ %mode);
+    //         %target.MountObject(%billboard, 8);
+    //     }
+    // }
 }
 
 function Billboard_refreshAll()
 {
-    for(%i = 0; %i < ClientGroup.getCount() - 1; %i++)
-    {
-        %client = ClientGroup.getObject($i);
-        if(!isObject(%client))
-        {
-            return; //Hate.
-        }
-        if(isObject(%client.avBillboardGroup))
-        {
-            %client.avBillboardGroup.delete();
-        }
-        %client.avBillboardGroup = AVBillboards_Create(OverheadBillboardMount, $Pref::Server::MaxPlayers * 2);
-        %client.avBillboardGroup.load(%client,"0 0 1000");
-    }
+    // for(%i = 0; %i < ClientGroup.getCount() - 1; %i++)
+    // {
+    //     %client = ClientGroup.getObject($i);
+    //     if(!isObject(%client))
+    //     {
+    //         return; //Hate.
+    //     }
+    //     if(isObject(%client.avBillboardGroup))
+    //     {
+    //         %client.avBillboardGroup.delete();
+    //     }
+    //     %client.avBillboardGroup = AVBillboards_Create(OverheadBillboardMount, $Pref::Server::MaxPlayers * 2);
+    //     %client.avBillboardGroup.load(%client,"0 0 1000");
+    // }
 }
 
 function Billboard_DeallocFromPlayer(%target, %mode)
 {
-    for(%i = 0; %i < ClientGroup.getCount(); %i++)
-    {
-        %client = ClientGroup.getObject(%i);
+    // for(%i = 0; %i < ClientGroup.getCount(); %i++)
+    // {
+    //     %client = ClientGroup.getObject(%i);
         
-        if(isObject(%group = %client.avBillboardGroup))
-        for(%k = 0; %k < %group.getCount(); %k++)
-        {
-            if(%group.getObject(%k).tag $= %target.client.bl_id @ "_" @ %mode)
-            {
-                %group.Clear(%target.client.bl_id @ "_" @ %mode);
-                return;
-            }
-        }
-    }
+    //     if(isObject(%group = %client.avBillboardGroup))
+    //     for(%k = 0; %k < %group.getCount(); %k++)
+    //     {
+    //         if(%group.getObject(%k).tag $= %target.client.bl_id @ "_" @ %mode)
+    //         {
+    //             %group.Clear(%target.client.bl_id @ "_" @ %mode);
+    //             return;
+    //         }
+    //     }
+    // }
 }
 
 //
@@ -123,7 +123,7 @@ package Gamemode_Left4Block_Billboards
         parent::onRemove(%this, %obj);
     }
 };
-activatePackage(Gamemode_Left4Block_Billboards);
+//activatePackage(Gamemode_Left4Block_Billboards);
 
 //
 // Finally, the function for spawning billboards on survivors that need help.
@@ -131,24 +131,24 @@ activatePackage(Gamemode_Left4Block_Billboards);
 
 function Billboard_NeedySurvivor(%target, %mode)
 {
-	if($L4B::Billboard_SO.active >= $L4B::Billboard_SO.getCount())
-	{
-        Billboard_ExtendGroupLimit($L4B::Billboard_SO, OverheadBillboardMount, 1);
-    }
-    if(%mode $= "Strangled")
-    {
-        %lightDB = strangledBillboard;
-    }
-    else if(%mode $= "Incapped")
-    {
-        %lightDB = incappedBillboard;
-    }
-    else
-    {
-        error("Billboard_NeedySurvivor :" SPC %mode SPC "is not a valid mode.");
-        return; 
-    }
-    Billboard_MountToPlayer(%target, %mode, %lightDB);
+	// if($L4B::Billboard_SO.active >= $L4B::Billboard_SO.getCount())
+	// {
+    //     Billboard_ExtendGroupLimit($L4B::Billboard_SO, OverheadBillboardMount, 1);
+    // }
+    // if(%mode $= "Strangled")
+    // {
+    //     %lightDB = strangledBillboard;
+    // }
+    // else if(%mode $= "Incapped")
+    // {
+    //     %lightDB = incappedBillboard;
+    // }
+    // else
+    // {
+    //     error("Billboard_NeedySurvivor :" SPC %mode SPC "is not a valid mode.");
+    //     return; 
+    // }
+    // Billboard_MountToPlayer(%target, %mode, %lightDB);
 }
 
 // INSTRUCTIONS:

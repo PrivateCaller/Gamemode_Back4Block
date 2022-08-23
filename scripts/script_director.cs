@@ -457,8 +457,8 @@ function MiniGameSO::DirectorMusic(%minigame,%music,%loopable,%volume,%client)
     if(isObject(l4b_music)) 
     l4b_music.delete();
 
-    if(isObject(%minigame.member0.player))
-    %pos = %minigame.member0.player.getPosition();
+    if(isObject(%minigame.member[0].player))
+    %pos = %minigame.member[0].player.getPosition();
     else %pos = "0 0 0";
 
     new AudioEmitter(l4b_music)

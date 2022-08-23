@@ -108,6 +108,52 @@ package L4B2Bots_Main
 		Parent::onImpact(%this, %obj, %col, %vec, %force);
 	}
 
+	//
+	// Two functions that enable death music.
+	//
+	function Armor::onDisabled(%this, %obj, %state)
+	{
+		parent::onDisabled(%this, %obj, %state);
+		if(%obj.hIsInfected || %obj.hZombieL4BType || %obj.hType $= "zombie" || %obj.isBot)
+		{
+			return;
+		}
+		%music = new AudioEmitter("")
+		{
+			position = %obj.getPosition();
+			profile = nameToID("leftfordeath_sound");
+			isLooping= false;
+			is3D = 0;
+			volume = 1;
+			useProfileDescription = "0";
+			type = 9;
+			outsideAmbient = "1";
+			referenceDistance = "2";
+			maxDistance = 999999;
+			enableVisualFeedback = "0";
+		};
+		%music.setNetFlag(6, true);
+		%dead_client = %obj.client;
+		%dead_client.deathMusic = %music.getID();
+		for(%i = 0; %i < ClientGroup.getCount(); %i++)
+		{
+			%target_client = ClientGroup.getObject(%i);
+			if(%dead_client.getID() == %target_client.getID())
+			{
+				%music.scopeToClient(%target_client);
+				continue;
+			}
+			%music.clearScopeToClient(%target_client);
+		}
+	}
+	function Armor::onAdd(%this, %obj)
+	{
+		if(isObject(%obj.client.deathMusic))
+		{
+			%obj.client.deathMusic.delete();
+		}
+	}
+
 	function Armor::onNewDatablock(%this, %obj)
 	{		
 		Parent::onNewDatablock(%this, %obj);
