@@ -391,7 +391,7 @@ function Projectile::PipeBombDistract(%obj, %flashcount)
 
 	while ((%targetid = containerSearchNext()) != 0 )
 	{
-		if(!%targetid.getState() !$= "Dead" && %targetid.getClassName() $= "AIPlayer" && %targetid.hZombieL4BType && %targetid.hZombieL4BType < 5 && !%targetid.isBurning)
+		if(!%targetid.getState() !$= "Dead" && %targetid.getClassName() $= "AIPlayer" && %targetid.hZombieL4BType $= "Normal" && !%targetid.isBurning)
 		{
 			if(%flashcount < 15)
 			{
@@ -741,11 +741,10 @@ function Projectile::BileBombDistract(%obj, %count)
 
 	while((%targetid = containerSearchNext()) != 0 )
 	{
-		if(!%targetid.getState() !$= "Dead" && %targetid.getClassName() $= "AIPlayer" && %targetid.hZombieL4BType && !%targetid.isBurning)
+		if(!%targetid.getState() !$= "Dead" && %targetid.getClassName() $= "AIPlayer" && %targetid.hZombieL4BType $= "Normal" && !%targetid.isBurning)
 		{
 			if(%count < %obj.getDatablock().distractionLifetime)
 			{
-				if(%targetid.hZombieL4BType < 5)
 				if(!%targetid.Distraction)
 				{
 					%targetid.Distraction = %obj.getID();
@@ -759,21 +758,18 @@ function Projectile::BileBombDistract(%obj, %count)
 					%time1 = getRandom(1000,4000);
 					%targetid.getDataBlock().schedule(%time1,onBotFollow,%targetid,%obj);
 				}
-
-				if(%obj.getdataBlock().getID() == BileBombFakeProjectile.getID() && ContainerSearchCurrRadiusDist() <= 4)
-				{
-					if(%targetid.hType $= "zombie")
-					{
-						%targetid.hType = "biled" @ getRandom(1,9999);
-						%targetid.mountImage(BileStatusPlayerImage, 2);
-						%targetid.BoomerBiled = 1;
-					}
-				}
 			}
 			else
 			{
 				%targetid.hSearch = 1;
 				%targetid.Distraction = 0;
+			}
+
+			if(%obj.getdataBlock().getID() == BileBombFakeProjectile.getID() && ContainerSearchCurrRadiusDist() <= 4 && %targetid.hType $= "zombie")
+			{
+				%targetid.hType = "biled" @ getRandom(1,9999);
+				%targetid.mountImage(BileStatusPlayerImage, 2);
+				%targetid.BoomerBiled = 1;
 			}
 		}
 	}

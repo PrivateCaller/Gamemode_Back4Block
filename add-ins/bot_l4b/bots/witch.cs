@@ -14,9 +14,7 @@ datablock PlayerData(ZombieWitchHoleBot : CommonZombieHoleBot)
 
     hName = "Witch";//cannot contain spaces
     hMeleeCI = "Witched";
-
-	ShapeNameDistance = 100;
-    hCustomNodeAppearance = 1;
+    hZombieL4BType = "Special";
     hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage*5;//15;//Melee Damage
 };
 
@@ -43,7 +41,7 @@ function ZombieWitchHoleBot::onCollision(%this, %obj, %col, %fade, %pos, %norm)
 {
     Parent::onCollision(%this, %obj, %col, %fade, %pos, %norm);
     
-    if(%col.getType() & $TypeMasks::PlayerObjectType && L4B_CheckifinMinigame(%obj,%col) && checkHoleBotTeams(%obj,%col))
+    if(%col.getType() & $TypeMasks::PlayerObjectType && minigameCanDamage(%obj,%col) && checkHoleBotTeams(%obj,%col))
     {
         %obj.hSearch = 1;
         cancel(%obj.StartleLoop);
@@ -234,7 +232,7 @@ function ZombieWitchHoleBot::WitchStartleLoop(%this,%obj)
         %eyePos = %obj.getEyePoint();
         %obscure = containerRayCast(%eyePos,vectorAdd(%targetid.getPosition(),"0 0 1.9"),$TypeMasks::FxBrickObjectType | $TypeMasks::VehicleObjectType,%obj);
         if(!isObject(%obscure))
-        if(%targetid.getState() !$= "Dead" && L4B_CheckifinMinigame(%obj,%targetid) && checkHoleBotTeams(%obj,%targetid))
+        if(%targetid.getState() !$= "Dead" && minigameCanDamage(%obj,%targetid) && checkHoleBotTeams(%obj,%targetid))
         {
             %obj.StartleCount = mClamp(%obj.StartleCount+2, 0, 11);
             %obj.setaimobject(%targetid);
@@ -341,7 +339,7 @@ function ZombieWitchHoleBot::WitchStartleLoop(%this,%obj)
     %obj.StartleLoop = %obj.getDataBlock().schedule(%time,WitchStartleLoop,%obj);
 }
 
-function ZombieWitchHoleBot::L4BSpecialAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
+function ZombieWitchHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {
         %skinColor = "0.1 0.1 0.1 1";
         %obj.hipColor =  %skinColor;

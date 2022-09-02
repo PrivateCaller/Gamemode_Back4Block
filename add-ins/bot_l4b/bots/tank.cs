@@ -65,10 +65,8 @@ datablock PlayerData(ZombieTankHoleBot : CommonZombieHoleBot)
 	maxenergy = 100;
 	showEnergyBar = true;
 	
-	ShapeNameDistance = 100;
 	hIsInfected = 2;
-	hZombieL4BType = 5;
-	hCustomNodeAppearance = 1;
+	hZombieL4BType = "Special";
 	hPinCI = "<bitmapk:gamemode_left4block/add-ins/bot_l4b/models/icons/ci_tank2>";
 	hBigMeleeSound = "tank_punch_sound";
 	SpecialCPMessage = "Right click to throw boulders";
@@ -103,7 +101,7 @@ function ZombieTankHoleBot::onImpact(%this, %obj, %col, %vec, %force)
 
 function ZombieTankHoleBot::onBotFollow( %this, %obj, %targ )
 {
-	if(getRandom(1,100) <= $Pref::Server::L4B2Bots::TankChance && L4B_IsOnGround(%obj) && vectorDist(%obj.getPosition(),%targ.getPosition()) >= 35)
+	if(getRandom(1,100) <= $Pref::Server::L4B2Bots::TankChance && getWord(%obj.getvelocity(),2) == 0 && vectorDist(%obj.getPosition(),%targ.getPosition()) >= 35)
 	{
 		%obj.setaimobject(%targ);
 		%obj.mountImage(BoulderImage,0);
@@ -126,7 +124,7 @@ function ZombieTankHoleBot::onNewDataBlock(%this,%obj)
 	Parent::onNewDataBlock(%this,%obj);
 	CommonZombieHoleBot::onNewDataBlock(%this,%obj);
 	%obj.hDefaultL4BAppearance(%obj);
-	%obj.setscale("1.5 1.5 1.5");
+	%obj.setscale("1.25 1.25 1.25");
 }
 
 
@@ -232,18 +230,11 @@ function ZombieTankHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
 	Parent::onTrigger (%this, %obj, %triggerNum, %val);
 }
 
-function ZombieTankHoleBot::L4BSpecialAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
+function ZombieTankHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {
 	%obj.hidenode("BallisticHelmet");
 	%obj.hidenode("BallisticVest");
-
-	switch($Pref::Server::L4B2Bots::CustomStyle)
-	{
-		case 0: %obj.hidenode(Headskin2);
-		case 1: %obj.hidenode(Headskin2);
-		case 2: %obj.hidenode(Headskin1);		
-		case 3: %obj.hidenode(Headskin1);
-	}
+ 	%obj.hidenode("Headskin2");
 
 	%pantsrandmultiplier = getrandom(2,8)*0.25;
 	%pantsColor = 0 SPC 0.141*%pantsrandmultiplier SPC 0.333*%pantsrandmultiplier SPC 1;

@@ -4,10 +4,8 @@ datablock PlayerData(ZombieJimmyHoleBot : CommonZombieHoleBot)
 	maxdamage = 250;//Health
 	hName = "Infected" SPC "Jimmy" SPC "Gibbs";//cannot contain spaces
 
-	ShapeNameDistance = 15;
 	hIsInfected = 1;
-	hZombieL4BType = 4;
-	hCustomNodeAppearance = 0;
+	hZombieL4BType = "Normal";
 	hPinCI = "";
 	hBigMeleeSound = "";
 };
@@ -49,7 +47,7 @@ function ZombieJimmyHoleBot::onDisabled(%this,%obj)
 	CommonZombieHoleBot::onDisabled(%this,%obj);
 }
 
-function ZombieJimmyHoleBot::L4BUncommonAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
+function ZombieJimmyHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {
 	%color = "0.105882 0.458824 0.768627 1";
 	%color2 = "0.750 0.750 0.750 1.000";

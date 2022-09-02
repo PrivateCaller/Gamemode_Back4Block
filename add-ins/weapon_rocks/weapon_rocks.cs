@@ -151,18 +151,17 @@ datablock ExplosionData(boulder4debrisExplosion)
 datablock ExplosionData(BoulderExplosion : spearExplosion)
 {
    soundProfile = "boulder_hit_sound";
-   //impulse
-   impulseRadius = 10;
-   impulseForce = 5000;
+
+   damageRadius = 3;
+   radiusDamage = 100;
+
+   impulseRadius = 5;
+   impulseForce = 1000;
 
    //subExplosion[0] = boulder1debrisExplosion;
    //subExplosion[1] = boulder2debrisExplosion;
    //subExplosion[2] = boulder3debrisExplosion;
    //subExplosion[3] = boulder4debrisExplosion;
-
-   //radius damage
-   radiusDamage        = 50;
-   damageRadius        = 10;
 
    faceViewer     = true;
    explosionScale = "5 5 5";

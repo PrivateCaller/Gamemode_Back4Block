@@ -1,4 +1,5 @@
-    //Old support for Slayer
+    //old support for Slayer, not using this right now
+	
 	function MiniGameSO::Reset(%minigame,%client)
 	{
 		Parent::Reset(%minigame,%client);

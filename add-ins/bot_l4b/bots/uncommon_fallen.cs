@@ -4,10 +4,8 @@ datablock PlayerData(ZombieFallenHoleBot : CommonZombieHoleBot)
 	maxdamage = 250;//Health
 	hName = "Infected" SPC "Fallen" SPC "Survivor";//cannot contain spaces... lies
 	
-	ShapeNameDistance = 15;
 	hIsInfected = 1;
-	hZombieL4BType = 4;
-	hCustomNodeAppearance = 1;
+	hZombieL4BType = "Normal";
 	hPinCI = "";
 	hBigMeleeSound = "";
 };
@@ -62,18 +60,10 @@ function ZombieFallenHoleBot::onDisabled(%this,%obj)
 	L4B_ZombieDropLoot(%obj,$L4B_Medical[getRandom(1,$L4B_MedicalAmount)],15);
 }
 
-function ZombieFallenHoleBot::L4BUncommonAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
-{
-	//if(%obj.getClassName() $= "AIPlayer" && getRandom(1,32) == 1)//Chance to become zombie version of player
-	//{
-	//	if(isObject(%playerclient = ClientGroup.getObject(getRandom(ClientGroup.getCount()-1))))
-	//	%obj.hZombieBotToPlayerApearance(%playerclient);
-	//}
-	
+function ZombieFallenHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
+{	
 	if(getRandom(1, 8) == 1 && isObject($L4B_clientLog) && $L4B_clientLog.getCount() > 0)
-	{
-		L4B_pushZombifiedSnapshot(%obj);
-	}
+	L4B_pushZombifiedSnapshot(%obj);
 	else
 	{
 		%hatColor = getRandomBotRGBColor();

@@ -159,6 +159,7 @@ datablock explosionData(flamerExplosion)
 datablock projectileData(flamerFakeProjectile)
 {
 	explosion = flamerExplosion;
+	lifetimeMS = 10000;
 };
 
 function createFireCircle(%pos,%rad,%amt,%cl,%obj,%damageType)
@@ -182,18 +183,13 @@ function createFireCircle(%pos,%rad,%amt,%cl,%obj,%damageType)
 }
 function player::flamer_burnStart(%pl,%tick)
 {
-	//if(%pl.getDamagePercent() >= 1)
-	//	return;
 	if(!%pl.isBurning)
 	{
 		%pl.setTempColor("0.1 0.1 0.1 1");
 		%pl.flamer_burn(%tick);
 		%pl.flamerBurnTickAdd = 0;
 	}
-	else
-	{
-		%pl.flamerBurnTickAdd = %tick;
-	}
+	else %pl.flamerBurnTickAdd = %tick;
 }
 function player::flamer_burn(%pl,%tick)
 {
@@ -205,10 +201,8 @@ function player::flamer_burn(%pl,%tick)
 		%pl.flamerBurnTickAdd = 0;
 	}
 	cancel(%pl.burnSched);
-	if(!isObject(%pl.getMountedImage(3)))
-	{
-		%pl.mountImage(flamerFleshBurningImage,3);
-	}
+	if(!isObject(%pl.getMountedImage(3))) %pl.mountImage(flamerFleshBurningImage,3);
+	
 	if(!%pl.isPlayingBurningSound)
 	{
 		%pl.playAudio(3,fleshFireLoopSound);
@@ -216,8 +210,7 @@ function player::flamer_burn(%pl,%tick)
 	}
 	
 	%dmg = mClamp(%tick,3,6)*1.75;
-	if(%pl.isCrouched())
-		%dmg *= 0.47619;
+	if(%pl.isCrouched()) %dmg *= 0.47619;
 	if(%pl.getDamagePercent() < 1)
 	{
 		%pl.damage(%pl.lastFireAttacker,%pl.getPosition(),%dmg,%pl.lastBurnDmgType);
@@ -230,10 +223,8 @@ function player::flamer_burn(%pl,%tick)
 		%pl.isBurning = 0;
 		%pl.playAudio(3,napalmFireEndSound);
 		%pl.isPlayingBurningSound = 0;
-		if(%pl.getDamagePercent() < 1)
-		{
-			%pl.flamerClearBurnSched = %pl.schedule(1500,flamer_clearBurn);
-		}
+
+		if(%pl.getDamagePercent() < 1) %pl.flamerClearBurnSched = %pl.schedule(1500,flamer_clearBurn);
 		return;
 	}
 	%pl.burnSched = %pl.schedule(500,flamer_burn,%tick--);
@@ -326,10 +317,7 @@ function flameSetGenerateMedian(%set)
 }
 function flameSetPlayAudio(%set)
 {
-	if(isObject(%set.soundObj))
-	{
-		%set.soundObj.setTransform(%set.median);
-	}
+	if(isObject(%set.soundObj)) %set.soundObj.setTransform(%set.median);
 	else
 	{
 		%soundObj = %set.soundObj = new aiPlayer()

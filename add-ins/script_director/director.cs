@@ -162,12 +162,8 @@ function MinigameSO::SpawnStalkZombies(%minigame)//Go after others who are on th
         {
             if(isObject(%player = %mgmember.player) && %player.getdataBlock().isSurvivor)
             {                                
-
                 %survivorcount++;
                 %survivorplayer[%sc++] = %player;
-
-                //%minigame.survivorAreaZoneNum[%saz++] = %player.AreaZoneNum;
-                //%minigame.survivorAreaZoneNumPlayer[%saz] = %player;
             }
         }
     }
@@ -176,43 +172,10 @@ function MinigameSO::SpawnStalkZombies(%minigame)//Go after others who are on th
     {
         if(%survivorcount > 1 && %survivorplayer[%j].survivorAllyCount == 1 && %survivorplayer[%j].currAreaZone != %survivorplayer[%j+1].currAreaZone)
         {
-            %minigame.spawnZombies(Horde,getRandom(10,20),%player.currAreaZone,%client);
-            %minigame.spawnZombies(Special,getRandom(1,2),%player.currAreaZone,%client);
+            %minigame.spawnZombies(Horde,getRandom(10,20),%player.currAreaZone);
+            %minigame.spawnZombies(Special,getRandom(1,2),%player.currAreaZone);
         }
     }
-
-                    
-
-    //if(%saz > 1)//Archiving this for another time
-    //{
-    //    %highestZone = 0;
-    //    for(%sazc = 1; %sazc <= %saz; %sazc++)
-    //    {    
-    //        %previous = %minigame.survivorAreaZoneNum[%sazc-1];
-    //        if(%minigame.survivorAreaZoneNum[%sazc] > %highestZone)//Find whoever is in the furthest zone
-    //        {
-    //            %highestZone = %minigame.survivorAreaZoneNum[%sazc];
-    //            %highestZonePlayer = %minigame.survivorAreaZoneNumPlayer[%sazc];
-    //        }
-    //        
-    //        if(%minigame.survivorAreaZoneNum[%sazc] == %previous)
-    //        {
-    //            %highzonecount++;
-    //
-    //            if(%highzonecount > %saz/1.333333)
-    //            {
-    //                %highestZone = 0;
-    //                %highestZonePlayer = 0;
-    //            }
-    //        }
-    //    }
-    //    
-    //    if(isObject(%highestZonePlayer))//Where are your friends when you need them?
-    //    {
-    //        %minigame.spawnZombies(Horde,getRandom(10,20),%highestZonePlayer.currAreaZone);
-    //        %minigame.spawnZombies(Special,getRandom(1,4),%highestZonePlayer.currAreaZone);
-    //    }
-    //}
 }
 
 function MinigameSO::BreakRound(%minigame,%client)
@@ -238,11 +201,11 @@ function MinigameSO::WitchRound(%minigame,%client)
         if(strstr(strlwr(MainAreaZone.getObject(%i).getName()),"witch") != -1)
         %spawn++;
     }
+
     if(!%spawn)
     return;
 
     announce("[A witch is nearby]");
-
     %minigame.spawnZombies("Witch",1,0,%client);
     %minigame.DirectorStatus = 2;
 }
@@ -257,6 +220,7 @@ function MinigameSO::TankRound(%minigame,%client)
         if(strstr(strlwr(MainAreaZone.getObject(%i).getName()),"tank") != -1)
         %spawn++;
     }
+
     if(!%spawn)
     return;
 
@@ -270,7 +234,6 @@ function MinigameSO::TankRound(%minigame,%client)
         else %minigame.SoldierTank = 0;
 
         %minigame.spawnZombies("Tank",1,0,%client);
-
         announce("[A tank is nearby]");
     } 
 }
@@ -285,6 +248,7 @@ function MinigameSO::PanicRound(%minigame,%client)
         if(strstr(strlwr(MainAreaZone.getObject(%i).getName()),"horde") != -1)
         %spawn++;
     }
+    
     if(!%spawn)
     return;
     
@@ -326,26 +290,6 @@ function MiniGameSO::HordeRound(%minigame,%type,%client)
         case 2: %minigame.DirectorStatus = 2;
                 if(%minigame.UrgentRound)
                 {
-                    if(isObject(%minigame.member0.player))
-                    %pos = %minigame.member0.player.getPosition();
-                    else %pos = "0 0 0";
-
-                    %musicnum = "musicdata_L4D_horde_urgent";
-                    new AudioEmitter(l4b_music_urgent)
-                    {
-                        position = %pos;
-                        profile = %musicnum.getID();
-                        isLooping = false;
-                        is3D = 0;
-                        volume = 1;
-                        useProfileDescription = "0";
-                        type = 9;
-                        outsideAmbient = "1";
-                        referenceDistance = "2";
-                        maxDistance = 999999;
-                        enableVisualFeedback = "0";
-                    };
-
                     %minigame.schedule(4000,DirectorMusic,"musicdata_L4D_horde_combat",true,1,%client);
                     %minigame.schedule(4000,directorPlaySound,"drum_suspense_end_sound",%client);
 
@@ -353,8 +297,8 @@ function MiniGameSO::HordeRound(%minigame,%type,%client)
                     %minigame.schedule(19000,directorPlaySound,"hordeslayer_0" @ getRandom(1,3) @ "_sound",%client);
                     %minigame.schedule(19000,directorPlaySound,"horde_danger_sound",%client);
                     %minigame.directorPlaySound("zombiehorde_sound",%client);
-                    %minigame.spawnZombies("Horde",30,0,%client);
-                    announce("[Urgent threat...]");
+                    %minigame.spawnZombies("Horde",60,0,%client);
+                    announce("[They're coming...]");
                 }
                 else
                 {

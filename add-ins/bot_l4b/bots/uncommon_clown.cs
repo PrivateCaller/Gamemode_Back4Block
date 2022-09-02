@@ -2,10 +2,8 @@ datablock PlayerData(ZombieClownHoleBot : CommonZombieHoleBot)
 {
 	uiName = "";
 	hName = "Infected" SPC "Clown";//cannot contain spaces
-	ShapeNameDistance = 15;
 	hIsInfected = 1;
-	hZombieL4BType = 4;
-	hCustomNodeAppearance = 1;
+	hZombieL4BType = "Normal";
 	hPinCI = "";
 	hBigMeleeSound = "";
 };
@@ -85,7 +83,7 @@ function L4B_CommonZombDistraction(%obj)
 	}
 }
 
-function ZombieClownHoleBot::L4BUncommonAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
+function ZombieClownHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {
 	%clothesrandmultiplier = getrandom(2,10)*0.15;
 	%uniformColor = 0.481818*%clothesrandmultiplier SPC 0.481818*%clothesrandmultiplier SPC 0.481818*%clothesrandmultiplier SPC 1;

@@ -3,10 +3,8 @@ datablock PlayerData(ToxiCommonZombieHoleBot : CommonZombieHoleBot)
 	uiName = "";
 	hName = "Infected" SPC "Toxic";//cannot contain spaces
 
-	ShapeNameDistance = 15;
 	hIsInfected = 1;
-	hZombieL4BType = 4;
-	hCustomNodeAppearance = 0;
+	hZombieL4BType = "Normal";
 	hPinCI = "";
 	hBigMeleeSound = "";
 };
@@ -114,7 +112,7 @@ function ToxiCommonZombieHoleBot::onCollision(%this, %obj, %col, %fade, %pos, %n
 	Parent::oncollision(%this, %obj, %col, %fade, %pos, %norm);	
 }
 
-function ToxiCommonZombieHoleBot::L4BUncommonAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
+function ToxiCommonZombieHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {	
 	%acidcolor = "0.25 0.85 0.3 1";
 	%randmultiplier = getRandom(200,1150)*0.001;

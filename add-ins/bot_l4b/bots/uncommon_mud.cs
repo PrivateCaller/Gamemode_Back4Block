@@ -410,10 +410,8 @@ datablock PlayerData(MudZombieHoleBot : CommonZombieHoleBot)
     maxBackwardCrouchSpeed = 2;
     maxSideCrouchSpeed = 2;
 
-	ShapeNameDistance = 15;
 	hIsInfected = 1;
-	hZombieL4BType = 4;
-	hCustomNodeAppearance = 0;
+	hZombieL4BType = "Normal";
 	hPinCI = "";
 	hBigMeleeSound = "";
 
@@ -461,7 +459,7 @@ function MudZombieHoleBot::onBotMelee(%this,%obj,%col)
 	CommonZombieHoleBot::onBotMelee(%this,%obj,%col);
 }
 
-function MudZombieHoleBot::L4BUncommonAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
+function MudZombieHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {
 	%mudColor = "0.539547 0.455146 0.416272 1.000000";
 	%randmultiplier = getRandom(200,1000)*0.001;

@@ -28,17 +28,15 @@ datablock PlayerData(ZombieJockeyHoleBot : CommonZombieHoleBot)
     cameratilt = 0.1;
     maxfreelookangle = 2;
 
-	maxdamage = 125;//Health
+	maxdamage = 150;//Health
 	jumpForce = 100 * 10; //8.3 * 90;
 	hTickRate = 2500;
 
 	hName = "Jockey";//cannot contain spaces
 	hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
-
-	ShapeNameDistance = 100;
+	
 	hIsInfected = 2;
-	hZombieL4BType = 5;
-	hCustomNodeAppearance = 0;
+	hZombieL4BType = "Special";
 	hPinCI = "<bitmapk:Add-Ons/Gamemode_Left4Block/add-ins/bot_l4b/icons/ci_jockey2>";
 	SpecialCPMessage = "Right click to leap <br>\c6Jump on non-infected to control them";
 	hBigMeleeSound = "";
@@ -89,7 +87,7 @@ function L4B_holeJockeyKill(%obj,%col)
 	return Parent::OnCollision(%this, %obj, %col, %fade, %pos, %norm);
 	
 	%oScale = getWord(%obj.getScale(),0);
-	if(%oScale >= 0.75 && %oScale <= 0.85 && !L4B_IsOnGround(%obj))
+	if(%oScale >= 0.75 && %oScale <= 0.85 && getWord(%obj.getvelocity(),2) != 0)
 	%obj.SpecialPinAttack(%col);
 	
 	if(%obj.getClassName() $= "AIPlayer")
@@ -217,7 +215,7 @@ function ZombieJockeyHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
 	Parent::onTrigger (%this, %obj, %triggerNum, %val);
 }
 
-	function ZombieJockeyHoleBot::L4BSpecialAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
+	function ZombieJockeyHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {
 	%decal = "AAA-None";
 	%hat = 0;	

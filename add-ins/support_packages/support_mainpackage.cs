@@ -1,17 +1,93 @@
 // ============================================================
 // 1. Main Package
 // ============================================================
+
 package L4B2Bots_Main
 {
-	function player::returnItemSlotDisplay(%obj,%slot)
+	function onObjectCollisionTest(%obj, %col)
 	{
-		if(!isObject(%obj))
+		if(!isObject(%obj)|| !isObject(%col))
 		return;
+	
+		%oscale = getWord(%obj.getScale(),2);
+		%force = vectorDot(%obj.getVelocity(), %obj.getForwardVector());
 		
-		if(isObject(%obj.client))
-		messageClient(%obj.client,'MsgItemPickup','',%slot,%obj.tool[%slot]);
+		if(%obj.getType() & $TypeMasks::PlayerObjectType && %col.getType() & $TypeMasks::PlayerObjectType) 
+		{
+			if(%obj.getdataBlock().getName().isSurvivor && %col.getdataBlock().getName().isSurvivor)
+			return false;
+			
+			if(%obj.getdataBlock().getName() $= "ZombieChargerHoleBot" && vectordist(%obj.getposition(),%col.getposition()) < 6)
+			if(%col.getdataBlock().getName() !$= "ZombieTankHoleBot" && %oScale >= 1.1 && %force > 20 && %obj.hEating != %col)
+			{
+				if(%col.getdatablock().getName() !$= "ZombieChargerHoleBot")
+				{				
+					%obj.playaudio(3,"charger_smash_sound");			
+					%forcecalc = %force/20;
+					%obj.spawnExplosion(pushBroomProjectile,%forcecalc SPC %forcecalc SPC %forcecalc);
+					%obj.playthread(2,"activate2");
+					%normVec = VectorNormalize(vectorAdd(%obj.getForwardVector(),"0" SPC "0" SPC "0.25"));
+					%eye = vectorscale(%normVec,%force/2);
+					%col.setvelocity(%eye);
+	
+					if(checkHoleBotTeams(%obj,%col))
+					%col.damage(%obj.hFakeProjectile, %col.getposition(),0.25, %obj.hDamageType);
+				}
+				return false;
+			}
+		}
+		return true;
+	}
 
-		%obj.slotTaken[%slot] = 0;
+	function Player::ActivateStuff (%player)
+	{
+		%client = %player.client;
+		%player.lastActivated = 0;
+
+		if(isObject(%client.miniGame) && %client.miniGame.WeaponDamage && getSimTime() - %client.lastF8Time < 5000 || %player.getDamagePercent () >= 1)
+		return 0;	
+
+		%start = %player.getEyePoint ();
+		%vec = %player.getEyeVector ();
+		%scale = getWord (%player.getScale (), 2);
+		%end = VectorAdd (%start, VectorScale (%vec, 10 * %scale));
+		%mask = $TypeMasks::FxBrickObjectType | $TypeMasks::VehicleObjectType | $TypeMasks::PlayerObjectType;
+
+		if(%player.isMounted())
+		%exempt = %player.getObjectMount();
+		else %exempt = %player;
+
+		%search = containerRayCast (%start, %end, %mask, %exempt);
+		%victim = getWord(%search, 0);
+
+		if(getSimTime() - %player.lastActivateTime <= 320)
+		%player.activateLevel += 1;
+		else %player.activateLevel = 0;
+		
+		%player.lastActivateTime = getSimTime ();
+
+		if(%player.activateLevel >= 5)
+		%player.playThread (3, activate2);
+		else %player.playThread (3, activate);
+		
+		if(%victim)
+		{
+			%pos = getWords (%search, 1, 3);
+			if(%victim.getType () & $TypeMasks::FxBrickObjectType)
+			{
+				%diff = VectorSub (%start, %pos);
+				%len = VectorLen (%diff);
+				if(%len <= $Game::BrickActivateRange * %scale)
+				%victim.onActivate (%player, %client, %pos, %vec);
+				
+			}
+			else if(isFunction(%victim, onActivate)) %victim.onActivate (%player, %client, %pos, %vec);
+
+			%player.lastActivated = %victim;
+			return %victim;
+		}
+		else return 0;
+		
 	}
 
 	function player::PutItemInSlot(%obj,%slot,%item)
@@ -30,19 +106,7 @@ package L4B2Bots_Main
 
 			return true;
 		}
-		else
-		{
-			if(isObject(%obj.client))
-			{
-				//if(!%obj.slotTaken[%slot])
-				//{
-				//	messageClient(%obj.client,'MsgItemPickup','',%slot,0);
-				//	%obj.slotTaken[%slot] = 1;
-				//	%obj.schedule(100,returnItemSlotDisplay,%slot);
-				//}
-			}
-			return false;
-		}
+		else return false;
 	}
 
 	function player::pickup(%obj,%item)
@@ -67,16 +131,12 @@ package L4B2Bots_Main
 			{			            
         	    case "Secondary": %obj.PutItemInSlot(1,%item);
 								  return;
-
 				case "Grenade": %obj.PutItemInSlot(2,%item);
 							  	return;
-
 				case "Medical": %obj.PutItemInSlot(3,%item);
 							  	return;
-
 				case "Medical_Secondary": %obj.PutItemInSlot(4,%item);
 							  			  return;
-
 				default: %obj.PutItemInSlot(0,%item);
 						 return;
 			}
@@ -89,69 +149,23 @@ package L4B2Bots_Main
 	{
 		Parent::onPlayerTouch(%data,%obj,%player);
 
-		if(%player.getDatablock().isSurvivor)
-		%obj.processInputEvent ("onSurvivorTouch");
-
-		if(%player.getDatablock().getName() !$= "ZombieTankHoleBot")
+		if(%player.getDatablock().isSurvivor) %obj.processInputEvent("onSurvivorTouch");
+		
+		if(%player.hZombieL4BType !$= "") 
 		{
-			if(%player.hZombieL4BType)
-			%obj.processInputEvent ("onZombieTouch");
+			%obj.processInputEvent("onZombieTouch");
+			if(%player.getDatablock().getName() $= "ZombieTankHoleBot") %obj.processInputEvent("onTankTouch");
 		}
-		else %obj.processInputEvent ("onTankTouch");	
-	}
+			
+	}	
 	
 	function Armor::onImpact(%this, %obj, %col, %vec, %force)
 	{
 		if(%force < 40)
 		serverPlay3D("impact_medium" @ getRandom(1,3) @ "_sound",%obj.getPosition());
 		else serverPlay3D("impact_hard" @ getRandom(1,3) @ "_sound",%obj.getPosition());
-		Parent::onImpact(%this, %obj, %col, %vec, %force);
-	}
 
-	//
-	// Two functions that enable death music.
-	//
-	function Armor::onDisabled(%this, %obj, %state)
-	{
-		parent::onDisabled(%this, %obj, %state);
-		if(%obj.hIsInfected || %obj.hZombieL4BType || %obj.hType $= "zombie" || %obj.isBot)
-		{
-			return;
-		}
-		%music = new AudioEmitter("")
-		{
-			position = %obj.getPosition();
-			profile = nameToID("leftfordeath_sound");
-			isLooping= false;
-			is3D = 0;
-			volume = 1;
-			useProfileDescription = "0";
-			type = 9;
-			outsideAmbient = "1";
-			referenceDistance = "2";
-			maxDistance = 999999;
-			enableVisualFeedback = "0";
-		};
-		%music.setNetFlag(6, true);
-		%dead_client = %obj.client;
-		%dead_client.deathMusic = %music.getID();
-		for(%i = 0; %i < ClientGroup.getCount(); %i++)
-		{
-			%target_client = ClientGroup.getObject(%i);
-			if(%dead_client.getID() == %target_client.getID())
-			{
-				%music.scopeToClient(%target_client);
-				continue;
-			}
-			%music.clearScopeToClient(%target_client);
-		}
-	}
-	function Armor::onAdd(%this, %obj)
-	{
-		if(isObject(%obj.client.deathMusic))
-		{
-			%obj.client.deathMusic.delete();
-		}
+		Parent::onImpact(%this, %obj, %col, %vec, %force);
 	}
 
 	function Armor::onNewDatablock(%this, %obj)
@@ -160,41 +174,42 @@ package L4B2Bots_Main
 
 		if(%this.hType !$= "Zombie")
 		{
-			%obj.hZombieL4BType = 0;
-			%obj.hIsInfected = 0;
+			%obj.hZombieL4BType = "";
+			%obj.hIsInfected = "";
 
-			if(%obj.getdatablock().hType)
-			%obj.hType = %obj.getdatablock().hType;
-
-			if(isObject(%obj.client))
-			commandToClient( %obj.client, 'SetVignette', $EnvGuiServer::VignetteMultiply, $EnvGuiServer::VignetteColor );
+			if(%obj.getdatablock().hType !$= "") %obj.hType = %obj.getdatablock().hType;
+			if(isObject(%obj.client)) commandToClient( %obj.client, 'SetVignette', $EnvGuiServer::VignetteMultiply, $EnvGuiServer::VignetteColor);
 		}
+
+		if(isObject(%hEater = %obj.hEater) && %hEater.getDataBlock().getName() $= "ZombieJockeyHoleBot") %obj.mountObject(hEater,2);
 	}	
 	
 	function Armor::onBotMelee(%obj,%col)
 	{
-		//
+		//stuff here
+	}
+
+	function Armor::hCustomNodeAppearance(%obj,%col)
+	{
+		//stuff here
 	}
 
 	function AIPlayer::hMeleeAttack(%obj,%col)
 	{						
-		if(%obj.getState() $= "Dead")
-		return;
+		if(%obj.getState() $= "Dead") return;
 
 		if(%col.getType() & $TypeMasks::VehicleObjectType || %col.getType() & $TypeMasks::PlayerObjectType)
 		{
-			if(%obj.hState $= "Following" || %obj.Distraction)//Make sure it can damage even if it has a distraction it's following
+			if(%obj.hState $= "Following" || %obj.Distraction)
 			{
-				%obj.getDataBlock().onBotMelee(%obj,%col);//Used for L4B zombie bots
-				%obj.playthread(2,activate2);
-
 				%damage = %obj.hAttackDamage*getWord(%obj.getScale(),0);
 				%damagefinal = getRandom(%damage/4,%damage);
-
-				%col.damage(%obj.hFakeProjectile, %col.getposition(), %damagefinal, %obj.hDamageType);
-
 				%obj.hlastmeleedamage = %damagefinal;
 				%obj.lastattacked = getsimtime()+1000;
+
+				%col.damage(%obj.hFakeProjectile, %col.getposition(), %damagefinal, %obj.hDamageType);
+				%obj.getDataBlock().onBotMelee(%obj,%col);
+				%obj.playthread(2,activate2);
 			}
 		}
 	}
@@ -285,7 +300,7 @@ package L4B2Bots_Main
 		if(!isObject(%objA) || !isObject(%objB))
 		return;
 
-		if(%objA.player !$= %objB)//Disable friendly fire
+		if(%objA.player !$= %objB)
 		{
 			if((%objA.getclassname() $= "GameConnection" || %objA.getclassname() $= "Player" || %objA.getclassname() $= "AIPlayer") && (%objB.getclassname() $= "Player" || %objB.getclassname() $= "AIPlayer"))
 			if(%objA.hType $= %objB.hType || %objA.player.hType $= %objB.hType)
@@ -297,7 +312,7 @@ package L4B2Bots_Main
 
 	function MiniGameSO::checkLastManStanding(%minigame)
 	{
-		if(%minigame.RespawnTime > 0 || isEventPending (%minigame.resetSchedule))
+		if(%minigame.RespawnTime > 0 || isEventPending(%minigame.resetSchedule))
 		return;
 
 		for(%i = 0; %i < %minigame.numMembers; %i++)
@@ -399,6 +414,9 @@ package L4B2Bots_Main
 				%aliveplayer++;
 				%minigame.survivorStatHealthAverage = 100*%aliveplayer;
 				%minigame.survivorStatStressAverage = 0;
+
+				if(isObject(%mgmember.deathMusic))
+				%mgmember.deathMusic.delete();
 			}
 		}
 
@@ -413,12 +431,28 @@ package L4B2Bots_Main
 
     function MiniGameSO::endGame(%minigame)
     {
-        Parent::endGame(%minigame);
-        if(isObject(l4b_music)) 
-        l4b_music.delete();
-
 		if(isObject(MainAreaZone))
 		MainAreaZone.delete();
+
+		if(isObject(L4B_BotSet))
+		{
+			for(%z = 0; %z < L4B_BotSet.getCount(); %z++)
+			{	
+				if(isObject(%bot = L4B_BotSet.getObject(%z)))
+				%bot.schedule(10,delete);
+			}
+		}		
+		
+		for(%i=0;%i<%minigame.numMembers;%i++)
+		{
+			if(isObject(%mgmember = %minigame.member[%i]))
+			{
+				if(isObject(%mgmember.deathMusic))
+				%mgmember.l4bmusic[%smc].delete();
+			}
+		}		
+		
+		Parent::endGame(%minigame);
     }
 
 	function holeZombieInfect(%obj, %col)
@@ -430,7 +464,7 @@ package L4B2Bots_Main
 				case "AIPlayer":%col.hChangeBotToInfectedAppearance();
 
 				case "Player": %minigame = getMinigameFromObject(%col);
-							   %minigame.L4B_PlaySound("survivor_turninfected" @ getRandom(1,3) @ "_sound",%col.client);
+							   %minigame.L4B_PlaySound("survivor_turninfected_sound",%col.client);
 							   %minigame.checkLastManStanding();
 							   chatMessageTeam(%col.client,'fakedeathmessage',"<color:00FF00>" @ %obj.getDatablock().hName SPC "<bitmapk:Add-Ons/Gamemode_Left4Block/add-ins/bot_l4b/icons/ci_infected>" SPC %col.client.name);
 

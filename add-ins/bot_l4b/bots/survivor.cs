@@ -82,13 +82,19 @@ datablock PlayerData(SurvivorHoleBot : SurvivorPlayer)
 	  hSpasticLook = 1;//Makes them look around their environment a bit more.
 	hEmote = 1;
 
-    //Our hook.
     hooks_ifWander = "SurvivorBot_ifWander";
 };
 
-//
-// Hook code.
-//
+function L4B_isInFOV(%viewer, %target)
+{	
+	return vectorDot(%viewer.getEyeVector(), vectorNormalize(vectorSub(%target.getPosition(), %viewer.getPosition()))) >= 0.7;
+}
+
+function L4B_isPlayerObstructed(%viewer, %target)
+{
+    //Check if there's anything blocking line-of-sight between the viewer and the target, then return the result.
+    return ContainerRayCast(%viewer.getEyePoint(), %target.getHackPosition(), $TypeMasks::FxBrickObjectType | $TypeMasks::DebrisObjectType | $TypeMasks::InteriorObjectType, %viewer);
+}
 
 function SurvivorBot_ifWander(%obj)
 {
@@ -583,7 +589,7 @@ function SurvivorHoleBot::onBotCollision( %this, %obj, %col, %normal, %speed )
     if(%col.getType() & $TypeMasks::PlayerObjectType && %col.hType $= "Zombie" && %col.getState() !$= "Dead")
     {
         %obj.setAimObject(%col);
-        %obj.meleeTrigger();	
+        //luacall(Survivor_Rightclick,%obj);	
         %obj.setMoveY(-%obj.hMaxMoveSpeed);
     }
 }

@@ -15,25 +15,6 @@ datablock fxDTSBrickData (BrickCommonZombie_HoleSpawnData)
 	holeBot = "CommonZombieHoleBot";
 };
 
-function BrickCommonZombie_HoleSpawnData::onPlant(%this, %obj)
-{
-	if(!isObject(directorBricks))
-    {
-        new SimSet(directorBricks);
-        directorBricks.add(%obj);
-        MissionCleanup.add(directorBricks);
-    }
-    else if(isObject(directorBricks))
-    directorBricks.add(%obj);
-
-	Parent::onPlant(%this,%obj);
-}
-
-function BrickCommonZombie_HoleSpawnData::onloadPlant(%this, %obj)
-{
-	BrickCommonZombie_HoleSpawnData::onPlant(%this,%obj);
-}
-
 datablock PlayerData(CommonZombieHoleBot : PlayerMeleeAnims)
 {
 	canJet = false;
@@ -42,9 +23,9 @@ datablock PlayerData(CommonZombieHoleBot : PlayerMeleeAnims)
 	airControl = 0.1;
 	speedDamageScale = 2.5;
 
-    maxForwardSpeed = 7;
-    maxBackwardSpeed = 6;
-    maxSideSpeed = 5;
+    maxForwardSpeed = 9;
+    maxBackwardSpeed = 7;
+    maxSideSpeed = 8;
 
  	maxForwardCrouchSpeed = 7;
     maxBackwardCrouchSpeed = 5;
@@ -62,17 +43,19 @@ datablock PlayerData(CommonZombieHoleBot : PlayerMeleeAnims)
 	uiName = "Infected";
 	maxTools = 0;
 	maxWeapons = 0;
-	maxdamage = 50;//Health
+	maxdamage = 100;//Health
+
+	rechargeRate = 1.15;
+	maxenergy = 100;
+	showEnergyBar = true;
 	
 	useCustomPainEffects = true;
 	jumpSound = "JumpSound";
 	PainSound		= "";
 	DeathSound		= "";
 
-	ShapeNameDistance = 15;
 	hIsInfected = 1;
-	hZombieL4BType = 1;
-	hCustomNodeAppearance = 0;
+	hZombieL4BType = "Normal";
 	hPinCI = "";
 	hBigMeleeSound = "";
 	
@@ -104,11 +87,10 @@ datablock PlayerData(CommonZombieHoleBot : PlayerMeleeAnims)
 	hStrafe = 0;//Randomly strafe while following player
 	hSearchFOV = 1;//if enabled disables normal hSearch
 	hFOVRadius = 10;//max 10
-
 	hAlertOtherBots = 1;//Alerts other bots when he sees a player, or gets attacked
 
 	//Attack Options
-	hMelee = 2;//Melee
+	hMelee = 1;
 	hAttackDamage = $Pref::Server::L4B2Bots::NormalDamage;
 	hShoot = 1;
 	hWep = "";
@@ -161,43 +143,35 @@ function CommonZombieHoleBot::onNewDataBlock(%this,%obj)
 
 function CommonZombieHoleBot::onDamage(%this,%obj)
 {
-	Parent::OnDamage(%this,%obj);
-
-	if(%obj.getWaterCoverage() == 1)
-	{
-		%obj.emote(oxygenBubbleImage, 1);
-		serverPlay3D("drown_bubbles_sound",%obj.getPosition());
-	}
-	
-	if(%obj.getstate() $= "Dead")
-	return;
+	if(%obj.getstate() $= "Dead") return;
 
 	if(%obj.lastdamage+1250 < getsimtime())
 	{
 		%obj.lastdamage = getsimtime();
+		%obj.playthread(2,"plant");
 
-		if(%obj.raisearms && !%obj.hasRiotshield)
+		if(%obj.raisearms)
 		{
 			%obj.raisearms = 0;
 			%obj.playthread(1,"root");
-			%obj.playthread(2,"plant");
 		}
 
-		if(%obj.getWaterCoverage() != 1)
-		if(%obj.isBurning)
+		if(%obj.getWaterCoverage() == 1)
+		{
+			%obj.emote(oxygenBubbleImage, 1);
+			serverPlay3D("drown_bubbles_sound",%obj.getPosition());
+		}
+		else if(%obj.isBurning)
 		{
 			switch(%obj.chest)	
 			{
 				case 0: %obj.playaudio(0,"zombiemale_ignite" @ getrandom(1,5) @ "_sound");
 				case 1: %obj.playaudio(0,"zombiefemale_ignite1" @ getrandom(1,5) @ "_sound");
 			}
+
+			%obj.MaxSpazzClick = getrandom(16,32);
+			L4B_SpazzZombie(%obj,0);
 			
-			if(!%obj.isBurningToDeath)
-			{
-				%obj.MaxSpazzClick = getrandom(16,32);
-				L4B_SpazzZombie(%obj,0);
-				%obj.isBurningToDeath = 1;
-			}
 		}
 		else switch(%obj.chest)	
 		{
@@ -205,168 +179,104 @@ function CommonZombieHoleBot::onDamage(%this,%obj)
 			case 1: %obj.playaudio(0,"zombiefemale_pain" @ getrandom(1,8) @ "_sound");
 		}
 	}
+
+	Parent::OnDamage(%this,%obj);
 }
 
 function CommonZombieHoleBot::onDisabled(%this,%obj)
 {
-	if(%obj.getstate() !$= "Dead")
-	return;
+	if(%obj.getstate() !$= "Dead") return;
 
 	Parent::OnDisabled(%this,%obj);
 	
-	if(isObject(%obj.client))
-	commandToClient( %obj.client, 'SetVignette', $EnvGuiServer::VignetteMultiply, $EnvGuiServer::VignetteColor );
+	if(isObject(%obj.client)) commandToClient(%obj.client,'SetVignette',$EnvGuiServer::VignetteMultiply,$EnvGuiServer::VignetteColor);
 
-	if(%obj.getWaterCoverage() == 1)
-	serverPlay3D("die_underwater_bubbles_sound",%obj.getPosition());
-	else if(%obj.headless)
-	%obj.playaudio(0,"zombie_headless" @ getrandom(1,4) @ "_sound");
+	if(%obj.getWaterCoverage() == 1) serverPlay3D("die_underwater_bubbles_sound",%obj.getPosition());
+
+	else if(%obj.headless) %obj.playaudio(0,"zombie_headless" @ getrandom(1,4) @ "_sound");
+	
 	else switch(%obj.chest)
 	{
 		case 0: %obj.playaudio(0,"zombiemale_death" @ getrandom(1,10) @ "_sound");
 		case 1: %obj.playaudio(0,"zombiefemale_death" @ getrandom(1,10) @ "_sound");
 	}
-
-	if(isObject(%weapon = %obj.getMountedImage(0)) && %weapon.item)
-	{
-		L4B_ZombieDropLoot(%obj,getMountedImage(0),100);
-		%obj.unMountImage(0);
-	}
 }
 
 function CommonZombieHoleBot::onBotLoop(%this,%obj)
 {
-	if(%obj.getWaterCoverage() == 1)
-	%obj.Damage(%obj, %obj.getPosition(), %obj.getdatablock().maxDamage/1.25, $DamageType::Suicide);
-	
-	if(isObject(%minigame = getMinigameFromObject(%obj)))
-	{
-		%prevdamage = $Pref::Server::L4B2Bots::NormalDamage;
+	if(%obj.getWaterCoverage() == 1) %obj.Damage(%obj,%obj.getPosition(),%obj.getdatablock().maxDamage/1.25,$DamageType::Suicide);
 
-		if(%minigame.UrgentRound)
-		{
-			%obj.hAttackDamage = %prevdamage*3;
-			%obj.setnodeColor("gloweyes","1 1 1 1");
-		}
-		else
-		{
-			%obj.hAttackDamage = %prevdamage;
-			%obj.setnodeColor("gloweyes","1 1 0 1");
-		}
-	}
+	if(%obj.hState !$= "Following")
+	{		
+		if(!isObject(%obj.distraction)) %obj.hSearch = 1;
 
-	%obj.hLimitedLifetime();
-
-	if(!isObject(%obj.distraction))
-	{
-		%obj.hSearch = 1;
-		%obj.distraction = 0;
-	}
-
-	if(!%obj.hFollowing)
-	{
 		%obj.raisearms = 0;
 		%obj.playthread(1,"root");
-
-		switch(%obj.hZombieL4BType)
-		{
-			case 1:	%obj.setMaxForwardSpeed(7);
-					%obj.setmaxUnderwaterForwardSpeed(7);		
-
-			case 3: %obj.setMaxForwardSpeed(5);
-					%obj.setmaxUnderwaterForwardSpeed(5);
-		}
+		%obj.setMaxForwardSpeed(7);
+		%obj.setmaxUnderwaterForwardSpeed(7);
+		%obj.hLimitedLifetime();
 	}
 }
 
 function CommonZombieHoleBot::onBotFollow( %this, %obj, %targ )
 {
-	if(!isObject(%obj) || %obj.getState() $= "Dead")
-	return;
+	if(!isObject(%obj) || %obj.getState() $= "Dead") return;
+
+	%obj.playthread(2,plant);
+	%obj.setMaxForwardSpeed(11);
+	%obj.setmaxUnderwaterForwardSpeed(11);
 	
-	if(%obj.lastsaw+getRandom(2000,6000) < getsimtime() && %obj.getWaterCoverage() != 1)
+	switch(%obj.chest)
 	{
-		switch(%obj.chest)
-		{
-			case 0: %obj.playaudio(0,"zombiemale_attack" @ getrandom(1,10) @ "_sound");
-			case 1: %obj.playaudio(0,"zombiefemale_attack" @ getrandom(1,12) @ "_sound");
-		}
+		case 0: %obj.playaudio(0,"zombiemale_attack" @ getrandom(1,10) @ "_sound");
+		case 1: %obj.playaudio(0,"zombiefemale_attack" @ getrandom(1,12) @ "_sound");
+	}
 
-		switch(%obj.hZombieL4BType)
-		{
-			case 1: %obj.setMaxForwardSpeed(15);
-					%obj.setmaxUnderwaterForwardSpeed(15);
-
-			case 3: %obj.setMaxForwardSpeed(4);
-					%obj.setmaxUnderwaterForwardSpeed(2);
-		}
-
-		%obj.lastsaw = getsimtime();
-		%obj.playthread(2,plant);
-
-		if(getRandom(1,100) <= 25)
-		{
-			%obj.MaxSpazzClick = getrandom(16,32);
-			L4B_SpazzZombie(%obj,0);
-		}
-
+	if(isObject(%targ) && vectordist(%obj.getposition(),%targ.getposition()) < 15)
+	{
 		if(!%obj.raisearms)
 		{	
 			%obj.playthread(1,"armReadyboth");
 			%obj.raisearms = 1;
-			%obj.setMaxForwardSpeed(10);
-		}	
+		}
+
+		if(getRandom(1,4) == 1) L4B_SpazzZombie(%obj,0);
 	}
+	else if(%obj.raisearms)
+	{	
+		%obj.playthread(1,"root");
+		%obj.raisearms = 0;
+	}	
 }
 
 function CommonZombieHoleBot::onCollision(%this, %obj, %col, %fade, %pos, %norm)
 {
-	Parent::oncollision(%this, %obj, %col, %fade, %pos, %norm);
+	Parent::onCollision(%this, %obj, %col, %fade, %pos, %norm);
 }
 
 function CommonZombieHoleBot::onBotMelee(%this,%obj,%col)
 {		
 	%meleeimpulse = mClamp(%obj.hLastMeleeDamage, 1, 10);
-	
-	if(%obj.hIsInfected $= "1" && !%col.hIsImmune && !%col.hIsInfected)
-	{
-		%col.setenergylevel(%col.getEnergyLevel()-%meleeimpulse*2);
-		
-		if(%col.getEnergyLevel() < 1)
-		holeZombieInfect(%obj,%col);
-	}
-
-	if(%col.getType() & $TypeMasks::PlayerObjectType)
-	%col.spawnExplosion("ZombieHitProjectile",%meleeimpulse/4);
-
-
-	%col.applyimpulse(%col.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),getrandom(100,100*%meleeimpulse)),"0" SPC "0" SPC getrandom(100,100*%meleeimpulse)));
-	%col.playthread(3,"plant");
 	%obj.playaudio(1,"melee_hit" @ getrandom(1,8) @ "_sound");
-}
+	%col.applyimpulse(%col.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),getrandom(100,100*%meleeimpulse)),"0" SPC "0" SPC getrandom(100,100*%meleeimpulse)));
+	
+	if(%col.getType() & $TypeMasks::PlayerObjectType)
+	{
+		if(%obj.hIsInfected && !%col.hIsImmune && !%col.hIsInfected && %col.getEnergyLevel() < 1)
+		{
+			%col.setenergylevel(%col.getEnergyLevel()-%meleeimpulse*2);
+			holeZombieInfect(%obj,%col);
+		}
 
-function Player::ZombieLowerArms(%player)
-{
-	%player.playthread(2,root);
-	%player.IsZombieArmsUp = 0;
+		%col.spawnExplosion("ZombieHitProjectile",%meleeimpulse/4);
+		%col.playthread(3,"plant");
+	}
 }
 
 function CommonZombieHoleBot::onBotCollision( %this, %obj, %col, %normal, %speed )
 {	
-	if(%obj.getState() $= "Dead")
-	return;
-	
-	if(%col.getClassName() $= "Player" || %col.getClassName() $= "AIPlayer")
-	if(%col.getState() !$= "Dead" && %obj.lasthit+getRandom(250,750) < getsimtime())
-	{
-		if(!checkholebotTeams(%obj,%col))//get out of my way
-		{
-			%col.applyimpulse(%col.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),getrandom(500,700)),"0" SPC "0" SPC getrandom(400,500)));
-			%obj.playaudio(1,"melee_shove_sound");
-			%obj.playthread(3,"activate2");
-			%obj.lasthit = getsimtime();
-		}
-	}
+	if(%obj.getState() $= "Dead") return;
+	//do something, I have no idea yet
 }
 
 function CommonZombieHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
@@ -377,7 +287,7 @@ function CommonZombieHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
 	{
 		switch(%triggerNum)
 		{
-			case 0: if(%val)
+			case 0: if(%val && %obj.getEnergyLevel() > 25)
 					{
 						if(!%obj.IsZombieArmsUp)
 						{
@@ -385,35 +295,26 @@ function CommonZombieHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
 							%obj.IsZombieArmsUp = 1;
 						}
 
+						if(isObject(%touchedobj = %obj.lastactivated) && checkHoleBotTeams(%obj,%touchedobj)) %obj.hMeleeAttack(%touchedobj);
+
 						cancel(%obj.ZombieLowerArmsSchedule);
 						%obj.ZombieLowerArmsSchedule = %obj.schedule(500,ZombieLowerArms);
-
-						%eye = %obj.getEyePoint(); //eye point
-						%scale = getWord (%obj.getScale (), 2);
-						%len = $Game::BrickActivateRange * %scale; //raycast length
-						%masks = $TypeMasks::FxBrickObjectType | $TypeMasks::PlayerObjectType | $TypeMasks::VehicleObjectType;
-						%vec = %obj.getEyeVector(); //eye vector
-
-						%beam = vectorScale(%vec,%len); //lengthened vector (for calculating the raycast's endpoint)
-						%end = vectorAdd(%eye,%beam); //calculated endpoint for raycast
-						%ray = containerRayCast(%eye,%end,%masks,%obj); //fire raycast
-						%ray = isObject(firstWord(%ray)) ? %ray : 0; //if raycast hit - keep ray, else set it to zero
-
-						if(!%ray) //if Beam Check fcn returned "0" (found nothing)
-						return Parent::onTrigger (%this, %obj, %triggerNum, %val); //stop here
-
-						%target = firstWord(%ray);
-
-						if(%target.getType() & $TypeMasks::PlayerObjectType)
-						if(miniGameCanDamage(%obj,%target) && checkHoleBotTeams(%obj,%target))
-						%obj.PlayerZombieMeleeAttack(%target);
 					}
 			default:
 		}
 	}
 }
 
-function CommonZombieHoleBot::L4BCommonAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
+function Player::ZombieLowerArms(%player)
+{
+	if(isObject(%player))
+	{
+		%player.playthread(2,root);
+		%player.IsZombieArmsUp = 0;
+	}
+}
+
+function CommonZombieHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {	
 	%shirtColor = getRandomBotRGBColor();
 	%accentColor = getRandomBotRGBColor();
@@ -472,130 +373,4 @@ function CommonZombieHoleBot::L4BCommonAppearance(%this,%obj,%skinColor,%face,%d
 
 	GameConnection::ApplyBodyParts(%obj);
 	GameConnection::ApplyBodyColors(%obj);
-}
-
-function CommonZombieHoleBot::L4BCommonFastAppearance(%this,%obj,%skinColor,%face,%chest)
-{	
-	%handColor = %skinColor;
-	%hatColor = getRandomBotRGBColor();
-	%packColor = getRandomBotRGBColor();
-	%shirtColor = %skinColor;
-	%pantsColor = getRandomBotPantsColor();
-	%shoeColor = getRandomBotPantsColor();
-
-	%larmColor = getRandom(0,1);
-	if(%larmColor)
-	%larmColor = %shirtColor;
-	else %larmColor = %skinColor;
-	%rarmColor = getRandom(0,1);
-	if(%rarmColor)
-	%rarmColor = %shirtColor;
-	else %rarmColor = %skinColor;
-	%rLegColor = getRandom(0,1);
-	if(%rLegColor)
-	%rLegColor = %shoeColor;
-	else %rLegColor = %skinColor;
-	%lLegColor = getRandom(0,1);
-	if(%lLegColor)
-	%lLegColor = %shoeColor;
-	else %lLegColor = %skinColor;
-
-	%decal = "HCZombie";
-	%obj.accentColor = %accentColor;
-	%obj.accent =  0;
-	%obj.hatColor = %hatColor;
-	%obj.hat = 0;
-	%obj.headColor = %skinColor;
-	%obj.faceName = %face;
-	%obj.chest =  %chest;
-	%obj.decalName = %decal;
-	%obj.chestColor = %shirtColor;
-	%obj.pack =  0;
-	%obj.packColor =  %packColor;
-	%obj.secondPack =  0;
-	%obj.secondPackColor =  %packColor;
-	%obj.larm =  "0";
-	%obj.larmColor = %larmColor;
-	%obj.lhand =  0;
-	%obj.lhandColor = %handColor;
-	%obj.rarm =  "0";
-	%obj.rarmColor = %rarmColor;
-	%obj.rhandColor = %handColor;
-	%obj.rhand = 0;
-	%obj.hip =  "0";
-	%obj.hipColor = %pantsColor;
-	%obj.lleg =  0;
-	%obj.llegColor = %lLegColor;
-	%obj.rleg =  0;
-	%obj.rlegColor = %rLegColor;
-
-	if(%obj.getClassName() $= "AIPlayer" && getRandom(1,16) == 1)//Chance to become zombie version of player
-	{
-		if(isObject(%playerclient = ClientGroup.getObject(getRandom(ClientGroup.getCount()-1))))
-		%obj.hZombieBotToPlayerApearance(%playerclient);
-	}
-
-	GameConnection::ApplyBodyParts(%obj);
-	GameConnection::ApplyBodyColors(%obj);
-}
-
-function AIPlayer::hZombieBotToPlayerApearance(%obj,%playerclient)
-{
-	%obj.name = %obj.getDataBlock().name SPC %playerclient.name;
-
-	%skin = %playerclient.headColor;
-	%zskin = getWord(%skin,0)/2.75 SPC getWord(%skin,1)/1.5 SPC getWord(%skin,2)/2.75 SPC 1;
-	%obj.headColor = %zskin;
-
-	%obj.accent =  %playerclient.accent;
-	%obj.hat = %playerclient.hat;
-	%obj.chest =  %playerclient.chest;
-	%obj.decalName = %playerclient.decalName;
-	%obj.pack =  %playerclient.pack;
-	%obj.secondPack =  %playerclient.secondPack;	
-	%obj.larm =  %playerclient.larm;	
-	%obj.lhand =  %playerclient.lhand;	
-	%obj.rarm =  %playerclient.rarm;
-	%obj.rhand = %playerclient.rhand;
-	%obj.hip =  %playerclient.hip;	
-	%obj.lleg =  %playerclient.lleg;	
-	%obj.rleg =  %playerclient.rleg;
-
-	%obj.accentColor = %playerclient.accentColor;
-	%obj.hatColor = %playerclient.hatColor;
-	%obj.packColor =  %playerclient.packColor;
-	%obj.secondPackColor =  %playerclient.secondPackColor;
-
-	%obj.chestColor = %playerclient.chestColor;
-	%obj.larmColor = %playerclient.larmColor;
-	%obj.rarmColor = %playerclient.rarmColor;
-	%obj.rhandColor = %playerclient.rhandColor;
-	%obj.lhandColor = %playerclient.lhandColor;
-	%obj.hipColor = %playerclient.hipColor;
-	%obj.llegColor = %playerclient.llegColor;
-	%obj.rlegColor = %playerclient.rlegColor;
-
-	if(%playerclient.chestColor $= %skin)
-	%obj.chestColor = %zskin;
-
-	if(%playerclient.larmColor $= %skin)
-	%obj.larmColor = %zskin;
-
-	if(%playerclient.rarmColor $= %skin)
-	%obj.rarmColor = %zskin;
-
-	if(%playerclient.rhandColor $= %skin)
-	%obj.rhandColor = %zskin;
-
-	if(%playerclient.lhandColor $= %skin)
-	%obj.lhandColor = %zskin;
-
-	if(%playerclient.hipColor $= %skin)
-	%obj.hipColor = %zskin;
-
-	if(%playerclient.llegColor $= %skin)
-	%obj.llegColor = %zskin;
-
-	if(%playerclient.rlegColor $= %skin)
-	%obj.rlegColor = %zskin;	
 }

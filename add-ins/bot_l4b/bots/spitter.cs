@@ -12,7 +12,7 @@ datablock PlayerData(ZombieSpitterHoleBot : CommonZombieHoleBot)
 	minImpactSpeed = 16;
 	speedDamageScale = 2;
 
-	maxdamage = 100;//Health
+	maxdamage = 150;//Health
 
     maxForwardSpeed = 8;
     maxBackwardSpeed = 7;
@@ -36,10 +36,8 @@ datablock PlayerData(ZombieSpitterHoleBot : CommonZombieHoleBot)
 	hMoveSlowdown = 1;
 	hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
 
-	ShapeNameDistance = 100;
 	hIsInfected = 1;
-	hZombieL4BType = 5;
-	hCustomNodeAppearance = 0;
+	hZombieL4BType = "Special";
 	hPinCI = "<bitmapk:Add-Ons/Gamemode_Left4Block/add-ins/bot_l4b/icons/ci_spitter2>";
 	SpecialCPMessage = "Right click to spit";
 	hBigMeleeSound = "";
@@ -85,13 +83,14 @@ function ZombieSpitterHoleBot::onBotLoop(%this,%obj)
 
 function ZombieSpitterHoleBot::onBotFollow( %this, %obj, %targ )
 {
-	%obj.setaimobject(%targ);
 	
-	if(vectorDist(%obj.getposition(),%targ.getposition()) < 48)
+	if(vectorDist(%obj.getposition(),%targ.getposition()) > 12)
 	{
-		for (%n = 0; %n < 2; %n++)
 		%obj.getDatablock().schedule(750 * %n,Spit,%obj);
+		%obj.hClearMovement();
+		%obj.setaimobject(%targ);
 	}
+	else %obj.hRunAwayFromPlayer(%targ);	
 
 	Parent::onBotFollow(%this,%obj,%targ);
 }
@@ -166,7 +165,7 @@ function ZombieSpitterHoleBot::onDisabled(%this,%obj)
 	Parent::OnDisabled(%this,%obj);
 }
 
-function ZombieSpitterHoleBot::L4BSpecialAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
+function ZombieSpitterHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {
 	%pantsColor = getRandomBotPantsColor();
 	%shoeColor = getRandomBotPantsColor();

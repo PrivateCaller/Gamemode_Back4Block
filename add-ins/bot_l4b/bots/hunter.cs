@@ -25,15 +25,13 @@ datablock PlayerData(ZombieHunterHoleBot : CommonZombieHoleBot)
     maxBackwardCrouchSpeed = 5;
     maxSideCrouchSpeed = 4;
 
-	ShapeNameDistance = 100;
 	hIsInfected = 2;
-	hZombieL4BType = 5;
-	hCustomNodeAppearance = 1;
+	hZombieL4BType = "Special";
 	hPinCI = "<bitmapk:Add-Ons/Gamemode_Left4Block/add-ins/bot_l4b/icons/ci_hunter2>";
 	SpecialCPMessage = "Hold shift, then press space to leap <br>\c6Pounce to pin non-infected";
 	hBigMeleeSound = "";
 
-	maxdamage = 250;//Health
+	maxdamage = 150;//Health
 	hTickRate = 2500;
 
 	hName = "Hunter";//cannot contain spaces
@@ -72,6 +70,7 @@ function L4B_holeHunterKill(%obj,%col)
 		%obj.HunterHurt = schedule(1000,0,L4B_holeHunterKill,%obj,%col);
 		%obj.unmount();
 		%col.damage(%obj.hFakeProjectile, %col.getposition(), $Pref::Server::L4B2Bots::SpecialsDamage*1.25, $DamageType::Hunter);
+		//%col.damage(%obj.hFakeProjectile, %col.getposition(), -100, $DamageType::Hunter);
 	}
 }
 
@@ -151,22 +150,19 @@ function ZombieHunterHoleBot::onBotFollow( %this, %obj, %targ )
 		%obj.raisearms = 1;
 	}
 
-	if(checkHoleBotTeams(%obj,%targ) && !%obj.isstrangling && !%targ.isBeingStrangled)
+	if(%obj.lastpounce+5000 < getsimtime() && !%obj.isstrangling)
 	{
-		if(%obj.lastpounce+5000 < getsimtime())
-		{
-			%obj.lastpounce = getsimtime();
-		
-			%obj.hCrouch(1750);
-			%obj.playaudio(0,"hunter_recognize" @ getrandom(1,3) @ "_sound");
-			%obj.hAbouttoattack = schedule(800,0,L4B_HunterZombieLunge,%obj,%targ);
-		}
+		%obj.lastpounce = getsimtime();
+	
+		%obj.hCrouch(1750);
+		%obj.playaudio(0,"hunter_recognize" @ getrandom(1,3) @ "_sound");
+		%obj.hAbouttoattack = schedule(1000,0,L4B_HunterZombieLunge,%obj,%targ);
 	}
 }
 
 function L4B_HunterZombieLunge(%obj,%targ)
 {
-	if(!isObject(%obj) || !isObject(%targ) || !L4B_IsOnGround(%obj) || %obj.getState() $= "Dead" || %obj.isstrangling)
+	if(!isObject(%obj) || !isObject(%targ) || getWord(%obj.getvelocity(),2) >= 2 || %obj.getState() $= "Dead" || %obj.isstrangling)
 	return;
 
 	%obj.playaudio(0,"hunter_attack" @ getrandom(1,3) @ "_sound");
@@ -201,22 +197,12 @@ function ZombieHunterHoleBot::onBotMelee(%this,%obj,%col)
 	%obj.spawnExplosion(pushBroomProjectile,%forcescale SPC %forcescale SPC %forcescale);
 	%obj.setMaxForwardSpeed(9);
 	
-	if(%oScale >= 0.9 && %obj.getstate() !$= "Dead")
-	%obj.SpecialPinAttack(%col,%force);
-
-	if(isObject(%obj.hFollowing) && %obj.hFollowing.getState() !$= "Dead" && %obj.getState() !$= "Dead" && !%obj.isStrangling && !%obj.hFollowing.isBeingStrangled)
-	{
-		if(%obj.lastpounce+5000 < getsimtime())
-		{
-			%obj.getDatablock().onBotFollow(%obj,%obj.hFollowing);
-			%obj.lastpounce = getsimtime();
-		}
-	}
+	if(%oScale >= 0.9 && %obj.getstate() !$= "Dead") %obj.SpecialPinAttack(%col,%force);
 
 	Parent::onImpact(%this, %obj, %col, %vec, %force);
 }
 
-function ZombieHunterHoleBot::L4BSpecialAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
+function ZombieHunterHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {	
 	%clothesrandmultiplier = getrandom(2,8)*0.25;
 	%shirtColor = 0.075 SPC 0.125*%clothesrandmultiplier SPC 0.1875*%clothesrandmultiplier SPC 1;
@@ -353,7 +339,7 @@ function ZombieHunterHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
 							%obj.light.delete();
 						 }
 
-			case 2: if(%val && L4B_IsOnGround(%obj) || L4B_IsOnWall(%obj))
+			case 2: if(%val && getWord(%obj.getvelocity(),2) <= 5)
 					if(%obj.BeginPounce)
 					{
 						%obj.BeginPounce = 0;

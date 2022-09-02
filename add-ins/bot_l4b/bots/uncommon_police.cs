@@ -5,8 +5,7 @@ datablock PlayerData(ZombiePoliceHoleBot : CommonZombieHoleBot)
 	hName = "Infected" SPC "Police";//cannot contain spaces//except it can lmao
 
 	hIsInfected = 1;
-	hZombieL4BType = 4;
-	hCustomNodeAppearance = 0;
+	hZombieL4BType = "Normal";
 	hPinCI = "";
 	hBigMeleeSound = "";
 
@@ -51,7 +50,7 @@ function ZombiePoliceHoleBot::onDisabled(%this,%obj)
 	CommonZombieHoleBot::OnDisabled(%this,%obj);
 }
 
-function ZombiePoliceHoleBot::L4BUncommonAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
+function ZombiePoliceHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {	
 	%clothesrandmultiplier = getrandom(5,8)*0.25;
 	%obj.suitColor = 0.075 SPC 0.125*%clothesrandmultiplier SPC 0.1875*%clothesrandmultiplier SPC 1;

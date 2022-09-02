@@ -171,23 +171,43 @@ function configLoadL4BItemNoSlots()
 	%read.delete();
 }
 
-if(loadRequiredAddOn("Bot_Hole") == $Error::None)
+if(loadRequiredAddOn("Bot_Hole") == $Error::None && loadRequiredAddOn("Support_Lua") == $Error::None)
 {	
-	exec("./add-ins/player_survivor/script_newplayerdatablock.cs");
 	exec("./preferences.cs");
-	exec("./support/packages.cs");
-	exec("./support/packages_dll.cs");
-	exec("./support/support_multipleslots.cs");
+	exec("./add-ins/player_survivor/script_newplayerdatablock.cs");
+	exec("./add-ins/support_packages/support_mainpackage.cs");
+	exec("./add-ins/support_packages/support_multipleslots.cs");
+	exec("./add-ins/support_packages/support_jettison.cs");
+	exec("./add-ins/support_packages/support_clientlogger.cs");
+	exec("./add-ins/player_survivor/script_survivor.cs");
+
+	if(isFunction(NetObject, setNetFlag))
+	{
+		exec("./add-ins/support_packages/support_billboards/billboards/billboards.cs");
+		exec("./add-ins/support_packages/support_billboards/billboards_wrapper.cs");
+		$L4B_hasSelectiveGhosting = true;
+	}
+	else
+	{
+		$L4B_hasSelectiveGhosting = false;
+		error("ERROR: The Selective Ghosting DLL is required for Gamemode_Left4Block's billboards to work.");
+		schedule(1000, 0, messageAll, 'MsgError', "\c0ERROR: The Selective Ghosting DLL is required for Gamemode_Left4Block's billboards to work.");
+	}
+
+	if(LoadRequiredAddOn("Support_BotHolePlus") == $Error::None)
+	{
+		exec("./add-ins/bot_l4b/bots/survivor.cs");
+		exec("./add-ins/support_packages/support_afk_system.cs");
+	}
 	
 	if(LoadRequiredAddOn("Weapon_FlashGrenade") == $Error::None)
-	exec("./support/support_flashbang.cs");
+	exec("./add-ins/support_packages/support_flashbang.cs");
 	
 	if(LoadRequiredAddOn("Weapon_SWeps_FlareGun") == $Error::None && LoadRequiredAddOn("Weapon_SWeps") == $Error::None)
-	exec("./support/support_sweps_flaregun.cs");
+	exec("./add-ins/support_packages/support_sweps_flaregun.cs");
 
 	exec("./add-ins/script_director/director.cs");
 	exec("./add-ins/script_director/areazones.cs");
-	exec("./add-ins/player_survivor/script_survivor.cs");
 	exec("./add-ins/bot_l4b/bot_l4b.cs");
 	exec("./add-ins/item_healing/item_healing.cs");
 	exec("./add-ins/script_secondary_melee/script_melee.cs");
@@ -198,26 +218,6 @@ if(loadRequiredAddOn("Bot_Hole") == $Error::None)
 	exec("./add-ins/weapon_throwable_explosives/weapon_throwable_explosives.cs");
 	exec("./add-ins/weapon_rocks/weapon_rocks.cs");
 	exec("./add-ins/brick_interactive/brick_interactive.cs");
-
-	exec("./support/jettison.cs");
-	exec("./support/clientlogger.cs");
-	 if(isFunction(NetObject, setNetFlag))
-	 {
-	 	exec("./support/billboards/billboards.cs");
-	 	exec("./support/billboards_wrapper.cs");
-	 	$L4B_hasSelectiveGhosting = true;
-	 }
-	 else
-	 {
-	 	$L4B_hasSelectiveGhosting = false;
-	 	error("ERROR: The Selective Ghosting DLL is required for Gamemode_Left4Block's billboards to work.");
-	 	schedule(1000, 0, messageAll, 'MsgError', "\c0ERROR: The Selective Ghosting DLL is required for Gamemode_Left4Block's billboards to work.");
-	 }
-	if(LoadRequiredAddOn("Support_BotHolePlus") == $Error::None)
-	{
-		exec("./add-ins/bot_l4b/bots/survivor.cs");
-		exec("./support/afk_system.cs");
-	}
 
 	configLoadL4BTXT("zombiefaces",hZombieFace);
 	configLoadL4BTXT("zombiedecals",hZombieDecal);

@@ -4,10 +4,8 @@ datablock PlayerData(ZombieSoldierHoleBot : CommonZombieHoleBot)
 	maxdamage = 250;//Health
 	hName = "Infected" SPC "Soldier";//cannot contain spaces//except it can lmao
 
-	ShapeNameDistance = 15;
 	hIsInfected = 1;
-	hZombieL4BType = 4;
-	hCustomNodeAppearance = 1;
+	hZombieL4BType = "Normal";
 	hPinCI = "";
 	hBigMeleeSound = "";
 
@@ -58,7 +56,7 @@ function ZombieSoldierHoleBot::onDisabled(%this,%obj)
 	L4B_ZombieDropLoot(%obj,$L4B_Medical[getRandom(1,$L4B_MedicalAmount)],5);
 }
 
-function ZombieSoldierHoleBot::L4BUncommonAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
+function ZombieSoldierHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {	
 	%obj.suitColor = getRandomBotPantsColor();
 	%uniformColor = %obj.suitColor;

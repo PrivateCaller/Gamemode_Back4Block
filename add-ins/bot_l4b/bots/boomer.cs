@@ -29,8 +29,7 @@ datablock PlayerData(ZombieBoomerHoleBot : CommonZombieHoleBot)
     maxSideCrouchSpeed = 5;
 	
 	hIsInfected = 1;
-	hZombieL4BType = 5;
-	hCustomNodeAppearance = 1;
+	hZombieL4BType = "Special";
 	hPinCI = "<bitmapk:Add-Ons/Gamemode_Left4Block/add-ins/bot_l4b/icons/ci_boomer2>";
 	SpecialCPMessage = "Right click to vomit";
 	hBigMeleeSound = "";
@@ -276,7 +275,7 @@ function L4B_ZombieMinionsAttack(%targetid,%count)
 		schedule(1000,0,L4B_ZombieMinionsAttack,%targetid,%count+1);
 }
 
-function ZombieBoomerHoleBot::L4BSpecialAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
+function ZombieBoomerHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {
 	%hatColor = getRandomBotRGBColor();
 	%packColor = getRandomBotRGBColor();

@@ -37,6 +37,7 @@ package L4B2Bots_NewPlayerDatablock
 		%pl.unHideNode((%cl.rarm ? "rarmSlim" : "rarm"));
 		%pl.unHideNode((%cl.larm ? "larmSlim" : "larm"));
 		%pl.unHideNode("headskin");
+
 		if($pack[%cl.pack] !$= "none")
 		{
 			%pl.unHideNode($pack[%cl.pack]);
@@ -63,10 +64,11 @@ package L4B2Bots_NewPlayerDatablock
 			%pl.unHideNode("pants");
 			%pl.unHideNode((%cl.rleg ? "rpeg" : "rshoe"));
 			%pl.unHideNode((%cl.lleg ? "lpeg" : "lshoe"));
+		
 		}
 		%pl.setHeadUp(0);
-		if(%cl.pack+%cl.secondPack > 0)
-			%pl.setHeadUp(1);
+		if(%cl.pack+%cl.secondPack > 0) %pl.setHeadUp(1);
+		
 		if($hat[%cl.hat] $= "Helmet")
 		{
 			if(%cl.accent == 1 && $accent[4] !$= "none")
@@ -80,19 +82,6 @@ package L4B2Bots_NewPlayerDatablock
 			%pl.unHideNode($accent[%cl.accent]);
 			%pl.setNodeColor($accent[%cl.accent],%cl.accentColor);
 		}
-	
-		if (%pl.bloody["lshoe"])
-			%pl.unHideNode("lshoe_blood");
-		if (%pl.bloody["rshoe"])
-			%pl.unHideNode("rshoe_blood");
-		if (%pl.bloody["lhand"])
-			%pl.unHideNode("lhand_blood");
-		if (%pl.bloody["rhand"])
-			%pl.unHideNode("rhand_blood");
-		if (%pl.bloody["chest_front"])
-			%pl.unHideNode((%cl.chest ? "fem" : "") @ "chest_blood_front");
-		if (%pl.bloody["chest_back"])
-			%pl.unHideNode((%cl.chest ? "fem" : "") @ "chest_blood_back");
 	
 		%pl.setFaceName(%cl.faceName);
 		%pl.setDecalName(%cl.decalName);
@@ -121,130 +110,119 @@ package L4B2Bots_NewPlayerDatablock
 		%pl.setNodeColor("skirttrimright",%cl.rlegColor);
 		%pl.setNodeColor("skirttrimleft",%cl.llegColor);
 	
-		//Set blood colors.
-		%pl.setNodeColor("lshoe_blood", "0.7 0 0 1");
-		%pl.setNodeColor("rshoe_blood", "0.7 0 0 1");
-		%pl.setNodeColor("lhand_blood", "0.7 0 0 1");
-		%pl.setNodeColor("rhand_blood", "0.7 0 0 1");
-		%pl.setNodeColor("chest_blood_front", "0.7 0 0 1");
-		%pl.setNodeColor("chest_blood_back", "0.7 0 0 1");
-		%pl.setNodeColor("femchest_blood_front", "0.7 0 0 1");
-		%pl.setNodeColor("femchest_blood_back", "0.7 0 0 1");
-	
-		if(%pl.getDataBlock().hCustomNodeAppearance)
 		%pl.getDataBlock().hCustomNodeAppearance(%pl);
 	
-		if(isObject(%cl) && %cl.isAdmin || %cl.isSuper)
+		if(isObject(%cl) && %cl.isAdmin || %cl.isSuper || %cl.player.shades)
 		{
 			%cl.player.unHideNode("shades");
 			%cl.player.setNodeColor("shades","0.1 0.1 0.1 1");
 		}
 
-		if($Pref::Server::L4B2Bots::CustomStyle < 2 && %pl.hIsInfected)
+		if(%pl.hIsInfected)
 		{
 			%pl.unhidenode("gloweyes");
 			%pl.setnodeColor("gloweyes","1 1 0 1");
-		}
 
-		if(isObject(%pl) && %pl.getClassName() $= "Player" && %pl.getDataBlock().hType $= "zombie")
-		{
-			%skin = %cl.headColor;
-			%zskin = getWord(%skin,0)/2.75 SPC getWord(%skin,1)/1.5 SPC getWord(%skin,2)/2.75 SPC 1;
-			%pl.client.zombieColor = %zskin;
-			%pl.setNodeColor("headskin", %zSkin);
-
-			if(%cl.rArmColor $= %skin)
+			if(%pl.getClassName() $= "Player")
 			{
-				%pl.setNodeColor($RArm[0], %zSkin);
-				%pl.setNodeColor($RArm[1], %zSkin);
-			}
-
-			if(%cl.lArmColor $= %skin)
-			{
-				%pl.setNodeColor($LArm[0], %zSkin);
-				%pl.setNodeColor($LArm[1], %zSkin);
-			}
-
-			if(%cl.rHandColor $= %skin)
-			{
-				%pl.setNodeColor($RHand[0], %zSkin);
-				%pl.setNodeColor($RHand[1], %zSkin);
-			}
-
-			if(%cl.lHandColor $= %skin)
-			{
-				%pl.setNodeColor($LHand[0], %zSkin);
-				%pl.setNodeColor($LHand[1], %zSkin);
-			}
-
-			if(%cl.chestColor $= %skin)
-			{
-				%pl.setNodeColor($Chest[0], %zSkin);
-				%pl.setNodeColor($Chest[1], %zSkin);
-			}
-
-			if(%cl.hipColor $= %skin)
-			{
-				%pl.setNodeColor($Hip[0], %zSkin);
-				%pl.setNodeColor($Hip[1], %zSkin);
-			}
-
-			if(%cl.rLegColor $= %skin)
-			{
-				%pl.setNodeColor($RLeg[0], %zSkin);
-				%pl.setNodeColor($RLeg[1], %zSkin);
-			}
-
-			if(%cl.lLegColor $= %skin)
-			{
-				%pl.setNodeColor($LLeg[0], %zSkin);
-				%pl.setNodeColor($LLeg[1], %zSkin);
-			}
-
-			if($Pref::Server::L4B2Bots::::CustomStyle < 2)
-			%pl.setFaceName("asciiTerror");
-			else %pl.setFaceName($hZombieFace[getRandom(1,$hZombieFaceAmount)]);
-
-			switch$(%pl.getDataBlock().getName())
-			{
-				case "ZombieHunterHoleBot": %pl.hideNode($hat[%cl.hat]);
-											%pl.unhideNode($hat[1]);
-											%pl.hidenode(Lhand);
-    										%pl.hidenode(Rhand);
-											%pl.setnodecolor($hat[1],%cl.chestColor);
-											%pl.setNodeColor($RArm[0],%cl.chestColor);
-											%pl.setNodeColor($RArm[1],%cl.chestColor);
-											%pl.setNodeColor($LArm[0],%cl.chestColor);
-											%pl.setNodeColor($LArm[1],%cl.chestColor);
-											%pl.setDecalName("Hoodie");
-
-				case "ZombieChargerHoleBot": %pl.setNodeColor($Chest[0], %zSkin);
-											 %pl.setNodeColor($Chest[1], %zSkin);
-											 %pl.setDecalName("worm_engineer");
-											
-											 %pl.HideNode("lhand_blood");
-											 %pl.HideNode("rhand_blood");
-											 %pl.bloody["rhand"] = false;
-											 %pl.bloody["lhand"] = false;
-											 
-				case "ZombieJockeyHoleBot": %pl.setNodeColor($RLeg[0], %zSkin);
-											%pl.setNodeColor($RLeg[1], %zSkin);
-											%pl.setNodeColor($LLeg[0], %zSkin);
-											%pl.setNodeColor($LLeg[1], %zSkin);
-											%pl.setNodeColor($Chest[0], %zSkin);
-											%pl.setNodeColor($Chest[1], %zSkin);
-											%pl.setNodeColor($LHand[0], %zSkin);
-											%pl.setNodeColor($LHand[1], %zSkin);
-											%pl.setNodeColor($RHand[0], %zSkin);
-											%pl.setNodeColor($RHand[1], %zSkin);
-											%pl.setNodeColor($RArm[0], %zSkin);
-											%pl.setNodeColor($RArm[1], %zSkin);
-											%pl.setNodeColor($LArm[0], %zSkin);
-											%pl.setNodeColor($LArm[1], %zSkin);
-											%pl.setDecalName("AAA-None");
-				case "ZombieBoomerHoleBot": %pl.hideNode($hat[%cl.hat]);
-				default:
-			}
+				%skin = %cl.headColor;
+				%zskin = getWord(%skin,0)/2.75 SPC getWord(%skin,1)/1.5 SPC getWord(%skin,2)/2.75 SPC 1;
+				%pl.client.zombieColor = %zskin;
+				%pl.setNodeColor("headskin", %zSkin);
+	
+				if(%cl.rArmColor $= %skin)
+				{
+					%pl.setNodeColor($RArm[0], %zSkin);
+					%pl.setNodeColor($RArm[1], %zSkin);
+				}
+	
+				if(%cl.lArmColor $= %skin)
+				{
+					%pl.setNodeColor($LArm[0], %zSkin);
+					%pl.setNodeColor($LArm[1], %zSkin);
+				}
+	
+				if(%cl.rHandColor $= %skin)
+				{
+					%pl.setNodeColor($RHand[0], %zSkin);
+					%pl.setNodeColor($RHand[1], %zSkin);
+				}
+	
+				if(%cl.lHandColor $= %skin)
+				{
+					%pl.setNodeColor($LHand[0], %zSkin);
+					%pl.setNodeColor($LHand[1], %zSkin);
+				}
+	
+				if(%cl.chestColor $= %skin)
+				{
+					%pl.setNodeColor($Chest[0], %zSkin);
+					%pl.setNodeColor($Chest[1], %zSkin);
+				}
+	
+				if(%cl.hipColor $= %skin)
+				{
+					%pl.setNodeColor($Hip[0], %zSkin);
+					%pl.setNodeColor($Hip[1], %zSkin);
+				}
+	
+				if(%cl.rLegColor $= %skin)
+				{
+					%pl.setNodeColor($RLeg[0], %zSkin);
+					%pl.setNodeColor($RLeg[1], %zSkin);
+				}
+	
+				if(%cl.lLegColor $= %skin)
+				{
+					%pl.setNodeColor($LLeg[0], %zSkin);
+					%pl.setNodeColor($LLeg[1], %zSkin);
+				}
+	
+				if($Pref::Server::L4B2Bots::::CustomStyle < 2)
+				%pl.setFaceName("asciiTerror");
+				else %pl.setFaceName($hZombieFace[getRandom(1,$hZombieFaceAmount)]);
+	
+				switch$(%pl.getDataBlock().getName())
+				{
+					case "ZombieHunterHoleBot": %pl.hideNode($hat[%cl.hat]);
+												%pl.unhideNode($hat[1]);
+												%pl.hidenode(Lhand);
+    											%pl.hidenode(Rhand);
+												%pl.setnodecolor($hat[1],%cl.chestColor);
+												%pl.setNodeColor($RArm[0],%cl.chestColor);
+												%pl.setNodeColor($RArm[1],%cl.chestColor);
+												%pl.setNodeColor($LArm[0],%cl.chestColor);
+												%pl.setNodeColor($LArm[1],%cl.chestColor);
+												%pl.setDecalName("Hoodie");
+	
+					case "ZombieChargerHoleBot": %pl.setNodeColor($Chest[0], %zSkin);
+												 %pl.setNodeColor($Chest[1], %zSkin);
+												 %pl.setDecalName("worm_engineer");
+												
+												 %pl.HideNode("lhand_blood");
+												 %pl.HideNode("rhand_blood");
+												 %pl.bloody["rhand"] = false;
+												 %pl.bloody["lhand"] = false;
+												 
+					case "ZombieJockeyHoleBot": %pl.setNodeColor($RLeg[0], %zSkin);
+												%pl.setNodeColor($RLeg[1], %zSkin);
+												%pl.setNodeColor($LLeg[0], %zSkin);
+												%pl.setNodeColor($LLeg[1], %zSkin);
+												%pl.setNodeColor($Chest[0], %zSkin);
+												%pl.setNodeColor($Chest[1], %zSkin);
+												%pl.setNodeColor($LHand[0], %zSkin);
+												%pl.setNodeColor($LHand[1], %zSkin);
+												%pl.setNodeColor($RHand[0], %zSkin);
+												%pl.setNodeColor($RHand[1], %zSkin);
+												%pl.setNodeColor($RArm[0], %zSkin);
+												%pl.setNodeColor($RArm[1], %zSkin);
+												%pl.setNodeColor($LArm[0], %zSkin);
+												%pl.setNodeColor($LArm[1], %zSkin);
+												%pl.setDecalName("AAA-None");
+					case "ZombieBoomerHoleBot": %pl.hideNode($hat[%cl.hat]);
+					default:
+				}
+			}			
 		}		
 	}
 

@@ -462,7 +462,7 @@ function MiniGameSO::sortItemSpawns(%minigame,%AreaZone,%client)
 
 function Player::BrickScanCheck(%obj)
 {
-	if(!$Pref::SurvivorPlayer::BrickScanning || !isObject(%obj) || %obj.getState() $= "Dead" || !isObject(%minigame = getMiniGameFromObject(%obj)))
+	if(!isObject(%obj) || %obj.getState() $= "Dead" || !isObject(%minigame = getMiniGameFromObject(%obj)))
 	return;
 
 	%obj.AreaZoneNum = 0;

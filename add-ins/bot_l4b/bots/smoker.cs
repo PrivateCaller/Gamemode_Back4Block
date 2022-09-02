@@ -12,7 +12,7 @@ datablock PlayerData(ZombieSmokerHoleBot : CommonZombieHoleBot)
 	minImpactSpeed = 24;
 	speedDamageScale = 2;
 
-	maxdamage = 100;//Health
+	maxdamage = 200;//Health
 
 	hName = "Smoker";//cannot contain spaces
 	hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
@@ -32,10 +32,8 @@ datablock PlayerData(ZombieSmokerHoleBot : CommonZombieHoleBot)
     cameratilt = 0.1;
     maxfreelookangle = 2;
 
-	ShapeNameDistance = 100;
 	hIsInfected = 2;
-	hZombieL4BType = 5;
-	hCustomNodeAppearance = 1;
+	hZombieL4BType = "Special";
 	hPinCI = "<bitmapk:Add-Ons/Gamemode_Left4Block/add-ins/bot_l4b/icons/ci_smoker2>";
 	SpecialCPMessage = "Right click to shoot your tongue <br>\c6Pin non-infected by hitting them with your tongue";
 	hBigMeleeSound = "";
@@ -156,7 +154,7 @@ function ZombieSmokerHoleBot::onBotFollow( %this, %obj, %targ )
 	%obj.hRunAwayFromPlayer(%targ);
 }
 
-function ZombieSmokerHoleBot::L4BSpecialAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
+function ZombieSmokerHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {	
 	%pack2 = 0;
 	%accent = 0;
@@ -316,6 +314,9 @@ function SmokerTongueShape::onTongueLoop(%this,%obj)
 
 			if(isObject(%end) && (%end.getClassName() $= "Player" || %end.getClassName() $= "AIPlayer"))
 			{
+				if(isObject(%end.getMountedImage(2)) && %end.getMountedImage(2).getID() == ZombieSmokerConstrictImage.getID())
+				%end.unMountImage(2);
+				
 				if(%end.getState() $= "Dead")
 				serverPlay3D("victim_smoked_sound",%end.getHackPosition());
 			}
@@ -325,61 +326,48 @@ function SmokerTongueShape::onTongueLoop(%this,%obj)
 		}
 	}
 
-	switch$(%end.getClassName())
+	if(%end.getType() & $TypeMasks::ProjectileObjectType)
+	%endpos = %end.getPosition();
+	else if(%end.getType() & $TypeMasks::PlayerObjectType)
 	{
-		case "Projectile": %endpos = %end.getPosition();
-							if(%smoker.getclassname() $= "AIPlayer")
-							%smoker.setaimlocation(%endpos);
-		case "Player": %endpos = %end.getHackPosition();
+		%smoker.playthread(1,"activate2");
+		%endpos = vectorSub(%end.getmuzzlePoint(2),"0 0 0.2");
 
-						if(%smoker.getclassname() $= "AIPlayer")
-						%smoker.setaimlocation(%endpos);
+		if(%smoker.getclassname() $= "AIPlayer")
+		%smoker.setaimlocation(%endpos);
 
-						if(getWord(%end.getVelocity(), 2) < 3 && vectordist(%smoker.getposition(),%end.getposition()) >= 1)
-						{
-							if(%end.lastchokecough+getrandom(500,750) < getsimtime())
-							{
-								%end.playaudio(0,"norm_cough" @ getrandom(1,3) @ "_sound");
-								%end.playthread(2,"plant");
-								%end.lastchokecough = getsimtime();
-								%end.damage(%smoker.hFakeProjectile, %end.getposition(), 3, $DamageType::SmokerConstrict);
-							}
-						}
+		if(%end.lastchokecough+getrandom(250,500) < getsimtime() && getWord(%end.getVelocity(), 2) >= 0.5)
+		{
+			%end.playaudio(0,"norm_cough" @ getrandom(1,3) @ "_sound");
+			%end.playthread(2,"plant");
+			%end.lastchokecough = getsimtime();
+			%end.damage(%smoker.hFakeProjectile, %end.getposition(), 3, $DamageType::SmokerConstrict);
 
-						%DisSub = vectorSub(%end.getPosition(),%smoker.getposition());
-						%DistanceNormal = vectorNormalize(%DisSub);
+			if(%smoker.lastdamage+getRandom(1000,2500) < getsimtime())//Check if the chest is the female variant and add a 1 second cooldown
+			{
+				%smoker.playaudio(0,"smoker_pain" @ getrandom(1,4) @ "_sound");
+				%smoker.lastdamage = getsimtime();
+				%smoker.playthread(2,"plant");
+			}
+		}
 
-						if(L4B_IsOnGround(%end))
-						%force = 10;
-						else %force = 5;
+		%DisSub = vectorSub(%end.getPosition(),%smoker.getposition());
+		%DistanceNormal = vectorNormalize(%DisSub);
 
-						%end.setVelocity(vectorscale(%DistanceNormal,-%force));
+		if(getWord(%end.getvelocity(),2) != 0)
+		%force = 10;
+		else %force = 5;
+		%newvelocity = vectorscale(%DistanceNormal,-%force);
 
-		case "AIPlayer": %endpos = %end.getHackPosition();
+		if(vectorDist(%end.gethackposition(),%smoker.gethackposition()) > 5)
+		%zinfluence = getWord(%end.getVelocity(), 2) + getWord(%newvelocity, 2)/7.5;
+		else %zinfluence = getWord(%end.getVelocity(), 2);
 
-						if(%smoker.getclassname() $= "AIPlayer")
-						%smoker.setaimlocation(%endpos);
-
-						 if(getWord(%end.getVelocity(), 2) < 3 && vectordist(%smoker.getposition(),%end.getposition()) >= 1)
-						 {
-						 	if(%end.lastchokecough+getrandom(500,750) < getsimtime())
-						 	{
-						 		%end.playaudio(0,"norm_cough" @ getrandom(1,3) @ "_sound");
-						 		%end.playthread(2,"plant");
-						 		%end.lastchokecough = getsimtime();
-						 		%end.damage(%smoker.hFakeProjectile, %end.getposition(), 3, $DamageType::SmokerConstrict);
-						 	}
-						 }
- 
-						 %DisSub = vectorSub(%end.getPosition(),%smoker.getposition());
-						 %DistanceNormal = vectorNormalize(%DisSub);
- 
-						 if(L4B_IsOnGround(%end))
-						 %force = 10;
-						 else %force = 5;
- 
-						 %end.setVelocity(vectorscale(%DistanceNormal,-%force));
+		%end.setVelocity(getWords(%newvelocity, 0, 1) SPC %zinfluence);
 	}
+
+	if(%smoker.getclassname() $= "AIPlayer")
+	%smoker.setaimlocation(%endpos);
 
 	//Calculate the position and scale between the smoker and victim
 	%head = %smoker.getmuzzlePoint(2);
@@ -390,7 +378,7 @@ function SmokerTongueShape::onTongueLoop(%this,%obj)
 	%obj.setTransform(vectorScale(vectorAdd(vectorAdd(%head,"0 0 0.5"),%endpos),0.5) SPC %xyz SPC %u);
 	%obj.setScale(0.2 SPC vectorDist(%head,%endpos) * 2 SPC 0.2);
 
-	%obj.TongueLoop = %this.schedule(25,onTongueLoop,%obj);
+	%obj.TongueLoop = %this.schedule(33,onTongueLoop,%obj);
 }
 
 datablock ProjectileData(SmokerTongueProjectile)
@@ -420,9 +408,10 @@ function SmokerTongueProjectile::onCollision(%this,%proj,%col,%fade,%pos,%normal
 	serverPlay3D("smoker_tongue_hit_sound",%pos);
 
 	cancel(%obj.SmokerTongueReturn);
-	if(%col.getType() & $Typemasks::PlayerObjectType && L4B_SpecialsPinCheck(%obj,%col))
+	if(%col.getType() & $Typemasks::PlayerObjectType)
 	{
 		%col.dismount();
+		%col.playthread(0,"side");
 		%obj.tongue.end = %col;
 		%obj.SpecialPinAttack(%col);
 	}

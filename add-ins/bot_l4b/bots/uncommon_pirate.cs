@@ -2,10 +2,8 @@ datablock PlayerData(ZombiePirateHoleBot : CommonZombieHoleBot)
 {
 	uiName = "";
 	hName = "Infected" SPC "Pirate";
-	ShapeNameDistance = 15;
 	hIsInfected = 1;
-	hZombieL4BType = 4;
-	hCustomNodeAppearance = 0;
+	hZombieL4BType = "Normal";
 	hPinCI = "";
 	hBigMeleeSound = "";
 };
@@ -43,7 +41,7 @@ function ZombiePirateHoleBot::onDamage(%this,%obj)
 	CommonZombieHoleBot::OnDamage(%this,%obj);
 }
 
-function ZombiePirateHoleBot::L4BUncommonAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
+function ZombiePirateHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {
 	%obj.hidenode(Rshoe_blood);
 	%obj.bloody["rshoe"] = false;

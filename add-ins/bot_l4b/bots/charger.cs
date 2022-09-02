@@ -12,8 +12,7 @@ datablock PlayerData(ZombieChargerHoleBot : CommonZombieHoleBot)
 	minImpactSpeed = 25;
 	airControl = 0.1;
 	speedDamageScale = 0.2;
-	ShapeNameDistance = 50;
-	maxdamage = 200;//Health
+	maxdamage = 300;//Health
 	hName = "Charger";//cannot contain spaces
 	hTickRate = 2500;
 	hMeleeCI = "Charger";
@@ -33,10 +32,8 @@ datablock PlayerData(ZombieChargerHoleBot : CommonZombieHoleBot)
     maxBackwardCrouchSpeed = 5;
     maxSideCrouchSpeed = 4;
 
-	hCustomNodeAppearance = 1;
-	ShapeNameDistance = 100;
 	hIsInfected = 2;
-	hZombieL4BType = 5;
+	hZombieL4BType = "Special";
 	hPinCI = "<bitmapk:Add-Ons/Gamemode_Left4Block/add-ins/bot_l4b/icons/ci_charger2>";
 	SpecialCPMessage = "Right click to charge <br>\c6Charge to pin non-infected";
 	hBigMeleeSound = "charger_punch1_sound";
@@ -134,18 +131,16 @@ function ZombieChargerHoleBot::onBotLoop(%this,%obj)
 
 function ZombieChargerHoleBot::onBotFollow( %this, %obj, %targ )
 {
-	if(%obj.lastsaw+8000 < getsimtime() && !%targ.getDatablock().isDowned && !%obj.isstrangling)
+	if(%obj.lastsaw+8000 < getsimtime() && vectorDist(%obj.getposition(),%targ.getposition()) > 8)
 	{
 		%obj.lastsaw = getsimtime();
-
-		%obj.AboutToCharge = schedule(1500,0,L4B_Charging,%obj,%targ);
+		%obj.AboutToCharge = schedule(1000,0,L4B_Charging,%obj,%targ);
 	
 		%obj.playthread(1,"armReadyright");
 		%obj.playthread(3,"plant");
 		%obj.playaudio(0,"charger_warn" @ getrandom(1,3) @ "_sound");
 	}
-	if(!isEventPending(%obj.AboutToCharge))
-	%obj.playaudio(0,"charger_recognize" @ getrandom(1,4) @ "_sound");
+	if(!isEventPending(%obj.AboutToCharge)) %obj.playaudio(0,"charger_recognize" @ getrandom(1,4) @ "_sound");
 }
 
 function ZombieChargerHoleBot::onCollision(%this, %obj, %col, %fade, %pos, %norm)
@@ -155,14 +150,8 @@ function ZombieChargerHoleBot::onCollision(%this, %obj, %col, %fade, %pos, %norm
 
 function ZombieChargerHoleBot::onImpact(%this, %obj, %col, %vec, %force)
 {
-	if(%obj.getstate() $= "Dead")
-	return;
-
-	//cancel(%obj.StartAfterCharge);
-	//cancel(%obj.WalkAfterCharge);
-
-	if(%obj.getclassname() $= "AIPlayer")
-	%obj.startHoleLoop();
+	if(%obj.getstate() $= "Dead") return;
+	if(%obj.getclassname() $= "AIPlayer") %obj.startHoleLoop();
 
 	if(%force >= 20)
 	{
@@ -179,6 +168,7 @@ function ZombieChargerHoleBot::onImpact(%this, %obj, %col, %vec, %force)
 
 function ZombieChargerHoleBot::onBotMelee(%this,%obj,%col)
 {
+	%obj.bigZombieMelee(%col);
 }	
 
 function ZombieChargerHoleBot::onDamage(%this,%obj,%source,%pos,%damage,%type)
@@ -211,7 +201,7 @@ function ZombieChargerHoleBot::onDisabled(%this,%obj)
 	Parent::onDisabled(%this,%obj,%a);
 }
 
-function ZombieChargerHoleBot::L4BSpecialAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
+function ZombieChargerHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {	
 	%hatColor = getRandomBotRGBColor();
 	%packColor = getRandomBotRGBColor();
@@ -302,12 +292,13 @@ function ZombieChargerHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
 {	
 	if(%obj.getClassName() $= "Player" && %obj.getstate() !$= "Dead")
 	{
-		if(!%obj.hEating && !%obj.SpazzOff)
+		if(%val && !%obj.hEating)
 		{
 			switch(%triggerNum)
 			{
-				case 0: %obj.playthread(1,"activate2");
-						%obj.bigZombieMelee();
+				case 0: if(%obj.getEnergyLevel() > 25 && isObject(%touchedobj = %obj.lastactivated) && checkHoleBotTeams(%obj,%touchedobj)) %obj.hMeleeAttack(%touchedobj);
+
+
 				case 4: if(%obj.GetEnergyLevel() >= %this.maxenergy && %val)
 						{
 							if(!isEventPending(%obj.AboutToCharge))

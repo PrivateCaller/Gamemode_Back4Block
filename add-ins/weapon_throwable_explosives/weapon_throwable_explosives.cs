@@ -524,7 +524,7 @@ function BileOGasCol::Distract(%this, %obj)
 
 	while((%targetid = containerSearchNext()) != 0 )
 	{
-		if(!%targetid.getState() !$= "Dead" && %targetid.getClassName() $= "AIPlayer" && %targetid.hZombieL4BType && %targetid.hZombieL4BType < 5 && !%targetid.isBurning)
+		if(!%targetid.getState() !$= "Dead" && %targetid.getClassName() $= "AIPlayer" && %targetid.hZombieL4BType $= "Normal" && !%targetid.isBurning)
 		{
 			if(!%targetid.Distraction)
 			{

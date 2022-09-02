@@ -4,10 +4,8 @@ datablock PlayerData(ZombieCedaHoleBot : CommonZombieHoleBot)
 	maxdamage = 35;//Health
 	hName = "Infected" SPC "CEDA";//cannot contain spaces
 	noBurning = 1;
-	ShapeNameDistance = 15;
 	hIsInfected = 2;
-	hZombieL4BType = 4;
-	hCustomNodeAppearance = 0;
+	hZombieL4BType = "Normal";
 	hPinCI = "";
 	hBigMeleeSound = "";
 };
@@ -110,7 +108,7 @@ function ZombieCedaHoleBot::onBotMelee(%this,%obj,%col)
 	CommonZombieHoleBot::onBotMelee(%this,%obj,%col);
 }
 
-function ZombieCedaHoleBot::L4BUncommonAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
+function ZombieCedaHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {
 	//Apppearance Zombie
 	%clothesrandmultiplier = getrandom(3,6)*0.15;

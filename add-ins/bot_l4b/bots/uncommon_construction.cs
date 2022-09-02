@@ -3,10 +3,8 @@ datablock PlayerData(ZombieConstructionHoleBot : CommonZombieHoleBot)
 	uiName = "";
 	maxdamage = 35;//Health
 	hName =  "Infected" SPC "Construction";//cannot contain spaces
-	ShapeNameDistance = 15;
 	hIsInfected = 1;
-	hZombieL4BType = 4;
-	hCustomNodeAppearance = 1;
+	hZombieL4BType = "Normal";
 	hPinCI = "";
 	hBigMeleeSound = "";
 };
@@ -66,7 +64,7 @@ function ZombieConstructionHoleBot::onBotMelee(%this,%obj,%col)
 	CommonZombieHoleBot::onBotMelee(%this,%obj,%col);
 }
 
-function ZombieConstructionHoleBot::L4BUncommonAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
+function ZombieConstructionHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {	
 	%clothesrandmultiplier = getrandom(75,200)*0.01;
 	%hatColor = getRandomBotRGBColor();

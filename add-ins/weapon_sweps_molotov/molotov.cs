@@ -115,7 +115,7 @@ datablock projectileData(flamerRubbishProjectile)
 	particleEmitter     	= flamerRubbishBurningEmitter;
 	isBallistic 			= 1;
 	gravityMod 				= 1;
-	lifeTime 				= 4023;
+	lifeTime 				= 12000;
 	explodeOnDeath 			= 1;
 	explosion 				= "";
 	muzzleVelocity = 5;
@@ -151,8 +151,7 @@ function flamerRubbishProjectile::onCollision(%db,%proj,%hit,%fade,%pos,%normal)
 function flamerProjectileExplode(%proj)
 {
 	%mask = $TypeMasks::fxBrickObjectType | $TypeMasks::StaticObjectType | $TypeMasks::InteriorObjectType | $TypeMasks::TerrainObjectType;
-	if(!isObject($flamerFireSet))
-	$flamerFireSet = new simSet();
+	if(!isObject($flamerFireSet)) $flamerFireSet = new simSet();
 	%set = $flamerFireSet;
 	%cnt = %set.getCount();
 	%pos = %proj.getPosition();
@@ -181,8 +180,7 @@ function flamerProjectileExplode(%proj)
 					break;
 				}
 			}
-			if(%pass)
-				%ready = 1;
+			if(%pass) %ready = 1;
 			%safety++;
 		}
 	}
@@ -193,8 +191,7 @@ function flamerProjectileExplode(%proj)
 	if(%pass)
 	{
 		%ray = containerRayCast(%pos,vectorAdd(%pos,"0 0 -1.5"),%mask);
-		if(getWord(%ray,0))
-			%pos = getWords(%ray,1,3);
+		if(getWord(%ray,0)) %pos = getWords(%ray,1,3);
 	}
 	%p = new projectile()
 	{
@@ -214,8 +211,7 @@ function flamerProjectileExplode(%proj)
 		damageType = %damageType;
 	};
 	$flamerFireSet.add(%exp);
-	if(!isEventPending($flamerFireGlobalLoop))
-		flamerExplosionLoop();
+	if(!isEventPending($flamerFireGlobalLoop)) flamerExplosionLoop();
 	flameSetAdd(getFlameSet(%exp),%exp);
 }
 function flamerExplosionLoop()
@@ -517,7 +513,7 @@ datablock ShapeBaseImageData(molotovImage)
 	stateSound[0]			= weaponSwitchSound;
 	
 	stateName[1]			= "FlickA";
-	stateTimeoutValue[1]		= 0.25;
+	stateTimeoutValue[1]		= 0.1;
 	stateTransitionOnTimeout[1]	= "FlickB";
 	stateSequence[1]		= "ready";
 	stateScript[1]			= "onFlick";
@@ -527,7 +523,7 @@ datablock ShapeBaseImageData(molotovImage)
 	stateSound[1]			= molotovLightSound;
 	
 	stateName[7]			= "FlickB";
-	stateTimeoutValue[7]		= 0.3;
+	stateTimeoutValue[7]		= 0.1;
 	stateTransitionOnTimeout[7]	= "Ready";
 	stateSequence[7]		= "ready";
 	stateEmitter[7]                 = molotovSparkEmitter;
@@ -548,7 +544,7 @@ datablock ShapeBaseImageData(molotovImage)
 	
 	stateName[3]                    = "Charge";
 	stateTransitionOnTimeout[3]	= "Armed";
-	stateTimeoutValue[3]            = 0.5;
+	stateTimeoutValue[3]            = 0.25;
 	stateWaitForTimeout[3]		= false;
 	stateTransitionOnTriggerUp[3]	= "AbortCharge";
 	stateScript[3]                  = "onCharge";
@@ -560,7 +556,7 @@ datablock ShapeBaseImageData(molotovImage)
 	
 	stateName[4]			= "AbortCharge";
 	stateTransitionOnTimeout[4]	= "Ready";
-	stateTimeoutValue[4]		= 0.3;
+	stateTimeoutValue[4]		= 0.1;
 	stateWaitForTimeout[4]		= true;
 	stateScript[4]			= "onAbortCharge";
 	stateAllowImageChange[4]	= false;

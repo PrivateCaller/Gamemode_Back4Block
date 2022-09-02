@@ -29,7 +29,7 @@ package L4B_SWepFlamesBurnsZombs
 			if(!%pl.noFireBurning)
 			{
 				%pl.damage(%pl.lastFireAttacker,%pl.getPosition(),%dmg,%pl.lastBurnDmgType);
-				if(%pl.getclassname() $= "AIPlayer" && %pl.hZombieL4BType && %pl.hZombieL4BType < 5)
+				if(%pl.getclassname() $= "AIPlayer" && %pl.hZombieL4BType $= "Normal")
 				{
 					%pl.hRunAwayFromPlayer(%pl);
 					%pl.stopHoleLoop();
@@ -56,14 +56,12 @@ package L4B_SWepFlamesBurnsZombs
 
 	function flamerProjectile::damage(%this,%obj,%col,%fade,%pos,%normal)
 	{
-		if(!%col.getDatablock().noBurning)
-		Parent::damage(%this,%obj,%col,%fade,%pos,%normal);
+		if(!%col.getDatablock().noBurning) Parent::damage(%this,%obj,%col,%fade,%pos,%normal);
 	}
 
 	function molotovProjectile::damage(%this,%obj,%col,%fade,%pos,%normal)
 	{
-		if(!%col.getDatablock().noBurning)
-		Parent::damage(%this,%obj,%col,%fade,%pos,%normal);	
+		if(!%col.getDatablock().noBurning) Parent::damage(%this,%obj,%col,%fade,%pos,%normal);	
 	}
 };
 activatePackage(L4B_SWepFlamesBurnsZombs);
