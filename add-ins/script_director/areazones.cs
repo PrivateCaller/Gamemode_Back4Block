@@ -464,6 +464,23 @@ function Player::BrickScanCheck(%obj)
 {
 	if(!isObject(%obj) || %obj.getState() $= "Dead" || !isObject(%minigame = getMiniGameFromObject(%obj)))
 	return;
+	
+	if(getword(%obj.getvelocity(),2) < -15)
+	{
+		%obj.playthread(2,"side");
+		L4B_SpazzZombie(%obj,0);
+		if(!%obj.isFalling)
+		{
+			%obj.playaudio(0,"survivor_pain_high1_sound");
+			%obj.isFalling = 1;
+		}
+	}
+	else if(%obj.isFalling)
+	{
+		L4B_SpazzZombie(%obj,15);
+		%obj.playthread(2,"root");
+		%obj.isFalling = 0;
+	}
 
 	%obj.AreaZoneNum = 0;
 	%survivorsfound = 1;
@@ -541,13 +558,13 @@ function Player::BrickScanCheck(%obj)
 				}
 
     	    	cancel(%brick.AreaZone.removeAreaFromZone);
-    	    	%brick.AreaZone.removeAreaFromZone = schedule(3000,0,removeAreaFromZone,%brick);
+    	    	%brick.AreaZone.removeAreaFromZone = schedule(2500,0,removeAreaFromZone,%brick);
 			}
     	}
 	}
 
 	cancel(%obj.BrickScanCheck);
-	%obj.BrickScanCheck = %obj.schedule(2000,BrickScanCheck);
+	%obj.BrickScanCheck = %obj.schedule(1500,BrickScanCheck);
 }
 
 registerInputEvent("fxDTSBrick","onAZFirstEntry","Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "Bot Bot" TAB "MiniGame MiniGame");
@@ -559,8 +576,7 @@ function Player::doMRandomTele(%obj,%type)
 {		
 	if(isObject(%main = MainAreaZone) && %main.getCount() > 0)
 	{	
-		if(%type $= "")
-		%brick = %main.getObject(getRandom(0,%main.getcount()-1));
+		if(%type $= "") %brick = %main.getObject(getRandom(0,%main.getcount()-1));
 		else
 		{
 			for (%i = 0; %i < %main.getCount(); %i++) 
@@ -571,8 +587,7 @@ function Player::doMRandomTele(%obj,%type)
 					%brick = %bricklist[getRandom(1,%n)];					
 				}
 			}
-			if(!%n)
-			%brick = %main.getObject(getRandom(0,%main.getcount()-1));
+			if(!%n) %brick = %main.getObject(getRandom(0,%main.getcount()-1));
 		}
 
 		if(%obj.AreaZone)
@@ -584,8 +599,7 @@ function Player::doMRandomTele(%obj,%type)
 					%wanderlist[%m++] = %obj.AreaZone.getObject(%i);
 					%brick = %wanderlist[getRandom(1,%m)];
 				}
-				else if(!%m)
-				%brick = %main.getObject(getRandom(0,%main.getcount()-1));
+				else if(!%m) %brick = %main.getObject(getRandom(0,%main.getcount()-1));
 			}
 		}
 

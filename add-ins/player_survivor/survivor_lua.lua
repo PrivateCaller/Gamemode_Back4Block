@@ -30,17 +30,29 @@ function Survivor_Rightclick(obj)
                     if(ts.call("isObject", ray) == "1") then
 
                         local class = ts.callobj(ray, "getClassName")
-                        ts.call("LuaProjecitleRay",ts.call("posFromRaycast",ray),"SecondaryMeleeProjectile")
+                        ts.call("LuaProjecitle",ts.call("posFromRaycast",ray),"SecondaryMeleeProjectile")
 
-                        if class == "AIPlayer" or class == "Player" then
-
-                            local zombietype = ts.getobj(ray,"hZombieL4BType")
+                        if ts.call("minigameCanDamage",obj,ray) and ts.call("checkHoleBotTeams",obj,ray) and class == "AIPlayer" or class == "Player" then
 
                                 ts.setobj(obj,"SurvivorStress",math.clamp(tonumber(ts.getobj(obj,"SurvivorStress"))+0.25,0,20))
-                                ts.callobj(ray,"applyimpulse",ts.call("posFromRaycast",ray),VectorAdd(VectorScale(ts.callobj(obj,"getForwardVector"),"600"),"0 0 250"))
-                                ts.callobj(ray,"setMoveY",-0.5)
+
+                                if ts.getcallobj(ts.callobj(ray,"getID"),"getDatablock().resistMelee") ~= "1" then 
+                                    
+                                    if class == "AIPlayer" then
+                                        ts.callobj(ray,"setMoveY",-0.5)
+                                        ts.callobj(ray,"setMoveX",0)
+                                        ts.callobj(ray,"setAimObject",obj)
+                                    end
+
+                                    ts.callobj(ray,"cancel",L4B_SpazzZombie)
+                                    ts.callobj(ray,"playThread",3,"zstumble"..math.random(1,3))
+                                    ts.getcallobj(ts.callobj(ray,"getDatablock"),"onDamage("..ts.callobj(obj,"getID")..")")
+                                    ts.callobj(ray,"applyimpulse",ts.call("posFromRaycast",ray),VectorAdd(VectorScale(ts.callobj(obj,"getForwardVector"),"600"),"0 0 250"))
+                                end
+
+                                
                                 ts.call("serverPlay3D","melee_hit" .. math.random(1,8) .. "_sound",ts.call("posFromRaycast",ray))
-                                ts.call("callFunctionFromObjectDatablock",ray,"onDamage",ts.callobj(ray,"getID"))
+                                
 
                         elseif class == "fxDTSBrick" or class == "WheeledVehicle" or class == "fxPlane" then
                             ts.call("serverPlay3D","HitEnv_Sound",ts.call("posFromRaycast",ray))
@@ -67,7 +79,7 @@ function Survivor_LeftClick(val,obj)
 
             if touchedobjclass == "WheeledVehicle" then
                 
-                local otdatablockimage = ts.call("getValueFromDatablock",ts.callobj(touchedobj,"getDatablock"),"image")
+                local otdatablockimage = ts.getcallobj(touchedobj,"getDatablock().image")
 
                 if otdatablockimage ~= "" then
                     ts.callobj(obj,"mountImage",otdatablockimage, 0);
@@ -76,12 +88,12 @@ function Survivor_LeftClick(val,obj)
 
             elseif touchedobjclass == "Player" or touchedobjclass == "AIPlayer" then
 
-                if tonumber(ts.call("getValueFromDatablock",ts.callobj(touchedobj,"getDatablock"),"isDowned")) ~= nil and tonumber(ts.call("getValueFromDatablock",ts.callobj(touchedobj,"getDatablock"),"isDowned")) == 1 then
+                if ts.getcallobj(touchedobj,"getdatablock().isDowned") == "1" then
                     Survivor_ReviveDowned(obj)
                 end
 
                 if tonumber(ts.getobj(touchedobj,"isbeingstrangled")) == 1 and tonumber(ts.getobj(touchedobj,"hisinfected")) ~= 1 then
-                    if tonumber(ts.call("isObject",ts.getobj(touchedobj,"heater"))) == 1 and ts.call("callFunctionFromObjectDatablock",ts.getobj(touchedobj,"heater"),"getName") ~= "ZombieChargerHoleBot" then
+                    if tonumber(ts.call("isObject",ts.getobj(touchedobj,"heater"))) == 1 and ts.getcallobj(ts.getobj(touchedobj,"heater"),"getDatablock().getName()") ~= "ZombieChargerHoleBot" then
 
                         local zombiepinner = ts.getobj(touchedobj,"heater")
 
@@ -113,7 +125,7 @@ function Survivor_LeftClick(val,obj)
 
         if touchedobjclass == "Player" or touchedobjclass == "AIPlayer" then
         
-            if ts.call("getValueFromDatablock",ts.callobj(touchedobj,"getDatablock"),"isDowned") == "1" then
+            if ts.getcallobj(touchedobj,"getdatablock().isDowned") == "1" then
 
                 ts.setobj(touchedobj,"isbeingsaved",0)
                 ts.callobj(obj,"playthread",2,"root")
@@ -175,9 +187,9 @@ end
 
 function Survivor_DamageCheck(obj,damage)
 
+    if ts.getstate(obj) == "Dead" then return end
+    
     local damagepercent = tonumber(ts.callobj(obj,"getDamagePercent"))
-    local damageamount = tonumber(damage)
-    local quarterdamage = damageamount*0.25
     local lastdamagetime = ts.getobj(obj, "lastdamage")
     local stresslevel = tonumber(ts.getobj(obj,"survivorstress"))
     
@@ -186,34 +198,37 @@ function Survivor_DamageCheck(obj,damage)
     elseif damagepercent > 0.75 then ts.callobj(obj,"SetDataBlock","SurvivorPlayerLow")
     end
 
-    if damageamount      > 0 then
+    if tonumber(damage) ~= nil and tonumber(damage) > 0 then
+        local quarterdamage = damage*0.25
+        
         if tonumber(ts.getobj(obj,"survivorstress")) == nil then ts.setobj(obj,"survivorstress",0) end
 		ts.setobj(obj,"survivorstress",math.clamp(stresslevel+quarterdamage,0,20))
 
         if tonumber(lastdamagetime) == nil or tonumber(lastdamagetime)+500 < tonumber(ts.call("GetSimTime")) then
             ts.setobj(obj, "lastdamage",ts.call("GetSimTime"))
         
-			if damageamount >= 5 then ts.callobj(obj,"playaudio",0,"survivor_pain"..math.random(1,4).."_sound") end
-            if damageamount >= 20 then ts.callobj(obj,"playaudio",0,"survivor_painmed"..math.random(1,4).."_sound") end
-            if damageamount >= 30 then ts.callobj(obj,"playaudio",0,"survivor_painhigh"..math.random(1,4).."_sound") end
+			if tonumber(damage) >= 5 then ts.callobj(obj,"playaudio",0,"survivor_pain"..math.random(1,4).."_sound") end
+            if tonumber(damage) >= 20 then ts.callobj(obj,"playaudio",0,"survivor_painmed"..math.random(1,4).."_sound") end
+            if tonumber(damage) >= 30 then ts.callobj(obj,"playaudio",0,"survivor_painhigh"..math.random(1,4).."_sound") end
 			if tonumber(ts.callobj(obj,"getWaterCoverage")) == 1 then ts.callobj(obj,"playaudio",0,"survivor_pain_underwater_sound") end
         end
     end
 end
 
 function Survivor_DownCheck(obj,damage,damageType)
-
+    
+    if ts.getstate(obj) == "Dead" or tonumber(damage) == nil then return end
+    
     local damagelevel = tonumber(ts.callobj(obj,"getdamagelevel"))
-    local damageamount = tonumber(damage)
-    local objdatablock = ts.callobj(obj,"getDatablock")
-    local objdatablockmaxdamage = tonumber(ts.call("getValueFromDatablock",objdatablock,"maxDamage"))
+    local damagedlevel = tonumber(damage)+damagelevel
+    local maxdamage = tonumber(ts.getcallobj(obj,"getdatablock().maxDamage"))
 
     if damageType == ts.get("DamageType::Fall") then
         ts.call("serverPlay3D","impact_fall_sound",ts.callobj(obj,"getHackPosition"))
-        ts.call("LuaProjecitleRay",ts.callobj(obj,"getHackPosition"),"ZombieHitProjectile")
+        ts.call("LuaProjecitle",ts.callobj(obj,"getHackPosition"),"ZombieHitProjectile")
     end    
 
-    if ts.callobj(obj,"getstate") ~= "Dead" and damagelevel+damageamount >= objdatablockmaxdamage and damageamount <= objdatablockmaxdamage/1.333 and tonumber(ts.callobj(obj,"getWaterCoverage")) ~= 1 then
+    if ts.getstate(obj) ~= "Dead" and ts.callobj(obj,"getWaterCoverage") ~= "1" and damagedlevel >= maxdamage and tonumber(damage) < maxdamage/1.333 then
 
 		ts.callobj(obj,"setdamagelevel",0)
         ts.callobj(obj,"setenergylevel",100)

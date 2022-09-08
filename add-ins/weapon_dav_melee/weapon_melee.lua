@@ -1,51 +1,55 @@
 ---@diagnostic disable: undefined-global
 
-function Melee_SwingCheck(obj,this,slot)--Still not done, dont use this
-    
-    if ts.get("isObject",obj) ~= "1" or ts.get("isObject",ts.callobj(obj,"getMountedImage",0)) ~= "1" or ts.call("getValueFromDatablock",ts.callobj(obj,"getMountedImage"),"MeleeDamage") == "" then
-        return
-    end
+function Melee_SwingCheck(obj,this,slot)
+
+    if ts.isobject(obj) == false or ts.getstate(obj) == "Dead" or ts.isobject(ts.callobj(obj,"getMountedImage",0)) == false then return end
+
+    local imagestate = ts.callobj(obj,"getImageState",0) 
+    if ts.getcallobj(obj,"getMountedImage(0).meleeDamage") == "" or imagestate == "Ready" or imagestate == "StopFire" then return end
 
     local pos = ts.callobj(obj,"getMuzzlePoint",slot)
-    local radius = 2
-    local mask = ts.get("TypeMasks::All")
+    local radius = 1
+    local mask = ts.mask.general
     ts.call("initContainerRadiusSearch", pos, radius, mask)
     local target = ts.call("containerSearchNext")
 
-    while ts.call("isObject", target) == "1" do
-        if ts.callobj(target, "getID") ~= ts.callobj(obj, "getID") then
+    while ts.isobject(target) do
+        if ts.callobj(target,"getID") ~= ts.callobj(obj,"getID") then
 
-            local class = ts.callobj(target, "getClassName")
-            local length = 2 * ts.call("getWord",ts.callobj(obj,"getScale"),2)
-            local vec = ts.callobj(obj,"getEyeVector")
-            local targetpos = ts.callobj(target,"getPosition")
-            local line = VectorNormalize(VectorSub(targetpos,pos))
-            local dot = VectorDot(line,vec)
+            local targetpos = ts.getposition(target)
+            local ray = ts.raycast(pos, targetpos, mask, obj)
 
-            if tonumber(VectorDist(pos,targetpos)) < 5 and tonumber(dot) >= 0.45 then
+            if ts.isobject(ray) then
+                
+                local class = ts.callobj(ray, "getClassName")
+                local raypos = ts.call("posFromRaycast",ray)
+                local rayobject = ts.callobj(ray,"getID")
 
-                local ray = ts.call("containerRayCast", pos, targetpos, mask, obj)
+                if tonumber(VectorDist(pos,raypos)) < 1.5 then
 
-                if(ts.call("isObject", ray) == "1") then
-
-                    local class = ts.callobj(ray, "getClassName")
-                    ts.call("LuaProjecitleRay",ts.call("posFromRaycast",ray),"SecondaryMeleeProjectile")
+                    ts.call("LuaProjecitle",ts.call("posFromRaycast",ray),"SecondaryMeleeProjectile")
 
                     if class == "AIPlayer" or class == "Player" then
+                        if ts.getobj(ray,"hZombieL4BType") ~= "" and ts.getstate(ray) ~= "Dead" and ts.call("minigameCanDamage",obj,ray) and ts.call("checkHoleBotTeams",obj,ray) then
 
-                        local zombietype = ts.getobj(ray,"hZombieL4BType")
+                            ts.call("serverPlay3D",ts.getcallobj(this,"meleeHitPlSound").."_hitpl"..math.random(1,2).."_sound",raypos)
+                            ts.callobj(ray,"playThread",3,"zstumble"..math.random(1,4))
+                            
+                            if ts.getcallobj(ts.callobj(ray,"getID"),"getDatablock().getName()") ~= "ZombieTankHoleBot" then
+                                ts.callobj(ray,"damage",obj,raypos,tonumber(ts.getcallobj(rayobject,"getDatablock().maxDamage"))/2,ts.get("DamageType::Default"))
+                                ts.callobj(ray,"applyimpulse",ts.call("posFromRaycast",ray),VectorAdd(VectorScale(ts.callobj(obj,"getForwardVector"),"625"),"0 0 375"))
+                                else ts.callobj(ray,"damage",obj,raypos,150,ts.get("DamageType::Default"))
+                            end
 
-                            ts.setobj(obj,"SurvivorStress",math.clamp(tonumber(ts.getobj(obj,"SurvivorStress"))+0.25,0,20))
-                            ts.callobj(ray,"applyimpulse",ts.call("posFromRaycast",ray),VectorAdd(VectorScale(ts.callobj(obj,"getForwardVector"),"1200"),"0 0 500"))
-                            ts.call("serverPlay3D","melee_hit" .. math.random(1,8) .. "_sound",ts.call("posFromRaycast",ray))
-                            ts.call("callFunctionFromObjectDatablock",ray,"onDamage",ts.callobj(ray,"getID"))
-
+                        end
                     elseif class == "fxDTSBrick" or class == "WheeledVehicle" or class == "fxPlane" then
-                        ts.call("serverPlay3D","HitEnv_Sound",ts.call("posFromRaycast",ray))
+                        ts.call("serverPlay3D",ts.getcallobj(this,"meleeHitEnvSound").."_hitenv"..math.random(1,2).."_sound",raypos)
                     end
                 end
             end
         end
         target = ts.call("containerSearchNext")
     end
+
+    schedule(60, Melee_SwingCheck,obj,this,slot)
 end

@@ -62,8 +62,12 @@ function SurvivorPlayer::onCollision(%this,%obj,%col,%vec,%speed)
 
 	function SurvivorPlayer::onImpact(%this, %obj, %col, %vec, %force)
 {
-	if(getWord(%vec, 2) > %this.minimpactspeed && getWord(%vec, 2) < 18.5) %obj.Damage(%obj,%obj.getPosition(),%force/5,$DamageType::Fall);
-	else if(getWord(%vec, 2) > 18.5) %obj.Damage(%obj,%obj.getPosition(),%force*3,$DamageType::Fall);
+	%vecdiv = getword(%vec,2)/4;
+	%forcediv = %force/4;
+	%falldamage = %vecdiv*%forcediv;
+
+	if(getWord(%vec, 2) > %this.minimpactspeed && getWord(%vec, 2) < 25) %obj.Damage(%obj,%obj.getPosition(),%falldamage,$DamageType::Fall);
+	else if(getWord(%vec, 2) > 25) %obj.Damage(%obj,%obj.getPosition(),%falldamage*3,$DamageType::Fall);
 	
 	Parent::onImpact(%this, %obj, %col, %vec, %force);
 }
@@ -118,15 +122,12 @@ function SurvivorPlayerLow::onLeaveLiquid(%this, %obj, %type)
 
 function SurvivorPlayer::onAdd(%this,%obj)
 {	
-	%obj.client.NotifyOfImmunity = 0;
 
 	if(%obj.getClassName() $= "Player" && isObject(getMinigameFromObject(%obj)))
 	{	
 		if(!%obj.hIsImmune)
-		if(!%obj.client.NotifyOfImmunity)
 		{
 			%obj.client.Play2d("survivor_notimmune_sound");
-			%obj.client.NotifyOfImmunity = 1;
 			GameConnection::ChatMessage (%obj.client, "\c3You are not immune, find a Panacea Syringe to gain immunity from the zombie infection.");
 		}
 	}

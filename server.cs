@@ -173,7 +173,8 @@ function configLoadL4BItemNoSlots()
 
 if(loadRequiredAddOn("Bot_Hole") == $Error::None && loadRequiredAddOn("Support_Lua") == $Error::None)
 {	
-	exec("./preferences.cs");
+	exec("./preferences.cs");	
+	exec("./add-ins/support_packages/extraResources.cs");
 	exec("./add-ins/player_survivor/script_newplayerdatablock.cs");
 	exec("./add-ins/support_packages/support_mainpackage.cs");
 	exec("./add-ins/support_packages/support_multipleslots.cs");

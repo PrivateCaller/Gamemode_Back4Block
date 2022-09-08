@@ -99,7 +99,8 @@ datablock PlayerData(SurvivorPlayer : PlayerMeleeAnims)
 	canJet = false;
 	jumpforce = 100*8.5;
 	jumpDelay = 25;
-	minimpactspeed = 12.5;
+	minimpactspeed = 15;
+	speedDamageScale = 0.25;
 	mass = 105;
 	airControl = 0.05;
 
@@ -109,13 +110,14 @@ datablock PlayerData(SurvivorPlayer : PlayerMeleeAnims)
     cameratilt = 0;
     maxfreelookangle = 2;
 
-    maxForwardSpeed = 8;
-    maxBackwardSpeed = 4;
-    maxSideSpeed = 5;
+    maxForwardSpeed = 9;
+	maxSideSpeed = 7;
+    maxBackwardSpeed = 6;
 
- 	maxForwardCrouchSpeed = 4;
-    maxBackwardCrouchSpeed = 2;
-    maxSideCrouchSpeed = 3;
+ 	maxForwardCrouchSpeed = 5;
+	maxSideCrouchSpeed = 4;
+    maxBackwardCrouchSpeed = 3;
+    
 
 	groundImpactMinSpeed = 5;
 	groundImpactShakeFreq = "4.0 4.0 4.0";

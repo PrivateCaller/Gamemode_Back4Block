@@ -44,8 +44,7 @@ package L4B2Bots_Main
 		%client = %player.client;
 		%player.lastActivated = 0;
 
-		if(isObject(%client.miniGame) && %client.miniGame.WeaponDamage && getSimTime() - %client.lastF8Time < 5000 || %player.getDamagePercent () >= 1)
-		return 0;	
+		if(isObject(%client.miniGame) && %client.miniGame.WeaponDamage && getSimTime() - %client.lastF8Time < 5000 || %player.getDamagePercent () >= 1) return 0;	
 
 		%start = %player.getEyePoint ();
 		%vec = %player.getEyeVector ();
@@ -60,14 +59,12 @@ package L4B2Bots_Main
 		%search = containerRayCast (%start, %end, %mask, %exempt);
 		%victim = getWord(%search, 0);
 
-		if(getSimTime() - %player.lastActivateTime <= 320)
-		%player.activateLevel += 1;
+		if(getSimTime() - %player.lastActivateTime <= 320) %player.activateLevel += 1;
 		else %player.activateLevel = 0;
 		
 		%player.lastActivateTime = getSimTime ();
 
-		if(%player.activateLevel >= 5)
-		%player.playThread (3, activate2);
+		if(%player.activateLevel >= 5) %player.playThread (3, activate2);
 		else %player.playThread (3, activate);
 		
 		if(%victim)
@@ -207,9 +204,9 @@ package L4B2Bots_Main
 				%obj.hlastmeleedamage = %damagefinal;
 				%obj.lastattacked = getsimtime()+1000;
 
-				%col.damage(%obj.hFakeProjectile, %col.getposition(), %damagefinal, %obj.hDamageType);
-				%obj.getDataBlock().onBotMelee(%obj,%col);
 				%obj.playthread(2,activate2);
+				%col.damage(%obj.hFakeProjectile, %col.getposition(), %damagefinal, %obj.hDamageType);
+				%obj.getDataBlock().onBotMelee(%obj,%col);				
 			}
 		}
 	}

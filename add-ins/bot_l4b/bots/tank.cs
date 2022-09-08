@@ -11,14 +11,14 @@ datablock PlayerData(ZombieTankHoleBot : CommonZombieHoleBot)
 	uiName = "Tank Infected";
 	shapeFile = "add-ons/gamemode_left4block/add-ins/bot_l4b/models/zTank.dts";
 	maxDamage = $Pref::Server::L4B2Bots::TankHealth;//Health
-	mass = 1000;
+	mass = 500;
 
-	runforce = 48 * 220;
-	drag = 0.2;
+	runforce = 100 * 75;
+	drag = 0.1;
 
-    maxForwardSpeed = 4.5;
-    maxBackwardSpeed = 3.5;
-    maxSideSpeed = 2.5;
+    maxForwardSpeed = 6.75;
+    maxBackwardSpeed = 5;
+    maxSideSpeed = 5.5;
 
  	maxForwardCrouchSpeed = 3;
     maxBackwardCrouchSpeed = 2;
@@ -42,11 +42,12 @@ datablock PlayerData(ZombieTankHoleBot : CommonZombieHoleBot)
 	boundingBox = "9.5 4 12";
 	crouchboundingBox = "8 3 6";
 
-	jumpForce = 100 * 100; //8.3 * 90;
+	jumpForce = 8.3 * 90;
 
 	hName = "Tank";//cannot contain spaces
 	hTickRate = 5000;
 	jumpSound = "HorseJumpSound";
+	resistMelee = 1;
 	
 	hSearchRadius = 512;//in brick units
 	hStrafe = 0;//Randomly strafe while following player
@@ -124,7 +125,13 @@ function ZombieTankHoleBot::onNewDataBlock(%this,%obj)
 	Parent::onNewDataBlock(%this,%obj);
 	CommonZombieHoleBot::onNewDataBlock(%this,%obj);
 	%obj.hDefaultL4BAppearance(%obj);
-	%obj.setscale("1.25 1.25 1.25");
+
+	if(getRandom(1,8) == 1)
+	{
+		%scale = getRandom(14,15)*0.1;
+		%obj.setscale(%scale SPC %scale SPC %scale);
+	}
+	else %obj.setscale("1.25 1.25 1.25");
 }
 
 
@@ -143,13 +150,6 @@ function ZombieTankHoleBot::onBotLoop(%this,%obj)
 		if(!%obj.hFollowing)
 		%obj.playaudio(0,"tank_idle" @ getrandom(1,7) @ "_sound");
 		else %obj.playaudio(0,"tank_yell" @ getrandom(1,6) @ "_sound");
-		%obj.tankDefaultSpeed = 4;
-		%obj.setMaxForwardSpeed(%obj.tankDefaultSpeed);
-	}
-	else
-	{
-		%obj.tankDefaultSpeed = 6;
-		%obj.setMaxForwardSpeed(%obj.tankDefaultSpeed);
 	}
 }	
 

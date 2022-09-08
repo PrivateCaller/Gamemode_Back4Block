@@ -1,20 +1,23 @@
 //NOTE TO SELF: TSShapeConstructor has to be done BEFORE player datablock.
+
 datablock TSShapeConstructor(mMeleeDts) 
 {
-	baseShape = "base/data/shapes/player/mmelee.dts";
-	sequence0 = "base/data/shapes/player/default.dsq";
-	sequence1 = "base/data/shapes/player/melee.dsq";
-	sequence2 = "base/data/shapes/player/actions.dsq";
-	sequence3 = "base/data/shapes/player/taunts.dsq";
+	baseShape = "./models/mmelee.dts";
+	sequence0 = "./models/default.dsq";
+	sequence1 = "./models/melee.dsq";
+	sequence2 = "./models/actions.dsq";
+	sequence3 = "./models/zombie.dsq";
 };
 
 datablock PlayerData(PlayerMeleeAnims : PlayerStandardArmor)
 {
-	shapeFile = "base/data/shapes/player/mMelee.dts";
-	uniformCompatible = true;
+	shapeFile = "./models/mMelee.dts";
 	canJet = false;
 	uiName = "";
 };
+
+addExtraResource("add-ons/gamemode_left4block/add-ins/player_survivor/models/decal.ifl");
+addExtraResource("add-ons/gamemode_left4block/add-ins/player_survivor/models/face.ifl");
 
 package L4B2Bots_NewPlayerDatablock
 {
@@ -248,7 +251,7 @@ package L4B2Bots_NewPlayerDatablock
 		parent::applyBodyColors(%cl,%o);
 		
 		if(isObject(%pl = %cl.player))
-		if((%pl.getDatablock()).shapeFile $= "base/data/shapes/player/mmelee.dts")
+		if(fileName (%pl.getDataBlock().shapeFile) $= "mmelee.dts")
 		%pl.fixAppearance(%cl);
 	}
 
@@ -258,7 +261,7 @@ package L4B2Bots_NewPlayerDatablock
 		parent::applyBodyParts(%cl,%o);
 		
 		if(isObject(%pl = %cl.player))
-		if((%pl.getDatablock()).shapeFile $= "base/data/shapes/player/mmelee.dts")
+		if(fileName (%pl.getDataBlock().shapeFile) $= "mmelee.dts")
 		%pl.fixAppearance(%cl);
 	}
 };

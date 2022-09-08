@@ -23,13 +23,13 @@ datablock PlayerData(CommonZombieHoleBot : PlayerMeleeAnims)
 	airControl = 0.1;
 	speedDamageScale = 2.5;
 
-    maxForwardSpeed = 9;
-    maxBackwardSpeed = 7;
-    maxSideSpeed = 8;
+    maxForwardSpeed = 10;
+    maxSideSpeed = 9;
+	maxBackwardSpeed = 8;
 
  	maxForwardCrouchSpeed = 7;
+	maxSideCrouchSpeed = 6;
     maxBackwardCrouchSpeed = 5;
-    maxSideCrouchSpeed = 6;
 
 	cameramaxdist = 4;
     cameraVerticalOffset = 1;
@@ -259,6 +259,7 @@ function CommonZombieHoleBot::onBotMelee(%this,%obj,%col)
 	%meleeimpulse = mClamp(%obj.hLastMeleeDamage, 1, 10);
 	%obj.playaudio(1,"melee_hit" @ getrandom(1,8) @ "_sound");
 	%col.applyimpulse(%col.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),getrandom(100,100*%meleeimpulse)),"0" SPC "0" SPC getrandom(100,100*%meleeimpulse)));
+	%obj.playthread(2,"zAttack" @ getRandom(1,3));
 	
 	if(%col.getType() & $TypeMasks::PlayerObjectType)
 	{

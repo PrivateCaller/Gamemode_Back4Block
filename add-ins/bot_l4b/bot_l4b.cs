@@ -209,8 +209,7 @@ function L4B_SpazzZombie(%obj,%count)
 
 function L4B_ZombieDropLoot(%obj,%lootitem,%chance)
 {
-	if(!isObject(%lootitem))
-	return;
+	if(!isObject(%lootitem)) return;
 	else if(getRandom(1,100) <= %chance)
 	{
 		%loot = new item()

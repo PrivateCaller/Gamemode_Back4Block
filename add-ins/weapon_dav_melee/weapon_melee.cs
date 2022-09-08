@@ -1,5 +1,4 @@
-//AddDamageType ("Default", '<bitmap:base/client/ui/ci/skull> %1', '%2 <bitmap:base/client/ui/ci/skull> %1!', 1, 0);
-
+luaexec("./weapon_melee.lua");
 %pattern = "add-ons/gamemode_left4block/add-ins/weapon_dav_melee/sound/*.wav";//Too lazy to write datablock files for the sounds, just took this from the Disease Gamemode
 %file = findFirstFile(%pattern);
 while(%file !$= "")
@@ -49,6 +48,53 @@ datablock ItemData(crowbarItem)
 	canDrop = true;
 };
 
+datablock ParticleData(meleeTrailParticle)
+{
+	dragCoefficient		= 3.0;
+	windCoefficient		= 1.5;
+	gravityCoefficient	= 0.0;
+	inheritedVelFactor	= 0.0;
+	constantAcceleration	= 0.0;
+	lifetimeMS		= 1800;
+	lifetimeVarianceMS	= 0;
+	spinSpeed		= 10.0;
+	spinRandomMin		= -50.0;
+	spinRandomMax		= 50.0;
+	useInvAlpha		= false;
+	animateTexture		= false;
+	//framesPerSec		= 1;
+
+	textureName		= "base/data/particles/dot";
+	//animTexName		= "~/data/particles/dot";
+
+	// Interpolation variables
+	colors[0]	= "1 1 1 0.05";
+	colors[1]	= "1 1 1 0.0";
+	sizes[0]	= 0.5;
+	sizes[1]	= 0.25;
+	times[0]	= 0.5;
+	times[1]	= 0.1;
+};
+
+datablock ParticleEmitterData(meleeTrailEmitter)
+{
+   ejectionPeriodMS = 2;
+   periodVarianceMS = 0;
+
+   ejectionVelocity = 0; //0.25;
+   velocityVariance = 0; //0.10;
+
+   ejectionOffset = 0;
+
+   thetaMin         = 0.0;
+   thetaMax         = 90.0;  
+
+   particles = meleeTrailParticle;
+
+   useEmitterColors = true;
+   uiName = "";
+};
+
 datablock ShapeBaseImageData(crowbarImage)
 {
 	shapeFile = "./models/model_crowbar.dts";
@@ -86,121 +132,34 @@ datablock ShapeBaseImageData(crowbarImage)
 	stateName[2]					= "PreFire";
 	stateScript[2]                  = "onPreFire";
 	stateAllowImageChange[2]        = false;
-	stateTimeoutValue[2]            = 0.095;
+	stateTimeoutValue[2]            = 0.05;
 	stateTransitionOnTimeout[2]     = "Fire";
 
 	stateName[3]                    = "Fire";
 	stateTransitionOnTimeout[3]     = "CheckFire";
 	stateFire[3]                    = false;
-	stateSequence[3]                = "Fire";
 	stateScript[3]                  = "onFire";
-	stateTimeoutValue[3]            = 0.215;
+	stateTimeoutValue[3]            = 0.1;
+	stateEmitter[3]					= "meleeTrailEmitter";
+	stateEmitterNode[3]             = "muzzlePoint";
+	stateEmitterTime[3]             = "0.225";
 
 	stateName[4]			= "CheckFire";
 	stateTransitionOnTriggerUp[4]	= "StopFire";
 	stateTransitionOnTriggerDown[4]	= "StopFire";
 
 	stateName[5]                    = "StopFire";
-	stateTransitionOnTimeout[5]     = "Ready";
-	stateTimeoutValue[5]            = 0.275;
-	stateSequence[5]                = "StopFire";
+	stateTransitionOnTimeout[5]     = "Break";
+	stateTimeoutValue[5]            = 0.1925;
 	stateScript[5]                  = "onStopFire";
+	stateEmitter[5]					= "";
+	stateEmitterNode[5]             = "muzzlePoint";
+	stateEmitterTime[5]             = "0.1";
+
+	stateName[6]                    = "Break";
+	stateTransitionOnTimeout[6]     = "Ready";
+	stateTimeoutValue[6]            = 0.25;
 };
-
-function MeleeSwingCheck(%obj,%this,%slot)
-{   	
-	if(!isObject(%obj) || !isObject(%obj.getMountedImage(0)) || %obj.getMountedImage(0).meleeDamage $= "") return;
-	
-	%pos = %obj.getMuzzlePoint(%slot);
-	%radius = 2;
-	%searchMasks = $TypeMasks::StaticObjectType | $TypeMasks::PlayerObjectType | $TypeMasks::VehicleObjectType | $TypeMasks::FxBrickObjectType;
-	InitContainerRadiusSearch(%pos, %radius, %searchMasks);
-	while (%target = containerSearchNext())
-   	{
-      	if(%target == %obj) continue;
-	
-      	%len = 2 * getWord(%obj.getScale (), 2);
-      	%vec = %obj.getMuzzleVector(%slot);
-      	%beam = vectorScale(%vec,%len);
-      	%end = vectorAdd(%pos,%beam);
-      	%ray = containerRayCast(%pos,%end,%searchMasks,%obj); //fire raycast
-
-     	if(vectorDist(%pos,posFromRaycast(%ray)) > 1.5) continue;
-
-     	if(%ray.getType() & $TypeMasks::FxBrickObjectType || %ray.getType() & $TypeMasks::StaticObjectType)
-     	{
-			if(%obj.lastmeleehit+75 < getsimtime())
-			{
-				%obj.lastmeleehit = getsimtime();
-				serverPlay3D(%this.meleeHitEnvSound @ "_hitenv" @ getRandom(1,2) @ "_sound",posFromRaycast(%ray));
-
-				%p = new projectile()
-				{
-					datablock = "SecondaryMeleeProjectile";
-					initialPosition = posFromRaycast(%ray);
-				};
-				%p.explode();
-			}
-     	}
-		 
-     	if(%ray.getType() & $TypeMasks::VehicleObjectType)
-     	{
-     	   	%damage = mClamp(%ray.getdatablock().maxDamage/15, 30, %ray.getdatablock().maxDamage/2);     	   	
-
-			if(minigameCanDamage(%obj,%ray))
-			{
-     	   		%ray.damage(%obj, posFromRaycast(%ray), %damage, $DamageType::Default);
-				%ray.applyimpulse(posFromRaycast(%ray),vectoradd(vectorscale(%vec,2000),"0 0 750"));
-			}
-     	   	serverPlay3D(%this.meleeHitEnvSound @ "_hitenv" @ getRandom(1,2) @ "_sound",posFromRaycast(%ray));
-
-			%p = new projectile()
-			{
-				datablock = "SecondaryMeleeProjectile";
-				initialPosition = posFromRaycast(%ray);
-			};
-			%p.explode();
-     	}
-
-		if(%ray.getType() & $TypeMasks::PlayerObjectType)
-		{
-			if(%ray.getstate() $= "Dead") continue;
-
-			%damage = %ray.getdatablock().maxDamage/8;
-			if(%obj.MeleePowerSwing)
-			{
-				%damagepower = %damage+%ray.getdatablock()/4;
-				%obj.MeleePowerSwing = 0;
-			}
-			else %damagepower = %damage;
-
-			%p = new projectile()
-			{
-				datablock = "SecondaryMeleeProjectile";
-				initialPosition = posFromRaycast(%ray);
-			};
-			%p.explode();
-
-			if(vectorDot(%ray.getforwardvector(),%obj.getforwardvector()) > 0.65)         
-			%damageclamp = mClamp(%damagepower*1.5, %this.meleeDamage, %ray.getdatablock().maxDamage);
-			else %damageclamp = mClamp(%damagepower, %this.meleeDamage, %ray.getdatablock().maxDamage);
-			serverPlay3D(%this.meleeHitPlSound @ "_hitpl" @ getRandom(1,2) @ "_sound",posFromRaycast(%ray));
-			
-			if(minigameCanDamage(%obj,%ray) && checkHoleBotTeams(%obj,%ray))
-			{
-				if(%ray.getdatablock().getName() $= "ZombieTankHoleBot")
-				%ray.damage(%obj,posFromRaycast(%ray),150,$damageclamp::Default);
-				else %ray.damage(%obj,posFromRaycast(%ray),%damageclamp,$DamageType::Default);
-
-				%ray.applyimpulse(posFromRaycast(%ray),vectoradd(vectorscale(%vec,1000),"0 0 750"));
-				serverPlay3D(%this.meleeHitPlSound @ "_hitpl" @ getRandom(1,2) @ "_sound",posFromRaycast(%ray));
-			}
-		}
-   	}
-
-	cancel(%obj.meleechecksched);
-   	return %obj.meleechecksched = schedule(50,0,MeleeSwingCheck,%obj,%this,%slot);
-}
 
 function crowbarImage::onReady(%this, %obj, %slot)
 {
@@ -210,38 +169,14 @@ function crowbarImage::onReady(%this, %obj, %slot)
 
 function crowbarImage::onFire(%this, %obj, %slot)
 {
-	if(%obj.getstate() $= "Dead") return;
-	%obj.meleechecksched = schedule(20,0,MeleeSwingCheck,%obj,%this,%slot);
+	LuaCall(Melee_SwingCheck,%obj,%this,%slot);
 }
 
 function crowbarImage::onPreFire(%this, %obj, %slot)
 {
 	if(%obj.getstate() $= "Dead") return;
-
 	serverPlay3D("melee_swing_sound",%obj.gethackposition());
 	%obj.playthread(1, "meleeRaise");
+	%obj.playthread(2, "meleeSwing" @ getRandom(1,3));
 
-	if(getWord(%obj.getvelocity(),2) == 0)
-	{
-		%rand = getRandom(1,2);
-		%obj.playthread(2, "meleeSwing" @ %rand);
-
-	   	if(%rand == 3 && getRandom(1,8) == 1)
-		{
-			%obj.playthread(2, "meleeSwing3");
-   			%obj.MeleePowerSwing = 1;
-			%obj.playthread(2, "plant");
-		}
-   		else %obj.MeleePowerSwing = 0;
-	}
-	else
-	{
-		%obj.playthread(2, "meleeSwing3");
-		%obj.MeleePowerSwing = 1;
-	}
-}
-
-function crowbarImage::onStopFire(%this, %obj, %slot)
-{
-   cancel(%obj.meleechecksched);
 }
