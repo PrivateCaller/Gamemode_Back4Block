@@ -184,7 +184,7 @@ if(loadRequiredAddOn("Bot_Hole") == $Error::None && loadRequiredAddOn("Support_L
 
 	if(isFunction(NetObject, setNetFlag))
 	{
-		exec("./add-ins/support_packages/support_billboards/billboards/billboards.cs");
+		exec("./add-ins/support_packages/support_billboards/billboards/billboardv2.cs");
 		exec("./add-ins/support_packages/support_billboards/billboards_wrapper.cs");
 		$L4B_hasSelectiveGhosting = true;
 	}
