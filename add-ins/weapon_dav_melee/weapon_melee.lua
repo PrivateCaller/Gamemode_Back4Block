@@ -30,17 +30,18 @@ function Melee_SwingCheck(obj,this,slot)
                     ts.call("LuaProjecitle",ts.call("posFromRaycast",ray),"SecondaryMeleeProjectile")
 
                     if class == "AIPlayer" or class == "Player" then
-                        if ts.getobj(ray,"hZombieL4BType") ~= "" and ts.getstate(ray) ~= "Dead" and ts.call("minigameCanDamage",obj,ray) and ts.call("checkHoleBotTeams",obj,ray) then
-
+                        if ts.getstate(ray) ~= "Dead" then--and ts.call("minigameCanDamage",obj,ray) and ts.call("checkHoleBotTeams",obj,ray) then
                             ts.call("serverPlay3D",ts.getcallobj(this,"meleeHitPlSound").."_hitpl"..math.random(1,2).."_sound",raypos)
-                            ts.callobj(ray,"playThread",3,"zstumble"..math.random(1,4))
-                            
-                            if ts.getcallobj(ts.callobj(ray,"getID"),"getDatablock().getName()") ~= "ZombieTankHoleBot" then
-                                ts.callobj(ray,"damage",obj,raypos,tonumber(ts.getcallobj(rayobject,"getDatablock().maxDamage"))/2,ts.get("DamageType::Default"))
-                                ts.callobj(ray,"applyimpulse",ts.call("posFromRaycast",ray),VectorAdd(VectorScale(ts.callobj(obj,"getForwardVector"),"625"),"0 0 375"))
-                                else ts.callobj(ray,"damage",obj,raypos,150,ts.get("DamageType::Default"))
-                            end
 
+                            if ts.getobj(ray,"hZombieL4BType") ~= "" then                            
+                                if ts.getcallobj(ts.callobj(ray,"getID"),"getDatablock().getName()") ~= "ZombieTankHoleBot" then
+                                    ts.callobj(ray,"playThread",3,"zstumble"..math.random(1,4))
+                                    ts.callobj(ray,"damage",obj,raypos,tonumber(ts.getcallobj(rayobject,"getDatablock().maxDamage"))/2,ts.get("DamageType::Default"))
+                                    ts.callobj(ray,"applyimpulse",ts.call("posFromRaycast",ray),VectorAdd(VectorScale(ts.callobj(obj,"getForwardVector"),"600"),"0 0 400"))
+
+                                    else ts.callobj(ray,"damage",obj,raypos,250,ts.get("DamageType::Default"))
+                                end
+                            end
                         end
                     elseif class == "fxDTSBrick" or class == "WheeledVehicle" or class == "fxPlane" then
                         ts.call("serverPlay3D",ts.getcallobj(this,"meleeHitEnvSound").."_hitenv"..math.random(1,2).."_sound",raypos)
@@ -51,5 +52,5 @@ function Melee_SwingCheck(obj,this,slot)
         target = ts.call("containerSearchNext")
     end
 
-    schedule(60, Melee_SwingCheck,obj,this,slot)
+    schedule(75, Melee_SwingCheck,obj,this,slot)
 end

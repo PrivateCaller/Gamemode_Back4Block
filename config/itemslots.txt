@@ -6,6 +6,8 @@ Secondary B&E: USP .45
 Secondary B&E: Colth Python
 Secondary B&E: M93 Raffica
 Secondary B&E: TT-33
+Secondary B&E: TEC-9
+Secondary NZS: Desert Eagle
 Secondary Crowbar
 Secondary Steel Machete
 Secondary Steel Hatchet

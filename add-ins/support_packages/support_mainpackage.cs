@@ -5,38 +5,33 @@
 package L4B2Bots_Main
 {
 	function onObjectCollisionTest(%obj, %col)
-	{
-		if(!isObject(%obj)|| !isObject(%col))
-		return;
-	
-		%oscale = getWord(%obj.getScale(),2);
-		%force = vectorDot(%obj.getVelocity(), %obj.getForwardVector());
-		
-		if(%obj.getType() & $TypeMasks::PlayerObjectType && %col.getType() & $TypeMasks::PlayerObjectType) 
+	{	
+		if(isObject(%obj) && isObject(%col))
 		{
-			if(%obj.getdataBlock().getName().isSurvivor && %col.getdataBlock().getName().isSurvivor)
-			return false;
-			
-			if(%obj.getdataBlock().getName() $= "ZombieChargerHoleBot" && vectordist(%obj.getposition(),%col.getposition()) < 6)
-			if(%col.getdataBlock().getName() !$= "ZombieTankHoleBot" && %oScale >= 1.1 && %force > 20 && %obj.hEating != %col)
+			if(%obj.getType() & $TypeMasks::PlayerObjectType && %col.getType() & $TypeMasks::PlayerObjectType) 
 			{
-				if(%col.getdatablock().getName() !$= "ZombieChargerHoleBot")
-				{				
+				if(%obj.getdataBlock().getName().isSurvivor && %col.getdataBlock().getName().isSurvivor) return false;
+
+				if(vectordist(%obj.getposition(),%col.getposition()) < 2 && %obj.getdataBlock().getName() $= "ZombieChargerHoleBot" && (%force = vectorDot(%obj.getVelocity(), %obj.getForwardVector())) > 20 && %col.getdataBlock().getName() !$= "ZombieTankHoleBot")
+				{
+				
+
+						return false;
+						
 					%obj.playaudio(3,"charger_smash_sound");			
-					%forcecalc = %force/20;
-					%obj.spawnExplosion(pushBroomProjectile,%forcecalc SPC %forcecalc SPC %forcecalc);
-					%obj.playthread(2,"activate2");
-					%normVec = VectorNormalize(vectorAdd(%obj.getForwardVector(),"0" SPC "0" SPC "0.25"));
-					%eye = vectorscale(%normVec,%force/2);
-					%col.setvelocity(%eye);
-	
-					if(checkHoleBotTeams(%obj,%col))
-					%col.damage(%obj.hFakeProjectile, %col.getposition(),0.25, %obj.hDamageType);
+					%obj.playthread(2,"shiftUp");
+
+					%eye = vectorscale(VectorNormalize(vectorAdd(%obj.getForwardVector(),"0" SPC "0" SPC "0.25")),%force);
+					%col.setvelocity(%eye);					
+
+					%col.damage(%obj.hFakeProjectile, %col.getposition(),5, %obj.hDamageType);
+					%obj.spawnExplosion(pushBroomProjectile,"1 1 1");
+
+					
 				}
-				return false;
 			}
-		}
 		return true;
+		}
 	}
 
 	function Player::ActivateStuff (%player)

@@ -191,6 +191,18 @@ function CommonZombieHoleBot::onDisabled(%this,%obj)
 	
 	if(isObject(%obj.client)) commandToClient(%obj.client,'SetVignette',$EnvGuiServer::VignetteMultiply,$EnvGuiServer::VignetteColor);
 
+	if(isObject(%minigame = getMiniGameFromObject(%obj)) && %minigame.DirectorStatus == 2) 
+	{
+		%minigame.zhordecount--;
+
+		if(%minigame.zhordecount < 1)
+		{
+			%minigame.RoundEnd();
+			%minigmae.zhordecount = 0;
+		}
+	}
+	
+
 	if(%obj.getWaterCoverage() == 1) serverPlay3D("die_underwater_bubbles_sound",%obj.getPosition());
 
 	else if(%obj.headless) %obj.playaudio(0,"zombie_headless" @ getrandom(1,4) @ "_sound");

@@ -30,6 +30,44 @@ while(%file !$= "")
 	%file = findNextFile(%pattern);
 }
 
+datablock ParticleData(meleeTrailParticle)
+{
+	dragCoefficient		= 3.0;
+	windCoefficient		= 1.5;
+	gravityCoefficient	= 0.0;
+	inheritedVelFactor	= 0.0;
+	constantAcceleration	= 0.0;
+	lifetimeMS		= 1800;
+	lifetimeVarianceMS	= 0;
+	spinSpeed		= 10.0;
+	spinRandomMin		= -50.0;
+	spinRandomMax		= 50.0;
+	useInvAlpha		= true;
+	animateTexture		= false;
+
+	textureName		= "base/data/particles/dot";
+	colors[0]	= "2 2 2 0.005";
+	colors[1]	= "2 2 2 0.0";
+	sizes[0]	= 0.75;
+	sizes[1]	= 0.5;
+	times[0]	= 0.5;
+	times[1]	= 0.1;
+};
+
+datablock ParticleEmitterData(meleeTrailEmitter)
+{
+   ejectionPeriodMS = 2;
+   periodVarianceMS = 0;
+   ejectionVelocity = 0; //0.25;
+   velocityVariance = 0; //0.10;
+   ejectionOffset = 0;
+   thetaMin         = 0.0;
+   thetaMax         = 90.0;  
+   particles = meleeTrailParticle;
+   useEmitterColors = true;
+   uiName = "";
+};
+
 datablock ItemData(crowbarItem)
 {
 	category = "Weapon";  // Mission editor category
@@ -46,53 +84,6 @@ datablock ItemData(crowbarItem)
 	colorShiftColor = "0.5 0.5 0.5 1";
 	image = crowbarImage;
 	canDrop = true;
-};
-
-datablock ParticleData(meleeTrailParticle)
-{
-	dragCoefficient		= 3.0;
-	windCoefficient		= 1.5;
-	gravityCoefficient	= 0.0;
-	inheritedVelFactor	= 0.0;
-	constantAcceleration	= 0.0;
-	lifetimeMS		= 1800;
-	lifetimeVarianceMS	= 0;
-	spinSpeed		= 10.0;
-	spinRandomMin		= -50.0;
-	spinRandomMax		= 50.0;
-	useInvAlpha		= false;
-	animateTexture		= false;
-	//framesPerSec		= 1;
-
-	textureName		= "base/data/particles/dot";
-	//animTexName		= "~/data/particles/dot";
-
-	// Interpolation variables
-	colors[0]	= "1 1 1 0.05";
-	colors[1]	= "1 1 1 0.0";
-	sizes[0]	= 0.5;
-	sizes[1]	= 0.25;
-	times[0]	= 0.5;
-	times[1]	= 0.1;
-};
-
-datablock ParticleEmitterData(meleeTrailEmitter)
-{
-   ejectionPeriodMS = 2;
-   periodVarianceMS = 0;
-
-   ejectionVelocity = 0; //0.25;
-   velocityVariance = 0; //0.10;
-
-   ejectionOffset = 0;
-
-   thetaMin         = 0.0;
-   thetaMax         = 90.0;  
-
-   particles = meleeTrailParticle;
-
-   useEmitterColors = true;
-   uiName = "";
 };
 
 datablock ShapeBaseImageData(crowbarImage)
@@ -178,5 +169,4 @@ function crowbarImage::onPreFire(%this, %obj, %slot)
 	serverPlay3D("melee_swing_sound",%obj.gethackposition());
 	%obj.playthread(1, "meleeRaise");
 	%obj.playthread(2, "meleeSwing" @ getRandom(1,3));
-
 }

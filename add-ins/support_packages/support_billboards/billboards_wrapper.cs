@@ -50,10 +50,8 @@ function Billboard_MountToPlayer(%target, %mode, %lightDB)
     {
         %client = ClientGroup.getObject(%i);
         %group = %client.avBillboardGroup;
-        if(isObject(%group))
-        {
-            BillboardMount_AddAVBillboard(%target, %group, %lightDB, %target.client.bl_id @ "_" @ %mode)
-        }
+        if(isObject(%group)) 
+        BillboardMount_AddAVBillboard(%target, %group, %lightDB, %target.client.bl_id @ "_" @ %mode);
     }
 }
 
@@ -114,18 +112,12 @@ package Gamemode_Left4Block_Billboards
 
 function Billboard_NeedySurvivor(%target, %mode)
 {
-    if(%mode $= "Strangled")
+    switch$(%mode)
     {
-        %lightDB = strangledBillboard;
-    }
-    else if(%mode $= "Incapped")
-    {
-        %lightDB = incappedBillboard;
-    }
-    else
-    {
-        error("Billboard_NeedySurvivor :" SPC %mode SPC "is not a valid mode.");
-        return; 
+        case "Strangled": %lightDB = strangledBillboard;
+        case "Incapped": %lightDB = incappedBillboard;
+        default: error("Billboard_NeedySurvivor :" SPC %mode SPC "is not a valid mode.");
+                return; 
     }
     Billboard_MountToPlayer(%target, %mode, %lightDB);
 }

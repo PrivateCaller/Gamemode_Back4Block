@@ -1,8 +1,1 @@
-ZombieFaceA
-ZombieFaceB
-ZombieFaceC
-ZombieFaceD
-ZombieFaceE
-ZombieFaceF
-ZombieFaceG
-ZombieFaceI
+asciiTerror

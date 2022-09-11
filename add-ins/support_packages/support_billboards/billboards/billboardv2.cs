@@ -71,7 +71,6 @@ function BillboardMount_AddBillboard(%bbm,%lightData,%dontGhost)
 	{
 		dataBlock = %lightData;
 	};
-
 	%obj.setNetFlag(6,true);
 	if(!%dontGhost)
 	{
@@ -82,17 +81,31 @@ function BillboardMount_AddBillboard(%bbm,%lightData,%dontGhost)
 		%obj.setNetFlag(8,false);
 	}
 
-	%obj.attachToObject(%bbm);
 	%bbm.billBoardGroup.add(%obj);
-
+	BillboardMount_FinishAddBillboard(%bbm,%obj);
 	return %obj;
 }
 
-function BillboardMount_CLearBillboards(%bbm)
+function BillboardMount_FinishAddBillboard(%bbm,%light)
+{
+	%group = clientGroup;
+	%count = %group.getCount();
+	for(%i = 0; %i < %count; %i++)
+	{
+		if(%group.getObject(%i).getGhostID(%bbm) == -1)
+		{
+			schedule(100,%bbm,"BillboardMount_FinishAddBillboard",%bbm,%light);
+			return "";
+		}
+	}
+	%light.attachToObject(%bbm);
+}
+
+function BillboardMount_ClearBillboards(%bbm)
 {
 	%group = %bbm.billBoardGroup;
 	%count = %group.getCount();
-	for(%i = %count - 1; %i >= 0; %i++)
+	for(%i = %count - 1; %i >= 0; %i--)
 	{
 		%obj = %group.getObject(%i);
 		%obj.delete();
@@ -107,18 +120,21 @@ function BillboardMount_AddAVBillboard(%bbm,%avbbg,%lightData,%tag)
 	{
 		return "";
 	}
-	
 	if(!%bbm.isBillboardMount || %avbbg.class !$= "AVBillboardGroup" || %lightData.className !$= "AVBillboard")
 	{
 		return "";
 	}
-
+	if(%avbbg.loadedClient.getGhostID(%bbm) == -1)
+	{
+		schedule(100,%bbm,"BillboardMount_AddAVBillboard",%bbm,%avbbg,%lightData,%tag);
+		return "";
+	}
 	%group = %avbbg;
 	%count = %group.getCount();
 	for(%i = 0; %i < %count; %i++)
 	{
 		%obj = %group.getObject(%i);
-		if(!%obj.isActive)
+		if(!%obj.active)
 		{
 			break;
 		}
@@ -127,11 +143,9 @@ function BillboardMount_AddAVBillboard(%bbm,%avbbg,%lightData,%tag)
 	{
 		return "";
 	}
-	
 	%bb = %avbbg.getObject(%i);
 	%bb.tag = %tag;
-	%bb.isActive = true;
-	%avbbg.active++;
+	%bb.active = true;
 
 	%bb.setNetFlag(8,true);
 	%bb.setDatablock(%lightData);
@@ -231,7 +245,7 @@ function AVBillboardGroup::Load(%avbbg,%client,%num)
 	{
 		return;
 	}
-
+	%avbbg.loadedClient = %client;
 	%camera = %client.AVBillboardGroup_LoadCamera = %client.AVBillboardGroup_LoadCamera ||  new Camera(){dataBlock = BillboardLoadingCamera;};
 	%dummyCamera = %client.AVBillboardGroup_LoadDummyCamera = %client.AVBillboardGroup_LoadDummyCamera || new Camera(){dataBlock = BillboardLoadingCamera;};
 	$AVBillboard::loadMount.scopeToClient(%client);
@@ -241,45 +255,65 @@ function AVBillboardGroup::Load(%avbbg,%client,%num)
 	
 	for(%i = 0; %i < %num; %i++)
 	{
-		%bb = BillboardMount_AddBillboard($AVBillboard::loadMount,DefaultBillboard,true);
+		%bb = new fxLight()
+		{
+			dataBlock = DefaultBillboard;
+		};
+		%bb.setNetFlag(6,true);
+		%bb.setNetFlag(8,false);
+		%bb.attachToObject($AVBillboard::loadMount);
 		Billboard_Ghost(%bb,%client);
 		%avbbg.add(%bb);
 	}
 
-	%avbbg.loadedClient = %client;
+	for(%i = 0; %i < %num; %i++)
+	{
+		AVBillboardGroup_CheckLoadProgress(%avbbg.getObject(%i));
+	}
 
 	return %avbbg;
 }
 
-function AVBillboardGroup::FinishLoad(%avbbg)
+function AVBillboardGroup_CheckLoadProgress(%bb)
 {
+	%avbbg = %bb.getGroup();
+	%client = %avbbg.loadedClient;
 	if(%avbbg.loadedClient $= "" || %avbbg.loaded)
 	{
 		return;
 	}
 
-	for(%i = 0; %i < %avbbg.getCount(); %i++)
+	if(%client.getGhostID(%bb) == -1)
 	{
-		%bb = %avbbg.getObject(%i);
-
-		%bb.setNetFlag(8,true);
-		%bb.setDatablock(DefaultAVBillboard);
-		%bb.setEnable(false);
-		%bb.setNetFlag(8,false);
+		schedule(100,%bb,"AVBillboardGroup_CheckLoadProgress",%bb);
+		return;
 	}
 
+	schedule(2000,%bb,"AVBillboardGroup_FinishLoad",%bb);
+}
+
+function AVBillboardGroup_FinishLoad(%bb)
+{
+	%avbbg = %bb.getGroup();
 	%client = %avbbg.loadedClient;
-	if(isObject(%client.player))
-	{
-		%client.setControlObject(%client.player);
-	}
-	else
-	{
-		%client.setControlObject(%client.camera);
-	}
 
-	%avbbg.loaded = true;
-	return %avbbg;
+	%bb.setNetFlag(8,true);
+	%bb.setDatablock(DefaultAVBillboard);
+	%bb.setEnable(false);
+	%bb.setNetFlag(8,false);
+	%avbbg.loadedCount++;
+	if(%avbbg.getCount() == %avbbg.loadedCount)
+	{
+		%avbbg.loaded = true;
+		if(isObject(%client.player))
+		{
+			%client.setControlObject(%client.player);
+		}
+		else
+		{
+			%client.setControlObject(%client.camera);
+		}
+	}
 }
 
 function AVBillboardGroup::Clear(%avbbg,%tag)
@@ -291,24 +325,19 @@ function AVBillboardGroup::Clear(%avbbg,%tag)
 
 	%group = %avbbg;
 	%count = %group.getCount();
-	for(%i = %count - 1; %i >= 0; %i--)
+	for(%i = 0; %i < %count; %i++)
 	{
 		%bb = %group.getObject(%i);
-		if((%tag !$= "" && %tag !$= %bb.tag) || !%bb.isActive)
+		if((%tag !$= "" && %tag !$= %bb.tag) || !%bb.active)
 		{
 			continue;
 		}
 		%bb.setNetFlag(8,true);
 		%bb.setEnable(false);
-		%bb.detachFromObject();
 		%bb.setNetFlag(8,false);
 		%bb.tag = "";
-		%bb.isActive = false;
-
-		%group.active--;
+		%bb.active = false;
 	}
-
-	%group.active = getMax(%group.active,0);
 	return %group;
 }
 
