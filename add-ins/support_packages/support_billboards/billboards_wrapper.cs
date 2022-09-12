@@ -2,42 +2,16 @@
 // The lights (billboards) the gamemode will use.
 //
 
-datablock fxLightData(strangledBillboard)
+datablock fxLightData(strangledBillboard : DefaultAVBillboard)
 {
-	LightOn = false;
-
-	flareOn = true;
 	flarebitmap = "./billboards/strangled.png";
 	ConstantSize = 1.35;
-    ConstantSizeOn = true;
-    FadeTime = inf;
-
-	LinkFlare = false;
-	blendMode = 1;
-	flareColor = "1 1 1 1";
-
-	AnimOffsets = true;
-	startOffset = "0 0 1.25";
-	endOffset = "0 0 1.25";
 };
 
-datablock fxLightData(incappedBillboard)
+datablock fxLightData(incappedBillboard : DefaultAVBillboard)
 {
-	LightOn = false;
-
-	flareOn = true;
 	flarebitmap = "./billboards/incapped.png";
 	ConstantSize = 1.35;
-    ConstantSizeOn = true;
-    FadeTime = inf;
-
-	LinkFlare = false;
-	blendMode = 0;
-	flareColor = "1 1 1 1";
-
-	AnimOffsets = true;
-	startOffset = "0 0 1.25";
-	endOffset = "0 0 1.25";
 };
 
 //
@@ -50,8 +24,10 @@ function Billboard_MountToPlayer(%target, %mode, %lightDB)
     {
         %client = ClientGroup.getObject(%i);
         %group = %client.avBillboardGroup;
-        if(isObject(%group)) 
-        BillboardMount_AddAVBillboard(%target, %group, %lightDB, %target.client.bl_id @ "_" @ %mode);
+        if(isObject(%group))
+        {
+            BillboardMount_AddAVBillboard(%target.billboardMount, %group, %lightDB, %target.client.bl_id @ "_" @ %mode);
+        }
     }
 }
 
@@ -60,14 +36,16 @@ function Billboard_DeallocFromPlayer(%target, %mode)
     for(%i = 0; %i < ClientGroup.getCount(); %i++)
     {
         %client = ClientGroup.getObject(%i);
-        
-        if(isObject(%group = %client.avBillboardGroup))
-        for(%k = 0; %k < %group.getCount(); %k++)
+        %group = %client.avBillboardGroup;
+        if(isObject(%group))
         {
-            if(%group.getObject(%k).tag $= %target.client.bl_id @ "_" @ %mode)
+            for(%k = 0; %k < %group.getCount(); %k++)
             {
-                %group.Clear(%target.client.bl_id @ "_" @ %mode);
-                return;
+                if(%group.getObject(%k).tag $= %target.client.bl_id @ "_" @ %mode)
+                {
+                    %group.Clear(%target.client.bl_id @ "_" @ %mode);
+                    return;
+                }
             }
         }
     }
@@ -85,7 +63,6 @@ package Gamemode_Left4Block_Billboards
 		%client.avBillboardGroup = %group = AVBillboardGroup_Make();
 		%group.Load(%client, $Pref::Server::MaxPlayers * 2);
 		%client.loadingbillboards = true;
-        %group.FinishLoad();
 		return %r;
 	}
     function GameConnection::onClientLeaveGame(%client)
@@ -96,15 +73,21 @@ package Gamemode_Left4Block_Billboards
 		}
 		return Parent::onClientLeaveGame(%client);
 	}
+    function Armor::onAdd(%this, %obj)
+    {
+        parent::onAdd(%this, %obj);
+        %mount = OverheadBillboardMount.Make();
+        %obj.billboardMount = %mount;
+        %obj.MountObject(%mount, 8);
+    }
     function Armor::onRemove(%this, %obj)
     {
         //Deallocates the billboard attached to a player when they are deleted.
-        Billboard_DeallocFromPlayer(%obj, "Strangled");
-        Billboard_DeallocFromPlayer(%obj, "Incapped");
         parent::onRemove(%this, %obj);
+        BillboardMount_ClearBillboards(%obj.billboardMount);
     }
 };
-//activatePackage(Gamemode_Left4Block_Billboards);
+activatePackage(Gamemode_Left4Block_Billboards);
 
 //
 // Finally, the function for spawning billboards on survivors that need help.
@@ -112,12 +95,18 @@ package Gamemode_Left4Block_Billboards
 
 function Billboard_NeedySurvivor(%target, %mode)
 {
-    switch$(%mode)
+    if(%mode $= "Strangled")
     {
-        case "Strangled": %lightDB = strangledBillboard;
-        case "Incapped": %lightDB = incappedBillboard;
-        default: error("Billboard_NeedySurvivor :" SPC %mode SPC "is not a valid mode.");
-                return; 
+        %lightDB = strangledBillboard;
+    }
+    else if(%mode $= "Incapped")
+    {
+        %lightDB = incappedBillboard;
+    }
+    else
+    {
+        error("Billboard_NeedySurvivor :" SPC %mode SPC "is not a valid mode.");
+        return; 
     }
     Billboard_MountToPlayer(%target, %mode, %lightDB);
 }
