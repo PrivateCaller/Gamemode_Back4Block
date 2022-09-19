@@ -39,6 +39,16 @@ while(%file !$= "")
 	%file = findNextFile(%pattern);
 }
 
+addExtraResource("add-ons/gamemode_left4block/add-ins/bot_l4b/icons/ci_boomer2.png");
+addExtraResource("add-ons/gamemode_left4block/add-ins/bot_l4b/icons/ci_charger2.png");
+addExtraResource("add-ons/gamemode_left4block/add-ins/bot_l4b/icons/ci_hunter2.png");
+addExtraResource("add-ons/gamemode_left4block/add-ins/bot_l4b/icons/ci_infected.png");
+addExtraResource("add-ons/gamemode_left4block/add-ins/bot_l4b/icons/ci_jockey2.png");
+addExtraResource("add-ons/gamemode_left4block/add-ins/bot_l4b/icons/ci_skull2.png");
+addExtraResource("add-ons/gamemode_left4block/add-ins/bot_l4b/icons/ci_smoker2.png");
+addExtraResource("add-ons/gamemode_left4block/add-ins/bot_l4b/icons/ci_witchclose.png");
+addExtraResource("add-ons/gamemode_left4block/add-ins/bot_l4b/icons/ci_spitter2.png");
+
 // Tank Datablocks
 datablock TSShapeConstructor(RotZTankDts)
 {

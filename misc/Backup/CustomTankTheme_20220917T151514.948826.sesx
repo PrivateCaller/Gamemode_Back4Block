@@ -4,7 +4,7 @@
 
   <session appBuild="14.0.0.36" appVersion="14.0" audioChannelType="stereo" bitDepth="16" duration="2543974" sampleRate="44100">
     <tracks>
-      <audioTrack automationLaneOpenState="false" id="10001" index="1" select="true" visible="true">
+      <audioTrack automationLaneOpenState="false" id="10001" index="1" select="false" visible="true">
         <trackParameters trackHeight="124" trackHue="160" trackMinimized="false">
           <name>Track 1</name>
         </trackParameters>
@@ -71,10 +71,10 @@
           </component>
         </trackAudioParameters>
         <editParameter parameterIndex="0" slotIndex="4294967280"/>
-        <audioClip clipAutoCrossfade="true" crossFadeHeadClipID="-1" crossFadeTailClipID="-1" endPoint="2312704" fileID="0" hue="-1" id="0" lockedInTime="false" looped="false" name="L4D1 Beta Style Tank Theme 44100 1" offline="false" select="true" sourceInPoint="0" sourceOutPoint="2312704" startPoint="0" zOrder="2">
+        <audioClip clipAutoCrossfade="true" crossFadeHeadClipID="-1" crossFadeTailClipID="-1" endPoint="2312704" fileID="0" hue="-1" id="0" lockedInTime="false" looped="false" name="L4D1 Beta Style Tank Theme 44100 1" offline="false" select="false" sourceInPoint="0" sourceOutPoint="2312704" startPoint="0" zOrder="0">
           <properties properties="{&quot;BasicAdjustmentsProperty&quot;:{&quot;type&quot;:&quot;tree::any&quot;,&quot;value&quot;:{&quot;AdjustmentMode&quot;:{&quot;type&quot;:&quot;UTF8String&quot;,&quot;value&quot;:&quot;sfx&quot;},&quot;ClipType&quot;:{&quot;type&quot;:&quot;std::int32_t&quot;,&quot;value&quot;:4},&quot;PanSection&quot;:{&quot;type&quot;:&quot;tree::any&quot;,&quot;value&quot;:{&quot;Enabled&quot;:{&quot;type&quot;:&quot;bool&quot;,&quot;value&quot;:true}}},&quot;PresetGuid&quot;:{&quot;type&quot;:&quot;UTF8String&quot;,&quot;value&quot;:&quot;cd445245-b028-4a97-86cd-61b0a660f087&quot;},&quot;SoundEffectsSection&quot;:{&quot;type&quot;:&quot;tree::any&quot;,&quot;value&quot;:{&quot;Enabled&quot;:{&quot;type&quot;:&quot;bool&quot;,&quot;value&quot;:true},&quot;Reverb&quot;:{&quot;type&quot;:&quot;tree::any&quot;,&quot;value&quot;:{&quot;2&quot;:{&quot;type&quot;:&quot;tree::any&quot;,&quot;value&quot;:{&quot;Value&quot;:{&quot;type&quot;:&quot;float&quot;,&quot;value&quot;:5}}},&quot;Enabled&quot;:{&quot;type&quot;:&quot;bool&quot;,&quot;value&quot;:false},&quot;UUID&quot;:{&quot;type&quot;:&quot;UTF8String&quot;,&quot;value&quot;:&quot;7e373b05-028c-4241-b7ea-e8a1fc68c2fc&quot;}}}}},&quot;VolumeSection&quot;:{&quot;type&quot;:&quot;tree::any&quot;,&quot;value&quot;:{&quot;Enabled&quot;:{&quot;type&quot;:&quot;bool&quot;,&quot;value&quot;:true}}}}}}"/>
           <component componentGuid="ddb37600-2051-4b01-9aef-b6360887f6f6" componentID="Audition.Fader" id="clipGain" name="volume" powered="true">
-            <parameter index="0" name="volume" parameterValue="1">
+            <parameter index="0" name="volume" parameterValue="1.27654063701629638671875">
               <parameterKeyframes enableSplines="false" readOnly="false">
                 <parameterKeyframe sampleOffset="184056" select="false" type="linear" value="0.64999997615814208984375"/>
                 <parameterKeyframe sampleOffset="293948" select="false" type="linear" value="0.74188029766082763671875"/>
@@ -86,12 +86,12 @@
                 <parameterKeyframe sampleOffset="1445320" select="false" type="linear" value="0.717307746410369873046875"/>
                 <parameterKeyframe sampleOffset="1796538" select="false" type="linear" value="0.717307746410369873046875"/>
                 <parameterKeyframe sampleOffset="1938850" select="false" type="linear" value="0.64999997615814208984375"/>
-                <parameterKeyframe sampleOffset="2193990" select="false" type="linear" value="0.4522247314453125"/>
+                <parameterKeyframe sampleOffset="2193990" select="true" type="linear" value="0.4522247314453125"/>
               </parameterKeyframes>
             </parameter>
             <parameter index="1" name="static gain" parameterValue="1"/>
           </component>
-          <component componentGuid="adeaf6be-ba11-4c0c-b719-2e9615b0d3bd" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
+          <component componentGuid="fe0e67ab-dbaa-4ac6-9411-a045dd025425" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
             <parameter index="0" parameterValue="0"/>
             <parameter index="1" name="mute" parameterValue="0"/>
           </component>
@@ -178,7 +178,7 @@
         <audioClip clipAutoCrossfade="true" crossFadeHeadClipID="-1" crossFadeTailClipID="-1" endPoint="2309464" fileID="1" hue="-1" id="0" lockedInTime="false" looped="false" name="tank" offline="false" select="false" sourceInPoint="0" sourceOutPoint="2309464" startPoint="0" zOrder="0">
           <properties properties="{&quot;BasicAdjustmentsProperty&quot;:{&quot;type&quot;:&quot;tree::any&quot;,&quot;value&quot;:{&quot;AdjustmentMode&quot;:{&quot;type&quot;:&quot;UTF8String&quot;,&quot;value&quot;:&quot;sfx&quot;},&quot;ClipType&quot;:{&quot;type&quot;:&quot;std::int32_t&quot;,&quot;value&quot;:4},&quot;PanSection&quot;:{&quot;type&quot;:&quot;tree::any&quot;,&quot;value&quot;:{&quot;Enabled&quot;:{&quot;type&quot;:&quot;bool&quot;,&quot;value&quot;:true}}},&quot;PresetGuid&quot;:{&quot;type&quot;:&quot;UTF8String&quot;,&quot;value&quot;:&quot;cd445245-b028-4a97-86cd-61b0a660f087&quot;},&quot;SoundEffectsSection&quot;:{&quot;type&quot;:&quot;tree::any&quot;,&quot;value&quot;:{&quot;Enabled&quot;:{&quot;type&quot;:&quot;bool&quot;,&quot;value&quot;:true},&quot;Reverb&quot;:{&quot;type&quot;:&quot;tree::any&quot;,&quot;value&quot;:{&quot;2&quot;:{&quot;type&quot;:&quot;tree::any&quot;,&quot;value&quot;:{&quot;Value&quot;:{&quot;type&quot;:&quot;float&quot;,&quot;value&quot;:5}}},&quot;Enabled&quot;:{&quot;type&quot;:&quot;bool&quot;,&quot;value&quot;:false},&quot;UUID&quot;:{&quot;type&quot;:&quot;UTF8String&quot;,&quot;value&quot;:&quot;d007b79b-80a1-42be-bcc0-00f0784e8f14&quot;}}}}},&quot;VolumeSection&quot;:{&quot;type&quot;:&quot;tree::any&quot;,&quot;value&quot;:{&quot;Enabled&quot;:{&quot;type&quot;:&quot;bool&quot;,&quot;value&quot;:true}}}}}}"/>
           <component componentGuid="ddfca82e-f026-4922-9167-5f99b4509a2f" componentID="Audition.Fader" id="clipGain" name="volume" powered="true">
-            <parameter index="0" name="volume" parameterValue="1.1619675159454345703125">
+            <parameter index="0" name="volume" parameterValue="0.02434984408318996429443359375">
               <parameterKeyframes enableSplines="false" readOnly="false">
                 <parameterKeyframe sampleOffset="688" select="false" type="linear" value="0.765384614467620849609375"/>
                 <parameterKeyframe sampleOffset="176507" select="false" type="linear" value="0.64999997615814208984375"/>
@@ -194,13 +194,13 @@
                 <parameterKeyframe sampleOffset="1437082" select="false" type="linear" value="0.72843134403228759765625"/>
                 <parameterKeyframe sampleOffset="1444516" select="false" type="linear" value="0"/>
                 <parameterKeyframe sampleOffset="1794759" select="false" type="linear" value="0.2844821512699127197265625"/>
-                <parameterKeyframe sampleOffset="1951767" select="true" type="linear" value="0.80686271190643310546875"/>
-                <parameterKeyframe sampleOffset="2264410" select="false" type="linear" value="0.76972091197967529296875"/>
+                <parameterKeyframe sampleOffset="1950688" select="false" type="linear" value="0.64999997615814208984375"/>
+                <parameterKeyframe sampleOffset="2264410" select="true" type="linear" value="0.76972091197967529296875"/>
               </parameterKeyframes>
             </parameter>
             <parameter index="1" name="static gain" parameterValue="1"/>
           </component>
-          <component componentGuid="a4c9bb66-6c41-4861-9674-3cf031540b4b" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
+          <component componentGuid="e743ac5c-53e3-4f24-96b5-dd4b662883a1" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
             <parameter index="0" parameterValue="0"/>
             <parameter index="1" name="mute" parameterValue="0"/>
           </component>
@@ -221,7 +221,7 @@
           </channelMap>
         </audioClip>
       </audioTrack>
-      <audioTrack automationLaneOpenState="false" id="10003" index="3" select="false" visible="true">
+      <audioTrack automationLaneOpenState="false" id="10003" index="3" select="true" visible="true">
         <trackParameters trackHeight="124" trackHue="51" trackMinimized="false">
           <name>Track 3</name>
         </trackParameters>
@@ -562,9 +562,9 @@
         <editParameter parameterIndex="0" slotIndex="4294967280"/>
       </masterTrack>
     </tracks>
-    <sessionState ctiPosition="99817" smpteStart="0">
-      <selectionState selectionDuration="0" selectionStart="99817"/>
-      <viewState horizontalViewDuration="1905431" horizontalViewStart="110" trackControlsWidth="224" verticalScrollOffset="0"/>
+    <sessionState ctiPosition="1584124" smpteStart="0">
+      <selectionState selectionDuration="0" selectionStart="1584124"/>
+      <viewState horizontalViewDuration="2543974" horizontalViewStart="0" trackControlsWidth="224" verticalScrollOffset="0"/>
       <timeFormatState beatsPerBar="4" beatsPerMinute="120" customFrameRate="12" linkToDefaultTimeSettings="true" noteLength="4" subdivisions="16" timeCodeDropFrame="false" timeCodeFrameRate="30" timeCodeNTSC="false" timeFormat="timeFormatDecimal"/>
       <mixingOptionState defaultPanModeLogarithmic="false" panPower="-3" playOverlappingClips="false"/>
     </sessionState>
@@ -580,10 +580,10 @@
             xmlns:xmpDM="http://ns.adobe.com/xmp/1.0/DynamicMedia/">
          <xmp:CreatorTool>Adobe Audition 14.0 (Windows)</xmp:CreatorTool>
          <xmp:CreateDate>2022-08-19T03:01:40-07:00</xmp:CreateDate>
-         <xmp:MetadataDate>2022-09-17T15:17:54-07:00</xmp:MetadataDate>
-         <xmp:ModifyDate>2022-09-17T15:17:54-07:00</xmp:ModifyDate>
-         <xmpMM:InstanceID>xmp.iid:a641c8df-87e4-bc41-b72f-4388dcb2b593</xmpMM:InstanceID>
-         <xmpMM:DocumentID>xmp.did:49d86d9b-61da-b44e-8457-c2565d3a10fa</xmpMM:DocumentID>
+         <xmp:MetadataDate>2022-09-17T15:15:14-07:00</xmp:MetadataDate>
+         <xmp:ModifyDate>2022-09-17T15:15:14-07:00</xmp:ModifyDate>
+         <xmpMM:InstanceID>xmp.iid:889b6922-9fe5-b240-9efa-5addfd1d9a4c</xmpMM:InstanceID>
+         <xmpMM:DocumentID>xmp.did:889b6922-9fe5-b240-9efa-5addfd1d9a4c</xmpMM:DocumentID>
          <xmpMM:OriginalDocumentID>xmp.did:77907677-65ce-5a4a-b44b-416fcac274f1</xmpMM:OriginalDocumentID>
          <xmpMM:History>
             <rdf:Seq>
@@ -722,37 +722,23 @@
                </rdf:li>
                <rdf:li rdf:parseType="Resource">
                   <stEvt:action>saved</stEvt:action>
-                  <stEvt:instanceID>xmp.iid:993b5dd5-68f0-3747-86a8-d4f1bfdcda7e</stEvt:instanceID>
-                  <stEvt:when>2022-09-17T15:17:21-07:00</stEvt:when>
+                  <stEvt:instanceID>xmp.iid:2e7468cf-6c6c-8a4e-ab2c-ba8617508e5a</stEvt:instanceID>
+                  <stEvt:when>2022-09-17T15:15:14-07:00</stEvt:when>
                   <stEvt:softwareAgent>Adobe Audition 14.0 (Windows)</stEvt:softwareAgent>
                   <stEvt:changed>/metadata</stEvt:changed>
                </rdf:li>
                <rdf:li rdf:parseType="Resource">
                   <stEvt:action>saved</stEvt:action>
-                  <stEvt:instanceID>xmp.iid:b84cb3a7-4663-1248-afce-a08c5c1b893d</stEvt:instanceID>
-                  <stEvt:when>2022-09-17T15:17:21-07:00</stEvt:when>
-                  <stEvt:softwareAgent>Adobe Audition 14.0 (Windows)</stEvt:softwareAgent>
-                  <stEvt:changed>/</stEvt:changed>
-               </rdf:li>
-               <rdf:li rdf:parseType="Resource">
-                  <stEvt:action>saved</stEvt:action>
-                  <stEvt:instanceID>xmp.iid:2785d08f-90a1-3043-b2f1-5aa42040500e</stEvt:instanceID>
-                  <stEvt:when>2022-09-17T15:17:54-07:00</stEvt:when>
-                  <stEvt:softwareAgent>Adobe Audition 14.0 (Windows)</stEvt:softwareAgent>
-                  <stEvt:changed>/metadata</stEvt:changed>
-               </rdf:li>
-               <rdf:li rdf:parseType="Resource">
-                  <stEvt:action>saved</stEvt:action>
-                  <stEvt:instanceID>xmp.iid:a641c8df-87e4-bc41-b72f-4388dcb2b593</stEvt:instanceID>
-                  <stEvt:when>2022-09-17T15:17:54-07:00</stEvt:when>
+                  <stEvt:instanceID>xmp.iid:889b6922-9fe5-b240-9efa-5addfd1d9a4c</stEvt:instanceID>
+                  <stEvt:when>2022-09-17T15:15:14-07:00</stEvt:when>
                   <stEvt:softwareAgent>Adobe Audition 14.0 (Windows)</stEvt:softwareAgent>
                   <stEvt:changed>/</stEvt:changed>
                </rdf:li>
             </rdf:Seq>
          </xmpMM:History>
          <xmpMM:DerivedFrom rdf:parseType="Resource">
-            <stRef:instanceID>xmp.iid:3a568c22-49b5-354c-89c4-a049c8380297</stRef:instanceID>
-            <stRef:documentID>xmp.did:77907677-65ce-5a4a-b44b-416fcac274f1</stRef:documentID>
+            <stRef:instanceID>xmp.iid:2e7468cf-6c6c-8a4e-ab2c-ba8617508e5a</stRef:instanceID>
+            <stRef:documentID>xmp.did:49d86d9b-61da-b44e-8457-c2565d3a10fa</stRef:documentID>
             <stRef:originalDocumentID>xmp.did:77907677-65ce-5a4a-b44b-416fcac274f1</stRef:originalDocumentID>
          </xmpMM:DerivedFrom>
          <dc:format>application/xml</dc:format>
@@ -877,8 +863,8 @@
   </session>
 
   <files>
-    <file absolutePath="D:\Cloud Storage\OneDrive\Blockland\Blockland Server\Add-Ons\Gamemode_Left4Block\misc\Imported Files\L4D1 Beta Style Tank Theme 44100 1.wav" id="0" importerPrivateSettings="Compression:0:0;LargeFileSupport:0:0;SampleType:0:40;" mediaHandler="AmioWav" relativePath="Imported Files/L4D1 Beta Style Tank Theme 44100 1.wav"/>
-    <file absolutePath="D:\Cloud Storage\OneDrive\Blockland\Blockland Server\Add-Ons\Gamemode_Left4Block\misc\Imported Files\tank.wav" id="1" importerPrivateSettings="Compression:0:0;LargeFileSupport:0:0;SampleType:0:40;" mediaHandler="AmioWav" relativePath="Imported Files/tank.wav"/>
+    <file absolutePath="D:\Cloud Storage\OneDrive\Blockland\Blockland Server\Add-Ons\Gamemode_Left4Block\misc\Imported Files\L4D1 Beta Style Tank Theme 44100 1.wav" id="0" importerPrivateSettings="Compression:0:0;LargeFileSupport:0:0;SampleType:0:40;" mediaHandler="AmioWav" recoveryID="a156cb29-1c23-4e1b-8f1f-82d1e0cc0a1d" relativePath="../Imported Files/L4D1 Beta Style Tank Theme 44100 1.wav"/>
+    <file absolutePath="D:\Cloud Storage\OneDrive\Blockland\Blockland Server\Add-Ons\Gamemode_Left4Block\misc\Imported Files\tank.wav" id="1" importerPrivateSettings="Compression:0:0;LargeFileSupport:0:0;SampleType:0:40;" mediaHandler="AmioWav" recoveryID="7772c14b-6efd-4ede-9312-33ea452cfd32" relativePath="../Imported Files/tank.wav"/>
   </files>
 
   <audioDevice inputID="CORSAIR VOID ELITE USB GAMING HEADSET" outputID="CORSAIR VOID ELITE USB GAMING HEADSET">

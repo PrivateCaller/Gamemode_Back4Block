@@ -343,7 +343,7 @@ function ZombieWitchHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat,
 {
         %skinColor = "0.1 0.1 0.1 1";
         %obj.hipColor =  %skinColor;
-        %obj.decalName = "AAA-None";
+        %obj.decalName = "witch";
         %obj.faceName = %face;
         %obj.larmColor =  %skinColor;
         %obj.secondPack =  "0";

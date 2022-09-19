@@ -1,4 +1,4 @@
-%pattern = "add-ons/gamemode_left4block/add-ins/player_survivor/sound/*.wav";//Too lazy to write datablock files for the sounds, just took this from the Disease Gamemode
+%pattern = "add-ons/gamemode_left4block/add-ins/player_survivor/sound/*.wav";
 %file = findFirstFile(%pattern);
 while(%file !$= "")
 {
@@ -12,22 +12,88 @@ while(%file !$= "")
 
 	//Check the names of the folders to determine what type of soundscape it will be, and check if it's a loopable sound or not
 	if(strstr(%file,"normal") != -1)//Normal soundscape
-	if(strstr(%file,"loop") != -1)
-	eval("datablock AudioProfile(" @ %soundName @ "_sound) { preload = true; description = AudioCloseLooping3d; filename = \"" @ %file @ "\"; };");
+	if(strstr(%file,"loop") != -1) eval("datablock AudioProfile(" @ %soundName @ "_sound) { preload = true; description = AudioCloseLooping3d; filename = \"" @ %file @ "\"; };");
 	else eval("datablock AudioProfile(" @ %soundName @ "_sound) { preload = true; description = AudioClose3d; filename = \"" @ %file @ "\"; };");
 
 	if(strstr(%file,"quiet") != -1)//Quiet soundscape
-	if(strstr(%file,"loop") != -1)
-	eval("datablock AudioProfile(" @ %soundName @ "_sound) { preload = true; description = AudioClosestLooping3d; filename = \"" @ %file @ "\"; };");
+	if(strstr(%file,"loop") != -1) eval("datablock AudioProfile(" @ %soundName @ "_sound) { preload = true; description = AudioClosestLooping3d; filename = \"" @ %file @ "\"; };");
 	else eval("datablock AudioProfile(" @ %soundName @ "_sound) { preload = true; description = AudioClosest3d; filename = \"" @ %file @ "\"; };");
 
 	if(strstr(%file,"loud") != -1)//Loudest Soundscape
-	if(strstr(%file,"loop") != -1)
-	eval("datablock AudioProfile(" @ %soundName @ "_sound) { preload = true; description = AudioDefaultLooping3d; filename = \"" @ %file @ "\"; };");
+	if(strstr(%file,"loop") != -1) eval("datablock AudioProfile(" @ %soundName @ "_sound) { preload = true; description = AudioDefaultLooping3d; filename = \"" @ %file @ "\"; };");
 	else eval("datablock AudioProfile(" @ %soundName @ "_sound) { preload = true; description = AudioDefault3d; filename = \"" @ %file @ "\"; };");
 
 	%file = findNextFile(%pattern);
 }
+
+function generateCustomDecalList()
+{
+	if(isFile("add-ons/gamemode_left4block/add-ins/player_survivor/models/decallist.txt"))
+	{
+		%write = new FileObject();
+		%write.openForWrite("add-ons/gamemode_left4block/add-ins/player_survivor/models/decallist.txt");		
+
+		%decalpath = "add-ons/gamemode_left4block/add-ins/player_survivor/models/decals/*.png";
+		for(%decal = findFirstFile(%decalpath); %decal !$= ""; %decal = findNextFile(%decalpath)) %write.writeLine("addExtraResource(\"" @ %decal @ "\");");
+		
+		%write.close();
+		%write.delete();
+	}
+}
+generateCustomDecalList();
+
+datablock TSShapeConstructor(mMeleeDts) 
+{
+	baseShape = "./models/mmelee.dts";
+	sequence0 = "./models/default.dsq";
+	sequence1 = "./models/melee.dsq";
+	sequence2 = "./models/actions.dsq";
+	sequence3 = "./models/zombie.dsq";
+};
+
+datablock PlayerData(PlayerMeleeAnims : PlayerStandardArmor)
+{
+	shapeFile = "./models/mMelee.dts";
+	canJet = true;
+	uiName = "Melee Player";
+};
+
+datablock PlayerData(PlayerMeleeAnimsJet : PlayerMeleeAnims)
+{
+	canJet = true;
+	uiName = "Melee Player Jet";
+};
+
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/zoey.png");
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/witch.png");
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/townsuit2.png");
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/townsuit.png");
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/shirtjacket.png");
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/rochelle.png");
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/polostriped.png");
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/polo.png");
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/piratestripes.png");
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/nick.png");
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/newoveralls.png");
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/newhoodie.png");
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/musclechest.png");
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/louis.png");
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/left4block.png");
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/jgtuxedoShirt.png");
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/jgtuxedo.png");
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/hoodienozipperpockets.png");
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/francis.png");
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/flannel.png");
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/ellis.png");
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/coach.png");
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/classicshirt.png");
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/civilian.png");
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/casualjacket.png");
+addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/bill.png");
+addExtraResource("add-ons/gamemode_left4block/add-ins/player_survivor/models/decal.ifl");
+addExtraResource("add-ons/gamemode_left4block/add-ins/player_survivor/models/face.ifl");
+addExtraResource("add-ons/gamemode_left4block/add-ins/player_survivor/icons/DownCi.png");
+addExtraResource("add-ons/gamemode_left4block/add-ins/player_survivor/icons/CI_VictimSaved.png");
 
 datablock ParticleData(oxygenBubbleParticle : painMidParticle)
 {
@@ -97,7 +163,8 @@ datablock PlayerData(SurvivorPlayer : PlayerMeleeAnims)
 {
 	canPhysRoll = true;
 	canJet = false;
-	jumpforce = 100*8.5;
+	runForce = 100 * 45;
+	jumpforce = 100*9.25;
 	jumpDelay = 25;
 	minimpactspeed = 15;
 	speedDamageScale = 0.25;
@@ -118,7 +185,6 @@ datablock PlayerData(SurvivorPlayer : PlayerMeleeAnims)
 	maxSideCrouchSpeed = 4;
     maxBackwardCrouchSpeed = 3;
     
-
 	groundImpactMinSpeed = 5;
 	groundImpactShakeFreq = "4.0 4.0 4.0";
 	groundImpactShakeAmp = "1.0 1.0 1.0";
@@ -126,8 +192,9 @@ datablock PlayerData(SurvivorPlayer : PlayerMeleeAnims)
 	groundImpactShakeFalloff = 15;
 
 	uiName = "Survivor Player";
-	usesL4DItems = 1;
-	isSurvivor = 1;
+	usesL4DItems = true;
+	isSurvivor = true;
+	firstpersononly = true;
 	hType = "Survivors";
 	maxtools = 5;
 	maxWeapons = 5;
@@ -142,57 +209,38 @@ datablock PlayerData(SurvivorPlayer : PlayerMeleeAnims)
 };
 datablock PlayerData(SurvivorPlayerMed : SurvivorPlayer)
 {
-	maxForwardSpeed = 6;
-   	maxBackwardSpeed = 2;
-   	maxSideSpeed = 3;
- 	maxForwardCrouchSpeed = 3;
-    maxBackwardCrouchSpeed = 1;
-    maxSideCrouchSpeed = 2;
+	maxForwardSpeed = SurvivorPlayer.maxForwardSpeed/1.375;
+   	maxBackwardSpeed = SurvivorPlayer.maxBackwardSpeed/1.375;
+   	maxSideSpeed = SurvivorPlayer.maxSideSpeed/1.375;
+ 	maxForwardCrouchSpeed = SurvivorPlayer.maxForwardCrouchSpeed/1.375;
+    maxBackwardCrouchSpeed = SurvivorPlayer.maxBackwardCrouchSpeed/1.375;
+    maxSideCrouchSpeed = SurvivorPlayer.maxSideCrouchSpeed/1.375;
 
 	uiName = "";
 };
 datablock PlayerData(SurvivorPlayerLow : SurvivorPlayer)
 {
-	canPhysRoll = false;
-	maxForwardSpeed = 3;
-   	maxBackwardSpeed = 1;
-   	maxSideSpeed = 1;
-
-	maxForwardCrouchSpeed = 2;
-   	maxBackwardCrouchSpeed = 1;
-   	maxSideCrouchSpeed = 1;
+	maxForwardSpeed = SurvivorPlayer.maxForwardSpeed/1.75;
+   	maxBackwardSpeed = SurvivorPlayer.maxBackwardSpeed/1.75;
+   	maxSideSpeed = SurvivorPlayer.maxSideSpeed/1.75;
+ 	maxForwardCrouchSpeed = SurvivorPlayer.maxForwardCrouchSpeed/1.75;
+    maxBackwardCrouchSpeed = SurvivorPlayer.maxBackwardCrouchSpeed/1.75;
+    maxSideCrouchSpeed = SurvivorPlayer.maxSideCrouchSpeed/1.75;
 
 	uiName = "";
 };
 
 datablock PlayerData(SurvivorPlayerDowned : SurvivorPlayerLow)
 {	
-   	runForce = 100 * 60;
+   	runForce = SurvivorPlayer.runForce;
    	maxForwardSpeed = 0;
    	maxBackwardSpeed = 0;
    	maxSideSpeed = 0;
-
    	maxForwardCrouchSpeed = 0;
    	maxBackwardCrouchSpeed = 0;
    	maxSideCrouchSpeed = 0;
-
-   	jumpForce = 0; //8.3 * 90;
-
-	firstpersononly = 1;
-
+   	jumpForce = 0;
+	rechargerate = 0;
+	isDowned = true;
 	uiName = "";
-	maxenergy = 100;
-	maxDamage = 200;
-	showEnergyBar = true;
-
-	jumpSound 		= "";
-	PainSound		= "";
-	DeathSound		= "";
-	useCustomPainEffects = true;
-	isDowned = 1;
-
-   	runSurfaceAngle  = 5;
-   	jumpSurfaceAngle = 5;
-   	isSurvivor = 1;
-   	rechargerate = 0;
 };

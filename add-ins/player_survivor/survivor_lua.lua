@@ -1,8 +1,19 @@
 ---@diagnostic disable: undefined-global
 
 function Survivor_Rightclick(obj)
-    if tonumber(ts.getobj(obj, "LastMeleeTime")) == nil or tonumber(ts.getobj(obj, "LastMeleeTime"))+400 < tonumber(ts.call("GetSimTime")) then
-        ts.setobj(obj, "LastMeleeTime",ts.call("GetSimTime"))
+
+    local lastmeleedelay = tonumber(ts.getobj(obj, "LastMeleeTime"))    
+    local delaycount = tonumber(ts.getobj(obj, "LastMeleeCount"))
+
+    if ts.getobj(obj, "LastMeleeCount") == "" or lastmeleedelay ~= nil and ts.getsimtime()-lastmeleedelay > 3000 then
+        ts.setobj(obj, "LastMeleeCount",0)
+        delaycount = tonumber(ts.getobj(obj, "LastMeleeCount"))
+    end
+    local newmeleedelay = 300 + delaycount*40
+    
+    if lastmeleedelay == nil or lastmeleedelay+newmeleedelay < ts.getsimtime() then
+        ts.setobj(obj, "LastMeleeTime",ts.getsimtime())
+        ts.setobj(obj, "LastMeleeCount",delaycount+1)
 
         local pos = ts.callobj(obj,"getHackPosition")
         local radius = 5
@@ -23,7 +34,7 @@ function Survivor_Rightclick(obj)
                 local line = VectorNormalize(VectorSub(targetpos,pos))
                 local dot = VectorDot(line,vec)
 
-                if tonumber(VectorDist(pos,targetpos)) < 5 and tonumber(dot) >= 0.45 then
+                if tonumber(VectorDist(pos,targetpos)) < 4 and tonumber(dot) >= 0.45 then
 
                     local ray = ts.call("containerRayCast", pos, targetpos, ts.get("TypeMasks::All"), obj)
 
@@ -44,10 +55,10 @@ function Survivor_Rightclick(obj)
                                         ts.callobj(ray,"setAimObject",obj)
                                     end
 
-                                    ts.callobj(ray,"cancel",L4B_SpazzZombie)
+                                    ts.callobj(ray,"cancel","L4B_SpazzZombie")
                                     ts.callobj(ray,"playThread",3,"zstumble"..math.random(1,3))
                                     ts.getcallobj(ts.callobj(ray,"getDatablock"),"onDamage("..ts.callobj(obj,"getID")..")")
-                                    ts.callobj(ray,"applyimpulse",ts.call("posFromRaycast",ray),VectorAdd(VectorScale(ts.callobj(obj,"getForwardVector"),"600"),"0 0 250"))
+                                    ts.callobj(ray,"applyimpulse",ts.call("posFromRaycast",ray),VectorAdd(VectorScale(ts.callobj(obj,"getForwardVector"),"500"),"0 0 250"))
                                 end
 
                                 
@@ -237,4 +248,20 @@ function Survivor_DownCheck(obj,damage,damageType)
 
         else return false
     end
+end
+
+function Survivor_FallDamage(obj,vector,force)--Default falling damage is garbage so I made my own version thats more suited for the player
+
+    local pos = ts.callobj(obj,"getPosition")
+    local minimpactspeed = tonumber(ts.getcallobj(obj,"getdatablock().minimpactspeed"))
+    local vectorz = tonumber(ts.call("getword",vector,2))
+    local vectorzquarter = vectorz/2
+    local forcequarter = tonumber(force)/2
+    local falldamage = vectorzquarter*forcequarter
+
+    if vectorz > minimpactspeed and vectorz < 20 then ts.callobj(obj,"damage",obj,pos,falldamage/3.75,ts.get("DamageType::Fall"))
+    elseif vectorz > 20 and vectorz < 25 then ts.callobj(obj,"damage",obj,pos,falldamage/1.5,ts.get("DamageType::Fall"))
+    elseif vectorz > 25 then ts.callobj(obj,"damage",obj,pos,falldamage*2.5,ts.get("DamageType::Fall"))
+    end
+
 end

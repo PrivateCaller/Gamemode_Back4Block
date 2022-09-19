@@ -33,6 +33,15 @@ function ZombieFallenHoleBot::onBotLoop(%this,%obj)
 	CommonZombieHoleBot::onBotLoop(%this,%obj);
 }
 
+
+function ZombieFallenHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
+{
+	if(%damageType !$= $DamageType::FallDamage || %damageType !$= $DamageType::Impact)
+	%damage = %damage/4;
+	
+	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
+}
+
 function ZombieFallenHoleBot::onDamage(%this,%obj)
 {
 	%obj.playaudio(1,"KevlarHit" @ getrandom(1,3));
@@ -62,8 +71,7 @@ function ZombieFallenHoleBot::onDisabled(%this,%obj)
 
 function ZombieFallenHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {	
-	if(getRandom(1, 8) == 1 && isObject($L4B_clientLog) && $L4B_clientLog.getCount() > 0)
-	L4B_pushZombifiedSnapshot(%obj);
+	if(getRandom(1, 8) == 1 && isObject($L4B_clientLog) && $L4B_clientLog.getCount() > 0) L4B_pushZombifiedSnapshot(%obj);
 	else
 	{
 		%hatColor = getRandomBotRGBColor();
@@ -74,21 +82,18 @@ function ZombieFallenHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat
 		%accentColor = getRandomBotRGBColor();
 		%handColor = %skinColor;
 
-		if(%larmColor)
 		%larmColor = %shirtColor;
-		else %larmColor = %skinColor;
-		%rarmColor = getRandom(0,1);
-		if(%rarmColor)
 		%rarmColor = %shirtColor;
-		else %rarmColor = %skinColor;
-		%rLegColor = getRandom(0,1);
-		if(%rLegColor)
-		%rLegColor = %pantsColor;
-		else %rLegColor = %skinColor;
-		%lLegColor = getRandom(0,1);
-		if(%lLegColor)
-		%lLegColor = %pantsColor;
-		else %lLegColor = %skinColor;
+		%rLegColor = %shoeColor;
+		%lLegColor = %shoeColor;
+
+		if(getRandom(1,3) == 1)
+		{
+			if(getRandom(1,2) == 1) %larmColor = %skinColor;
+			if(getRandom(1,2) == 1) %rarmColor = %skinColor;
+			if(getRandom(1,2) == 1) %rLegColor = %skinColor;
+			if(getRandom(1,2) == 1) %lLegColor = %skinColor;
+		}
 
 		%obj.accentColor = %accentColor;
 		%obj.accent =  "0";

@@ -1,13 +1,13 @@
 datablock PlayerData(ZombieSoldierHoleBot : CommonZombieHoleBot)
 {
 	uiName = "";
-	maxdamage = 250;//Health
 	hName = "Infected" SPC "Soldier";//cannot contain spaces//except it can lmao
 
 	hIsInfected = 1;
 	hZombieL4BType = "Normal";
 	hPinCI = "";
 	hBigMeleeSound = "";
+	maxdamage = 250;//Health
 
 	hShootTimes = 4;
 	hMaxShootRange = 60;
@@ -40,6 +40,14 @@ function ZombieSoldierHoleBot::onBotMelee(%this,%obj,%col)
 	CommonZombieHoleBot::onBotMelee(%this,%obj,%col);
 }
 
+function ZombieSoldierHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
+{
+	if(%damageType !$= $DamageType::FallDamage || %damageType !$= $DamageType::Impact)
+	%damage = %damage/4;
+	
+	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
+}
+
 function ZombieSoldierHoleBot::onDamage(%this,%obj)
 {
 	%obj.playaudio(2,"kevlarhit" @ getrandom(1,3) @ "_sound");
@@ -60,23 +68,18 @@ function ZombieSoldierHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%ha
 {	
 	%obj.suitColor = getRandomBotPantsColor();
 	%uniformColor = %obj.suitColor;
-	%larmColor = getRandom(0,1);
-	if(%larmColor)
 	%larmColor = %uniformColor;
-	else %larmColor = %skinColor;
-	%rarmColor = getRandom(0,1);
-	if(%rarmColor)
 	%rarmColor = %uniformColor;
-	else %rarmColor = %skinColor;
-	%rLegColor = getRandom(0,1);
-	if(%rLegColor)
 	%rLegColor = %uniformColor;
-	else %rLegColor = %skinColor;
-	%lLegColor = getRandom(0,1);
-	if(%lLegColor)
 	%lLegColor = %uniformColor;
-	else %lLegColor = %skinColor;
-	%handColor = %skinColor;
+	
+	if(getRandom(1,3) == 1)
+	{
+		if(getRandom(1,2) == 1) %larmColor = %skinColor;
+		if(getRandom(1,2) == 1) %rarmColor = %skinColor;
+		if(getRandom(1,2) == 1) %rLegColor = %skinColor;
+		if(getRandom(1,2) == 1) %lLegColor = %skinColor;
+	}
 
 	%obj.llegColor =  %lLegColor;
 	%obj.secondPackColor =  "1 1 1 1";

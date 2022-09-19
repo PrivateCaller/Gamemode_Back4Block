@@ -1,11 +1,11 @@
 ---@diagnostic disable: undefined-global
 
 function Melee_SwingCheck(obj,this,slot)
-
+    
     if ts.isobject(obj) == false or ts.getstate(obj) == "Dead" or ts.isobject(ts.callobj(obj,"getMountedImage",0)) == false then return end
 
     local imagestate = ts.callobj(obj,"getImageState",0) 
-    if ts.getcallobj(obj,"getMountedImage(0).meleeDamage") == "" or imagestate == "Ready" or imagestate == "StopFire" then return end
+    if ts.getcallobj(obj,"getMountedImage(0).meleeDamageDivisor") == "" or imagestate == "Ready" or imagestate == "StopFire" then return end
 
     local pos = ts.callobj(obj,"getMuzzlePoint",slot)
     local radius = 1
@@ -35,8 +35,9 @@ function Melee_SwingCheck(obj,this,slot)
 
                             if ts.getobj(ray,"hZombieL4BType") ~= "" then                            
                                 if ts.getcallobj(ts.callobj(ray,"getID"),"getDatablock().getName()") ~= "ZombieTankHoleBot" then
+                                    
                                     ts.callobj(ray,"playThread",3,"zstumble"..math.random(1,4))
-                                    ts.callobj(ray,"damage",obj,raypos,tonumber(ts.getcallobj(rayobject,"getDatablock().maxDamage"))/2,ts.get("DamageType::Default"))
+                                    ts.callobj(ray,"damage",obj,raypos,tonumber(ts.getcallobj(rayobject,"getDatablock().maxDamage"))/tonumber(ts.getcallobj(this,"meleeDamageDivisor")),ts.get("DamageType::Default"))
                                     ts.callobj(ray,"applyimpulse",ts.call("posFromRaycast",ray),VectorAdd(VectorScale(ts.callobj(obj,"getForwardVector"),"600"),"0 0 400"))
 
                                     else ts.callobj(ray,"damage",obj,raypos,250,ts.get("DamageType::Default"))

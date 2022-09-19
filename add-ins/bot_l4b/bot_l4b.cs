@@ -27,28 +27,6 @@ registerInputEvent ("fxDTSBrick", "onDoorClose", "Self fxDTSBrick" TAB "Player P
 registerInputEvent ("fxDTSBrick", "onDoorOpen", "Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "MiniGame MiniGame");
 registerOutputEvent ("fxDTSBrick", "zfakeKillBrick");
 
-$hZombieDecalDefault[%n = 1] = "AAA-None";
-$hZombieDecalDefault[%n++] = "Mod-Army";
-$hZombieDecalDefault[%n++] = "Mod-Police";
-$hZombieDecalDefault[%n++] = "Mod-Suit";
-$hZombieDecalDefault[%n++] = "Meme-Mongler";
-$hZombieDecalDefault[%n++] = "Mod-Daredevil";
-$hZombieDecalDefault[%n++] = "Mod-Pilot";
-$hZombieDecalDefault[%n++] = "Mod-Prisoner";
-$hZombieDecalDefault[%n++] = "Meme-Mongler";
-$hZombieDecalDefault[%n++] = "Medieval-YARLY";
-$hZombieDecalDefault[%n++] = "Medieval-ORLY";
-$hZombieDecalDefault[%n++] = "Medieval-Eagle";
-$hZombieDecalDefault[%n++] = "Medieval-Lion";
-$hZombieDecalDefault[%n++] = "Medieval-Tunic";
-$hZombieDecalDefault[%n++] = "Hoodie";
-$hZombieDecalDefault[%n++] = "DrKleiner";
-$hZombieDecalDefault[%n++] = "Chef";
-$hZombieDecalDefault[%n++] = "worm-sweater";
-$hZombieDecalDefault[%n++] = "worm_engineer";
-$hZombieDecalDefault[%n++] = "Archer";
-$hZombieDecalDefaultAmount = %n;
-
 $hZombieHat[%c++] = 4;
 $hZombieHat[%c++] = 6;
 $hZombieHat[%c++] = 7;
@@ -64,10 +42,10 @@ function fxDTSBrick::RandomizeZombieUncommon(%obj) { %obj.hBotType = $hZombieUnc
 
 function fxDTSBrick::zfakeKillBrick(%obj)
 {
-	if(strstr(strlwr(%obj.getName()),"breakbrick") != -1)
+	if(strstr(strlwr(%obj.getName()),"breakbrick") != 1)
 	{
 		%obj.fakeKillBrick("0 0 1", "5");
-		%obj.schedule(5100,disappear,-1);
+		%obj.schedule(5100,disappear,1);
 
 		if($oldTimescale $= "") $oldTimescale = getTimescale();
 
@@ -83,7 +61,7 @@ function Player::hMeleeAttack(%obj,%col)
 
 	if(%col.getType() & $TypeMasks::VehicleObjectType || %col.getType() & $TypeMasks::PlayerObjectType)
 	{
-		%obj.setenergylevel(%obj.getEnergyLevel()-25);
+		%obj.setenergylevel(%obj.getEnergyLevel()/25);
 		%damage = %obj.hAttackDamage*getWord(%obj.getScale(),0);
 		%damagefinal = getRandom(%damage/4,%damage);
 		%obj.hlastmeleedamage = %damagefinal;
@@ -94,11 +72,33 @@ function Player::hMeleeAttack(%obj,%col)
 	}
 }
 
+function Player::StunnedSlowDown(%obj,%slowdowndivider)
+{						
+	if(!isObject(%obj) || %obj.getstate() $= "Dead") return;
+
+	%datablock = %obj.getDataBlock();
+
+	%obj.setMaxForwardSpeed(%datablock.MaxForwardSpeed/%slowdowndivider);
+	%obj.setMaxSideSpeed(%datablock.MaxSideSpeed/%slowdowndivider);
+	%obj.setMaxBackwardSpeed(%datablock.maxBackwardSpeed/%slowdowndivider);
+
+	%obj.setMaxCrouchForwardSpeed(%datablock.maxForwardCrouchSpeed/%slowdowndivider);
+  	%obj.setMaxCrouchBackwardSpeed(%datablock.maxSideCrouchSpeed/%slowdowndivider);
+  	%obj.setMaxCrouchSideSpeed(%datablock.maxSideCrouchSpeed/%slowdowndivider);
+
+ 	%obj.setMaxUnderwaterBackwardSpeed(%datablock.MaxUnderwaterBackwardSpeed/%slowdowndivider);
+  	%obj.setMaxUnderwaterForwardSpeed(%datablock.MaxUnderwaterForwardSpeed/%slowdowndivider);
+  	%obj.setMaxUnderwaterSideSpeed(%datablock.MaxUnderwaterForwardSpeed/%slowdowndivider);
+
+	cancel(%obj.resetSpeedSched);
+	%obj.resetSpeedSched = %obj.schedule(2000,StunnedSlowDown,1);
+}
+
 function Player::hChangeBotToInfectedAppearance(%obj)
 {
 	%this = %obj.getdataBlock();
 	%obj.resetHoleLoop();
-	if(!%this.hNeedsWeapons) %obj.setWeapon(-1);
+	if(!%this.hNeedsWeapons) %obj.setWeapon(1);
 
 	%obj.hNeutralAttackChance = %this.hNeutralAttackChance;
 	%obj.hSearch = %this.hSearch;
@@ -190,7 +190,7 @@ function Player::hDefaultL4BAppearance(%obj)
 	%randmultiplier = getRandom(500,3000)*0.001;
 	%randskin = $hZombieSkin[getRandom(1,$hZombieSkinAmount)];
 	%skincolor = getWord(%randskin,0)*%randmultiplier SPC getWord(%randskin,1)*%randmultiplier SPC getWord(%randskin,2)*%randmultiplier SPC 1;
-	%decal = $hZombieDecalDefault[getRandom(1,$hZombieDecalDefaultAmount)];
+	%decal = $hZombieDecal[getRandom(1,$hZombieDecalAmount)];
 	%face = $hZombieFace[getRandom(1,$hZombieFaceAmount)];
 	
 	%this.Appearance(%obj,%skinColor,%face,%decal,%hat,%pack,%chest);
@@ -223,7 +223,7 @@ function L4B_ZombieDropLoot(%obj,%lootitem,%chance)
 		};
 		missionCleanup.add(%loot);
 
-		%loot.applyimpulse(%loot.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),getRandom(4/4,4)),getRandom(4*-1,4) @ " 0 " @ getRandom(6/3,6)));
+		%loot.applyimpulse(%loot.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),getRandom(4/4,4)),getRandom(4*1,4) @ " 0 " @ getRandom(6/3,6)));
 		%loot.fadeSched = %loot.schedule(8000,fadeOut);
 		%loot.delSched = %loot.schedule(8200,delete);
 	}
@@ -259,7 +259,7 @@ function Player::bigZombieMelee(%obj)
 		%dot = vectorDot( %obj.getEyeVector(), %line );
 		%obscure = containerRayCast(%obj.getEyePoint(),vectorAdd(%hit.getPosition(),"0 0 1.9"),$TypeMasks::InteriorObjectType | $TypeMasks::TerrainObjectType | $TypeMasks::FxBrickObjectType, %obj);
 
-		if(isObject(%obscure) || ContainerSearchCurrRadiusDist() > 2 || %dot > -0.5)
+		if(isObject(%obscure) || ContainerSearchCurrRadiusDist() > 2 || %dot > 0.5)
 		continue;
 
 		if(%hit.getType() & $TypeMasks::PlayerObjectType && miniGameCanDamage(%obj,%hit) && checkHoleBotTeams(%obj,%hit))

@@ -174,32 +174,31 @@ function configLoadL4BItemNoSlots()
 if(loadRequiredAddOn("Bot_Hole") == $Error::None && loadRequiredAddOn("Support_Lua") == $Error::None)
 {	
 	exec("./preferences.cs");	
-	exec("./add-ins/support_packages/extraResources.cs");
-	exec("./add-ins/player_survivor/script_newplayerdatablock.cs");
+	exec("./add-ins/support_packages/support_extraresources.cs");
 	exec("./add-ins/support_packages/support_mainpackage.cs");
 	exec("./add-ins/support_packages/support_multipleslots.cs");
 	exec("./add-ins/support_packages/support_jettison.cs");
 	exec("./add-ins/support_packages/support_clientlogger.cs");
 	exec("./add-ins/player_survivor/script_survivor.cs");
 
-	if(isFunction(NetObject, setNetFlag))
-	{
-		exec("./add-ins/support_packages/support_billboards/billboards/billboardv2.cs");
-		exec("./add-ins/support_packages/support_billboards/billboards_wrapper.cs");
-		$L4B_hasSelectiveGhosting = true;
-	}
-	else
-	{
-		$L4B_hasSelectiveGhosting = false;
-		error("ERROR: The Selective Ghosting DLL is required for Gamemode_Left4Block's billboards to work.");
-		schedule(1000, 0, messageAll, 'MsgError', "\c0ERROR: The Selective Ghosting DLL is required for Gamemode_Left4Block's billboards to work.");
-	}
+	//if(isFunction(NetObject, setNetFlag))
+	//{
+	//	exec("./add-ins/support_billboards/billboards/billboardv2.cs");
+	//	exec("./add-ins/support_billboards/billboards_wrapper.cs");
+	//	$L4B_hasSelectiveGhosting = true;
+	//}
+	//else
+	//{
+	//	$L4B_hasSelectiveGhosting = false;
+	//	error("ERROR: The Selective Ghosting DLL is required for Gamemode_Left4Block's billboards to work.");
+	//	schedule(1000, 0, messageAll, 'MsgError', "\c0ERROR: The Selective Ghosting DLL is required for Gamemode_Left4Block's billboards to work.");
+	//}
 
-	if(LoadRequiredAddOn("Support_BotHolePlus") == $Error::None)
-	{
-		exec("./add-ins/bot_l4b/bots/survivor.cs");
-		exec("./add-ins/support_packages/support_afk_system.cs");
-	}
+	//if(LoadRequiredAddOn("Support_BotHolePlus") == $Error::None)
+	//{
+	//	exec("./add-ins/bot_l4b/bots/survivor.cs");
+	//	exec("./add-ins/support_packages/support_afk_system.cs");
+	//}
 	
 	if(LoadRequiredAddOn("Weapon_FlashGrenade") == $Error::None)
 	exec("./add-ins/support_packages/support_flashbang.cs");

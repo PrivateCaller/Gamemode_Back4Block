@@ -19,9 +19,9 @@ datablock PlayerData(CommonZombieHoleBot : PlayerMeleeAnims)
 {
 	canJet = false;
 	jumpForce = 9.5*100;
-	minImpactSpeed = 32;
+	minImpactSpeed = 20;
 	airControl = 0.1;
-	speedDamageScale = 2.5;
+	speedDamageScale = 0.5;
 
     maxForwardSpeed = 10;
     maxSideSpeed = 9;
@@ -263,6 +263,12 @@ function CommonZombieHoleBot::onBotFollow( %this, %obj, %targ )
 
 function CommonZombieHoleBot::onCollision(%this, %obj, %col, %fade, %pos, %norm)
 {
+	if(%obj.lastattackis < getSimTime() && %col.getType() & $TypeMasks::PlayerObjectType && checkHoleBotTeams(%obj,%col) && minigameCanDamage(%obj,%col))
+	{
+		%obj.hMeleeAttack(%col);
+		%obj.lastattackis = getSimTime()+750;
+	}
+	
 	Parent::onCollision(%this, %obj, %col, %fade, %pos, %norm);
 }
 
@@ -272,6 +278,7 @@ function CommonZombieHoleBot::onBotMelee(%this,%obj,%col)
 	%obj.playaudio(1,"melee_hit" @ getrandom(1,8) @ "_sound");
 	%col.applyimpulse(%col.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),getrandom(100,100*%meleeimpulse)),"0" SPC "0" SPC getrandom(100,100*%meleeimpulse)));
 	%obj.playthread(2,"zAttack" @ getRandom(1,3));
+	%obj.setaimobject(%col);
 	
 	if(%col.getType() & $TypeMasks::PlayerObjectType)
 	{
@@ -281,15 +288,11 @@ function CommonZombieHoleBot::onBotMelee(%this,%obj,%col)
 			holeZombieInfect(%obj,%col);
 		}
 
-		%col.spawnExplosion("ZombieHitProjectile",%meleeimpulse/4);
+		%col.spawnExplosion("ZombieHitProjectile",%meleeimpulse/2 SPC %meleeimpulse/2 SPC %meleeimpulse/2);
 		%col.playthread(3,"plant");
+		%col.StunnedSlowDown(3);
+		%col.setVelocity(vectorscale(%obj.getEyeVector(),-10));
 	}
-}
-
-function CommonZombieHoleBot::onBotCollision( %this, %obj, %col, %normal, %speed )
-{	
-	if(%obj.getState() $= "Dead") return;
-	//do something, I have no idea yet
 }
 
 function CommonZombieHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
@@ -337,22 +340,18 @@ function CommonZombieHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat
 	%packColor = getRandomBotRGBColor();
 	%handColor = %skinColor;
 
-	%larmColor = getRandom(0,1);
-	if(%larmColor)
 	%larmColor = %shirtColor;
-	else %larmColor = %skinColor;
-	%rarmColor = getRandom(0,1);
-	if(%rarmColor)
 	%rarmColor = %shirtColor;
-	else %rarmColor = %skinColor;
-	%rLegColor = getRandom(0,1);
-	if(%rLegColor)
 	%rLegColor = %shoeColor;
-	else %rLegColor = %skinColor;
-	%lLegColor = getRandom(0,1);
-	if(%lLegColor)
 	%lLegColor = %shoeColor;
-	else %lLegColor = %skinColor;
+
+	if(getRandom(1,3) == 1)
+	{
+		if(getRandom(1,2) == 1) %larmColor = %skinColor;
+		if(getRandom(1,2) == 1) %rarmColor = %skinColor;
+		if(getRandom(1,2) == 1) %rLegColor = %skinColor;
+		if(getRandom(1,2) == 1) %lLegColor = %skinColor;
+	}
 
 	%pack2 = 0;
 	%accent = 0;

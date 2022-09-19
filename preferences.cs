@@ -344,7 +344,7 @@ else
 	$Pref::Server::L4B2Bots::MinigameMessages = 1;
 	$Pref::Server::L4B2Bots::VictimSavedMessages = 1;
 
-	$Pref::Server::L4B2Bots::NormalDamage = 5;
+	$Pref::Server::L4B2Bots::NormalDamage = 2;
 	$Pref::Server::L4B2Bots::SpecialsDamage = 15;
 	$Pref::Server::L4B2Bots::TankRounds = 1;
 	$Pref::Server::L4B2Bots::TankRoundChance = 25;
@@ -359,7 +359,7 @@ function L4B_DifficultyAdjustment()
 {
 	switch($Pref::Server::L4B2Bots::Difficulty)
 	{
-		case 0: $Pref::Server::L4B2Bots::NormalDamage = 5;
+		case 0: $Pref::Server::L4B2Bots::NormalDamage = 2;
 				$Pref::Server::L4B2Bots::SpecialsDamage = 15;
 				$Pref::Server::L4B2Bots::TankRounds = 1;
 				$Pref::Server::L4B2Bots::TankRoundChance = 25;

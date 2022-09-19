@@ -65,12 +65,6 @@ function MinigameSO::Director(%minigame,%enabled,%interval)
 
     if(%minigame.DirectorStatus)
     {    
-        if(%interval == 2)
-        {
-            if(getRandom(1,4) == 1) %minigame.spawnZombies("Horde",10,0);
-            %minigame.spawnZombies("Special",getRandom(1,2),0);            
-            %minigame.SpawnStalkZombies();
-        }
         
         if(%interval > 3) 
         {
@@ -137,6 +131,17 @@ function MinigameSO::Director(%minigame,%enabled,%interval)
                 case 2: 
             }            
         }
+
+        if(%interval == 2)
+        {
+            if(!%stressed) %spawnchance = 4;
+            else %spawnchance = 3;
+
+            if(getRandom(1,%spawnchance) == 1) %minigame.spawnZombies("Horde",10,0);
+            if(getRandom(1,%spawnchance-2) == 1) %minigame.spawnZombies("Special",getRandom(1,2),0);
+
+            %minigame.SpawnStalkZombies();
+        }        
 
         cancel(%minigame.directorSchedule);
         %minigame.directorSchedule = %minigame.schedule(10000,Director,1,%interval++);

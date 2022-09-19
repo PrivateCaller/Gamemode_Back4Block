@@ -98,27 +98,10 @@ function ZombieSpitterHoleBot::onBotFollow( %this, %obj, %targ )
 	function ZombieSpitterHoleBot::onBotMelee(%this,%obj,%col)
 {
 	CommonZombieHoleBot::onBotMelee(%this,%obj,%col);
-	for(%i=0;%i<5;%i++)
-	{
-		%rnd = getRandom();
-		%dist = getRandom()*15;
-		%x = mCos(%rnd*$PI*3)*%dist;
-		%y = mSin(%rnd*$PI*3)*%dist;
-		%p = new projectile()
-		{
-			datablock = SpitterSpewedProjectile;
-			initialPosition = %obj.getPosition();
-			initialVelocity = %x SPC %y SPC (getRandom()*4);
-			client = %obj.client;
-			sourceObject = %obj;
-			damageType = $DamageType::SpitAcidBall;
-		};
-	}
 }
 
 function ZombieSpitterHoleBot::onDamage(%this,%obj)
 {
-
 	if(%obj.getstate() $= "Dead")
 	return;
 
@@ -196,7 +179,7 @@ function ZombieSpitterHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%ha
 	%obj.hatColor =  "1 1 1 1";
 	%obj.hipColor =  %pantsColor;
 	%obj.chest =  "1";
-	%obj.decalName =  "worm-engineer";
+	%obj.decalName =  "witch";
 	%obj.rarm =  "0";
 	%obj.packColor =  "0.2 0 0.8 1";
 	%obj.pack =  "0";
@@ -233,7 +216,7 @@ function ZombieSpitterHoleBot::Spit(%this, %obj)
 	%obj.playthread(0,"plant");
 
 	%muzzle = vectorAdd(%obj.getMuzzlePoint(2),"0 0 0.35");
-	%velocity = vectorScale(%obj.getEyeVector(),40);
+	%velocity = vectoradd(vectorScale(%obj.getEyeVector(),40),"0 0 2.5");
 
 	%pm = new projectile()
 	{

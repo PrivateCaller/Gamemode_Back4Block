@@ -106,7 +106,7 @@ datablock ShapeBaseImageData(crowbarImage)
 	doColorShift = crowbarItem.doColorShift;
 	colorShiftColor = crowbarItem.colorShiftColor;
 
-	meleeDamage = 32;
+	meleeDamageDivisor = 2;
 	meleeHitEnvSound = "crowbar";
 	meleeHitPlSound = "crowbar";
 
@@ -169,4 +169,226 @@ function crowbarImage::onPreFire(%this, %obj, %slot)
 	serverPlay3D("melee_swing_sound",%obj.gethackposition());
 	%obj.playthread(1, "meleeRaise");
 	%obj.playthread(2, "meleeSwing" @ getRandom(1,3));
+}
+
+datablock ItemData(macheteItem : crowbarItem)
+{
+	shapeFile = "./models/model_machete.dts";
+	uiName = "Machete";
+	iconName = "./icons/icon_machete";
+	colorShiftColor = "0.5 0.5 0.5 1";
+	image = macheteImage;
+};
+
+datablock ShapeBaseImageData(macheteImage : crowbarImage)
+{
+	shapeFile = "./models/model_machete.dts";
+	offset = "0 0.05 0.25";
+	item = macheteItem;
+	doColorShift = macheteItem.doColorShift;
+	colorShiftColor = macheteItem.colorShiftColor;
+	meleeDamageDivisor = 1.25;
+	meleeHitEnvSound = "machete";
+	meleeHitPlSound = "machete";
+	stateTimeoutValue[6]            = 0.16;
+};
+
+function macheteImage::onReady(%this, %obj, %slot)
+{
+	crowbarImage::onReady(%this, %obj, %slot);
+}
+
+function macheteImage::onFire(%this, %obj, %slot)
+{
+	crowbarImage::onFire(%this, %obj, %slot);
+}
+
+function macheteImage::onPreFire(%this, %obj, %slot)
+{
+	crowbarImage::onPreFire(%this, %obj, %slot);
+}
+
+datablock ItemData(baseballbatItem : crowbarItem)
+{
+	shapeFile = "./models/model_baseballbat.dts";
+	uiName = "baseballbat";
+	iconName = "./icons/icon_baseballbat";
+	colorShiftColor = "0.5 0.5 0.5 1";
+	image = baseballbatImage;
+};
+
+datablock ShapeBaseImageData(baseballbatImage : crowbarImage)
+{
+	shapeFile = "./models/model_baseballbat.dts";
+	offset = "0 0.05 0.25";
+	item = baseballbatItem;
+	doColorShift = baseballbatItem.doColorShift;
+	colorShiftColor = baseballbatItem.colorShiftColor;
+	meleeDamageDivisor = 2.5;
+	meleeHitEnvSound = "baseballbat";
+	meleeHitPlSound = "baseballbat";
+	stateTimeoutValue[6]            = 0.16;
+};
+
+function baseballbatImage::onReady(%this, %obj, %slot)
+{
+	crowbarImage::onReady(%this, %obj, %slot);
+}
+
+function baseballbatImage::onFire(%this, %obj, %slot)
+{
+	crowbarImage::onFire(%this, %obj, %slot);
+}
+
+function baseballbatImage::onPreFire(%this, %obj, %slot)
+{
+	crowbarImage::onPreFire(%this, %obj, %slot);
+}
+
+datablock ItemData(fryingpanItem : crowbarItem)
+{
+	shapeFile = "./models/model_fryingpan.dts";
+	uiName = "fryingpan";
+	iconName = "./icons/icon_fryingpan";
+	colorShiftColor = "0.5 0.5 0.5 1";
+	image = fryingpanImage;
+};
+
+datablock ShapeBaseImageData(fryingpanImage : crowbarImage)
+{
+	shapeFile = "./models/model_fryingpan.dts";
+	offset = "0 0.05 0.25";
+	item = fryingpanItem;
+	doColorShift = fryingpanItem.doColorShift;
+	colorShiftColor = fryingpanItem.colorShiftColor;
+	meleeDamageDivisor = 3;
+	meleeHitEnvSound = "fryingpan";
+	meleeHitPlSound = "fryingpan";
+	stateTimeoutValue[6]            = 0.16;
+};
+
+function fryingpanImage::onReady(%this, %obj, %slot)
+{
+	crowbarImage::onReady(%this, %obj, %slot);
+}
+
+function fryingpanImage::onFire(%this, %obj, %slot)
+{
+	crowbarImage::onFire(%this, %obj, %slot);
+}
+
+function fryingpanImage::onPreFire(%this, %obj, %slot)
+{
+	crowbarImage::onPreFire(%this, %obj, %slot);
+}
+
+datablock ItemData(hatchetItem : crowbarItem)
+{
+	shapeFile = "./models/model_hatchet.dts";
+	uiName = "hatchet";
+	iconName = "./icons/icon_hatchet";
+	colorShiftColor = "0.5 0.5 0.5 1";
+	image = hatchetImage;
+};
+
+datablock ShapeBaseImageData(hatchetImage : crowbarImage)
+{
+	shapeFile = "./models/model_hatchet.dts";
+	offset = "0 0.05 0.25";
+	item = hatchetItem;
+	doColorShift = hatchetItem.doColorShift;
+	colorShiftColor = hatchetItem.colorShiftColor;
+	meleeDamageDivisor = 1.25;
+	meleeHitEnvSound = "crowbar";
+	meleeHitPlSound = "machete";
+	stateTimeoutValue[6]            = 0.16;
+};
+
+function hatchetImage::onReady(%this, %obj, %slot)
+{
+	crowbarImage::onReady(%this, %obj, %slot);
+}
+
+function hatchetImage::onFire(%this, %obj, %slot)
+{
+	crowbarImage::onFire(%this, %obj, %slot);
+}
+
+function hatchetImage::onPreFire(%this, %obj, %slot)
+{
+	crowbarImage::onPreFire(%this, %obj, %slot);
+}
+
+datablock ItemData(shovelItem : crowbarItem)
+{
+	shapeFile = "./models/model_shovel.dts";
+	uiName = "shovel";
+	iconName = "./icons/icon_shovel";
+	colorShiftColor = "0.5 0.5 0.5 1";
+	image = shovelImage;
+};
+
+datablock ShapeBaseImageData(shovelImage : crowbarImage)
+{
+	shapeFile = "./models/model_shovel.dts";
+	offset = "0 0.05 0.25";
+	item = shovelItem;
+	doColorShift = shovelItem.doColorShift;
+	colorShiftColor = shovelItem.colorShiftColor;
+	meleeDamageDivisor = 1.25;
+	meleeHitEnvSound = "crowbar";
+	meleeHitPlSound = "crowbar";
+	stateTimeoutValue[6]            = 0.16;
+};
+
+function shovelImage::onReady(%this, %obj, %slot)
+{
+	crowbarImage::onReady(%this, %obj, %slot);
+}
+
+function shovelImage::onFire(%this, %obj, %slot)
+{
+	crowbarImage::onFire(%this, %obj, %slot);
+}
+
+function shovelImage::onPreFire(%this, %obj, %slot)
+{
+	crowbarImage::onPreFire(%this, %obj, %slot);
+}
+
+datablock ItemData(macheteItem : crowbarItem)
+{
+	shapeFile = "./models/model_machete.dts";
+	uiName = "Machete";
+	iconName = "./icons/icon_machete";
+	colorShiftColor = "0.5 0.5 0.5 1";
+	image = macheteImage;
+};
+
+datablock ShapeBaseImageData(batonImage : crowbarImage)
+{
+	shapeFile = "./models/model_baton.dts";
+	offset = "0 0.05 0.25";
+	item = batonItem;
+	doColorShift = batonItem.doColorShift;
+	colorShiftColor = batonItem.colorShiftColor;
+	meleeDamageDivisor = 1.25;
+	meleeHitEnvSound = "baseballbat";
+	meleeHitPlSound = "baseballbat";
+	stateTimeoutValue[6]            = 0.16;
+};
+
+function batonImage::onReady(%this, %obj, %slot)
+{
+	crowbarImage::onReady(%this, %obj, %slot);
+}
+
+function batonImage::onFire(%this, %obj, %slot)
+{
+	crowbarImage::onFire(%this, %obj, %slot);
+}
+
+function batonImage::onPreFire(%this, %obj, %slot)
+{
+	crowbarImage::onPreFire(%this, %obj, %slot);
 }

@@ -11,10 +11,9 @@ while(%file !$= "")
 	%file = findNextFile(%pattern);
 }
 
-if(!isObject(HealParticle))
+
+datablock ParticleData(HealParticle)
 {
-	datablock ParticleData(HealParticle)
-	{
 		dragCoefficient      = 5;
 		gravityCoefficient   = -0.2;
 		inheritedVelFactor   = 0;
@@ -32,13 +31,10 @@ if(!isObject(HealParticle))
 		times[0]      = 0;
 		times[1]      = 0.2;
 		times[2]      = 1;
-	};
-}
+};
 
-if(!isObject(HealEmitter))
+datablock ParticleEmitterData(HealEmitter)
 {
-	datablock ParticleEmitterData(HealEmitter)
-	{
 		ejectionPeriodMS = 35;
 		periodVarianceMS = 0;
 		ejectionVelocity = 0.5;
@@ -52,13 +48,10 @@ if(!isObject(HealEmitter))
 		particles = "HealParticle";
 
 		uiName = "";
-	};
-}
+};
 
-if(!isObject(HealImage))
+datablock ShapeBaseImageData(HealImage)
 {
-	datablock ShapeBaseImageData(HealImage)
-	{
 		shapeFile = "base/data/shapes/empty.dts";
 		emap = false;
 
@@ -77,217 +70,17 @@ if(!isObject(HealImage))
 
 		stateName[2]			= "Done";
 		stateScript[2]			= "onDone";
-	};
-}
+};
 
 function HealImage::onDone(%data, %player, %slot)
 {
 	%player.unMountImage(%slot);
 }
 
-if(!isObject(ZombieMedpackItem))
+
+
+datablock DebrisData(PillsHereDebris)
 {
-	datablock ItemData(ZombieMedpackItem)
-	{
-		category = "Weapon";
-		className = "Weapon";
-		
-		shapeFile = "./models/medpack.1.dts";
-		rotate = false;
-		mass = 1;
-		density = 0.2;
-		elasticity = 0.2;
-		friction = 0.6;
-		emap = true;
-		
-		uiName = "Medpack";
-		iconName = "./icons/Icon_Medpack";
-		doColorShift = false;
-		
-		image = ZombieMedpackImage;
-		canDrop = true;
-		l4ditemtype = "heal_full";
-	};
-}
-
-if(!isObject(ZombieMedpackImage))
-{
-	datablock ShapeBaseImageData(ZombieMedpackImage)
-	{
-		shapeFile = "./models/medpack.1.dts";
-		emap = true;
-		mountPoint = 0;
-		offset = "0 0 0";
-		eyeOffset = 0;
-		rotation = eulerToMatrix("0 0 0");
-		
-		className = "WeaponImage";
-		item = ZombieMedpackItem;
-		isHealing = 1;
-		
-		armReady = true;
-		doColorShift = false;
-		
-		stateName[0]					= "Activate";
-		stateSound[0]					= "heal_medpack_unholster_sound";
-		stateScript[0]					= "onActivate";
-		stateTimeoutValue[0]			= 0.15;
-		stateSequence[0]				= "Ready";
-		stateTransitionOnTimeout[0]		= "Ready";
-
-		stateName[1]					= "Ready";
-		stateAllowImageChange[1]		= true;
-		stateScript[1]					= "onReady";
-		stateTransitionOnTriggerDown[1]	= "Use";
-		
-		stateName[2]					= "Use";
-		stateScript[2]					= "onUse";
-		stateTransitionOnTriggerUp[2]	= "Ready";
-	};
-}
-
-function ZombieMedpackImage::onActivate(%this,%obj)
-{
-	%obj.playThread(3,plant);
-}
-function ZombieMedpackImage::healLoop(%this, %obj)
-{
-	%bandageSlot = %obj.currTool;
-	%client = %obj.client;
-	%tool = %obj.tool[%bandageSlot];
-	
-	if(isObject(%tool) && %tool.getID() == %this.item.getID())
-	{
-		%time = 3.4;
-		%obj.zombieMedpackUse += 0.1;
-		
-		if(%obj.zombieMedpackUse >= %time)
-		{
-				%obj.pseudoHealth = 0;
-				%obj.setDamageLevel(0);
-				%obj.emote(HealImage, 1);
-				%obj.tool[%bandageSlot] = 0;
-				%obj.weaponCount--;
-				%obj.setMaxForwardSpeed(%obj.getDatablock().maxForwardSpeed);
-				
-				if(isObject(%client))
-				{
-					messageClient(%client, 'MsgItemPickup', '', %bandageSlot, 0);
-					%client.setControlObject(%obj);
-				}
-				
-				%obj.unMountImage(%slot);
-				%obj.playThread(2, "root");
-				%obj.playThread(1, "root");
-
-				%client.zombieMedpackting = false;
-				%obj.zombieMedpackUse = false;
-				cancel(%obj.zombieMedpackSched);
-		}
-		else
-		{
-			if((%obj.zombieMedpackUse * 10) % 10 == 0)
-			{
-				if(getRandom(0, 2))
-				{
-					%obj.playThread(3, "shiftright");
-				}
-				else
-				{
-					%obj.playThread(3, "activate2");
-				}
-			}
-			
-			if(isObject(%client))
-			{
-				%bars = "<color:ffaaaa>";
-				%div = 20;
-				%tens = mFloor((%obj.zombieMedpackUse / %time) * %div);
-				
-				for(%a = 0; %a < %div; %a++)
-				{
-					if(%a == (%div - %tens))
-					{
-						%bars = %bars @ "<color:aaffaa>";
-					}
-					
-					%bars = %bars @ "|";
-				}
-				
-				commandToClient(%client, 'centerPrint', %bars, 0.25);
-			}
-			cancel(%obj.zombieMedpackSched);
-			%obj.zombieMedpackSched = %this.schedule(100, "healLoop", %obj);
-			
-		}
-	}
-	else
-	{
-		if(isObject(%client))
-		{
-			commandToClient(%client, 'centerPrint', "<color:ffaaaa>Heal Aborted!", 1);
-			%client.setControlObject(%obj);
-			%client.player.playAudio(1,"heal_stop_sound");
-			%obj.setMaxForwardSpeed(%obj.getDatablock().maxForwardSpeed);
-		}
-		cancel(%obj.zombieMedpackSched);
-	}
-}
-
-function ZombieMedpackImage::onReady(%this, %obj, %slot)
-{
-	%obj.zombieMedpackUse = 0;
-}
-
-function ZombieMedpackImage::onUse(%this, %obj, %slot)
-{
-	%client = %obj.client;
-	
-	if(%obj.getDamageLevel() < 5 || %obj.getDatablock().getName() $= "DownPlayerSurvivorArmor")
-	{
-		if(isObject(%client))
-		{
-			if(%obj.getDatablock().getName() $= "DownPlayerSurvivorArmor")
-			commandToClient(%client, 'centerPrint', "\c5Cannot use while down.", 1);
-			else commandToClient(%client, 'centerPrint', "\c5You are not injured.", 1);
-		}
-	}
-	else
-	{
-		if(isObject(%client))
-		{
-			%client.zombieMedpackting = true;
-			%client.player.playAudio(1,"heal_medpack_bandaging_sound");
-			%this.healLoop(%obj);
-			%obj.setMaxForwardSpeed(%obj.getDatablock().maxForwardSpeed/4);
-		}
-	}
-}
-
-function ZombieMedpackImage::onMount(%this, %obj, %slot)
-{
-	parent::onMount(%this, %obj, %slot);
-	
-	%obj.zombieMedpackUse = 0;
-	%obj.playThread(2, "armReadyBoth");
-}
-
-function ZombieMedpackImage::onUnMount(%this, %obj, %slot)
-{
-	%obj.playThread(2, "root");
-}
-
-function ZombieMedpackImage::onReady(%this, %obj, %slot)
-{
-	%obj.zombieMedpackUse = 0;
-}
-
-
-
-if(!isObject(ZombiePillsDebris))
-{
-	datablock DebrisData(ZombiePillsDebris)
-	{
 		shapeFile = "./models/cap.2.dts";
 		lifetime = 5.0;
 		minSpinSpeed = -400.0;
@@ -299,13 +92,10 @@ if(!isObject(ZombiePillsDebris))
 		snapOnMaxBounce = false;
 		fade = true;
 		gravModifier = 2;
-	};
-}
+};
 
-if(!isObject(ZombiePillsItem))
+datablock ItemData(PillsHereItem)
 {
-	datablock ItemData(ZombiePillsItem)
-	{
 		category = "Weapon";
 		className = "Weapon";
 		
@@ -322,15 +112,12 @@ if(!isObject(ZombiePillsItem))
 		doColorShift = true;
 		colorShiftColor = "0.8 0.8 0.8 1";
 		
-		image = ZombiePillsImage;
+		image = PillsHereImage;
 		canDrop = true;
-	};
-}
+};
 
-if(!isObject(ZombiePillsImage))
+datablock ShapeBaseImageData(PillsHereImage)
 {
-	datablock ShapeBaseImageData(ZombiePillsImage)
-	{
 		shapeFile = "./models/pills.4.dts";
 		emap = true;
 		mountPoint = 0;
@@ -339,15 +126,15 @@ if(!isObject(ZombiePillsImage))
 		rotation = eulerToMatrix( "0 0 0" );
 		
 		className = "WeaponImage";
-		item = ZombiePillsItem;
+		item = PillsHereItem;
 		isHealing = 1;
 		
 		armReady = true;
 		
-		doColorShift = ZombiePillsItem.doColorShift;
-		colorShiftColor = ZombiePillsItem.colorShiftColor;
+		doColorShift = PillsHereItem.doColorShift;
+		colorShiftColor = PillsHereItem.colorShiftColor;
 		
-		casing = ZombiePillsDebris;
+		casing = PillsHereDebris;
 		shellExitDir		= "1.0 1.0 1.0";
 		shellExitOffset		= "0 0 0";
 		shellExitVariance	= 5;	
@@ -381,15 +168,14 @@ if(!isObject(ZombiePillsImage))
 		
 		stateName[5]					= "Hack";
 		stateScript[5]					= "onHack";
-	};
-}
+};
 
-function ZombiePillsImage::onActivate(%this,%obj,%db)
+function PillsHereImage::onActivate(%this,%obj,%db)
 {
 	serverplay3d("heal_pills_deploy" @ getRandom(1,3) @ "_sound", %obj.getPosition());
 }
 
-function ZombiePillsImage::onHack(%this, %obj, %slot)
+function PillsHereImage::onHack(%this, %obj, %slot)
 {
 	%obj.playThread(1, "root");
 	%obj.schedule(32, "unMountImage", %slot);
@@ -398,7 +184,7 @@ function ZombiePillsImage::onHack(%this, %obj, %slot)
 	serverCmdUnUseTool(%client);
 }
 
-function ZombiePillsImage::onUnUse(%this, %obj, %slot)
+function PillsHereImage::onUnUse(%this, %obj, %slot)
 {
 	%tool = %obj.tool[%obj.currTool];
 	
@@ -427,7 +213,7 @@ function ZombiePillsImage::onUnUse(%this, %obj, %slot)
 	}
 }
 
-function ZombiePillsImage::onUse(%this, %obj, %slot)
+function PillsHereImage::onUse(%this, %obj, %slot)
 {
 	if(%obj.getDamageLevel() > 5 || %obj.getDatablock().getName() $= "DownPlayerSurvivorArmor")
 	%obj.setImageAmmo(%slot, false);
@@ -443,87 +229,10 @@ function ZombiePillsImage::onUse(%this, %obj, %slot)
 
 
 
-datablock ItemData(RedPotionItem)
+
+
+datablock ItemData(GauzeItem)
 {
-	category = "Weapon";
-	className = "Weapon";
-
-	shapeFile = "./models/redpotion.dts";
-	rotate = false;
-	mass = 1;
-	density = 0.2;
-	elasticity = 0.2;
-	friction = 0.6;
-	emap = true;
-
-	uiName = "Red Potion";
-	iconName = "./icons/Icon_RedPotion";
-	doColorShift = false;
-
-	image = RedPotionImage;
-	canDrop = true;
-};
-
-datablock ShapeBaseImageData(RedPotionImage)
-{
-	shapeFile = "./models/redpotion.dts";
-	emap = true;
-
-	mountPoint = 0;
-	offset = "-0.05 0.08 0.1";
-	eyeOffset = 0;
-	rotation = "0 0 0 1";
-
-	className = "WeaponImage";
-	item = RedPotionItem;
-	isHealing = 1;
-
-	armReady = true;
-
-	doColorShift = false;
-
-	stateName[0]			= "Ready";
-	stateTransitionOnTriggerDown[0]	= "Fire";
-	stateAllowImageChange[0]	= true;
-
-	stateName[1]			= "Fire";
-	stateScript[1]			= "onFire";
-};
-
-function RedPotionImage::onFire(%data, %obj, %slot)
-{
-	%client = %obj.client;
-	
-	if(%obj.getDamageLevel() < 5 && %obj.getDatablock().getName() !$= "DownPlayerSurvivorArmor")
-	{
-		if(isObject(%client))
-		commandToClient(%client, 'centerPrint', "\c5You are not injured.", 1);
-	}
-	else
-	{
-		cancel(%obj.gc_poisoning2);
-		%obj.setDamageFlash(0);
-		%obj.setDamageLevel(%obj.getDamageLevel()/1.5);
-		%obj.playthread(3, plant);
-		%obj.emote(HealImage, 1);
-		%obj.playaudio(2, "heal_potion_drink_sound");
-		%currSlot = %obj.currTool;
-		%obj.tool[%currSlot] = 0;
-		%obj.weaponCount--;
-		messageClient(%obj.client,'MsgItemPickup','',%currSlot,0);
-		serverCmdUnUseTool(%obj.client);
-      
-		if(%obj.getenergylevel() < 100 && %obj.getDatablock().getName() $= "DownPlayerSurvivorArmor")
-		%obj.setenergylevel(%obj.getenergylevel()/0.8);
-	}
-}
-
-
-
-if(!isObject(GauzeItem))
-{
-	datablock ItemData(GauzeItem)
-	{
 		category = "Weapon";
 		className = "Weapon";
 		
@@ -542,13 +251,11 @@ if(!isObject(GauzeItem))
 		image = GauzeImage;
 		canDrop = true;
 		l4ditemtype = "heal_full";
-	};
-}
+};
 
-if(!isObject(GauzeImage))
+
+datablock ShapeBaseImageData(GauzeImage)
 {
-	datablock ShapeBaseImageData(GauzeImage)
-	{
 		shapeFile = "./models/gauze.dts";
 		emap = true;
 		mountPoint = 0;
@@ -577,8 +284,8 @@ if(!isObject(GauzeImage))
 		stateName[2]					= "Use";
 		stateScript[2]					= "onUse";
 		stateTransitionOnTriggerUp[2]	= "Ready";
-	};
-}
+};
+
 
 function GauzeImage::onActivate(%this,%obj)
 {
@@ -622,14 +329,9 @@ function GauzeImage::healLoop(%this, %obj)
 		{
 			if((%obj.GauzeUse * 10) % 10 == 0)
 			{
-				if(getRandom(0, 1))
-				{
-					%obj.playThread(0, "activate");
-				}
-				else
-				{
-					%obj.playThread(3, "activate2");
-				}
+				if(getRandom(0, 1)) %obj.playThread(0, "activate");
+				
+				else %obj.playThread(3, "activate2");
 			}
 			
 			if(isObject(%client))
@@ -640,10 +342,7 @@ function GauzeImage::healLoop(%this, %obj)
 				
 				for(%a = 0; %a < %div; %a++)
 				{
-					if(%a == (%div - %tens))
-					{
-						%bars = %bars @ "<color:aaffaa>";
-					}
+					if(%a == (%div - %tens)) %bars = %bars @ "<color:aaffaa>";
 					
 					%bars = %bars @ "|";
 				}
@@ -709,199 +408,15 @@ function GauzeImage::onUse(%this, %obj, %slot)
 
 		%client.player.playAudio(1,"heal_gauze_bandaging_sound");
 		%this.healLoop(%obj);
-		%obj.setMaxForwardSpeed(%obj.getDatablock().maxForwardSpeed/2);
 	}
 }
 
 
-
-datablock ItemData(coughsyrupItem)
-{
-	category = "Weapon";
-	className = "Weapon";
-
-	shapeFile = "./models/coughsyrup.dts";
-	rotate = false;
-	mass = 1;
-	density = 0.2;
-	elasticity = 0.2;
-	friction = 0.6;
-	emap = true;
-
-	uiName = "Cough Syrup";
-	iconName = "./icons/Icon_coughsyrup";
-	doColorShift = false;
-
-	image = coughsyrupImage;
-	canDrop = true;
-};
-
-datablock ShapeBaseImageData(coughsyrupImage)
-{
-	shapeFile = "./models/coughsyrup.dts";
-	emap = true;
-
-	mountPoint = 0;
-	offset = "-0.05 0.08 0.1";
-	eyeOffset = 0;
-	rotation = "0 0 0 1";
-
-	className = "WeaponImage";
-	isHealing = 1;
-	item = coughsyrupItem;
-
-	armReady = true;
-
-	doColorShift = false;
-
-	stateName[0]			= "Ready";
-	stateTransitionOnTriggerDown[0]	= "Fire";
-	stateAllowImageChange[0]	= true;
-
-	stateName[1]			= "Fire";
-	stateScript[1]			= "onFire";
-};
-
-function coughsyrupImage::onFire(%data, %obj, %slot)
-{
-	%client = %obj.client;
-	
-	if(%obj.getDamageLevel() < 5 && %obj.getDatablock().getName() !$= "DownPlayerSurvivorArmor")
-	{
-		if(isObject(%client))
-		commandToClient(%client, 'centerPrint', "\c5You are not injured.", 1);
-	}
-	else
-	{
-		cancel(%obj.gc_poisoning2);
-		%obj.setDamageFlash(0);
-		%obj.setDamageLevel(%obj.getDamageLevel()/1.675);
-		%obj.playthread(3, plant);
-		%obj.emote(HealImage, 1);
-		%obj.playaudio(2, "heal_potion_drink_sound");
-		%currSlot = %obj.currTool;
-		%obj.tool[%currSlot] = 0;
-		%obj.weaponCount--;
-		messageClient(%obj.client,'MsgItemPickup','',%currSlot,0);
-		serverCmdUnUseTool(%obj.client);
-      	%obj.setenergylevel(%obj.getenergylevel()/0.25);
-	}
-}
-
-datablock ItemData(gc_SyringePanaceaItem)
-{
-  uiName = "Syringe Panacea";
-  iconName = "./icons/Icon_SyringeOrange";
-  image = gc_SyringePanaceaImage;
-  category = Weapon;
-  className = Weapon;
-  shapeFile = "./models/SyringeOrange.dts";
-  mass = 1;
-  density = 0.2;
-  elasticity = 0;
-  friction = 0.6;
-  emap = true;
-  doColorShift = true;
-  colorShiftColor = "1 1 1 1";
-  canDrop = true;
-  gc_syringe = 1;
-};
-
-datablock shapeBaseImageData(gc_SyringePanaceaImage)
-{
-  	shapeFile = "./models/SyringeOrange.dts";
-  	emap = true;
-  	correctMuzzleVector = false;
-  	isHealing = 1;
-  	className = "WeaponImage";
-  	item = gc_SyringePanaceaItem;
-  	ammo = "";
-  	projectile = "";
-  	projectileType = Projectile;
-  	melee = false;
-  	doReaction = false;
-  	armReady = true;
-  	doColorShift = true;
-  	colorShiftColor = "1 1 1 1";
-	
-  	stateName[0] = "Activate";
-  	stateTimeoutValue[0] = 0.2;
-  	stateTransitionOnTimeout[0] = "Ready";
-  	stateSound[0] = "heal_syringe_pickup_sound";
-	
-  	stateName[1] = "Ready";
-  	stateTransitionOnTriggerDown[1] = "Fire";
-  	stateAllowImageChange[1] = true;
-	
-  	stateName[2] = "Fire";
-  	stateTransitionOnTimeout[2] = "Ready";
-  	stateTimeoutValue[2] = 0.2;
-  	stateFire[2] = true;
-  	stateScript[2] = "onFire";
-  	stateWaitForTimeout[2] = true;
-  	stateAllowImageChange[2] = false;
-};
-
-function gc_SyringePanaceaImage::onFire(%this,%obj,%slot)
-{
-	gc_SyringePanaceaImage::onSelfUse(%this,%obj,%slot);
-}
-
-function gc_SyringePanaceaImage::onSelfUse(%this,%obj,%slot)
-{
-    if(%obj.hIsInfected)
-    return;
-
-	%client = %obj.client;
-	
-	if(!%obj.hIsImmune)
-	{
-        %obj.hIsImmune = 1;
-        if(%obj.getClassName() $= "Player")
-        {
-          %client.Play2d("survivor_immunity_sound");
-          GameConnection::ChatMessage (%obj.client, "\c2Immunity gained!");
-		  commandToClient(%obj.client,'SetVignette',$EnvGuiServer::VignetteMultiply,$EnvGuiServer::VignetteColor);
-		}
-	}
-
-	%obj.playThread(3, plant);
-	cancel(%obj.gc_poisoning2);
-	%obj.setDamageFlash(0);
-	%obj.setDamageLevel(%obj.getDamageLevel()/2.15);
-	%obj.emote(HealImage, 1);
-	%obj.playaudio(2, "heal_syringe_stab_sound");
-	%currSlot = %obj.currTool;
-	%obj.tool[%currSlot] = 0;
-	%obj.weaponCount--;
-	messageClient(%obj.client,'MsgItemPickup','',%currSlot,0);
-	serverCmdUnUseTool(%obj.client);
-	%obj.setenergylevel(%obj.getenergylevel()/0.35);
-
-	if(%obj.getDatablock().getName() $= "DownPlayerSurvivorArmor")
-	{
-		centerprintcounter(%obj,%obj.savetimer);
-		%obj.isdowned = 0;
-		%obj.SetDataBlock("SurvivorPlayerLow");
-		SurvivorPlayer_HeartBeat(%obj.client,1);
-		%obj.lastdamage = getsimtime();
-		%obj.sethealth(25);
-
-		%obj.playthread(0,root);
-		%obj.client.centerprint("<color:00fa00>You were saved by yourself",5);
-		//chatMessageTeam(%target.client,'fakedeathmessage',"<color:00fa00>" @ %this.client.name SPC "<bitmap:add-ons/player_Survivor/Reviver><bitmap:add-ons/player_Survivor/Revived>" SPC %target.client.name);
-		%obj.savetimer = 0;
-		cancel(%obj.energydeath1);
-		cancel(%obj.energydeath2);
-		cancel(%obj.energydeath3);
-	}
-}
-
-datablock ItemData(gc_SyringeAntidoteItem)
+datablock ItemData(SyringeAntidoteItem)
 {
 	uiName = "Syringe Antidote";
 	iconName = "./icons/icon_syringered";
-	image = gc_SyringeAntidoteImage;
+	image = SyringeAntidoteImage;
 	category = Weapon;
 	className = Weapon;
 	shapeFile = "./models/syringered.dts";
@@ -916,14 +431,14 @@ datablock ItemData(gc_SyringeAntidoteItem)
 	gc_syringe = 1;
 };
 
-datablock shapeBaseImageData(gc_SyringeAntidoteImage)
+datablock shapeBaseImageData(SyringeAntidoteImage)
 {
 	shapeFile = "./models/syringered.dts";
 	emap = true;
 	correctMuzzleVector = false;
 	isHealing = 1;
 	className = "WeaponImage";
-	item = gc_SyringeAntidoteItem;
+	item = SyringeAntidoteItem;
 	ammo = "";
 	projectile = "";
 	projectileType = Projectile;
@@ -951,12 +466,12 @@ datablock shapeBaseImageData(gc_SyringeAntidoteImage)
 	stateAllowImageChange[2] = false;
 };
 
-function gc_SyringeAntidoteImage::onFire(%this,%obj,%slot)
+function SyringeAntidoteImage::onFire(%this,%obj,%slot)
 {
-	gc_SyringeAntidoteImage::onSelfUse(%this,%obj,%slot);
+	SyringeAntidoteImage::onSelfUse(%this,%obj,%slot);
 }
 
-function gc_SyringeAntidoteImage::onSelfUse(%this,%obj,%slot)
+function SyringeAntidoteImage::onSelfUse(%this,%obj,%slot)
 {
 	%client = %obj.client;
 	

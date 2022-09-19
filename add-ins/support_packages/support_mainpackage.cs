@@ -14,9 +14,7 @@ package L4B2Bots_Main
 
 				if(vectordist(%obj.getposition(),%col.getposition()) < 2 && %obj.getdataBlock().getName() $= "ZombieChargerHoleBot" && (%force = vectorDot(%obj.getVelocity(), %obj.getForwardVector())) > 20 && %col.getdataBlock().getName() !$= "ZombieTankHoleBot")
 				{
-				
-
-						return false;
+					return false;
 						
 					%obj.playaudio(3,"charger_smash_sound");			
 					%obj.playthread(2,"shiftUp");
@@ -47,8 +45,7 @@ package L4B2Bots_Main
 		%end = VectorAdd (%start, VectorScale (%vec, 10 * %scale));
 		%mask = $TypeMasks::FxBrickObjectType | $TypeMasks::VehicleObjectType | $TypeMasks::PlayerObjectType;
 
-		if(%player.isMounted())
-		%exempt = %player.getObjectMount();
+		if(%player.isMounted()) %exempt = %player.getObjectMount();
 		else %exempt = %player;
 
 		%search = containerRayCast (%start, %end, %mask, %exempt);
@@ -172,8 +169,6 @@ package L4B2Bots_Main
 			if(%obj.getdatablock().hType !$= "") %obj.hType = %obj.getdatablock().hType;
 			if(isObject(%obj.client)) commandToClient( %obj.client, 'SetVignette', $EnvGuiServer::VignetteMultiply, $EnvGuiServer::VignetteColor);
 		}
-
-		if(isObject(%hEater = %obj.hEater) && %hEater.getDataBlock().getName() $= "ZombieJockeyHoleBot") %obj.mountObject(hEater,2);
 	}	
 	
 	function Armor::onBotMelee(%obj,%col)
