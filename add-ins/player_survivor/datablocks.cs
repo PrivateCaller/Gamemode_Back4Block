@@ -2,13 +2,7 @@
 %file = findFirstFile(%pattern);
 while(%file !$= "")
 {
-	%soundName = strlwr(%file);
-	%soundName = strreplace(%soundName, "add-ons/gamemode_left4block/add-ins/player_survivor/sound/", "");
-	%soundName = strreplace(%soundName, "/", "");
-	%soundName = strreplace(%soundName, ".wav", "");
-	%soundName = strreplace(%soundName, "quiet", "");
-	%soundName = strreplace(%soundName, "normal", "");
-	%soundName = strreplace(%soundName, "loud", "");
+	%soundName = strreplace(filename(strlwr(%file)), ".wav", "");
 
 	//Check the names of the folders to determine what type of soundscape it will be, and check if it's a loopable sound or not
 	if(strstr(%file,"normal") != -1)//Normal soundscape
@@ -26,25 +20,38 @@ while(%file !$= "")
 	%file = findNextFile(%pattern);
 }
 
-function generateCustomDecalList()
+
+if(isFile("add-ons/gamemode_left4block/add-ins/player_survivor/models/decal.ifl"))
 {
-	if(isFile("add-ons/gamemode_left4block/add-ins/player_survivor/models/decallist.txt"))
+	%write = new FileObject();
+	%write.openForWrite("add-ons/gamemode_left4block/add-ins/player_survivor/models/decal.ifl");		
+
+	%decalpath = "add-ons/gamemode_left4block/add-ins/player_survivor/models/decals/*.png";
+	for(%decalfile = findFirstFile(%decalpath); %decalfile !$= ""; %decalfile = findNextFile(%decalpath))
 	{
-		%write = new FileObject();
-		%write.openForWrite("add-ons/gamemode_left4block/add-ins/player_survivor/models/decallist.txt");		
+		eval("addExtraResource(\""@ %decalfile @ "\");");
+		%write.writeLine(%decalfile);
+		%soundName = strreplace(filename(strlwr(%decalfile)), ".png", "");
 
-		%decalpath = "add-ons/gamemode_left4block/add-ins/player_survivor/models/decals/*.png";
-		for(%decal = findFirstFile(%decalpath); %decal !$= ""; %decal = findNextFile(%decalpath)) %write.writeLine("addExtraResource(\"" @ %decal @ "\");");
-		
-		%write.close();
-		%write.delete();
+		if(strstr(strlwr(%decalfile), "tailor") == -1)
+		{
+			eval("$hZombieDecal[" @ %i++ @ "] = \"" @ %decalName @ "\";");
+			eval("$hZombieDecalAmount = %i;");
+		}
 	}
-}
-generateCustomDecalList();
 
-datablock TSShapeConstructor(mMeleeDts) 
+	addExtraResource("add-ons/gamemode_left4block/add-ins/player_survivor/models/decal.ifl");
+	%write.close();
+	%write.delete();
+}
+
+addExtraResource("add-ons/gamemode_left4block/add-ins/player_survivor/models/face.ifl");
+addExtraResource("add-ons/gamemode_left4block/add-ins/player_survivor/icons/DownCi.png");
+addExtraResource("add-ons/gamemode_left4block/add-ins/player_survivor/icons/CI_VictimSaved.png");
+
+datablock TSShapeConstructor(NewMDts) 
 {
-	baseShape = "./models/mmelee.dts";
+	baseShape = "./models/newm.dts";
 	sequence0 = "./models/default.dsq";
 	sequence1 = "./models/melee.dsq";
 	sequence2 = "./models/actions.dsq";
@@ -53,7 +60,7 @@ datablock TSShapeConstructor(mMeleeDts)
 
 datablock PlayerData(PlayerMeleeAnims : PlayerStandardArmor)
 {
-	shapeFile = "./models/mMelee.dts";
+	shapeFile = "./models/newm.dts";
 	canJet = true;
 	uiName = "Melee Player";
 };
@@ -63,37 +70,6 @@ datablock PlayerData(PlayerMeleeAnimsJet : PlayerMeleeAnims)
 	canJet = true;
 	uiName = "Melee Player Jet";
 };
-
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/zoey.png");
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/witch.png");
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/townsuit2.png");
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/townsuit.png");
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/shirtjacket.png");
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/rochelle.png");
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/polostriped.png");
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/polo.png");
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/piratestripes.png");
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/nick.png");
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/newoveralls.png");
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/newhoodie.png");
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/musclechest.png");
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/louis.png");
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/left4block.png");
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/jgtuxedoShirt.png");
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/jgtuxedo.png");
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/hoodienozipperpockets.png");
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/francis.png");
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/flannel.png");
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/ellis.png");
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/coach.png");
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/classicshirt.png");
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/civilian.png");
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/casualjacket.png");
-addExtraResource("Add-Ons/Gamemode_Left4Block/add-ins/player_survivor/models/decals/bill.png");
-addExtraResource("add-ons/gamemode_left4block/add-ins/player_survivor/models/decal.ifl");
-addExtraResource("add-ons/gamemode_left4block/add-ins/player_survivor/models/face.ifl");
-addExtraResource("add-ons/gamemode_left4block/add-ins/player_survivor/icons/DownCi.png");
-addExtraResource("add-ons/gamemode_left4block/add-ins/player_survivor/icons/CI_VictimSaved.png");
 
 datablock ParticleData(oxygenBubbleParticle : painMidParticle)
 {
@@ -161,7 +137,6 @@ datablock PlayerData(downedMount)
 
 datablock PlayerData(SurvivorPlayer : PlayerMeleeAnims)
 {
-	canPhysRoll = true;
 	canJet = false;
 	runForce = 100 * 45;
 	jumpforce = 100*9.25;
@@ -178,12 +153,12 @@ datablock PlayerData(SurvivorPlayer : PlayerMeleeAnims)
     maxfreelookangle = 2;
 
     maxForwardSpeed = 9;
-	maxSideSpeed = 7;
-    maxBackwardSpeed = 6;
+	maxSideSpeed = 8;
+	maxBackwardSpeed = 7;
 
  	maxForwardCrouchSpeed = 5;
 	maxSideCrouchSpeed = 4;
-    maxBackwardCrouchSpeed = 3;
+	maxBackwardCrouchSpeed = 3;
     
 	groundImpactMinSpeed = 5;
 	groundImpactShakeFreq = "4.0 4.0 4.0";

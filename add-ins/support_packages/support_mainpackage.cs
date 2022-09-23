@@ -2,7 +2,7 @@
 // 1. Main Package
 // ============================================================
 
-package L4B2Bots_Main
+package Package_Left4Block
 {
 	function onObjectCollisionTest(%obj, %col)
 	{	
@@ -113,7 +113,7 @@ package L4B2Bots_Main
 				return;
 			}
 
-			if(%item.getdataBlock().L4Bitemnoslot)
+			if(%item.getdataBlock().L4Bitemslot $= "NoSlot")
 			return Parent::pickup(%obj,%item);
 
 			switch$(%item.getdataBlock().L4Bitemslot)
@@ -140,12 +140,11 @@ package L4B2Bots_Main
 
 		if(%player.getDatablock().isSurvivor) %obj.processInputEvent("onSurvivorTouch");
 		
-		if(%player.hZombieL4BType !$= "") 
+		if(%player.hType $= "zombie") 
 		{
 			%obj.processInputEvent("onZombieTouch");
 			if(%player.getDatablock().getName() $= "ZombieTankHoleBot") %obj.processInputEvent("onTankTouch");
-		}
-			
+		}			
 	}	
 	
 	function Armor::onImpact(%this, %obj, %col, %vec, %force)
@@ -230,6 +229,26 @@ package L4B2Bots_Main
 				%player.client.AZCount = %num;
 			}
 		}
+
+		if(%player.hType $= "Zombie" && %obj.getdatablock().isDoor)
+		{
+			%obj.playSound("BrickRotateSound");
+			
+			if(%obj.getdatablock().uiName !$= "L4D Door" && %player.breakDoorTime < getSimTime())
+			{
+				if(%obj.breakDoorCount < 10) %obj.breakDoorCount++;
+				else
+				{
+					%obj.zfakeKillBrick();
+					%obj.breakDoorCount = 0;
+				}
+
+				%obj.playSound("BrickBreakSound");
+				%player.breakDoorTime = getSimTime()+250;
+			}
+			return;
+		}
+
 		Parent::onActivate (%obj, %player, %client, %pos, %vec);
 	}		
 
@@ -321,34 +340,34 @@ package L4B2Bots_Main
 
     function MiniGameSO::Reset(%minigame,%client)
 	{
-		if(isObject(MainAreaZone))
-		MainAreaZone.delete();
+		if(isObject(MainAreaZone)) MainAreaZone.delete();
 
 		if(isObject(L4B_BotSet))
 		{
 			for(%z = 0; %z < L4B_BotSet.getCount(); %z++)
 			{	
-				if(isObject(%bot = L4B_BotSet.getObject(%z)))
-				%bot.schedule(10,delete);
+				if(isObject(%bot = L4B_BotSet.getObject(%z))) %bot.schedule(10,delete);
 			}
 		}
 		
 		Parent::Reset(%minigame,%client);
 
-		for(%i = 0; %i < %client.brickgroup.ntobjectcount_breakbrick; %i++)
+		if(isObject(BreakBrickSet))
 		{
-			if(isObject(%breakbrick = %client.brickgroup.ntobject_breakbrick_[%i]))
+			for(%i = 0; %i < BreakBrickSet.getCount(); %i++) 
 			{
-				%breakbrick.setRendering(1);
-				%breakbrick.setRayCasting(1);
-				%breakbrick.setColliding(1);
+				if(isObject(%brick = BreakBrickSet.getObject(%i)))
+				{
+					%brick.setRendering(1);
+					%brick.setRayCasting(1);
+					%brick.setColliding(1);
+				}
 			}
 		}
 
 		for(%i = 0; %i < %client.brickgroup.ntobjectcount_progress_door; %i++)
 		{
-			if(isObject(%door = %client.brickgroup.ntobject_progress_door_[%i]))
-			%door.door(close);
+			if(isObject(%door = %client.brickgroup.ntobject_progress_door_[%i])) %door.door(close);
 		}
 
 		if(isObject(GlobalAreaZone))
@@ -484,13 +503,13 @@ if(isPackage(BotHolePackage))
 {
 	deactivatePackage(BotHolePackage);
 	activatePackage(BotHolePackage);
-	activatePackage(L4B2Bots_Main);
+	activatePackage(Package_Left4Block);
 }
 
 if(isPackage(aeAmmo))
 {
 	deactivatePackage(aeAmmo);
-	activatePackage(L4B2Bots_Main);
+	activatePackage(Package_Left4Block);
 	activatePackage(aeAmmo);
 }
 

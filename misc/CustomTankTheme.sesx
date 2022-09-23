@@ -4,7 +4,7 @@
 
   <session appBuild="14.0.0.36" appVersion="14.0" audioChannelType="stereo" bitDepth="16" duration="2543974" sampleRate="44100">
     <tracks>
-      <audioTrack automationLaneOpenState="false" id="10001" index="1" select="true" visible="true">
+      <audioTrack automationLaneOpenState="false" id="10001" index="1" select="false" visible="true">
         <trackParameters trackHeight="124" trackHue="160" trackMinimized="false">
           <name>Track 1</name>
         </trackParameters>
@@ -71,10 +71,10 @@
           </component>
         </trackAudioParameters>
         <editParameter parameterIndex="0" slotIndex="4294967280"/>
-        <audioClip clipAutoCrossfade="true" crossFadeHeadClipID="-1" crossFadeTailClipID="-1" endPoint="2312704" fileID="0" hue="-1" id="0" lockedInTime="false" looped="false" name="L4D1 Beta Style Tank Theme 44100 1" offline="false" select="true" sourceInPoint="0" sourceOutPoint="2312704" startPoint="0" zOrder="2">
+        <audioClip clipAutoCrossfade="true" crossFadeHeadClipID="-1" crossFadeTailClipID="-1" endPoint="2312704" fileID="0" hue="-1" id="0" lockedInTime="false" looped="false" name="L4D1 Beta Style Tank Theme 44100 1" offline="false" select="false" sourceInPoint="0" sourceOutPoint="2312704" startPoint="0" zOrder="2">
           <properties properties="{&quot;BasicAdjustmentsProperty&quot;:{&quot;type&quot;:&quot;tree::any&quot;,&quot;value&quot;:{&quot;AdjustmentMode&quot;:{&quot;type&quot;:&quot;UTF8String&quot;,&quot;value&quot;:&quot;sfx&quot;},&quot;ClipType&quot;:{&quot;type&quot;:&quot;std::int32_t&quot;,&quot;value&quot;:4},&quot;PanSection&quot;:{&quot;type&quot;:&quot;tree::any&quot;,&quot;value&quot;:{&quot;Enabled&quot;:{&quot;type&quot;:&quot;bool&quot;,&quot;value&quot;:true}}},&quot;PresetGuid&quot;:{&quot;type&quot;:&quot;UTF8String&quot;,&quot;value&quot;:&quot;cd445245-b028-4a97-86cd-61b0a660f087&quot;},&quot;SoundEffectsSection&quot;:{&quot;type&quot;:&quot;tree::any&quot;,&quot;value&quot;:{&quot;Enabled&quot;:{&quot;type&quot;:&quot;bool&quot;,&quot;value&quot;:true},&quot;Reverb&quot;:{&quot;type&quot;:&quot;tree::any&quot;,&quot;value&quot;:{&quot;2&quot;:{&quot;type&quot;:&quot;tree::any&quot;,&quot;value&quot;:{&quot;Value&quot;:{&quot;type&quot;:&quot;float&quot;,&quot;value&quot;:5}}},&quot;Enabled&quot;:{&quot;type&quot;:&quot;bool&quot;,&quot;value&quot;:false},&quot;UUID&quot;:{&quot;type&quot;:&quot;UTF8String&quot;,&quot;value&quot;:&quot;7e373b05-028c-4241-b7ea-e8a1fc68c2fc&quot;}}}}},&quot;VolumeSection&quot;:{&quot;type&quot;:&quot;tree::any&quot;,&quot;value&quot;:{&quot;Enabled&quot;:{&quot;type&quot;:&quot;bool&quot;,&quot;value&quot;:true}}}}}}"/>
           <component componentGuid="ddb37600-2051-4b01-9aef-b6360887f6f6" componentID="Audition.Fader" id="clipGain" name="volume" powered="true">
-            <parameter index="0" name="volume" parameterValue="1">
+            <parameter index="0" name="volume" parameterValue="1.27654063701629638671875">
               <parameterKeyframes enableSplines="false" readOnly="false">
                 <parameterKeyframe sampleOffset="184056" select="false" type="linear" value="0.64999997615814208984375"/>
                 <parameterKeyframe sampleOffset="293948" select="false" type="linear" value="0.74188029766082763671875"/>
@@ -91,7 +91,7 @@
             </parameter>
             <parameter index="1" name="static gain" parameterValue="1"/>
           </component>
-          <component componentGuid="adeaf6be-ba11-4c0c-b719-2e9615b0d3bd" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
+          <component componentGuid="27383843-b1cc-43da-802c-381315513db0" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
             <parameter index="0" parameterValue="0"/>
             <parameter index="1" name="mute" parameterValue="0"/>
           </component>
@@ -178,7 +178,7 @@
         <audioClip clipAutoCrossfade="true" crossFadeHeadClipID="-1" crossFadeTailClipID="-1" endPoint="2309464" fileID="1" hue="-1" id="0" lockedInTime="false" looped="false" name="tank" offline="false" select="false" sourceInPoint="0" sourceOutPoint="2309464" startPoint="0" zOrder="0">
           <properties properties="{&quot;BasicAdjustmentsProperty&quot;:{&quot;type&quot;:&quot;tree::any&quot;,&quot;value&quot;:{&quot;AdjustmentMode&quot;:{&quot;type&quot;:&quot;UTF8String&quot;,&quot;value&quot;:&quot;sfx&quot;},&quot;ClipType&quot;:{&quot;type&quot;:&quot;std::int32_t&quot;,&quot;value&quot;:4},&quot;PanSection&quot;:{&quot;type&quot;:&quot;tree::any&quot;,&quot;value&quot;:{&quot;Enabled&quot;:{&quot;type&quot;:&quot;bool&quot;,&quot;value&quot;:true}}},&quot;PresetGuid&quot;:{&quot;type&quot;:&quot;UTF8String&quot;,&quot;value&quot;:&quot;cd445245-b028-4a97-86cd-61b0a660f087&quot;},&quot;SoundEffectsSection&quot;:{&quot;type&quot;:&quot;tree::any&quot;,&quot;value&quot;:{&quot;Enabled&quot;:{&quot;type&quot;:&quot;bool&quot;,&quot;value&quot;:true},&quot;Reverb&quot;:{&quot;type&quot;:&quot;tree::any&quot;,&quot;value&quot;:{&quot;2&quot;:{&quot;type&quot;:&quot;tree::any&quot;,&quot;value&quot;:{&quot;Value&quot;:{&quot;type&quot;:&quot;float&quot;,&quot;value&quot;:5}}},&quot;Enabled&quot;:{&quot;type&quot;:&quot;bool&quot;,&quot;value&quot;:false},&quot;UUID&quot;:{&quot;type&quot;:&quot;UTF8String&quot;,&quot;value&quot;:&quot;d007b79b-80a1-42be-bcc0-00f0784e8f14&quot;}}}}},&quot;VolumeSection&quot;:{&quot;type&quot;:&quot;tree::any&quot;,&quot;value&quot;:{&quot;Enabled&quot;:{&quot;type&quot;:&quot;bool&quot;,&quot;value&quot;:true}}}}}}"/>
           <component componentGuid="ddfca82e-f026-4922-9167-5f99b4509a2f" componentID="Audition.Fader" id="clipGain" name="volume" powered="true">
-            <parameter index="0" name="volume" parameterValue="1.1619675159454345703125">
+            <parameter index="0" name="volume" parameterValue="0.0359788239002227783203125">
               <parameterKeyframes enableSplines="false" readOnly="false">
                 <parameterKeyframe sampleOffset="688" select="false" type="linear" value="0.765384614467620849609375"/>
                 <parameterKeyframe sampleOffset="176507" select="false" type="linear" value="0.64999997615814208984375"/>
@@ -200,7 +200,7 @@
             </parameter>
             <parameter index="1" name="static gain" parameterValue="1"/>
           </component>
-          <component componentGuid="a4c9bb66-6c41-4861-9674-3cf031540b4b" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
+          <component componentGuid="1aec34a2-8d7d-4460-b317-3fc82bcdb1b7" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
             <parameter index="0" parameterValue="0"/>
             <parameter index="1" name="mute" parameterValue="0"/>
           </component>
@@ -357,7 +357,7 @@
         </trackAudioParameters>
         <editParameter parameterIndex="0" slotIndex="4294967280"/>
       </audioTrack>
-      <audioTrack automationLaneOpenState="false" id="10005" index="5" select="false" visible="true">
+      <audioTrack automationLaneOpenState="false" id="10005" index="5" select="true" visible="true">
         <trackParameters trackHeight="124" trackHue="294" trackMinimized="false">
           <name>Track 5</name>
         </trackParameters>
@@ -562,9 +562,9 @@
         <editParameter parameterIndex="0" slotIndex="4294967280"/>
       </masterTrack>
     </tracks>
-    <sessionState ctiPosition="99817" smpteStart="0">
-      <selectionState selectionDuration="0" selectionStart="99817"/>
-      <viewState horizontalViewDuration="1905431" horizontalViewStart="110" trackControlsWidth="224" verticalScrollOffset="0"/>
+    <sessionState ctiPosition="1615049" smpteStart="0">
+      <selectionState selectionDuration="0" selectionStart="1615049"/>
+      <viewState horizontalViewDuration="2543974" horizontalViewStart="0" trackControlsWidth="224" verticalScrollOffset="0"/>
       <timeFormatState beatsPerBar="4" beatsPerMinute="120" customFrameRate="12" linkToDefaultTimeSettings="true" noteLength="4" subdivisions="16" timeCodeDropFrame="false" timeCodeFrameRate="30" timeCodeNTSC="false" timeFormat="timeFormatDecimal"/>
       <mixingOptionState defaultPanModeLogarithmic="false" panPower="-3" playOverlappingClips="false"/>
     </sessionState>
@@ -580,9 +580,9 @@
             xmlns:xmpDM="http://ns.adobe.com/xmp/1.0/DynamicMedia/">
          <xmp:CreatorTool>Adobe Audition 14.0 (Windows)</xmp:CreatorTool>
          <xmp:CreateDate>2022-08-19T03:01:40-07:00</xmp:CreateDate>
-         <xmp:MetadataDate>2022-09-17T15:17:54-07:00</xmp:MetadataDate>
-         <xmp:ModifyDate>2022-09-17T15:17:54-07:00</xmp:ModifyDate>
-         <xmpMM:InstanceID>xmp.iid:a641c8df-87e4-bc41-b72f-4388dcb2b593</xmpMM:InstanceID>
+         <xmp:MetadataDate>2022-09-19T02:09:40-07:00</xmp:MetadataDate>
+         <xmp:ModifyDate>2022-09-19T02:09:40-07:00</xmp:ModifyDate>
+         <xmpMM:InstanceID>xmp.iid:44946775-1c98-7941-b06c-d20b53768442</xmpMM:InstanceID>
          <xmpMM:DocumentID>xmp.did:49d86d9b-61da-b44e-8457-c2565d3a10fa</xmpMM:DocumentID>
          <xmpMM:OriginalDocumentID>xmp.did:77907677-65ce-5a4a-b44b-416fcac274f1</xmpMM:OriginalDocumentID>
          <xmpMM:History>
@@ -745,6 +745,20 @@
                   <stEvt:action>saved</stEvt:action>
                   <stEvt:instanceID>xmp.iid:a641c8df-87e4-bc41-b72f-4388dcb2b593</stEvt:instanceID>
                   <stEvt:when>2022-09-17T15:17:54-07:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe Audition 14.0 (Windows)</stEvt:softwareAgent>
+                  <stEvt:changed>/</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:9cc40284-1b33-4941-88ec-aea88f1588b7</stEvt:instanceID>
+                  <stEvt:when>2022-09-19T02:09:40-07:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe Audition 14.0 (Windows)</stEvt:softwareAgent>
+                  <stEvt:changed>/metadata</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:44946775-1c98-7941-b06c-d20b53768442</stEvt:instanceID>
+                  <stEvt:when>2022-09-19T02:09:40-07:00</stEvt:when>
                   <stEvt:softwareAgent>Adobe Audition 14.0 (Windows)</stEvt:softwareAgent>
                   <stEvt:changed>/</stEvt:changed>
                </rdf:li>

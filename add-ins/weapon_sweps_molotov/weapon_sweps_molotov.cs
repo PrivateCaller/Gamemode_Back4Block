@@ -1,6 +1,5 @@
-AddDamageType("Molotov",'<bitmap:Add-Ons/Weapon_SWeps_Ext/model/icon/ci_molotov> %1','%2 <bitmap:Add-Ons/Weapon_SWeps_Ext/model/icon/ci_molotov> %1',1,1);
-AddDamageType("Flamer",'<bitmap:Add-Ons/Weapon_SWeps_Ext/model/icon/ci_fire> %1','%2 <bitmap:Add-Ons/Weapon_SWeps_Ext/model/icon/ci_fire> %1',1,1);
-
+AddDamageType("Molotov",'<bitmap:Add-Ons/Gamemode_Left4Block/add-ins/weapon_sweps_molotov/model/icon/ci_molotov> %1','%2 <bitmap:Add-Ons/Gamemode_Left4Block/add-ins/weapon_sweps_molotov/model/icon/ci_molotov> %1',1,1);
+AddDamageType("Flamer",'<bitmap:Add-Ons/Gamemode_Left4Block/add-ins/weapon_sweps_molotov/model/icon/ci_fire> %1','%2 <bitmap:Add-Ons/Gamemode_Left4Block/add-ins/weapon_sweps_molotov/model/icon/ci_fire> %1',1,1);
 exec("./molotov.cs");
 
 datablock PlayerData(emptyPlayer : playerStandardArmor)
@@ -251,27 +250,18 @@ function cleanFlameSet()
 		%set = $flameSet[%i];
 		if(%set $= "")
 		{
-			if(%tailClear == 1)
-			{
-				$flameSetCnt--;
-			}
+			if(%tailClear == 1) $flameSetCnt--;
 			continue;
 		}
 		if(%set.getCount() == 0)
 		{
-			if(isObject(%set.soundObj))
-				%set.soundObj.delete();
+			if(isObject(%set.soundObj)) %set.soundObj.delete();
 			%set.delete();
 			$flameSet[%i] = "";
-			if(%tailClear == 1)
-			{
-				$flameSetCnt--;
-			}
+			if(%tailClear == 1) $flameSetCnt--;
+			
 		}
-		else
-		{
-			%tailClear = 0;
-		}
+		else %tailClear = 0;
 	}
 }
 function getFlameSet(%exp)
@@ -365,10 +355,7 @@ package swol_sweps_extpack
 		{
 			if(isObject(%im))
 			{
-				if(%im.getClassName() !$= "ProjectileData")
-				{
-					return;
-				}
+				if(%im.getClassName() !$= "ProjectileData") return;
 			}
 		}
 		parent::emote(%pl,%im,%override);

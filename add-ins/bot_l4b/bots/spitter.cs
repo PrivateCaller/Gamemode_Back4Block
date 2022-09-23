@@ -83,14 +83,14 @@ function ZombieSpitterHoleBot::onBotLoop(%this,%obj)
 
 function ZombieSpitterHoleBot::onBotFollow( %this, %obj, %targ )
 {
-	
-	if(vectorDist(%obj.getposition(),%targ.getposition()) > 12)
+	%distance = vectorDist(%obj.getposition(),%targ.getposition());
+	if(%distance > 12 && %distance < 24)
 	{
 		%obj.getDatablock().schedule(750 * %n,Spit,%obj);
 		%obj.hClearMovement();
 		%obj.setaimobject(%targ);
 	}
-	else %obj.hRunAwayFromPlayer(%targ);	
+	else if(%distance < 12) %obj.hRunAwayFromPlayer(%targ);	
 
 	Parent::onBotFollow(%this,%obj,%targ);
 }

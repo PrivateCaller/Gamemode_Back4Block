@@ -6,13 +6,7 @@ else $Item_Explosives_isSWepsExtOn = 0;
 %file = findFirstFile(%pattern);
 while(%file !$= "")
 {
-	%soundName = strlwr(%file);
-	%soundName = strreplace(%soundName, "add-ons/gamemode_left4block/add-ins/weapon_throwable_explosives/sound/", "");
-	%soundName = strreplace(%soundName, "/", "");
-	%soundName = strreplace(%soundName, ".wav", "");
-	%soundName = strreplace(%soundName, "quiet", "");
-	%soundName = strreplace(%soundName, "normal", "");
-	%soundName = strreplace(%soundName, "loud", "");
+	%soundName = strreplace(filename(strlwr(%file)), ".wav", "");
 
 	//Check the names of the folders to determine what type of soundscape it will be, and check if it's a loopable sound or not
 	if(strstr(%file,"normal") != -1)//Normal soundscape

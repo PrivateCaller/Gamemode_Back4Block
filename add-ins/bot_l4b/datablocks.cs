@@ -2,23 +2,7 @@
 %file = findFirstFile(%pattern);
 while(%file !$= "")
 {
-	%soundName = strlwr(%file);
-	%soundName = strreplace(%soundName, "add-ons/gamemode_left4block/add-ins/bot_l4b/sound/", "");
-	%soundName = strreplace(%soundName, "/", "");
-	%soundName = strreplace(%soundName, ".wav", "");
-	%soundName = strreplace(%soundName, "quiet", "");
-	%soundName = strreplace(%soundName, "normal", "");
-	%soundName = strreplace(%soundName, "loud", "");
-	%soundName = strreplace(%soundName, "snd-tank", "");//Has to be written with snd-zombiename or it might replace the name of the zombie sound files themselves
-	%soundName = strreplace(%soundName, "snd-witch", "");
-	%soundName = strreplace(%soundName, "snd-hunter", "");
-	%soundName = strreplace(%soundName, "snd-boomer", "");
-	%soundName = strreplace(%soundName, "snd-charger", "");
-	%soundName = strreplace(%soundName, "snd-smoker", "");
-	%soundName = strreplace(%soundName, "snd-jockey", "");
-	%soundName = strreplace(%soundName, "snd-spitter", "");
-	%soundName = strreplace(%soundName, "snd-common", "");
-	%soundName = strreplace(%soundName, "snd-survivor", "");
+	%soundName = strreplace(filename(strlwr(%file)), ".wav", "");
 
 	//Check the names of the folders to determine what type of soundscape it will be, and check if it's a loopable sound or not
 	if(strstr(%file,"normal") != -1)//Normal soundscape

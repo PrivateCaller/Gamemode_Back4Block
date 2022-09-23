@@ -50,89 +50,6 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 	new ScriptObject(Preference)
 	{
 		className      = "Gamemode_Left4Block";
-
-		addon          = "Gamemode_Left4Block";
-		category       = "Director (Minigame Only)";
-		title          = "Director sounds/music";
-
-		type           = "bool";
-		params         = "";
-
-		variable       = "$Pref::L4BDirector::EnableCues";
-
-		defaultValue   = "1";
-
-		updateCallback = "";
-		loadCallback   = "";
-
-		hostOnly       = false;
-		secret         = false;
-
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "Gamemode_Left4Block";
-		addon          = "Gamemode_Left4Block";
-		category       = "Bots Main";
-		title          = "Limited lifetime";
-		type           = "bool";
-		params         = "";
-		variable       = "$Pref::Server::L4B2Bots::LimitedLifetime";
-		defaultValue   = "1";
-		updateCallback = "";
-		loadCallback   = "";
-		hostOnly       = false;
-		secret         = false;
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "Gamemode_Left4Block";
-		addon          = "Gamemode_Left4Block";
-		category       = "Bots Main";
-		title          = "Victim saved messages";
-		type           = "bool";
-		params         = "";
-		variable       = "$Pref::Server::L4B2Bots::VictimSavedMessages";
-		defaultValue   = "1";
-		updateCallback = "";
-		loadCallback   = "";
-		hostOnly       = false;
-		secret         = false;
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "L4B2Bots_NormalDamage";
-		addon          = "Gamemode_Left4Block";
-		category       = "Bots Main";
-		title          = "Incap/strangle cutscene length";
-		type           = "num";
-		params         = "0 1000 0";
-		variable       = "$Pref::Server::L4B2Bots::NeedHelpCutsceneLength";
-		defaultValue   = "200";
-		updateCallback = "";
-		loadCallback   = "";
-		hostOnly       = false;
-		secret         = false;
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "Gamemode_Left4Block";
 		addon          = "Gamemode_Left4Block";
 		category       = "Bot Specials";
 		title          = "Specials pinned messages";
@@ -328,7 +245,6 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 }
 else
 {
-
 	$Pref::Server::L4BAmmocrate::Supplies = 1;
 	$Pref::Server::L4BAmmocrate::SupplyAmount = 25;
 	$Pref::Server::L4BAmmocrate::AcquireDelay = 500;
@@ -337,14 +253,11 @@ else
 	$Pref::L4BHealthLocker::AcquireDelay = 500;
 
 	$Pref::L4BDirector::EnableOnMG = 0;
-	$Pref::L4BDirector::EnableCues = 1;
 	
 	$Pref::Server::L4B2Bots::Difficulty = 1;
-	$Pref::Server::L4B2Bots::LimitedLifetime = 1;
 	$Pref::Server::L4B2Bots::MinigameMessages = 1;
-	$Pref::Server::L4B2Bots::VictimSavedMessages = 1;
 
-	$Pref::Server::L4B2Bots::NormalDamage = 2;
+	$Pref::Server::L4B2Bots::NormalDamage = 5;
 	$Pref::Server::L4B2Bots::SpecialsDamage = 15;
 	$Pref::Server::L4B2Bots::TankRounds = 1;
 	$Pref::Server::L4B2Bots::TankRoundChance = 25;
@@ -355,11 +268,29 @@ else
 	$Pref::Server::L4B2Bots::MaxTank = 1;
 }
 
+$hZombieSkin[%hzskin++] = "0.16 0.25 0.21 1";
+$hZombieSkinAmount = %hzskin;
+
+$hZombieSpecialType[%hzs++] = "ZombieChargerHoleBot";
+$hZombieSpecialType[%hzs++] = "ZombieBoomerHoleBot";
+$hZombieSpecialType[%hzs++] = "ZombieSpitterHoleBot";
+$hZombieSpecialType[%hzs++] = "ZombieHunterHoleBot";
+$hZombieSpecialType[%hzs++] = "ZombieSmokerHoleBot";
+$hZombieSpecialType[%hzs++] = "ZombieJockeyHoleBot";
+$hZombieSpecialTypeAmount = %hzs;
+
+$hZombieUncommonType[%hzu++] = "ZombieConstructionHoleBot";
+$hZombieUncommonType[%hzu++] = "ZombieFallenHoleBot";
+$hZombieUncommonType[%hzu++] = "ZombieCedaHoleBot";
+$hZombieUncommonType[%hzu++] = "ZombieSoldierHoleBot";
+$hZombieUncommonType[%hzu++] = "ZombiePoliceHoleBot";
+$hZombieUncommonTypeAmount = %hzu;
+
 function L4B_DifficultyAdjustment()
 {
 	switch($Pref::Server::L4B2Bots::Difficulty)
 	{
-		case 0: $Pref::Server::L4B2Bots::NormalDamage = 2;
+		case 0: $Pref::Server::L4B2Bots::NormalDamage = 5;
 				$Pref::Server::L4B2Bots::SpecialsDamage = 15;
 				$Pref::Server::L4B2Bots::TankRounds = 1;
 				$Pref::Server::L4B2Bots::TankRoundChance = 25;

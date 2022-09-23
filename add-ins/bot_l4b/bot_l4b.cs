@@ -1,3 +1,4 @@
+luaexec("./bot_l4b.lua");
 exec("./datablocks.cs");
 exec("./bots/common.cs");
 exec("./bots/uncommon_soldier.cs");
@@ -41,17 +42,16 @@ function fxDTSBrick::RandomizeZombieSpecial(%obj) { %obj.hBotType = $hZombieSpec
 function fxDTSBrick::RandomizeZombieUncommon(%obj) { %obj.hBotType = $hZombieUncommonType[getRandom(1,$hZombieUncommonTypeAmount)]; }
 
 function fxDTSBrick::zfakeKillBrick(%obj)
-{
-	if(strstr(strlwr(%obj.getName()),"breakbrick") != 1)
+{		
+	%obj.fakeKillBrick("0 0 1", "5");
+	%obj.schedule(5100,disappear,-1);
+
+	if(isObject(BreakBrickSet)) BreakBrickSet.add(%obj);
+	else
 	{
-		%obj.fakeKillBrick("0 0 1", "5");
-		%obj.schedule(5100,disappear,1);
-
-		if($oldTimescale $= "") $oldTimescale = getTimescale();
-
-		setTimescale(getRandom(8,16)*0.1);
-		%obj.playSound(BrickBreakSound.getID());
-		setTimescale($oldTimescale);
+		new SimSet(BreakBrickSet);
+		missionCleanup.add(BreakBrickSet);
+		BreakBrickSet.add(%obj);
 	}
 }
 
@@ -117,25 +117,45 @@ function Player::hChangeBotToInfectedAppearance(%obj)
 
 		if(%objC $= %obj.headColor) eval("%obj." @ %cur @ " = %newskincolor;");
 
-		%obj.faceName = $hZombieFace[getRandom(1,$hZombieFaceAmount)];
+		%obj.faceName = "asciiTerror";
 	}
 
 	GameConnection::ApplyBodyParts(%obj);
 	GameConnection::ApplyBodyColors(%obj);
 }
 
-function AIPlayer::hLimitedLifetime(%obj)
+function AIPlayer::hNoSeeIdleTeleport(%obj)//Originally intended to kill a bot after some time being idle, but is now a function to teleport them
 {
-	if(!$Pref::Server::L4B2Bots::LimitedLifetime || !isObject(getMinigameFromObject(%obj)) || %obj.hFollowing)
+	if(!isObject(%minigame = getMinigameFromObject(%obj)) || %obj.hState $= "Following") return;
+	%obj.hTimeLeftToTele++;
+
+	if(%obj.hTimeLeftToTele >= 10) 
 	{
-		%obj.hLimitLife = 0;
-		return;
+		%obj.hTimeLeftToTele = 0;
+
+		if(isObject(%minigame))	
+		for(%i=0;%i<%minigame.numMembers;%i++)
+		{
+			if(isObject(%mgmember = %minigame.member[%i]) && isObject(%player = %mgmember.player))
+			{
+				%raycast = containerRayCast(%obj.getMuzzlePoint(2),%player.getEyePoint(),$TypeMasks::FxBrickObjectType | $TypeMasks::VehicleObjectType,%obj);
+				if(isObject(%raycast)) %canSee = false;//If the distance between the player and object is being obstructed by a brick or vehicle, they cannot see us
+				else
+				{
+					%EyeVector = %player.getEyeVector();
+					%PosNormal = vectorNormalize(vectorSub(%obj.getMuzzlePoint(2),%player.getEyePoint()));
+
+					if(VectorDot(%EyeVector,%PosNormal) > 0.55)//FOV check, if the value is higher than 0.55 then the player can see us
+					{
+						%canSee = true;
+						break;//Looks like we're being observed, so we cannot teleport
+					}
+					else %canSee = false;
+				}		
+			}
+		}		
+		if(!%canSee) %obj.doMRandomTele("Horde");//Teleport if we cannot be observed
 	}
-
-	%obj.hLimitLife++;
-
-	if(%obj.hLimitLife == 10) %obj.doMRandomTele(%obj.spawnType);
-	else if(%obj.hLimitLife >= 25) %obj.kill();
 }
 
 function Player::onL4BDatablockAttributes(%obj)
@@ -191,7 +211,7 @@ function Player::hDefaultL4BAppearance(%obj)
 	%randskin = $hZombieSkin[getRandom(1,$hZombieSkinAmount)];
 	%skincolor = getWord(%randskin,0)*%randmultiplier SPC getWord(%randskin,1)*%randmultiplier SPC getWord(%randskin,2)*%randmultiplier SPC 1;
 	%decal = $hZombieDecal[getRandom(1,$hZombieDecalAmount)];
-	%face = $hZombieFace[getRandom(1,$hZombieFaceAmount)];
+	%face = "asciiTerror";
 	
 	%this.Appearance(%obj,%skinColor,%face,%decal,%hat,%pack,%chest);
 	%this.hCustomNodeAppearance(%obj);
@@ -231,8 +251,7 @@ function L4B_ZombieDropLoot(%obj,%lootitem,%chance)
 
 function L4B_ZombieLunge(%obj,%targ,%power)
 {
-	if(!isObject(%obj) || !isObject(%targ) || getWord(%obj.getvelocity(),2) == 0 || %obj.getState() $= "Dead")
-	return;
+	if(!isObject(%obj) || %obj.getState() $= "Dead" || !isObject(%targ) || getWord(%obj.getvelocity(),2) == 0) return;
 
 	%dis = VectorSub(%targ.getposition(),%obj.getposition());
 	%normVec = VectorNormalize(vectoradd(%dis,"0 0" SPC 0.15*vectordist(%targ.getposition(),%obj.getposition())));
@@ -334,15 +353,14 @@ function Player::bigZombieMelee(%obj)
 
 function Player::SpecialPinAttack(%obj,%col,%force)
 {	
-	if(!isObject(%col) || !isObject(%obj))
-	return;
+	if(!isObject(%col) || !isObject(%obj)) return;
 
-	if(%col.getType() & $TypeMasks::PlayerObjectType && checkHoleBotTeams(%obj,%col))
+	if(%col.getType() & $TypeMasks::PlayerObjectType && checkHoleBotTeams(%obj,%col) && miniGameCanDamage(%obj,%col))
 	{	
-		%shape = %col.getDataBlock().shapeFile;
-		if(miniGameCanDamage(%obj,%col) && %obj.getState() !$= "Dead" && %col.getState() !$= "Dead" && !%obj.isStrangling && !%col.isBeingStrangled && %obj.laststun+5000 < getsimtime() && %shape $= "base/data/shapes/player/m.dts" || %shape $= "base/data/shapes/player/mmelee.dts")
+		%shape = fileName(%col.getDataBlock().shapeFile);
+
+		if(%obj.getState() !$= "Dead" && %col.getState() !$= "Dead" && !%obj.isStrangling && !%col.isBeingStrangled && %shape $= "m.dts" || %shape $= "mmelee.dts")
 		{
-			%obj.laststun = getsimtime();
 			%col.isBeingStrangled = 1;
 			%obj.isStrangling = 1;
 			%obj.hEating = %col;

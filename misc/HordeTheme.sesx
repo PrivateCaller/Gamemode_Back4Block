@@ -12,7 +12,7 @@
           <trackOutput outputID="10000" type="trackID"/>
           <trackInput inputID="1"/>
           <component componentGuid="f70c9786-d26b-4e2e-badd-eddf3a2d1e2a" componentID="Audition.Fader" id="trackFader" name="volume" powered="true">
-            <parameter index="0" name="volume" parameterValue="1"/>
+            <parameter index="0" name="volume" parameterValue="1.33352148532867431640625"/>
             <parameter index="1" name="static gain" parameterValue="1"/>
           </component>
           <component componentGuid="f98f15b8-20ee-4d3d-9e14-e1e00c1ec22c" componentID="Audition.Mute" id="trackMute" name="Mute" powered="true">
@@ -76,7 +76,7 @@
             <parameter index="0" name="volume" parameterValue="1"/>
             <parameter index="1" name="static gain" parameterValue="1"/>
           </component>
-          <component componentGuid="4bd5e55f-5247-4778-bfe7-7d6375f7ecc1" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
+          <component componentGuid="306ca746-cd6b-4655-87fd-c703a2703acd" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
             <parameter index="0" parameterValue="0"/>
             <parameter index="1" name="mute" parameterValue="0"/>
           </component>
@@ -97,7 +97,7 @@
             <parameter index="0" name="volume" parameterValue="1"/>
             <parameter index="1" name="static gain" parameterValue="1"/>
           </component>
-          <component componentGuid="b1ee8adc-84b2-440b-b7f8-0bc4d6faafe5" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
+          <component componentGuid="25aadaf6-aeba-4642-9fe0-839146abefbf" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
             <parameter index="0" parameterValue="0"/>
             <parameter index="1" name="mute" parameterValue="0"/>
           </component>
@@ -118,7 +118,7 @@
             <parameter index="0" name="volume" parameterValue="1"/>
             <parameter index="1" name="static gain" parameterValue="1"/>
           </component>
-          <component componentGuid="0cdbaa5f-8491-4403-8ae4-e32e989d0e22" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
+          <component componentGuid="25296172-ab58-4474-b065-c20a4faf9604" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
             <parameter index="0" parameterValue="0"/>
             <parameter index="1" name="mute" parameterValue="0"/>
           </component>
@@ -143,7 +143,7 @@
           <trackOutput outputID="10000" type="trackID"/>
           <trackInput inputID="1"/>
           <component componentGuid="26c3e240-29db-4717-b4b4-bf187bbaeae7" componentID="Audition.Fader" id="trackFader" name="volume" powered="true">
-            <parameter index="0" name="volume" parameterValue="0.316227734088897705078125"/>
+            <parameter index="0" name="volume" parameterValue="0.562341272830963134765625"/>
             <parameter index="1" name="static gain" parameterValue="1"/>
           </component>
           <component componentGuid="6f93c6e0-ceee-41a0-822e-dff1567b868b" componentID="Audition.Mute" id="trackMute" name="Mute" powered="true">
@@ -202,12 +202,12 @@
           </component>
         </trackAudioParameters>
         <editParameter parameterIndex="0" slotIndex="4294967280"/>
-        <audioClip clipAutoCrossfade="true" crossFadeHeadClipID="-1" crossFadeTailClipID="-1" endPoint="249036" fileID="4" hue="-1" id="0" lockedInTime="false" looped="false" name="snare_horde_01_01a" offline="false" select="false" sourceInPoint="0" sourceOutPoint="249036" startPoint="0" zOrder="0">
+        <audioClip clipAutoCrossfade="true" crossFadeHeadClipID="-1" crossFadeTailClipID="-1" endPoint="249036" fileID="3" hue="-1" id="0" lockedInTime="false" looped="false" name="snare_horde_01_01a" offline="false" select="false" sourceInPoint="0" sourceOutPoint="249036" startPoint="0" zOrder="0">
           <component componentGuid="a835c036-ed92-447a-b253-2efb6e5c4cf5" componentID="Audition.Fader" id="clipGain" name="volume" powered="true">
             <parameter index="0" name="volume" parameterValue="1"/>
             <parameter index="1" name="static gain" parameterValue="1"/>
           </component>
-          <component componentGuid="64a25195-3e6f-401f-8752-ae58a8df6c3d" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
+          <component componentGuid="d64b0ab7-6203-469f-9a04-5d7b81a4df97" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
             <parameter index="0" parameterValue="0"/>
             <parameter index="1" name="mute" parameterValue="0"/>
           </component>
@@ -223,12 +223,12 @@
             <channel index="1" sourceIndex="1"/>
           </channelMap>
         </audioClip>
-        <audioClip clipAutoCrossfade="true" crossFadeHeadClipID="-1" crossFadeTailClipID="-1" endPoint="498100" fileID="3" hue="-1" id="1" lockedInTime="false" looped="false" name="snare_horde_01_01b" offline="false" select="false" sourceInPoint="0" sourceOutPoint="249036" startPoint="249064" zOrder="7">
+        <audioClip clipAutoCrossfade="true" crossFadeHeadClipID="-1" crossFadeTailClipID="-1" endPoint="498100" fileID="4" hue="-1" id="1" lockedInTime="false" looped="false" name="snare_horde_01_01b" offline="false" select="false" sourceInPoint="0" sourceOutPoint="249036" startPoint="249064" zOrder="7">
           <component componentGuid="101af49f-5448-40aa-9e08-874e510d3cb8" componentID="Audition.Fader" id="clipGain" name="volume" powered="true">
             <parameter index="0" name="volume" parameterValue="1"/>
             <parameter index="1" name="static gain" parameterValue="1"/>
           </component>
-          <component componentGuid="ddb4d06c-b167-49bb-b1a0-96231a998c42" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
+          <component componentGuid="434db684-7fe3-4b5a-bf14-e588d00294a2" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
             <parameter index="0" parameterValue="0"/>
             <parameter index="1" name="mute" parameterValue="0"/>
           </component>
@@ -244,12 +244,12 @@
             <channel index="1" sourceIndex="1"/>
           </channelMap>
         </audioClip>
-        <audioClip clipAutoCrossfade="true" crossFadeHeadClipID="-1" crossFadeTailClipID="-1" endPoint="747136" fileID="4" hue="-1" id="2" lockedInTime="false" looped="false" name="snare_horde_01_01a" offline="false" select="false" sourceInPoint="0" sourceOutPoint="249036" startPoint="498100" zOrder="2">
+        <audioClip clipAutoCrossfade="true" crossFadeHeadClipID="-1" crossFadeTailClipID="-1" endPoint="747136" fileID="3" hue="-1" id="2" lockedInTime="false" looped="false" name="snare_horde_01_01a" offline="false" select="false" sourceInPoint="0" sourceOutPoint="249036" startPoint="498100" zOrder="2">
           <component componentGuid="17e00033-7470-4720-a7a4-2ddac631acce" componentID="Audition.Fader" id="clipGain" name="volume" powered="true">
             <parameter index="0" name="volume" parameterValue="1"/>
             <parameter index="1" name="static gain" parameterValue="1"/>
           </component>
-          <component componentGuid="f5334475-65ff-4fb7-93e3-82c921d650b4" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
+          <component componentGuid="b55119ed-5910-4a53-a017-0727018d2c77" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
             <parameter index="0" parameterValue="0"/>
             <parameter index="1" name="mute" parameterValue="0"/>
           </component>
@@ -274,12 +274,12 @@
           <trackOutput outputID="10000" type="trackID"/>
           <trackInput inputID="1"/>
           <component componentGuid="cd5539ec-c621-4d42-8c4d-3b6cfa92bd1f" componentID="Audition.Fader" id="trackFader" name="volume" powered="true">
-            <parameter index="0" name="volume" parameterValue="0.17782790958881378173828125"/>
+            <parameter index="0" name="volume" parameterValue="0.421696484088897705078125"/>
             <parameter index="1" name="static gain" parameterValue="1"/>
           </component>
           <component componentGuid="1de7de60-0a8c-4e94-8ecc-068c9de4bfdf" componentID="Audition.Mute" id="trackMute" name="Mute" powered="true">
             <parameter index="0" parameterValue="0"/>
-            <parameter index="1" name="mute" parameterValue="1"/>
+            <parameter index="1" name="mute" parameterValue="0"/>
           </component>
           <component componentGuid="663090de-cdba-4fd9-a4e5-912af83fc895" componentID="Audition.StereoPanner" id="trackPan" name="StereoPanner" powered="true">
             <parameter index="0" name="Pan" parameterValue="0"/>
@@ -338,7 +338,7 @@
             <parameter index="0" name="volume" parameterValue="1"/>
             <parameter index="1" name="static gain" parameterValue="1"/>
           </component>
-          <component componentGuid="24dcc23b-c8f2-4839-a31b-adf44ce26d1d" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
+          <component componentGuid="1d2edcc9-7f15-42da-9fda-53d917634038" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
             <parameter index="0" parameterValue="0"/>
             <parameter index="1" name="mute" parameterValue="0"/>
           </component>
@@ -359,7 +359,7 @@
             <parameter index="0" name="volume" parameterValue="1"/>
             <parameter index="1" name="static gain" parameterValue="1"/>
           </component>
-          <component componentGuid="f5e8b42a-d011-4720-bdb8-be22107c537b" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
+          <component componentGuid="cd55ab75-1048-4c85-ba14-d78f1ebdc4a7" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
             <parameter index="0" parameterValue="0"/>
             <parameter index="1" name="mute" parameterValue="0"/>
           </component>
@@ -375,16 +375,16 @@
             <channel index="1" sourceIndex="1"/>
           </channelMap>
         </audioClip>
-        <audioClip clipAutoCrossfade="true" crossFadeHeadClipID="-1" crossFadeTailClipID="-1" endPoint="747100" fileID="6" hue="-1" id="2" lockedInTime="false" looped="false" name="drums03b" offline="false" select="false" sourceInPoint="0" sourceOutPoint="249018" startPoint="498082" zOrder="4">
-          <component componentGuid="38c4211f-92fe-4f6f-8e72-8329d7cf301b" componentID="Audition.Fader" id="clipGain" name="volume" powered="true">
+        <audioClip clipAutoCrossfade="true" crossFadeHeadClipID="-1" crossFadeTailClipID="-1" endPoint="747136" fileID="5" hue="-1" id="2" lockedInTime="false" looped="false" name="drums03a" offline="false" select="false" sourceInPoint="0" sourceOutPoint="249018" startPoint="498118" zOrder="8">
+          <component componentGuid="9ed68843-02bf-40b2-b839-c87ed4b79420" componentID="Audition.Fader" id="clipGain" name="volume" powered="true">
             <parameter index="0" name="volume" parameterValue="1"/>
             <parameter index="1" name="static gain" parameterValue="1"/>
           </component>
-          <component componentGuid="2b9d5fb5-ed3c-4ab7-a228-6d241b7111f8" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
+          <component componentGuid="bb6d479a-957b-4fad-aead-537c41091ce9" componentID="Audition.Mute" id="clipMute" name="Mute" powered="true">
             <parameter index="0" parameterValue="0"/>
             <parameter index="1" name="mute" parameterValue="0"/>
           </component>
-          <component componentGuid="a96fbff3-684e-45ce-9410-4288044caab0" componentID="Audition.StereoPanner" id="clipPan" name="StereoPanner" powered="true">
+          <component componentGuid="9571b099-4467-42c1-a1e6-bbb1ff740902" componentID="Audition.StereoPanner" id="clipPan" name="StereoPanner" powered="true">
             <parameter index="0" name="Pan" parameterValue="0"/>
           </component>
           <fadeIn crossFadeLinkType="linkedSymmetric" endPoint="0" shape="19" startPoint="0" type="log"/>
@@ -670,9 +670,9 @@
         <editParameter parameterIndex="0" slotIndex="4294967280"/>
       </masterTrack>
     </tracks>
-    <sessionState ctiPosition="42112" smpteStart="0">
-      <selectionState selectionDuration="0" selectionStart="42112"/>
-      <viewState horizontalViewDuration="1759589" horizontalViewStart="0" trackControlsWidth="224" verticalScrollOffset="0"/>
+    <sessionState ctiPosition="409295" smpteStart="0">
+      <selectionState selectionDuration="0" selectionStart="409295"/>
+      <viewState horizontalViewDuration="2340253" horizontalViewStart="0" trackControlsWidth="224" verticalScrollOffset="0"/>
       <timeFormatState beatsPerBar="4" beatsPerMinute="120" customFrameRate="12" linkToDefaultTimeSettings="true" noteLength="4" subdivisions="16" timeCodeDropFrame="false" timeCodeFrameRate="30" timeCodeNTSC="false" timeFormat="timeFormatDecimal"/>
       <mixingOptionState defaultPanModeLogarithmic="false" panPower="-3" playOverlappingClips="false"/>
     </sessionState>
@@ -688,9 +688,9 @@
             xmlns:xmpDM="http://ns.adobe.com/xmp/1.0/DynamicMedia/">
          <xmp:CreatorTool>Adobe Audition 14.0 (Windows)</xmp:CreatorTool>
          <xmp:CreateDate>2022-09-17T15:01:54-07:00</xmp:CreateDate>
-         <xmp:MetadataDate>2022-09-17T15:15:01-07:00</xmp:MetadataDate>
-         <xmp:ModifyDate>2022-09-17T15:15:01-07:00</xmp:ModifyDate>
-         <xmpMM:InstanceID>xmp.iid:227d0b7e-063f-6840-a4f1-093cb436995f</xmpMM:InstanceID>
+         <xmp:MetadataDate>2022-09-19T02:08:08-07:00</xmp:MetadataDate>
+         <xmp:ModifyDate>2022-09-19T02:08:08-07:00</xmp:ModifyDate>
+         <xmpMM:InstanceID>xmp.iid:422dab33-b5f6-c640-94b5-cce9d0675613</xmpMM:InstanceID>
          <xmpMM:DocumentID>xmp.did:4b316a38-d2c3-6a4d-b7a1-b49d7e8aea6e</xmpMM:DocumentID>
          <xmpMM:OriginalDocumentID>xmp.did:b86312b4-284e-954d-b9ce-04af82ff874f</xmpMM:OriginalDocumentID>
          <xmpMM:History>
@@ -769,6 +769,62 @@
                   <stEvt:action>saved</stEvt:action>
                   <stEvt:instanceID>xmp.iid:227d0b7e-063f-6840-a4f1-093cb436995f</stEvt:instanceID>
                   <stEvt:when>2022-09-17T15:15:01-07:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe Audition 14.0 (Windows)</stEvt:softwareAgent>
+                  <stEvt:changed>/</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:629251cd-c458-eb48-b09d-127f4fd34e79</stEvt:instanceID>
+                  <stEvt:when>2022-09-19T02:06:30-07:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe Audition 14.0 (Windows)</stEvt:softwareAgent>
+                  <stEvt:changed>/metadata</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:04dfc267-5979-704a-a4c0-75dcb0e6292b</stEvt:instanceID>
+                  <stEvt:when>2022-09-19T02:06:30-07:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe Audition 14.0 (Windows)</stEvt:softwareAgent>
+                  <stEvt:changed>/</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:6749e5d2-6546-424c-bdf5-dcf7f3c8545f</stEvt:instanceID>
+                  <stEvt:when>2022-09-19T02:06:42-07:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe Audition 14.0 (Windows)</stEvt:softwareAgent>
+                  <stEvt:changed>/metadata</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:7a5a0b50-bc90-cc42-8319-75ed254daa59</stEvt:instanceID>
+                  <stEvt:when>2022-09-19T02:06:42-07:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe Audition 14.0 (Windows)</stEvt:softwareAgent>
+                  <stEvt:changed>/</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:066a3571-ee36-cb48-a9de-90d6ee8c8ed0</stEvt:instanceID>
+                  <stEvt:when>2022-09-19T02:07:32-07:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe Audition 14.0 (Windows)</stEvt:softwareAgent>
+                  <stEvt:changed>/metadata</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:34a2883f-5937-774c-bef3-f46034c8518b</stEvt:instanceID>
+                  <stEvt:when>2022-09-19T02:07:32-07:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe Audition 14.0 (Windows)</stEvt:softwareAgent>
+                  <stEvt:changed>/</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:4fbc6b12-fd11-8f4c-a5aa-9724a8b5f086</stEvt:instanceID>
+                  <stEvt:when>2022-09-19T02:08:08-07:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe Audition 14.0 (Windows)</stEvt:softwareAgent>
+                  <stEvt:changed>/metadata</stEvt:changed>
+               </rdf:li>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>saved</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:422dab33-b5f6-c640-94b5-cce9d0675613</stEvt:instanceID>
+                  <stEvt:when>2022-09-19T02:08:08-07:00</stEvt:when>
                   <stEvt:softwareAgent>Adobe Audition 14.0 (Windows)</stEvt:softwareAgent>
                   <stEvt:changed>/</stEvt:changed>
                </rdf:li>
@@ -904,8 +960,8 @@
     <file absolutePath="D:\Cloud Storage\OneDrive\Blockland\Blockland Server\Add-Ons\Gamemode_Left4Block\misc\Imported Files\horde_01.wav" id="0" importerPrivateSettings="Compression:0:0;LargeFileSupport:0:0;SampleType:0:40;" mediaHandler="AmioWav" relativePath="Imported Files/horde_01.wav"/>
     <file absolutePath="D:\Cloud Storage\OneDrive\Blockland\Blockland Server\Add-Ons\Gamemode_Left4Block\misc\Imported Files\horde_03.wav" id="1" importerPrivateSettings="Compression:0:0;LargeFileSupport:0:0;SampleType:0:40;" mediaHandler="AmioWav" relativePath="Imported Files/horde_03.wav"/>
     <file absolutePath="D:\Cloud Storage\OneDrive\Blockland\Blockland Server\Add-Ons\Gamemode_Left4Block\misc\Imported Files\horde_02.wav" id="2" importerPrivateSettings="Compression:0:0;LargeFileSupport:0:0;SampleType:0:40;" mediaHandler="AmioWav" relativePath="Imported Files/horde_02.wav"/>
-    <file absolutePath="D:\Cloud Storage\OneDrive\Blockland\Blockland Server\Add-Ons\Gamemode_Left4Block\misc\Imported Files\snare_horde_01_01b.wav" id="3" importerPrivateSettings="Compression:0:0;LargeFileSupport:0:0;SampleType:0:40;" mediaHandler="AmioWav" relativePath="Imported Files/snare_horde_01_01b.wav"/>
-    <file absolutePath="D:\Cloud Storage\OneDrive\Blockland\Blockland Server\Add-Ons\Gamemode_Left4Block\misc\Imported Files\snare_horde_01_01a.wav" id="4" importerPrivateSettings="Compression:0:0;LargeFileSupport:0:0;SampleType:0:40;" mediaHandler="AmioWav" relativePath="Imported Files/snare_horde_01_01a.wav"/>
+    <file absolutePath="D:\Cloud Storage\OneDrive\Blockland\Blockland Server\Add-Ons\Gamemode_Left4Block\misc\Imported Files\snare_horde_01_01a.wav" id="3" importerPrivateSettings="Compression:0:0;LargeFileSupport:0:0;SampleType:0:40;" mediaHandler="AmioWav" relativePath="Imported Files/snare_horde_01_01a.wav"/>
+    <file absolutePath="D:\Cloud Storage\OneDrive\Blockland\Blockland Server\Add-Ons\Gamemode_Left4Block\misc\Imported Files\snare_horde_01_01b.wav" id="4" importerPrivateSettings="Compression:0:0;LargeFileSupport:0:0;SampleType:0:40;" mediaHandler="AmioWav" relativePath="Imported Files/snare_horde_01_01b.wav"/>
     <file absolutePath="D:\Cloud Storage\OneDrive\Blockland\Blockland Server\Add-Ons\Gamemode_Left4Block\misc\Imported Files\drums03a.wav" id="5" importerPrivateSettings="Compression:0:0;LargeFileSupport:0:0;SampleType:0:40;" mediaHandler="AmioWav" relativePath="Imported Files/drums03a.wav"/>
     <file absolutePath="D:\Cloud Storage\OneDrive\Blockland\Blockland Server\Add-Ons\Gamemode_Left4Block\misc\Imported Files\drums03b.wav" id="6" importerPrivateSettings="Compression:0:0;LargeFileSupport:0:0;SampleType:0:40;" mediaHandler="AmioWav" relativePath="Imported Files/drums03b.wav"/>
   </files>

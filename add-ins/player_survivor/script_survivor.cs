@@ -228,8 +228,7 @@ package L4B2Bots_NewPlayerDatablock
 	{
 		Parent::createPlayer (%client, %spawnPoint);
 
-		if(isObject(%client.Player))
-		%client.Player.spawnTime = getSimTime();
+		if(isObject(%client.Player)) %client.Player.spawnTime = getSimTime();
 		
 		if(%client.setZombieBlock)
 		if(isObject(%client.Player))
@@ -246,7 +245,7 @@ package L4B2Bots_NewPlayerDatablock
 		parent::applyBodyColors(%cl,%o);
 		
 		if(isObject(%pl = %cl.player))
-		if(fileName (%pl.getDataBlock().shapeFile) $= "mmelee.dts")
+		if(fileName (%pl.getDataBlock().shapeFile) $= "m.dts")
 		%pl.fixAppearance(%cl);
 	}
 
@@ -256,7 +255,7 @@ package L4B2Bots_NewPlayerDatablock
 		parent::applyBodyParts(%cl,%o);
 		
 		if(isObject(%pl = %cl.player))
-		if(fileName (%pl.getDataBlock().shapeFile) $= "mmelee.dts")
+		if(fileName (%pl.getDataBlock().shapeFile) $= "m.dts")
 		%pl.fixAppearance(%cl);
 	}
 };

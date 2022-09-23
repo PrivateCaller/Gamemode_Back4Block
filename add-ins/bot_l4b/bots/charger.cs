@@ -34,7 +34,7 @@ datablock PlayerData(ZombieChargerHoleBot : CommonZombieHoleBot)
 
 	hIsInfected = 2;
 	hZombieL4BType = "Special";
-	resistMelee = 1;
+	resistMelee = true;
 	hPinCI = "<bitmapk:Add-Ons/Gamemode_Left4Block/add-ins/bot_l4b/icons/ci_charger2>";
 	SpecialCPMessage = "Right click to charge <br>\c6Charge to pin non-infected";
 	hBigMeleeSound = "charger_punch1_sound";
@@ -56,6 +56,14 @@ function ZombieChargerHoleBot::onAdd(%this,%obj)
 {
 	Parent::onAdd(%this,%obj);
 	CommonZombieHoleBot::onAdd(%this,%obj);
+}
+
+
+function ZombieChargerHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
+{
+	if(%damageType !$= $DamageType::FallDamage || %damageType !$= $DamageType::Impact) %damage = %damage/1.5;
+	
+	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
 }
 
 function L4B_holeChargerKill(%obj,%col)

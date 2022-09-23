@@ -42,8 +42,7 @@ function ZombieSoldierHoleBot::onBotMelee(%this,%obj,%col)
 
 function ZombieSoldierHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
 {
-	if(%damageType !$= $DamageType::FallDamage || %damageType !$= $DamageType::Impact)
-	%damage = %damage/4;
+	if(%damageType !$= $DamageType::FallDamage || %damageType !$= $DamageType::Impact) %damage = %damage/4;
 	
 	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
 }
@@ -72,6 +71,7 @@ function ZombieSoldierHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%ha
 	%rarmColor = %uniformColor;
 	%rLegColor = %uniformColor;
 	%lLegColor = %uniformColor;
+	%handColor = %skinColor;
 	
 	if(getRandom(1,3) == 1)
 	{

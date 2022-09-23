@@ -1,16 +1,9 @@
 luaexec("./weapon_melee.lua");
-%pattern = "add-ons/gamemode_left4block/add-ins/weapon_dav_melee/sound/*.wav";//Too lazy to write datablock files for the sounds, just took this from the Disease Gamemode
+%pattern = "add-ons/gamemode_left4block/add-ins/weapon_dav_melee/sound/*.wav";
 %file = findFirstFile(%pattern);
 while(%file !$= "")
 {
-	%soundName = strlwr(%file);
-	%soundName = strreplace(%soundName, "add-ons/gamemode_left4block/add-ins/weapon_dav_melee/sound/", "");
-	%soundName = strreplace(%soundName, "/", "");
-	%soundName = strreplace(%soundName, ".wav", "");
-	%soundName = strreplace(%soundName, "quiet", "");
-	%soundName = strreplace(%soundName, "normal", "");
-	%soundName = strreplace(%soundName, "loud", "");
-
+	%soundName = strreplace(filename(strlwr(%file)), ".wav", "");
 	//Check the names of the folders to determine what type of soundscape it will be, and check if it's a loopable sound or not
 	if(strstr(%file,"normal") != -1)//Normal soundscape
 	if(strstr(%file,"loop") != -1)
@@ -37,7 +30,7 @@ datablock ParticleData(meleeTrailParticle)
 	gravityCoefficient	= 0.0;
 	inheritedVelFactor	= 0.0;
 	constantAcceleration	= 0.0;
-	lifetimeMS		= 1800;
+	lifetimeMS		= 1500;
 	lifetimeVarianceMS	= 0;
 	spinSpeed		= 10.0;
 	spinRandomMin		= -50.0;
@@ -46,10 +39,10 @@ datablock ParticleData(meleeTrailParticle)
 	animateTexture		= false;
 
 	textureName		= "base/data/particles/dot";
-	colors[0]	= "2 2 2 0.005";
+	colors[0]	= "2 2 2 0.0025";
 	colors[1]	= "2 2 2 0.0";
-	sizes[0]	= 0.75;
-	sizes[1]	= 0.5;
+	sizes[0]	= 0.4;
+	sizes[1]	= 0.1;
 	times[0]	= 0.5;
 	times[1]	= 0.1;
 };
@@ -67,6 +60,8 @@ datablock ParticleEmitterData(meleeTrailEmitter)
    useEmitterColors = true;
    uiName = "";
 };
+
+AddDamageType("Crowbar",'<bitmap:Add-Ons/Gamemode_Left4Block/add-ins/weapon_dav_melee/icons/ci_crowbar> %1','%2 <bitmap:Add-Ons/Gamemode_Left4Block/add-ins/weapon_dav_melee/icons/ci_crowbar> %1',0.2,1);
 
 datablock ItemData(crowbarItem)
 {
@@ -91,7 +86,7 @@ datablock ShapeBaseImageData(crowbarImage)
 	shapeFile = "./models/model_crowbar.dts";
 	emap = true;
 	mountPoint = 0;
-	offset = "0 0.05 0.25";
+	offset = "0 0 0";
 	correctMuzzleVector = false;
 	eyeOffset = "0 0 0";
 	className = "WeaponImage";
@@ -149,7 +144,7 @@ datablock ShapeBaseImageData(crowbarImage)
 
 	stateName[6]                    = "Break";
 	stateTransitionOnTimeout[6]     = "Ready";
-	stateTimeoutValue[6]            = 0.25;
+	stateTimeoutValue[6]            = 0.3;
 };
 
 function crowbarImage::onReady(%this, %obj, %slot)
@@ -171,224 +166,45 @@ function crowbarImage::onPreFire(%this, %obj, %slot)
 	%obj.playthread(2, "meleeSwing" @ getRandom(1,3));
 }
 
-datablock ItemData(macheteItem : crowbarItem)
+function L4B_CreateMeleeItem(%doOverwrite,%name,%colorShiftColor,%damageDivisor,%HitEnvSound,%HitPlSound,%delay)
 {
-	shapeFile = "./models/model_machete.dts";
-	uiName = "Machete";
-	iconName = "./icons/icon_machete";
-	colorShiftColor = "0.5 0.5 0.5 1";
-	image = macheteImage;
-};
+    %mainDirectory = "add-ons/gamemode_left4block/add-ins/weapon_dav_melee";
+	%itemData = "datablock ItemData(" @ %name @ "Item : crowbarItem){shapeFile = \"" @ %mainDirectory @ "/models/model_" @ %name @ ".dts\"; uiName = \"" @ %name @ "\"; iconName = \""  @ %mainDirectory @  "/icons/icon_" @ %name @ "\"; colorShiftColor = \"" @ %colorShiftColor @ "\"; image = \"" @ %name @ "Image\";};";
+    %imageData = "datablock ShapeBaseImageData(" @ %name @ "Image : crowbarImage){shapeFile = \""  @ %mainDirectory @  "/models/model_" @ %name @ ".dts\"; item = \"" @ %name @ "Item\"; doColorShift = " @ %name @ "Item.doColorShift; colorShiftColor = " @ %name @ "Item.colorShiftColor; meleeDamageDivisor = " @ %damageDivisor @ "; meleeHitEnvSound = \"" @ %HitEnvSound @ "\"; meleeHitPlSound = \"" @ %HitPlSound @ "\"; stateTimeoutValue[6] = " @ %delay @ ";};";
+    %onReady = "function" SPC %name @ "Image::onReady(%this, %obj, %slot) {crowbarImage::onReady(%this, %obj, %slot);}";
+	%onPreFire = "function" SPC %name @ "Image::onPreFire(%this, %obj, %slot) {crowbarImage::onPreFire(%this, %obj, %slot);}";
+    %onFire = "function" SPC %name @ "Image::onFire(%this, %obj, %slot) {crowbarImage::onFire(%this, %obj, %slot);}";    
 
-datablock ShapeBaseImageData(macheteImage : crowbarImage)
-{
-	shapeFile = "./models/model_machete.dts";
-	offset = "0 0.05 0.25";
-	item = macheteItem;
-	doColorShift = macheteItem.doColorShift;
-	colorShiftColor = macheteItem.colorShiftColor;
-	meleeDamageDivisor = 1.25;
-	meleeHitEnvSound = "machete";
-	meleeHitPlSound = "machete";
-	stateTimeoutValue[6]            = 0.16;
-};
+    %file = new fileObject();
+    
+	if(%doOverwrite)
+	{ 
+		%file.openForWrite("add-ons/gamemode_left4block/add-ins/weapon_dav_melee/extraweapons.cs");
+		%file.writeLine("//Don't edit anything, the function in weapon_melee.cs edits the stuff here");
+	}
+	else %file.openForAppend("add-ons/gamemode_left4block/add-ins/weapon_dav_melee/extraweapons.cs");
 
-function macheteImage::onReady(%this, %obj, %slot)
-{
-	crowbarImage::onReady(%this, %obj, %slot);
+	%file.writeLine("");
+	%file.writeLine("AddDamageType(" @ %name @ ",'<bitmap:" @ %mainDirectory @ "/icons/ci_" @ %name @ "> %1','%2 <bitmap:" @ %mainDirectory @ "/icons/ci_" @ %name @ "> %1',0.2,1);");
+    %file.writeLine(%itemData);
+	%file.writeLine(%imageData);
+    %file.writeLine(%onReady);
+	%file.writeLine(%onPreFire);
+    %file.writeLine(%onFire);
+    
+    %file.close();
+    %file.delete();
 }
 
-function macheteImage::onFire(%this, %obj, %slot)
-{
-	crowbarImage::onFire(%this, %obj, %slot);
-}
-
-function macheteImage::onPreFire(%this, %obj, %slot)
-{
-	crowbarImage::onPreFire(%this, %obj, %slot);
-}
-
-datablock ItemData(baseballbatItem : crowbarItem)
-{
-	shapeFile = "./models/model_baseballbat.dts";
-	uiName = "baseballbat";
-	iconName = "./icons/icon_baseballbat";
-	colorShiftColor = "0.5 0.5 0.5 1";
-	image = baseballbatImage;
-};
-
-datablock ShapeBaseImageData(baseballbatImage : crowbarImage)
-{
-	shapeFile = "./models/model_baseballbat.dts";
-	offset = "0 0.05 0.25";
-	item = baseballbatItem;
-	doColorShift = baseballbatItem.doColorShift;
-	colorShiftColor = baseballbatItem.colorShiftColor;
-	meleeDamageDivisor = 2.5;
-	meleeHitEnvSound = "baseballbat";
-	meleeHitPlSound = "baseballbat";
-	stateTimeoutValue[6]            = 0.16;
-};
-
-function baseballbatImage::onReady(%this, %obj, %slot)
-{
-	crowbarImage::onReady(%this, %obj, %slot);
-}
-
-function baseballbatImage::onFire(%this, %obj, %slot)
-{
-	crowbarImage::onFire(%this, %obj, %slot);
-}
-
-function baseballbatImage::onPreFire(%this, %obj, %slot)
-{
-	crowbarImage::onPreFire(%this, %obj, %slot);
-}
-
-datablock ItemData(fryingpanItem : crowbarItem)
-{
-	shapeFile = "./models/model_fryingpan.dts";
-	uiName = "fryingpan";
-	iconName = "./icons/icon_fryingpan";
-	colorShiftColor = "0.5 0.5 0.5 1";
-	image = fryingpanImage;
-};
-
-datablock ShapeBaseImageData(fryingpanImage : crowbarImage)
-{
-	shapeFile = "./models/model_fryingpan.dts";
-	offset = "0 0.05 0.25";
-	item = fryingpanItem;
-	doColorShift = fryingpanItem.doColorShift;
-	colorShiftColor = fryingpanItem.colorShiftColor;
-	meleeDamageDivisor = 3;
-	meleeHitEnvSound = "fryingpan";
-	meleeHitPlSound = "fryingpan";
-	stateTimeoutValue[6]            = 0.16;
-};
-
-function fryingpanImage::onReady(%this, %obj, %slot)
-{
-	crowbarImage::onReady(%this, %obj, %slot);
-}
-
-function fryingpanImage::onFire(%this, %obj, %slot)
-{
-	crowbarImage::onFire(%this, %obj, %slot);
-}
-
-function fryingpanImage::onPreFire(%this, %obj, %slot)
-{
-	crowbarImage::onPreFire(%this, %obj, %slot);
-}
-
-datablock ItemData(hatchetItem : crowbarItem)
-{
-	shapeFile = "./models/model_hatchet.dts";
-	uiName = "hatchet";
-	iconName = "./icons/icon_hatchet";
-	colorShiftColor = "0.5 0.5 0.5 1";
-	image = hatchetImage;
-};
-
-datablock ShapeBaseImageData(hatchetImage : crowbarImage)
-{
-	shapeFile = "./models/model_hatchet.dts";
-	offset = "0 0.05 0.25";
-	item = hatchetItem;
-	doColorShift = hatchetItem.doColorShift;
-	colorShiftColor = hatchetItem.colorShiftColor;
-	meleeDamageDivisor = 1.25;
-	meleeHitEnvSound = "crowbar";
-	meleeHitPlSound = "machete";
-	stateTimeoutValue[6]            = 0.16;
-};
-
-function hatchetImage::onReady(%this, %obj, %slot)
-{
-	crowbarImage::onReady(%this, %obj, %slot);
-}
-
-function hatchetImage::onFire(%this, %obj, %slot)
-{
-	crowbarImage::onFire(%this, %obj, %slot);
-}
-
-function hatchetImage::onPreFire(%this, %obj, %slot)
-{
-	crowbarImage::onPreFire(%this, %obj, %slot);
-}
-
-datablock ItemData(shovelItem : crowbarItem)
-{
-	shapeFile = "./models/model_shovel.dts";
-	uiName = "shovel";
-	iconName = "./icons/icon_shovel";
-	colorShiftColor = "0.5 0.5 0.5 1";
-	image = shovelImage;
-};
-
-datablock ShapeBaseImageData(shovelImage : crowbarImage)
-{
-	shapeFile = "./models/model_shovel.dts";
-	offset = "0 0.05 0.25";
-	item = shovelItem;
-	doColorShift = shovelItem.doColorShift;
-	colorShiftColor = shovelItem.colorShiftColor;
-	meleeDamageDivisor = 1.25;
-	meleeHitEnvSound = "crowbar";
-	meleeHitPlSound = "crowbar";
-	stateTimeoutValue[6]            = 0.16;
-};
-
-function shovelImage::onReady(%this, %obj, %slot)
-{
-	crowbarImage::onReady(%this, %obj, %slot);
-}
-
-function shovelImage::onFire(%this, %obj, %slot)
-{
-	crowbarImage::onFire(%this, %obj, %slot);
-}
-
-function shovelImage::onPreFire(%this, %obj, %slot)
-{
-	crowbarImage::onPreFire(%this, %obj, %slot);
-}
-
-datablock ItemData(macheteItem : crowbarItem)
-{
-	shapeFile = "./models/model_machete.dts";
-	uiName = "Machete";
-	iconName = "./icons/icon_machete";
-	colorShiftColor = "0.5 0.5 0.5 1";
-	image = macheteImage;
-};
-
-datablock ShapeBaseImageData(batonImage : crowbarImage)
-{
-	shapeFile = "./models/model_baton.dts";
-	offset = "0 0.05 0.25";
-	item = batonItem;
-	doColorShift = batonItem.doColorShift;
-	colorShiftColor = batonItem.colorShiftColor;
-	meleeDamageDivisor = 1.25;
-	meleeHitEnvSound = "baseballbat";
-	meleeHitPlSound = "baseballbat";
-	stateTimeoutValue[6]            = 0.16;
-};
-
-function batonImage::onReady(%this, %obj, %slot)
-{
-	crowbarImage::onReady(%this, %obj, %slot);
-}
-
-function batonImage::onFire(%this, %obj, %slot)
-{
-	crowbarImage::onFire(%this, %obj, %slot);
-}
-
-function batonImage::onPreFire(%this, %obj, %slot)
-{
-	crowbarImage::onPreFire(%this, %obj, %slot);
-}
+L4B_CreateMeleeItem(true,"Machete","0.5 0.5 0.5 1",1.275,"Machete","Machete",0.275);
+L4B_CreateMeleeItem(false,"Katana","0.75 0.75 0.75 1",1.275,"Machete","Machete",0.3);
+L4B_CreateMeleeItem(false,"cKnife","0.75 0.75 0.75 1",1.125,"Machete","cKnife",0.125);
+L4B_CreateMeleeItem(false,"Bat","0.675 0.45 0.275 1",4,"Bat","Bat",0.325);
+L4B_CreateMeleeItem(false,"Spikebat","0.675 0.45 0.275 1",1.25,"Bat","Spikebat",0.3);
+L4B_CreateMeleeItem(false,"Baton","0.125 0.125 0.125 1",1.25,"Bat","Bat",0.275);
+L4B_CreateMeleeItem(false,"Hatchet","0.75 0.75 0.75 1",1.375,"Crowbar","Machete",0.35);
+L4B_CreateMeleeItem(false,"Axe","0.75 0.75 0.5 1",1.15,"Crowbar","Machete",0.5);
+L4B_CreateMeleeItem(false,"Shovel","0.5 0.5 0.5 1",3,"Crowbar","Crowbar",0.45);
+L4B_CreateMeleeItem(false,"Sledgehammer","0.8 0.8 0.8 1",1.25,"Crowbar","Sledgehammer",0.5);
+L4B_CreateMeleeItem(false,"Pan","0.375 0.375 0.375 1",4,"Pan","Pan",0.225);
+exec("./extraweapons.cs");

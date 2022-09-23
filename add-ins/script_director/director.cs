@@ -2,13 +2,7 @@
 %file = findFirstFile(%pattern);
 while(%file !$= "")
 {
-	%soundName = strlwr(%file);
-	%soundName = strreplace(%soundName, "add-ons/gamemode_left4block/add-ins/script_director/sound/", "");
-	%soundName = strreplace(%soundName, "/", "");
-	%soundName = strreplace(%soundName, ".wav", "");
-	%soundName = strreplace(%soundName, "quiet", "");
-	%soundName = strreplace(%soundName, "normal", "");
-	%soundName = strreplace(%soundName, "loud", "");
+    %soundName = strreplace(filename(strlwr(%file)), ".wav", "");
 
 	//Check the names of the folders to determine what type of soundscape it will be, and check if it's a loopable sound or not
 	if(strstr(%file,"normal") != -1)//Normal soundscape
@@ -229,16 +223,12 @@ function MinigameSO::PanicRound(%minigame)
 
     for(%i = 0; %i < MainAreaZone.getCount(); %i++) 
     {				
-        if(strstr(strlwr(MainAreaZone.getObject(%i).getName()),"horde") != -1)
-        %spawn++;
+        if(strstr(strlwr(MainAreaZone.getObject(%i).getName()),"horde") != -1) %spawn++;
     }
     
-    if(!%spawn)
-    return;
+    if(!%spawn) return;
     
     %minigame.DirectorStatus = 2;
-
-    if($Pref::L4BDirector::EnableCues)
     %minigame.DirectorMusic("musicdata_L4D_skin_on_our_teeth",true,1);
 
     announce("[Time to escape]");
@@ -389,7 +379,7 @@ function MinigameSO::spawnZombies(%minigame,%type,%amount,%spawnset,%count)
                     case "AIPlayer": $InputTarget_["Bot"] = %bot;
                 }
                 $InputTarget_["MiniGame"] = getMiniGameFromObject(%obj);
-                %spawnbrick.processInputEvent("onDirectorBotSpawn",%spawnbrick.getgroup().client);
+                %spawnbrick.processInputEvent("onDirectorBotTeleSpawn",%spawnbrick.getgroup().client);
 
                 if(strlen(%bottype.hMeleeCI))
                 eval("%bot.hDamageType = $DamageType::" @ %bottype.hMeleeCI @ ";");
@@ -475,7 +465,7 @@ function MinigameSO::spawnZombies(%minigame,%type,%amount,%spawnset,%count)
                 case "AIPlayer": $InputTarget_["Bot"] = %bot;
             }
             $InputTarget_["MiniGame"] = getMiniGameFromObject(%obj);
-            %spawnbrick.processInputEvent("onDirectorBotSpawn",%spawnbrick.getgroup().client);
+            %spawnbrick.processInputEvent("onDirectorBotTeleSpawn",%spawnbrick.getgroup().client);
 
             if(strlen(%bottype.hMeleeCI))
             eval("%bot.hDamageType = $DamageType::" @ %bottype.hMeleeCI @ ";");
@@ -496,7 +486,7 @@ function MinigameSO::spawnZombies(%minigame,%type,%amount,%spawnset,%count)
         }
     }
 }
-registerInputEvent("fxDTSBrick","onDirectorBotSpawn","Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "Bot Bot" TAB "MiniGame MiniGame");
+registerInputEvent("fxDTSBrick","onDirectorBotTeleSpawn","Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "Bot Bot" TAB "MiniGame MiniGame");
 
 function MiniGameSO::DirectorMusic(%minigame,%music,%loopable,%volume)
 {

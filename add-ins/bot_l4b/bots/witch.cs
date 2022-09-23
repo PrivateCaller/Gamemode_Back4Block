@@ -15,7 +15,9 @@ datablock PlayerData(ZombieWitchHoleBot : CommonZombieHoleBot)
     hName = "Witch";//cannot contain spaces
     hMeleeCI = "Witched";
     hZombieL4BType = "Special";
+    runforce = 100 * 75;
     hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage*5;//15;//Melee Damage
+    resistMelee = true;
 };
 
 function ZombieWitchHoleBot::onAdd(%this,%obj)
@@ -43,6 +45,12 @@ function ZombieWitchHoleBot::onCollision(%this, %obj, %col, %fade, %pos, %norm)
     
     if(%col.getType() & $TypeMasks::PlayerObjectType && minigameCanDamage(%obj,%col) && checkHoleBotTeams(%obj,%col))
     {
+	    if(%obj.lastattackis < getSimTime())
+	    {
+	    	%obj.hMeleeAttack(%col);
+	    	%obj.lastattackis = getSimTime()+500;
+	    }
+
         %obj.hSearch = 1;
         cancel(%obj.StartleLoop);
 
@@ -58,9 +66,7 @@ function ZombieWitchHoleBot::onCollision(%this, %obj, %col, %fade, %pos, %norm)
         }
 
         %obj.getDataBlock().WitchOnLoop(%obj);
-
-        if(%obj.GetDamageLevel() >= 750 && !%obj.hMelee)
-        %obj.hMelee = 0;
+        if(%obj.GetDamageLevel() >= 750 && !%obj.hMelee) %obj.hMelee = 0;
     }
 }
 
@@ -161,10 +167,16 @@ function ZombieWitchHoleBot::OnRemove(%this,%obj)
     Parent::OnRemove(%this,%obj);
 }
 
+function ZombieWitchHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
+{
+	if(%damageType !$= $DamageType::FallDamage || %damageType !$= $DamageType::Impact) %damage = %damage/2.5;
+	
+	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
+}
+
 function ZombieWitchHoleBot::OnDamage(%this,%obj,%am)
 {
-    if(%obj.getstate() $= "Dead")
-    return;
+    if(%obj.getstate() $= "Dead") return;
 
     if(%obj.lastdamage+750 < getsimtime())//Check if the chest is the male variant and add a 1 second cooldown
     {
@@ -216,8 +228,7 @@ function ZombieWitchHoleBot::onDisabled(%this,%obj)
 
 function ZombieWitchHoleBot::WitchStartleLoop(%this,%obj)
 {
-    if(!isObject(%obj.spawnbrick) || !isObject(%obj.spawnbrick))
-    return;
+    if(!isObject(%obj.spawnbrick) || !isObject(%obj.spawnbrick) || %obj.getState() $= "Dead") return;
 
     %time = 1000;
     %pos = %obj.getPosition();
@@ -342,7 +353,7 @@ function ZombieWitchHoleBot::WitchStartleLoop(%this,%obj)
 function ZombieWitchHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {
         %skinColor = "0.1 0.1 0.1 1";
-        %obj.hipColor =  %skinColor;
+        %obj.hipColor =  "0.3 0.3 0.3 1";
         %obj.decalName = "witch";
         %obj.faceName = %face;
         %obj.larmColor =  %skinColor;

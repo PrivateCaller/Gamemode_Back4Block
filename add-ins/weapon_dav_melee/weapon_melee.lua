@@ -25,7 +25,7 @@ function Melee_SwingCheck(obj,this,slot)
                 local raypos = ts.call("posFromRaycast",ray)
                 local rayobject = ts.callobj(ray,"getID")
 
-                if tonumber(VectorDist(pos,raypos)) < 1.5 then
+                if tonumber(VectorDist(pos,raypos)) < 1 then
 
                     ts.call("LuaProjecitle",ts.call("posFromRaycast",ray),"SecondaryMeleeProjectile")
 
@@ -40,7 +40,7 @@ function Melee_SwingCheck(obj,this,slot)
                                     ts.callobj(ray,"damage",obj,raypos,tonumber(ts.getcallobj(rayobject,"getDatablock().maxDamage"))/tonumber(ts.getcallobj(this,"meleeDamageDivisor")),ts.get("DamageType::Default"))
                                     ts.callobj(ray,"applyimpulse",ts.call("posFromRaycast",ray),VectorAdd(VectorScale(ts.callobj(obj,"getForwardVector"),"600"),"0 0 400"))
 
-                                    else ts.callobj(ray,"damage",obj,raypos,250,ts.get("DamageType::Default"))
+                                    else ts.callobj(ray,"damage",obj,raypos,tonumber(ts.getcallobj(rayobject,"getDatablock().maxDamage"))/25,ts.get("DamageType::Default"))
                                 end
                             end
                         end

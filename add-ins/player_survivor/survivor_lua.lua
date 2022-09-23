@@ -57,7 +57,7 @@ function Survivor_Rightclick(obj)
 
                                     ts.callobj(ray,"cancel","L4B_SpazzZombie")
                                     ts.callobj(ray,"playThread",3,"zstumble"..math.random(1,3))
-                                    ts.getcallobj(ts.callobj(ray,"getDatablock"),"onDamage("..ts.callobj(obj,"getID")..")")
+                                    ts.getcallobj(ts.callobj(ray,"getDatablock"),"onDamage("..ts.callobj(ray,"getID")..")")
                                     ts.callobj(ray,"applyimpulse",ts.call("posFromRaycast",ray),VectorAdd(VectorScale(ts.callobj(obj,"getForwardVector"),"500"),"0 0 250"))
                                 end
 

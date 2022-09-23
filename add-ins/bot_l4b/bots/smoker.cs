@@ -112,6 +112,13 @@ function ZombieSmokerHoleBot::onBotMelee(%this,%obj,%col)
 	CommonZombieHoleBot::onBotMelee(%this,%obj,%col);
 }
 
+function ZombieSmokerHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
+{
+	if(%damageType !$= $DamageType::FallDamage || %damageType !$= $DamageType::Impact) %damage = %damage/1.5;
+	
+	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
+}
+
 function ZombieSmokerHoleBot::onDamage(%this,%obj)
 {
 	
@@ -195,7 +202,7 @@ function ZombieSmokerHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat
 	%obj.rarm =  "0";
 	%obj.packColor =  "1 1 1 1";
 	%obj.pack =  %pack;
-	%obj.decalName =  %decal;
+	%obj.decalName =  "classicshirt";
 	%obj.larmColor =  %larmColor;
 	%obj.secondPack =  "0";
 	%obj.larm =  "0";

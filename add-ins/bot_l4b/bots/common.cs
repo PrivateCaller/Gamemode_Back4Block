@@ -204,8 +204,6 @@ function CommonZombieHoleBot::onDisabled(%this,%obj)
 	
 
 	if(%obj.getWaterCoverage() == 1) serverPlay3D("die_underwater_bubbles_sound",%obj.getPosition());
-
-	else if(%obj.headless) %obj.playaudio(0,"zombie_headless" @ getrandom(1,4) @ "_sound");
 	
 	else switch(%obj.chest)
 	{
@@ -226,7 +224,7 @@ function CommonZombieHoleBot::onBotLoop(%this,%obj)
 		%obj.playthread(1,"root");
 		%obj.setMaxForwardSpeed(7);
 		%obj.setmaxUnderwaterForwardSpeed(7);
-		%obj.hLimitedLifetime();
+		%obj.hNoSeeIdleTeleport();
 	}
 }
 

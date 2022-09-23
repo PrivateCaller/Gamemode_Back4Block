@@ -16,9 +16,9 @@ datablock PlayerData(ZombieTankHoleBot : CommonZombieHoleBot)
 	runforce = 100 * 75;
 	drag = 0.1;
 
-    maxForwardSpeed = 6.75;
-    maxBackwardSpeed = 5;
-    maxSideSpeed = 5.5;
+    maxForwardSpeed = 6;
+    maxBackwardSpeed = 4;
+    maxSideSpeed = 5;
 
  	maxForwardCrouchSpeed = 3;
     maxBackwardCrouchSpeed = 2;
@@ -47,7 +47,7 @@ datablock PlayerData(ZombieTankHoleBot : CommonZombieHoleBot)
 	hName = "Tank";//cannot contain spaces
 	hTickRate = 5000;
 	jumpSound = "HorseJumpSound";
-	resistMelee = 1;
+	resistMelee = true;
 	
 	hSearchRadius = 512;//in brick units
 	hStrafe = 0;//Randomly strafe while following player
@@ -149,6 +149,13 @@ function ZombieTankHoleBot::onBotLoop(%this,%obj)
 	}
 }	
 
+function ZombieTankHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
+{
+	if(%damageType !$= $DamageType::FallDamage || %damageType !$= $DamageType::Impact) %damage = %damage/1.5;
+	
+	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
+}
+
 function ZombieTankHoleBot::onDamage(%this,%obj,%Am,%Type )
 {
     Parent::onDamage(%this,%obj,%Am,%Type);
@@ -157,7 +164,7 @@ function ZombieTankHoleBot::onDamage(%this,%obj,%Am,%Type )
 	{
 		%obj.playaudio(0,"tank_pain" @ getrandom(1,5) @ "_sound");
 		%obj.lastdamage = getsimtime();
-	}	
+	}
 }
 
 function ZombieTankHoleBot::onDisabled(%this,%obj)

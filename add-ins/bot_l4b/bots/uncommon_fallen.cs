@@ -101,7 +101,7 @@ function ZombieFallenHoleBot::Appearance(%this,%obj,%skinColor,%face,%decal,%hat
 		%obj.hat = %hat;
 		%obj.headColor = %skinColor;
 		%obj.faceName = %face;
-		%obj.chest =  %chest;
+		%obj.chest =  0;
 		%obj.decalName = "Hoodie";
 		%obj.chestColor = %shirtColor;
 		%obj.pack = 4;

@@ -123,48 +123,7 @@ function configLoadL4BItemSlots()
 		for (%d = 0; %d < DatablockGroup.getCount(); %d++) 
 		{
 			%datablock = DatablockGroup.getObject(%d);
-
-			if(%datablock.getClassName() $= "ItemData" && %datablock.uiName $= %itemremoveword)
-			%datablock.L4Bitemslot = %firstword;
-		}
-	}
-	%read.close();
-	%read.delete();
-}
-
-function configLoadL4BItemNoSlots()
-{
-	%read = new FileObject();
-	if(!isFile("config/server/Left4Block/itemnoslots.txt"))
-	{
-		%read.openForRead("Add-Ons/Gamemode_Left4Block/config/itemnoslots.txt");
-		%write = new FileObject();
-		%write.openForWrite("config/server/Left4Block/itemnoslots.txt");
-		
-		while(!%read.isEOF())
-		{
-			%line = %read.readLine();
-			%write.writeLine(%line);
-		}
-		
-		%read.close();
-		%write.close();
-		%write.delete();
-	}
-	
-	%read.openForRead("config/server/Left4Block/itemnoslots.txt");
-	
-	while(!%read.isEOF())
-	{
-		%i++;
-		%line = %read.readLine(); 
-
-		for (%d = 0; %d < DatablockGroup.getCount(); %d++) 
-		{
-			%datablock = DatablockGroup.getObject(%d);
-
-			if(%datablock.getClassName() $= "ItemData" && %datablock.uiName $= %line)
-			%dataBlock.L4Bitemnoslot = 1;
+			if(%datablock.getClassName() $= "ItemData" && %datablock.uiName $= %itemremoveword) %datablock.L4Bitemslot = %firstword;
 		}
 	}
 	%read.close();
@@ -200,8 +159,7 @@ if(loadRequiredAddOn("Bot_Hole") == $Error::None && loadRequiredAddOn("Support_L
 	//	exec("./add-ins/support_packages/support_afk_system.cs");
 	//}
 	
-	if(LoadRequiredAddOn("Weapon_FlashGrenade") == $Error::None)
-	exec("./add-ins/support_packages/support_flashbang.cs");
+	if(LoadRequiredAddOn("Weapon_FlashGrenade") == $Error::None) exec("./add-ins/support_packages/support_flashbang.cs");
 	
 	if(LoadRequiredAddOn("Weapon_SWeps_FlareGun") == $Error::None && LoadRequiredAddOn("Weapon_SWeps") == $Error::None)
 	exec("./add-ins/support_packages/support_sweps_flaregun.cs");
@@ -219,12 +177,6 @@ if(loadRequiredAddOn("Bot_Hole") == $Error::None && loadRequiredAddOn("Support_L
 	exec("./add-ins/weapon_rocks/weapon_rocks.cs");
 	exec("./add-ins/brick_interactive/brick_interactive.cs");
 
-	configLoadL4BTXT("zombiefaces",hZombieFace);
-	configLoadL4BTXT("zombiedecals",hZombieDecal);
-	configLoadL4BTXT("zombieskin",hZombieSkin);
-	configLoadL4BTXT("zombiespecial",hZombieSpecialType);
-	configLoadL4BTXT("zombieuncommon",hZombieUncommonType);
 	configLoadL4BItemScavenge();
 	configLoadL4BItemSlots();
-	configLoadL4BItemNoSlots();
 }

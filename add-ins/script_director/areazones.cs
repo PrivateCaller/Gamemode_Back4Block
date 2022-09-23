@@ -570,7 +570,6 @@ function Player::BrickScanCheck(%obj)
 registerInputEvent("fxDTSBrick","onAZFirstEntry","Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "Bot Bot" TAB "MiniGame MiniGame");
 registerOutputEvent("Bot","doMRandomTele","string 20 100");
 registerOutputEvent("Player","doMRandomTele","string 20 100");
-registerInputEvent("fxDTSBrick","onMRandomTele","Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "Bot Bot" TAB "MiniGame MiniGame");
 
 function Player::doMRandomTele(%obj,%type)
 {		
@@ -614,7 +613,7 @@ function Player::doMRandomTele(%obj,%type)
 			case "AIPlayer": $InputTarget_["Bot"] = %obj;
 		}
 		$InputTarget_["MiniGame"] = getMiniGameFromObject(%obj);
-		%brick.processInputEvent("onMRandomTele",%brick.getgroup().client);
+		%brick.processInputEvent("onDirectorBotTeleSpawn",%brick.getgroup().client);
 	}
 	else
 	{
