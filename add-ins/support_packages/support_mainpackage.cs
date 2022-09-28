@@ -4,33 +4,33 @@
 
 package Package_Left4Block
 {
-	function onObjectCollisionTest(%obj, %col)
-	{	
-		if(isObject(%obj) && isObject(%col))
-		{
-			if(%obj.getType() & $TypeMasks::PlayerObjectType && %col.getType() & $TypeMasks::PlayerObjectType) 
-			{
-				if(%obj.getdataBlock().getName().isSurvivor && %col.getdataBlock().getName().isSurvivor) return false;
-
-				if(vectordist(%obj.getposition(),%col.getposition()) < 2 && %obj.getdataBlock().getName() $= "ZombieChargerHoleBot" && (%force = vectorDot(%obj.getVelocity(), %obj.getForwardVector())) > 20 && %col.getdataBlock().getName() !$= "ZombieTankHoleBot")
-				{
-					return false;
-						
-					%obj.playaudio(3,"charger_smash_sound");			
-					%obj.playthread(2,"shiftUp");
-
-					%eye = vectorscale(VectorNormalize(vectorAdd(%obj.getForwardVector(),"0" SPC "0" SPC "0.25")),%force);
-					%col.setvelocity(%eye);					
-
-					%col.damage(%obj.hFakeProjectile, %col.getposition(),5, %obj.hDamageType);
-					%obj.spawnExplosion(pushBroomProjectile,"1 1 1");
-
-					
-				}
-			}
-		return true;
-		}
-	}
+	//function onObjectCollisionTest(%obj, %col)
+	//{	
+	//	if(isObject(%obj) && isObject(%col))
+	//	{
+	//		if(%obj.getType() & $TypeMasks::PlayerObjectType && %col.getType() & $TypeMasks::PlayerObjectType) 
+	//		{
+	//			if(%obj.getdataBlock().getName().isSurvivor && %col.getdataBlock().getName().isSurvivor) return false;
+//
+	//			if(vectordist(%obj.getposition(),%col.getposition()) < 2 && %obj.getdataBlock().getName() $= "ZombieChargerHoleBot" && (%force = vectorDot(%obj.getVelocity(), %obj.getForwardVector())) > 20 && %col.getdataBlock().getName() !$= "ZombieTankHoleBot")
+	//			{
+	//				return false;
+	//					
+	//				%obj.playaudio(3,"charger_smash_sound");			
+	//				%obj.playthread(2,"shiftUp");
+//
+	//				%eye = vectorscale(VectorNormalize(vectorAdd(%obj.getForwardVector(),"0" SPC "0" SPC "0.25")),%force);
+	//				%col.setvelocity(%eye);					
+//
+	//				%col.damage(%obj.hFakeProjectile, %col.getposition(),5, %obj.hDamageType);
+	//				%obj.spawnExplosion(pushBroomProjectile,"1 1 1");
+//
+	//				
+	//			}
+	//		}
+	//	return true;
+	//	}
+	//}
 
 	function Player::ActivateStuff (%player)
 	{
@@ -284,35 +284,27 @@ package Package_Left4Block
 
 	function ServerCmdDropTool (%client, %position)
 	{
-		if(isObject(%client.player))
-		%client.player.playthread(3,"activate");
-
-		Parent::ServerCmdDropTool (%client, %position);
+		if(isObject (%player = %client.player) && isObject(%item = %player.tool[%position]) && %item.canDrop)
+		%player.playthread(3,"activate");
+		%bool = Parent::ServerCmdDropTool (%client, %position);
 	}
 
 	function ServerCmdPlantBrick (%client)
 	{
 		Parent::ServerCmdPlantBrick (%client);
-
-		if(isObject(%obj = %client.player) && %obj.hIsInfected && %obj.spawnTime+5000 > getSimTime())
-		{
-			%client.setZombieBlock = 1;
-			%client.spawnPlayer();
-		}
 	}
 
 	function minigameCanDamage(%objA, %objB)
 	{
-		if(!isObject(%objA) || !isObject(%objB))
-		return;
+		if(!isObject(%objA) || !isObject(%objB)) return false;
+		
+		if(%objA.getclassname() $= "GameConnection") %TargetA = %objA.player;
+		else %TargetA = %objA;
+		if(%objB.getclassname() $= "GameConnection") %TargetB = %objB.player;
+		else %TargetB = %objB;
 
-		if(%objA.player !$= %objB)
-		{
-			if((%objA.getclassname() $= "GameConnection" || %objA.getclassname() $= "Player" || %objA.getclassname() $= "AIPlayer") && (%objB.getclassname() $= "Player" || %objB.getclassname() $= "AIPlayer"))
-			if(%objA.hType $= %objB.hType || %objA.player.hType $= %objB.hType)
-			return;
-		}
-
+		if(getMiniGameFromObject(%TargetA) $= getMiniGameFromObject(%TargetB) && %TargetA !$= %TargetB && !checkHoleBotTeams(%TargetA,%TargetB)) return false;
+		
 		Parent::minigameCanDamage(%objA, %objB);
 	}
 
@@ -463,16 +455,16 @@ package Package_Left4Block
 
 	function holeZombieInfect(%obj, %col)
 	{			
-		if(%col.getDataBlock().shapeFile $= "base/data/shapes/player/m.dts" || %col.getDataBlock().shapeFile $= "base/data/shapes/player/mmelee.dts")
+		if(fileName(%col.getDataBlock().shapeFile) $= "m.dts" || %col.getDataBlock().shapeFile $= "newm.dts")
 		{		
 			switch$(%col.getclassname())
 			{
 				case "AIPlayer":%col.hChangeBotToInfectedAppearance();
 
 				case "Player": %minigame = getMinigameFromObject(%col);
-							   %minigame.L4B_PlaySound("survivor_turninfected_sound",%col.client);
+							   %minigame.L4B_PlaySound("survivor_left4dead_sound",%col.client);
 							   %minigame.checkLastManStanding();
-							   chatMessageTeam(%col.client,'fakedeathmessage',"<color:00FF00>" @ %obj.getDatablock().hName SPC "<bitmapk:Add-Ons/Gamemode_Left4Block/add-ins/bot_l4b/icons/ci_infected>" SPC %col.client.name);
+							   chatMessageTeam(%col.client,'fakedeathmessage',"<color:00FF00>" @ %obj.getDatablock().hName SPC "<bitmapk:Add-Ons/Gamemode_Left4Block/add-ins/player_l4b/icons/ci_infected>" SPC %col.client.name);
 
 							   for (%i = 0; %i < %col.getdatablock().maxTools; %i++) 
 							   {

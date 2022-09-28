@@ -62,6 +62,7 @@ datablock ParticleEmitterData(meleeTrailEmitter)
 };
 
 AddDamageType("Crowbar",'<bitmap:Add-Ons/Gamemode_Left4Block/add-ins/weapon_dav_melee/icons/ci_crowbar> %1','%2 <bitmap:Add-Ons/Gamemode_Left4Block/add-ins/weapon_dav_melee/icons/ci_crowbar> %1',0.2,1);
+$DamageType::Crowbar.meleeType = true;
 
 datablock ItemData(crowbarItem)
 {
@@ -102,6 +103,7 @@ datablock ShapeBaseImageData(crowbarImage)
 	colorShiftColor = crowbarItem.colorShiftColor;
 
 	meleeDamageDivisor = 2;
+	meleeDamageType = $DamageType::Crowbar;
 	meleeHitEnvSound = "crowbar";
 	meleeHitPlSound = "crowbar";
 
@@ -166,11 +168,11 @@ function crowbarImage::onPreFire(%this, %obj, %slot)
 	%obj.playthread(2, "meleeSwing" @ getRandom(1,3));
 }
 
-function L4B_CreateMeleeItem(%doOverwrite,%name,%colorShiftColor,%damageDivisor,%HitEnvSound,%HitPlSound,%delay)
+function L4B_CreateMeleeItem(%doOverwrite,%name,%colorShiftColor,%damageDivisor,%rBlood,%HitEnvSound,%HitPlSound,%delay)
 {
     %mainDirectory = "add-ons/gamemode_left4block/add-ins/weapon_dav_melee";
 	%itemData = "datablock ItemData(" @ %name @ "Item : crowbarItem){shapeFile = \"" @ %mainDirectory @ "/models/model_" @ %name @ ".dts\"; uiName = \"" @ %name @ "\"; iconName = \""  @ %mainDirectory @  "/icons/icon_" @ %name @ "\"; colorShiftColor = \"" @ %colorShiftColor @ "\"; image = \"" @ %name @ "Image\";};";
-    %imageData = "datablock ShapeBaseImageData(" @ %name @ "Image : crowbarImage){shapeFile = \""  @ %mainDirectory @  "/models/model_" @ %name @ ".dts\"; item = \"" @ %name @ "Item\"; doColorShift = " @ %name @ "Item.doColorShift; colorShiftColor = " @ %name @ "Item.colorShiftColor; meleeDamageDivisor = " @ %damageDivisor @ "; meleeHitEnvSound = \"" @ %HitEnvSound @ "\"; meleeHitPlSound = \"" @ %HitPlSound @ "\"; stateTimeoutValue[6] = " @ %delay @ ";};";
+    %imageData = "datablock ShapeBaseImageData(" @ %name @ "Image : crowbarImage){shapeFile = \""  @ %mainDirectory @  "/models/model_" @ %name @ ".dts\"; item = \"" @ %name @ "Item\"; doColorShift = " @ %name @ "Item.doColorShift; colorShiftColor = " @ %name @ "Item.colorShiftColor; meleeDamageDivisor = " @ %damageDivisor @ "; damageType = $DamageType::" @ %name @ "; meleeHitEnvSound = \"" @ %HitEnvSound @ "\"; meleeHitPlSound = \"" @ %HitPlSound @ "\"; stateTimeoutValue[6] = " @ %delay @ ";};";
     %onReady = "function" SPC %name @ "Image::onReady(%this, %obj, %slot) {crowbarImage::onReady(%this, %obj, %slot);}";
 	%onPreFire = "function" SPC %name @ "Image::onPreFire(%this, %obj, %slot) {crowbarImage::onPreFire(%this, %obj, %slot);}";
     %onFire = "function" SPC %name @ "Image::onFire(%this, %obj, %slot) {crowbarImage::onFire(%this, %obj, %slot);}";    
@@ -186,6 +188,7 @@ function L4B_CreateMeleeItem(%doOverwrite,%name,%colorShiftColor,%damageDivisor,
 
 	%file.writeLine("");
 	%file.writeLine("AddDamageType(" @ %name @ ",'<bitmap:" @ %mainDirectory @ "/icons/ci_" @ %name @ "> %1','%2 <bitmap:" @ %mainDirectory @ "/icons/ci_" @ %name @ "> %1',0.2,1);");
+	%file.writeLine("$DamageType::" @ %name @ ".rBlood = \"" @ %rBlood @ "\";");
     %file.writeLine(%itemData);
 	%file.writeLine(%imageData);
     %file.writeLine(%onReady);
@@ -196,15 +199,18 @@ function L4B_CreateMeleeItem(%doOverwrite,%name,%colorShiftColor,%damageDivisor,
     %file.delete();
 }
 
-L4B_CreateMeleeItem(true,"Machete","0.5 0.5 0.5 1",1.275,"Machete","Machete",0.275);
-L4B_CreateMeleeItem(false,"Katana","0.75 0.75 0.75 1",1.275,"Machete","Machete",0.3);
-L4B_CreateMeleeItem(false,"cKnife","0.75 0.75 0.75 1",1.125,"Machete","cKnife",0.125);
-L4B_CreateMeleeItem(false,"Bat","0.675 0.45 0.275 1",4,"Bat","Bat",0.325);
-L4B_CreateMeleeItem(false,"Spikebat","0.675 0.45 0.275 1",1.25,"Bat","Spikebat",0.3);
-L4B_CreateMeleeItem(false,"Baton","0.125 0.125 0.125 1",1.25,"Bat","Bat",0.275);
-L4B_CreateMeleeItem(false,"Hatchet","0.75 0.75 0.75 1",1.375,"Crowbar","Machete",0.35);
-L4B_CreateMeleeItem(false,"Axe","0.75 0.75 0.5 1",1.15,"Crowbar","Machete",0.5);
-L4B_CreateMeleeItem(false,"Shovel","0.5 0.5 0.5 1",3,"Crowbar","Crowbar",0.45);
-L4B_CreateMeleeItem(false,"Sledgehammer","0.8 0.8 0.8 1",1.25,"Crowbar","Sledgehammer",0.5);
-L4B_CreateMeleeItem(false,"Pan","0.375 0.375 0.375 1",4,"Pan","Pan",0.225);
+
+L4B_CreateMeleeItem(true,"Machete","0.5 0.5 0.5 1",1,true,"Machete","Machete",0.275);
+L4B_CreateMeleeItem(false,"cKnife","0.75 0.75 0.75 1",1,true,"Machete","cKnife",0.125);
+L4B_CreateMeleeItem(false,"Hatchet","0.75 0.75 0.75 1",1,true,"Crowbar","Machete",0.35);
+L4B_CreateMeleeItem(false,"Axe","0.75 0.75 0.5 1",1,true,"Crowbar","Machete",0.4);
+
+L4B_CreateMeleeItem(false,"Spikebat","0.675 0.45 0.275 1",2,true,"Bat","Spikebat",0.3);
+L4B_CreateMeleeItem(false,"Katana","0.75 0.75 0.75 1",2,true,"Machete","Machete",0.3);
+
+L4B_CreateMeleeItem(false,"Bat","0.675 0.45 0.275 1",3,false,"Bat","Bat",0.325);
+L4B_CreateMeleeItem(false,"Baton","0.125 0.125 0.125 1",2,false,"Bat","Bat",0.275);
+L4B_CreateMeleeItem(false,"Shovel","0.5 0.5 0.5 1",3,false,"Crowbar","Crowbar",0.45);
+L4B_CreateMeleeItem(false,"Sledgehammer","0.8 0.8 0.8 1",2,false,"Crowbar","Sledgehammer",0.4);
+L4B_CreateMeleeItem(false,"Pan","0.375 0.375 0.375 1",3,false,"Pan","Pan",0.225);
 exec("./extraweapons.cs");

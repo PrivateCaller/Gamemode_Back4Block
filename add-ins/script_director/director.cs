@@ -108,19 +108,20 @@ function MinigameSO::Director(%minigame,%enabled,%interval)
                         if(getRandom(1,2) == 1)
                         {
                             %chance = getRandom(1,100);
-                            if(%chance <= 40) %round = 1;
+                            if(%chance <= 50) %round = 1;
                             else if(%chance <= $Pref::Server::L4B2Bots::TankRoundChance) %round = 2;
                             else if(%chance <= 20) %round = 3;
 
                             if(%stressed) %round = 0;
+                        }
+                        else %round = 0;
 
-                            switch(%round)
-                            {
-                                case 0: %minigame.BreakRound();
-                                case 1: %minigame.HordeRound();
-                                case 2: %minigame.WitchRound();
-                                case 3: %minigame.TankRound();
-                            }
+                        switch(%round)
+                        {
+                            case 0: %minigame.BreakRound();
+                            case 1: %minigame.HordeRound();
+                            case 2: %minigame.WitchRound();
+                            case 3: %minigame.TankRound();
                         }
                 case 2: 
             }            
@@ -132,7 +133,7 @@ function MinigameSO::Director(%minigame,%enabled,%interval)
             else %spawnchance = 3;
 
             if(getRandom(1,%spawnchance) == 1) %minigame.spawnZombies("Horde",10,0);
-            if(getRandom(1,%spawnchance-2) == 1) %minigame.spawnZombies("Special",getRandom(1,2),0);
+            //if(getRandom(1,%spawnchance-2) == 1) %minigame.spawnZombies("Special",getRandom(1,2),0);
 
             %minigame.SpawnStalkZombies();
         }        
@@ -165,7 +166,6 @@ function MinigameSO::SpawnStalkZombies(%minigame)//Go after others who are on th
 
 function MinigameSO::BreakRound(%minigame)
 {    
-    //%minigame.L4B_PlaySound("zombiechoir_0" @ getrandom(1,6) @ "_sound");
     //%minigame.choirSFX = %minigame.schedule(15000,L4B_PlaySound,"zombiechoir_0" @ getrandom(1,6) @ "_sound");
     //%minigame.DirectorMusic("musicdata_L4D_background" @ getRandom(1,3),false,1);
 }
@@ -242,24 +242,21 @@ function MiniGameSO::HordeRound(%minigame)
 {
     if(!%minigame.DirectorStatus || !isObject(MainAreaZone)) return;
 
-    for(%i = 0; %i < MainAreaZone.getCount(); %i++) 
-    {				
-        if(strstr(strlwr(MainAreaZone.getObject(%i).getName()),"horde") != -1) %spawn++;
-    }
+    for(%i = 0; %i < MainAreaZone.getCount(); %i++) if(strstr(strlwr(MainAreaZone.getObject(%i).getName()),"horde") != -1) %spawn++;
     if(!%spawn) return;
 
     %minigame.zhordecount = 1; 
     %minigame.DirectorStatus = 2;
 
-    %random = getRandom(30,45);
+    %random = getRandom(35,45);
     %minigame.zhordecount = %random;
-    %minigame.spawnZombies("Horde",%random,0);
+    %minigame.spawnZombies("Horde",%random+5,0);
     %minigame.L4B_PlaySound("hordeincoming" @ getrandom(1,9) @ "_sound");
-    announce("[Incoming]");
+    announce("[They're coming...]");
 
-    //%minigame.schedule(9000,L4B_PlaySound,"hordeslayer_0" @ getRandom(1,3) @ "_sound");
-    //%minigame.schedule(19000,L4B_PlaySound,"hordeslayer_0" @ getRandom(1,3) @ "_sound");
-    //%minigame.schedule(19000,L4B_PlaySound,"horde_danger_sound");
+    %minigame.schedule(9000,L4B_PlaySound,"hordeslayer_0" @ getRandom(1,3) @ "_sound");
+    %minigame.schedule(19000,L4B_PlaySound,"hordeslayer_0" @ getRandom(1,3) @ "_sound");
+    %minigame.schedule(19000,L4B_PlaySound,"horde_danger_sound");
 
     %minigame.schedule(4000,L4B_PlaySound,"drum_suspense_end_sound");
     %minigame.schedule(4000,DirectorMusic,"musicdata_L4D_horde_combat",true,1);
@@ -279,7 +276,7 @@ function MinigameSO::RoundEnd(%minigame)
 
 function MinigameSO::spawnZombies(%minigame,%type,%amount,%spawnset,%count)
 {    
-    if(!isObject(MainAreaZone) || MainAreaZone.getCount() <= 0) return;
+    if(!isObject(MainAreaZone) || MainAreaZone.getCount() == 0) return;
 
     if(!isObject(%spawnset))
     {
@@ -313,15 +310,11 @@ function MinigameSO::spawnZombies(%minigame,%type,%amount,%spawnset,%count)
 
                 switch$(%type)
                 {
-                    case "Horde": %bottype = "CommonZombieHoleBot";
-                                  if(getRandom(1,16) == 1)
-                                  %bottype = $hZombieUncommonType[getRandom(1,$hZombieUncommonTypeAmount)];
                     case "Wander": %bottype = "CommonZombieHoleBot";
                                    if(getRandom(1,16) == 1)
                                    %bottype = $hZombieUncommonType[getRandom(1,$hZombieUncommonTypeAmount)];
                     case "Tank": %bottype = "ZombieTankHoleBot";
                     case "Witch": %bottype = "ZombieWitchHoleBot";
-                    case "Special": %bottype = $hZombieSpecialType[getRandom(1,$hZombieSpecialTypeAmount)];
                 }
 
                 %bot = new AIPlayer()
@@ -386,13 +379,14 @@ function MinigameSO::spawnZombies(%minigame,%type,%amount,%spawnset,%count)
                 else %bot.hDamageType = $DamageType::HoleMelee;
                 %bot.setTransform(%spawnbrick.getposition() SPC getwords(%spawnbrick.gettransform(),3,6));
 
-                if(isObject(L4B_BotSet))
-                L4B_BotSet.add(%bot);
-                else
+                if(isObject(%bot))
                 {
-                    new SimSet(L4B_BotSet);
-                    missionCleanup.add(L4B_BotSet);
-                    L4B_BotSet.add(%bot);
+                    if(!isObject(L4B_BotSet))
+                    {
+                        new SimSet(L4B_BotSet);
+                        missionCleanup.add(L4B_BotSet);                        
+                    }
+                    else if(!L4B_BotSet.isMember(%bot)) L4B_BotSet.add(%bot);
                 }
             }
         }
@@ -402,11 +396,10 @@ function MinigameSO::spawnZombies(%minigame,%type,%amount,%spawnset,%count)
 
             switch$(%type)
             {
-                case "Horde": %bottype = "CommonZombieHoleBot";
+                case "Horde":   %bottype = "CommonZombieHoleBot";
                                 if(getRandom(1,8) == 1)
                                 %bottype = $hZombieUncommonType[getRandom(1,$hZombieUncommonTypeAmount)];
-                case "Tank": %bottype = "ZombieTankHoleBot";
-                case "Witch": %bottype = "ZombieWitchHoleBot";
+
                 case "Special": %bottype = $hZombieSpecialType[getRandom(1,$hZombieSpecialTypeAmount)];
             }
 
@@ -472,13 +465,14 @@ function MinigameSO::spawnZombies(%minigame,%type,%amount,%spawnset,%count)
             else %bot.hDamageType = $DamageType::HoleMelee;
             %bot.setTransform(%spawnbrick.getposition() SPC getwords(%spawnbrick.gettransform(),3,6));
 
-            if(isObject(L4B_BotSet))
-            L4B_BotSet.add(%bot);
-            else
+            if(isObject(%bot))
             {
-                new SimSet(L4B_BotSet);
-                missionCleanup.add(L4B_BotSet);
-                L4B_BotSet.add(%bot);
+                if(!isObject(L4B_BotSet))
+                {
+                    new SimSet(L4B_BotSet);
+                    missionCleanup.add(L4B_BotSet);                        
+                }
+                else if(!L4B_BotSet.isMember(%bot)) L4B_BotSet.add(%bot);
             }
 
             cancel(%minigame.spawn[%type]);

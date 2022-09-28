@@ -510,11 +510,12 @@ function Player::BrickScanCheck(%obj)
 				for(%i = 0; %i < %brick.AreaZone.getcount(); %i++)
     	    	{					
 					%areazone = %brick.AreaZone.getObject(%i);
-    	    		if(!isObject(MainAreaZone))
-    	    		new SimSet(MainAreaZone);
-					else if(!MainAreaZone.isMember(%areazone))
-					missionCleanup.add(MainAreaZone);
-					MainAreaZone.add(%areazone);
+    	    		if(!isObject(MainAreaZone)) 
+					{
+						new SimSet(MainAreaZone);
+						missionCleanup.add(MainAreaZone);
+					}
+					else if(!MainAreaZone.isMember(%areazone)) MainAreaZone.add(%areazone);										
 		        }		
 				
 				if(!%brick.AreaZone.firstentry)

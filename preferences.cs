@@ -1,6 +1,144 @@
+function configLoadL4BTXT(%file,%svartype)//Set up custom variables
+{
+	%read = new FileObject();
+	if(!isFile("config/server/Left4Block/" @ %file @ ".txt"))
+	{
+		%read.openForRead("add-ons/gamemode_left4block/config/" @ %file @ ".txt");
+
+		%write = new FileObject();
+		%write.openForWrite("config/server/Left4Block/" @ %file @ ".txt");
+	
+		while(!%read.isEOF())
+		{
+			%line = %read.readLine();
+			%write.writeLine(%line);
+		}
+
+		%write.close();
+		%write.delete();
+	}
+
+	%read.openForRead("config/server/Left4Block/" @ %file @ ".txt");
+
+	while(!%read.isEOF())
+	{
+		%i++;
+		%line = %read.readLine(); 
+		eval("$" @ %svartype @"[%i] = \"" @ %line @ "\";");
+		eval("$" @ %svartype @"Amount = %i;");
+	}
+	
+	%read.close();
+	%read.delete();
+}
+
+function configLoadL4BItemScavenge()//Set up items
+{
+	%read = new FileObject();
+	if(!isFile("config/server/Left4Block/itemscavenge.txt"))
+	{
+		%read.openForRead("add-ons/gamemode_left4block/config/itemscavenge.txt");
+
+		%write = new FileObject();
+		%write.openForWrite("config/server/Left4Block/itemscavenge.txt");
+	
+		while(!%read.isEOF())
+		{
+			%line = %read.readLine();
+			%write.writeLine(%line);
+		}
+
+		%write.close();
+		%write.delete();
+	}
+
+	%read.openForRead("config/server/Left4Block/itemscavenge.txt");
+
+	while(!%read.isEOF())
+	{
+		%i++;
+		%line = %read.readLine(); 
+
+		%itemremoveword = strreplace(%line, getWord(%line,0) @ " ", "");
+		%previousline[%i] = getWord(%line,0);
+
+		if(%previousline[%i] $= %previousline[mClamp(%i-1, 1, %i)])
+		{
+			%j++;
+			eval("$" @ getWord(%line,0) @"[%j] = \"" @ %itemremoveword @ "\";");
+			eval("$" @ getWord(%line,0) @"Amount = %j;");
+		}
+		else 
+		{
+			eval("$" @ getWord(%line,0) @"[1] = \"" @ %itemremoveword @ "\";");
+			%j = 1;
+		}
+
+		for (%d = 0; %d < DatablockGroup.getCount(); %d++) 
+		{
+			%datablock = DatablockGroup.getObject(%d);
+
+			if(%datablock.getClassName() $= "ItemData")
+			if(%datablock.uiName $= %itemremoveword)
+			{	
+				%item = %datablock;
+				eval("$" @ getWord(%line,0) @"[%j] = \"" @ %item.getName() @ "\";");
+			}
+		}
+	}
+	%read.close();
+	%read.delete();
+}
+
+function configLoadL4BItemSlots()
+{
+	%read = new FileObject();
+	if(!isFile("config/server/Left4Block/itemslots.txt"))
+	{
+		%read.openForRead("Add-Ons/Gamemode_Left4Block/config/itemslots.txt");
+		%write = new FileObject();
+		%write.openForWrite("config/server/Left4Block/itemslots.txt");
+		
+		while(!%read.isEOF())
+		{
+			%line = %read.readLine();
+			%write.writeLine(%line);
+		}
+		
+		%read.close();
+		%write.close();
+		%write.delete();
+	}
+	
+	%read.openForRead("config/server/Left4Block/itemslots.txt");
+	
+	while(!%read.isEOF())
+	{
+		%i++;
+		%line = %read.readLine(); 
+
+		%firstword = getWord(%line,0);
+		%itemremoveword = strreplace(%line, %firstword @ " ", "");
+
+		for (%d = 0; %d < DatablockGroup.getCount(); %d++) 
+		{
+			%datablock = DatablockGroup.getObject(%d);
+			if(%datablock.getClassName() $= "ItemData" && %datablock.uiName $= %itemremoveword) %datablock.L4Bitemslot = %firstword;
+		}
+	}
+	%read.close();
+	%read.delete();
+}
+
+configLoadL4BItemScavenge();
+configLoadL4BItemSlots(); 
+
+$DecalSystem::DecalLimit = 200;
+$DecalSystem::DecalTimeout = 300000;
+
 if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 {
-	registerPreferenceAddon("Gamemode_Left4Block", "Left 4 Block", "bios");
+	registerPreferenceAddon("Gamemode_Left4Block", "Left 4 Block", "bios");				
 
 	new ScriptObject(Preference)
 	{
@@ -26,7 +164,7 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 		className      = "Gamemode_Left4Block";
 
 		addon          = "Gamemode_Left4Block";
-		category       = "Director (Minigame Only)";
+		category       = "General";
 		title          = "Director enable on minigame start/reset";
 
 		type           = "bool";
@@ -50,101 +188,10 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 	new ScriptObject(Preference)
 	{
 		className      = "Gamemode_Left4Block";
-		addon          = "Gamemode_Left4Block";
-		category       = "Bot Specials";
-		title          = "Specials pinned messages";
-		type           = "bool";
-		params         = "";
-		variable       = "$Pref::Server::L4B2Bots::MinigameMessages";
-		defaultValue   = "1";
-		updateCallback = "";
-		loadCallback   = "";
-		hostOnly       = false;
-		secret         = false;
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "Gamemode_Left4Block";
-		addon          = "Gamemode_Left4Block";
-		category       = "Bot Specials";
-		title          = "Specials spawn cue";
-		type           = "bool";
-		params         = "";
-		variable       = "$Pref::Server::L4B2Bots::SpecialsCue";
-		defaultValue   = "1";
-		updateCallback = "";
-		loadCallback   = "";
-		hostOnly       = false;
-		secret         = false;
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "Gamemode_Left4Block";
 
 		addon          = "Gamemode_Left4Block";
-		category       = "Ammo Crate";
-		title          = "Limited supplies (Minigame only)";
-
-		type           = "bool";
-		params         = "";
-
-		variable       = "$Pref::Server::L4BAmmocrate::AmmoSupplies";
-
-		defaultValue   = "1";
-
-		updateCallback = "";
-		loadCallback   = "";
-
-		hostOnly       = false;
-		secret         = false;
-
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-
-	new ScriptObject(Preference)
-	{
-		className      = "Gamemode_Left4Block";
-
-		addon          = "Gamemode_Left4Block";
-		category       = "Ammo Crate";
-		title          = "Supply amount";
-
-		type           = "num";
-		params         = "0 100 0";
-
-		variable       = "$Pref::Server::L4BAmmocrate::AmmoSupplyAmount";
-
-		defaultValue   = "25";
-
-		updateCallback = "";
-		loadCallback   = "";
-
-		hostOnly       = false;
-		secret         = false;
-
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-				new ScriptObject(Preference)
-	{
-		className      = "Gamemode_Left4Block";
-
-		addon          = "Gamemode_Left4Block";
-		category       = "Ammo Crate";
-		title          = "Acquire delay (ms)";
+		category       = "Interactive Bricks";
+		title          = "Ammo crate delay (ms)";
 
 		type           = "num";
 		params         = "0 750 0";
@@ -169,61 +216,8 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 		className      = "Gamemode_Left4Block";
 
 		addon          = "Gamemode_Left4Block";
-		category       = "Health Locker";
-		title          = "Limited supplies (Minigame only)";
-
-		type           = "bool";
-		params         = "";
-
-		variable       = "$Pref::L4BHealthLocker::Supplies";
-
-		defaultValue   = "1";
-
-		updateCallback = "";
-		loadCallback   = "";
-
-		hostOnly       = false;
-		secret         = false;
-
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-
-	new ScriptObject(Preference)
-	{
-		className      = "Gamemode_Left4Block";
-
-		addon          = "Gamemode_Left4Block";
-		category       = "Health Locker";
-		title          = "Supply amount";
-
-		type           = "num";
-		params         = "0 100 0";
-
-		variable       = "$Pref::L4BHealthLocker::SupplyAmount";
-
-		defaultValue   = "20";
-
-		updateCallback = "";
-		loadCallback   = "";
-
-		hostOnly       = false;
-		secret         = false;
-
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "Gamemode_Left4Block";
-
-		addon          = "Gamemode_Left4Block";
-		category       = "Health Locker";
-		title          = "Acquire delay (ms)";
+		category       = "Interactive Bricks";
+		title          = "Health locker delay (ms)";
 
 		type           = "num";
 		params         = "0 750 0";
@@ -242,21 +236,131 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 		noSave         = false;
 		requireRestart = false;
 	};
+	
+	new ScriptObject(Preference)
+	{
+		className      = "Gamemode_Left4Block_Blood";
+		addon          = "Gamemode_Left4Block";
+		category       = "Blood";
+		title          = "Enable blood";
+
+		type           = "bool";
+		params         = "";
+
+		variable       = "$Pref::Server::L4BBlood::Enable";
+
+		defaultValue   = "1";
+
+		updateCallback = "";
+		loadCallback   = "";
+
+		hostOnly       = false;
+		secret         = false;
+
+		loadNow        = false;
+		noSave         = false;
+		requireRestart = false;
+	};
+
+	new ScriptObject(Preference)
+	{
+		className      = "Gamemode_Left4Block_Blood";
+		addon          = "Gamemode_Left4Block";
+		category       = "Blood";
+		title          = "Blood Decals";
+
+		type           = "bool";
+		params         = "";
+
+		variable       = "$Pref::Server::L4BBlood::BloodDecals";
+
+		defaultValue   = "1";
+
+		updateCallback = "";
+		loadCallback   = "";
+
+		hostOnly       = false;
+		secret         = false;
+
+		loadNow        = false;
+		noSave         = false;
+		requireRestart = false;
+	};
+
+	new ScriptObject(Preference)
+	{
+		className      = "Gamemode_Left4Block_Blood";
+		addon          = "Gamemode_Left4Block";
+		category       = "Blood";
+		title          = "Blood Decals Drip";
+
+		type           = "bool";
+		params         = "";
+
+		variable       = "$Pref::Server::L4BBlood::BloodDecalsDrip";
+
+		defaultValue   = "1";
+
+		updateCallback = "";
+		loadCallback   = "";
+
+		hostOnly       = false;
+		secret         = false;
+
+		loadNow        = false;
+		noSave         = false;
+		requireRestart = false;
+	};
+
+	new ScriptObject(Preference)
+	{
+		className      = "Gamemode_Left4Block_Blood";
+		addon          = "Gamemode_Left4Block";
+		category       = "Blood";
+		title          = "Blood Decals Limit";
+		type           = "num";
+		params         = "0 250 0";
+		variable       = "$Pref::Server::L4BBlood::BloodDecalsLimit";
+		defaultValue   = "250";
+		updateCallback = "";
+		loadCallback   = "";
+		hostOnly       = false;
+		secret         = false;
+		loadNow        = false;
+		noSave         = false;
+		requireRestart = false;
+	};
+
+	new ScriptObject(Preference)
+	{
+		className      = "Gamemode_Left4Block_Blood";
+		addon          = "Gamemode_Left4Block";
+		category       = "Blood";
+		title          = "Blood Decals Timeout (ms)";
+		type           = "num";
+		params         = "0 30000 0";
+		variable       = "$Pref::Server::L4BBlood::BloodDecalsTimeout";
+		defaultValue   = "15000";
+		updateCallback = "";
+		loadCallback   = "";
+		hostOnly       = false;
+		secret         = false;
+		loadNow        = false;
+		noSave         = false;
+		requireRestart = false;
+	};	
 }
 else
 {
-	$Pref::Server::L4BAmmocrate::Supplies = 1;
-	$Pref::Server::L4BAmmocrate::SupplyAmount = 25;
+	$Pref::Server::L4BBlood::Enable = true;
+	$Pref::Server::L4BBlood::BloodDecals = true;
+	$Pref::Server::L4BBlood::BloodDecalsDrip = true;
+	$Pref::Server::L4BAmmocrate::BloodDecalsLimit = 250;
+	$Pref::Server::L4BAmmocrate::BloodDecalsTimeout = 15000;
 	$Pref::Server::L4BAmmocrate::AcquireDelay = 500;
-	$Pref::L4BHealthLocker::Supplies = 1;
-	$Pref::L4BHealthLocker::SupplyAmount = 20;
 	$Pref::L4BHealthLocker::AcquireDelay = 500;
-
-	$Pref::L4BDirector::EnableOnMG = 0;
-	
+	$Pref::L4BDirector::EnableOnMG = false;	
 	$Pref::Server::L4B2Bots::Difficulty = 1;
-	$Pref::Server::L4B2Bots::MinigameMessages = 1;
-
 	$Pref::Server::L4B2Bots::NormalDamage = 5;
 	$Pref::Server::L4B2Bots::SpecialsDamage = 15;
 	$Pref::Server::L4B2Bots::TankRounds = 1;
@@ -294,7 +398,7 @@ function L4B_DifficultyAdjustment()
 				$Pref::Server::L4B2Bots::SpecialsDamage = 15;
 				$Pref::Server::L4B2Bots::TankRounds = 1;
 				$Pref::Server::L4B2Bots::TankRoundChance = 25;
-				$Pref::Server::L4B2Bots::TankHealth = 5000;
+				$Pref::Server::L4B2Bots::TankHealth = 2500;
 				$Pref::Server::L4B2Bots::SurvivorImmunity = 1;
 				$Pref::Server::L4B2Bots::MaxSpecial = 4;
 				$Pref::Server::L4B2Bots::MaxHorde = 60;
@@ -304,7 +408,7 @@ function L4B_DifficultyAdjustment()
 				$Pref::Server::L4B2Bots::SpecialsDamage = 25;
 				$Pref::Server::L4B2Bots::TankRounds = 2;
 				$Pref::Server::L4B2Bots::TankRoundChance = 60;
-				$Pref::Server::L4B2Bots::TankHealth = 7500;
+				$Pref::Server::L4B2Bots::TankHealth = 5000;
 				$Pref::Server::L4B2Bots::SurvivorImmunity = 0;
 				$Pref::Server::L4B2Bots::MaxSpecial = 8;
 				$Pref::Server::L4B2Bots::MaxHorde = 35;
@@ -316,7 +420,4 @@ function L4B_DifficultyAdjustment()
 	eval("ZombieTankHoleBot.maxDamage =" @ $Pref::Server::L4B2Bots::TankHealth @ ";");
 }
 
-function Gamemode_Left4Block_Difficulty::onUpdate(%this, %val) 
-{
-	L4B_DifficultyAdjustment();
-}
+function Gamemode_Left4Block_Difficulty::onUpdate(%this, %val) { L4B_DifficultyAdjustment(); }

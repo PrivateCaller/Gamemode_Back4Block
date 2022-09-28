@@ -1,1 +1,0 @@
-Put these files in the main directory of Blockland

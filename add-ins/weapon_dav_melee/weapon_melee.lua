@@ -22,27 +22,28 @@ function Melee_SwingCheck(obj,this,slot)
             if ts.isobject(ray) then
                 
                 local class = ts.callobj(ray, "getClassName")
-                local raypos = ts.call("posFromRaycast",ray)
-                local rayobject = ts.callobj(ray,"getID")
+                local raypos = ts.call("posFromRaycast",ray)            
 
                 if tonumber(VectorDist(pos,raypos)) < 1 then
-
                     ts.call("LuaProjecitle",ts.call("posFromRaycast",ray),"SecondaryMeleeProjectile")
 
-                    if class == "AIPlayer" or class == "Player" then
-                        if ts.getstate(ray) ~= "Dead" then--and ts.call("minigameCanDamage",obj,ray) and ts.call("checkHoleBotTeams",obj,ray) then
+                    if class == "AIPlayer" or class == "Player" then                        
+                        if ts.getstate(ray) ~= "Dead" and tonumber(ts.minigamecandamage(obj,ray)) == 1 then
                             ts.call("serverPlay3D",ts.getcallobj(this,"meleeHitPlSound").."_hitpl"..math.random(1,2).."_sound",raypos)
-
-                            if ts.getobj(ray,"hZombieL4BType") ~= "" then                            
                                 if ts.getcallobj(ts.callobj(ray,"getID"),"getDatablock().getName()") ~= "ZombieTankHoleBot" then
+
+                                    if class == "AIPlayer" then
+                                        ts.callobj(ray,"setMoveY",-0.15)
+                                        ts.callobj(ray,"setMoveX",0)
+                                        ts.callobj(ray,"setAimObject",obj)
+                                    end
                                     
                                     ts.callobj(ray,"playThread",3,"zstumble"..math.random(1,4))
-                                    ts.callobj(ray,"damage",obj,raypos,tonumber(ts.getcallobj(rayobject,"getDatablock().maxDamage"))/tonumber(ts.getcallobj(this,"meleeDamageDivisor")),ts.get("DamageType::Default"))
+                                    ts.callobj(ray,"damage",obj,raypos,tonumber(ts.getcallobj(ts.callobj(ray,"getID"),"getDatablock().maxDamage"))/tonumber(ts.getcallobj(this,"meleeDamageDivisor")),tonumber(ts.getcallobj(this,"DamageType")))
                                     ts.callobj(ray,"applyimpulse",ts.call("posFromRaycast",ray),VectorAdd(VectorScale(ts.callobj(obj,"getForwardVector"),"600"),"0 0 400"))
 
-                                    else ts.callobj(ray,"damage",obj,raypos,tonumber(ts.getcallobj(rayobject,"getDatablock().maxDamage"))/25,ts.get("DamageType::Default"))
+                                    else ts.callobj(ray,"damage",obj,raypos,tonumber(ts.getcallobj(ray,"getDatablock().maxDamage"))/25,ts.get("DamageType::Default"))
                                 end
-                            end
                         end
                     elseif class == "fxDTSBrick" or class == "WheeledVehicle" or class == "fxPlane" then
                         ts.call("serverPlay3D",ts.getcallobj(this,"meleeHitEnvSound").."_hitenv"..math.random(1,2).."_sound",raypos)

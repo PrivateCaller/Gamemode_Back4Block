@@ -6,8 +6,6 @@ about the gamemode.
 
 # Requirements
 
-The music in the requirements folder
-
 https://github.com/Surdavow/Support_Lua
 
 https://github.com/Surdavow/Support_BotHolePlus
