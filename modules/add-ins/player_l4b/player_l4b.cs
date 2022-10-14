@@ -72,12 +72,13 @@ package L4B_PlayerBot
 			{
 				case "AIPlayer": %col.hChangeBotToInfectedAppearance();
 
-				case "Player": %minigame = getMinigameFromObject(%col);
-							   %minigame.L4B_PlaySound("survivor_left4dead_sound",%col.client);
-							   %minigame.checkLastManStanding();
-							   chatMessageTeam(%col.client,'fakedeathmessage',"<color:00FF00>" @ %obj.getDatablock().hName SPC "<bitmapk:Add-Ons/Gamemode_Left4Block/add-ins/player_l4b/icons/ci_infected>" SPC %col.client.name);
+				case "Player": 	if(isObject(%minigame = getMiniGameFromObject(%obj)))
+								{
+							   		%minigame.L4B_ChatMessage("<color:00FF00>" @ %obj.getDatablock().hName SPC "<bitmapk:Add-Ons/Gamemode_Left4Block/add-ins/player_l4b/icons/ci_infected>" SPC %col.client.name,"survivor_left4dead_sound",true);
+							   		%minigame.checkLastManStanding();
+								}
 
-							   	for (%i = 0; %i < %col.getdatablock().maxTools; %i++) 
+							   	for(%i = 0; %i < %col.getdatablock().maxTools; %i++) 
 							   	{
 									%col.tool[%i] = 0;
 									messageClient(%col.client,'MsgItemPickup','',%i,0);
@@ -95,7 +96,7 @@ package L4B_PlayerBot
 
 	function AIPlayer::hMeleeAttack(%obj,%col)
 	{						
-		if(%obj.getState() $= "Dead") return;
+		if(%obj.getState() $= "Dead" || ($admingod && %col.getclassname() $= "Player" && %col.client.isSuperAdmin)) return;
 
 		if(%col.getType() & $TypeMasks::VehicleObjectType || %col.getType() & $TypeMasks::PlayerObjectType)
 		{
@@ -496,6 +497,7 @@ package L4B_PlayerBot
 if(isPackage(holeZombiePackage)) deactivatePackage(holeZombiePackage);
 if(isPackage(BotHolePackage))
 {
+	deactivatePackage(L4B_PlayerBot);
 	deactivatePackage(BotHolePackage);
 	activatePackage(BotHolePackage);
 	activatePackage(L4B_PlayerBot);

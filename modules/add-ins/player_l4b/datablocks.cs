@@ -20,8 +20,8 @@ while(%file !$= "")
 	%file = findNextFile(%pattern);
 }
 
-addExtraResource("add-ons/Gamemode_Left4Block/modules/add-ins/player_l4b/icons/downci.png");
-addExtraResource("add-ons/gamemode_left4block/modules/add-ins/player_l4b/icons/CI_VictimSaved.png");
+addExtraResource("add-ons/Gamemode_Left4Block/modules/add-ins/player_l4b/icons/ci_down.png");
+addExtraResource("add-ons/gamemode_left4block/modules/add-ins/player_l4b/icons/ci_victimsaved.png");
 addExtraResource("add-ons/gamemode_left4block/modules/add-ins/player_l4b/icons/ci_boomer2.png");
 addExtraResource("add-ons/gamemode_left4block/modules/add-ins/player_l4b/icons/ci_charger2.png");
 addExtraResource("add-ons/gamemode_left4block/modules/add-ins/player_l4b/icons/ci_hunter2.png");
@@ -36,8 +36,9 @@ AddDamageType("SecondaryMelee",'<bitmap:add-ons/Gamemode_Left4Block/modules/add-
 if(isFile("add-ons/gamemode_left4block/modules/add-ins/player_l4b/models/decal.ifl"))
 {
 	%write = new FileObject();
-	%write.openForWrite("add-ons/gamemode_left4block/modules/add-ins/player_l4b/models/decal.ifl");		
-
+	%write.openForWrite("add-ons/gamemode_left4block/modules/add-ins/player_l4b/models/decal.ifl");	
+	%write.writeLine("base/data/shapes/players/decals/AAA-none.png");
+	
 	%decalpath = "add-ons/gamemode_left4block/modules/add-ins/player_l4b/models/decals/*.png";
 	for(%decalfile = findFirstFile(%decalpath); %decalfile !$= ""; %decalfile = findNextFile(%decalpath))
 	{

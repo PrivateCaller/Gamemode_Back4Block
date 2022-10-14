@@ -274,11 +274,11 @@ function ZombieSmokerHoleBot::ShootTongue(%this, %obj)
 	%obj.playaudio(1,"smoker_launch_tongue_sound");
 
 	%muzzle = vectorAdd(%obj.getMuzzlePoint(2),"0 0 0.35");
-	%velocity = vectorscale(getProjectileVector(%obj.hFollowing, 1000, %p.gravityMod * %p.isBallistic, %muzzle),125);
+	%velocity = vectorscale(getProjectileVector(%obj.hFollowing, 1000, %p.gravityMod * %p.isBallistic, %muzzle),200);
 	%p = new Projectile()
 	{
 		dataBlock = "SmokerTongueProjectile";
-		initialVelocity = %velocity;
+		initialVelocity = vectorAdd(%velocity,"0 0 2.5");
 		initialPosition = vectorAdd(%obj.getMuzzlePoint(2),"0 0 0.35");
 		sourceObject = %obj;
 		client = %obj.client;

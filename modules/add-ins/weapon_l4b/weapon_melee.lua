@@ -33,7 +33,7 @@ function Melee_SwingCheck(obj,this,slot)
                         ts.callobj(ray,"damage",obj,raypos,tonumber(ts.getcallobj(ts.callobj(ray,"getID"),"getDatablock().maxDamage"))/tonumber(ts.getcallobj(this,"meleeDamageDivisor")),tonumber(ts.getcallobj(this,"DamageType")))
                         ts.callobj(ray,"applyimpulse",ts.call("posFromRaycast",ray),VectorAdd(VectorScale(ts.callobj(obj,"getForwardVector"),"600"),"0 0 400"))
 
-                        else ts.callobj(ray,"damage",obj,raypos,tonumber(ts.getcallobj(ray,"getDatablock().maxDamage"))/25,ts.get("DamageType::Default"))
+                        else ts.callobj(ray,"damage",obj,raypos,tonumber(ts.getcallobj(ts.callobj(ray,"getID"),"getDatablock().maxDamage"))/25,tonumber(ts.getcallobj(this,"DamageType")))
                     end
             end
         elseif class == "fxDTSBrick" or class == "WheeledVehicle" or class == "fxPlane" then

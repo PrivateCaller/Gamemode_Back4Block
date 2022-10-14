@@ -1,7 +1,21 @@
 luaexec("./survivor.lua");
+if(LoadRequiredAddOn("Support_BotHolePlus") == $Error::None) exec("./bots/survivorally.cs");
 
-if(LoadRequiredAddOn("Support_BotHolePlus") == $Error::None)
-exec("./bots/survivorally.cs");
+function removeAreaFromZone(%brick)
+{
+    if(isObject(%brick.AreaZone))
+    {
+        for(%i = 0; %i < %brick.AreaZone.getcount(); %i++)
+        {
+            %areazone = %brick.AreaZone.getObject(%i);
+
+            if(isObject(MainAreaZone) && MainAreaZone.isMember(%areazone))
+            MainAreaZone.remove(%areazone);
+        }
+    }
+}
+
+registerInputEvent("fxDTSBrick","onAZFirstEntry","Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "Bot Bot" TAB "MiniGame MiniGame");
 
 function Player::Safehouse(%player,%bool)
 {
@@ -144,43 +158,21 @@ function SurvivorPlayer::onNewDataBlock(%this,%obj)
 {	
 	Parent::onNewDataBlock(%this,%obj);
 
-	if($Pref::Server::L4B2Bots::SurvivorImmunity)
-	%obj.hIsImmune = 1;
-	
+	if($Pref::Server::L4B2Bots::SurvivorImmunity) %obj.hIsImmune = 1;
 	%obj.SurvivorStress = 0;
-
 	%obj.hType = "Survivors";
-	%obj.BrickScanCheck();
 
-	if(isObject(%obj.client.deathMusic))
-	%obj.client.deathMusic.delete();
-
-	if(!%obj.hIsImmune && %obj.getdamagelevel() <= 0)
-	commandToClient(%obj.client, 'SetVignette', false, "0 0 0 1");
+	if(!%obj.hIsImmune && %obj.getdamagelevel() <= 0) commandToClient(%obj.client, 'SetVignette', false, "0 0 0 1");
 }
 
 function SurvivorPlayerMed::onNewDataBlock(%this,%obj)
 {	
-	Parent::onNewDataBlock(%this,%obj);
-	%obj.BrickScanCheck();
-
-	if(isObject(%obj.client.deathMusic))
-	%obj.client.deathMusic.delete();
-
-	if(!%obj.hIsImmune && %obj.getdamagelevel() <= 0)
-	commandToClient(%obj.client, 'SetVignette', false, "0 0 0 1");
+	SurvivorPlayer::onNewDataBlock(%this,%obj);
 }
 		
 function SurvivorPlayerLow::onNewDataBlock(%this,%obj)
 {
-	Parent::onNewDataBlock(%this,%obj);
-	%obj.BrickScanCheck();
-
-	if(isObject(%obj.client.deathMusic))
-	%obj.client.deathMusic.delete();
-
-	if(!%obj.hIsImmune && %obj.getdamagelevel() <= 0)
-	commandToClient(%obj.client, 'SetVignette', false, "0 0 0 1");
+	SurvivorPlayer::onNewDataBlock(%this,%obj);
 }
 
 function SurvivorPlayerLow::onDisabled(%this,%obj,%state)
@@ -194,19 +186,6 @@ function SurvivorPlayerLow::onDisabled(%this,%obj,%state)
 		serverPlay3D("drown_bubbles_sound",%obj.getPosition());
 		serverPlay3D("die_underwater_bubbles_sound",%obj.getPosition());
 	}
-	
-	%obj.client.deathMusic = new AudioEmitter("DeathMusic")
-	{
-		profile = "musicdata_L4D_death";
-		isLooping = false;
-        position = "9e9 9e9 9e9";
-        volume = 1;
-        type = 10;
-        useProfileDescription = false;
-        is3D = false;
-	};
-	%obj.client.deathMusic.setNetFlag(6, true);
-	%obj.client.deathMusic.scopeToClient(%obj.client);
 
 	Parent::onDisabled(%this,%obj,%state);
 }
@@ -332,30 +311,16 @@ function SurvivorPlayerDowned::onDisabled(%this,%obj)
 	%obj.playaudio(0,"survivor_death" @ getRandom(1, 8) @ "_sound");
 	commandToClient(%obj.client,'SetVignette',$EnvGuiServer::VignetteMultiply,$EnvGuiServer::VignetteColor);
 
-	%obj.client.deathMusic = new AudioEmitter("DeathMusic")
-	{
-		profile = "musicdata_L4D_death";
-		isLooping = false;
-        position = "9e9 9e9 9e9";
-        volume = 1;
-        type = 10;
-        useProfileDescription = false;
-        is3D = false;
-	};
-	%obj.client.deathMusic.setNetFlag(6, true);
-	%obj.client.deathMusic.scopeToClient(%obj.client);
-
 	Parent::onDisabled(%this, %obj);
 }
 
 function SurvivorPlayerDowned::onNewDataBlock(%this,%obj)
 {
 	if(isObject(%minigame = getMiniGameFromObject(%obj))) %minigame.checkLastManStanding();	
-	if(isObject(%obj.client.deathMusic)) %obj.client.deathMusic.delete();
 	
 	if(%obj.getClassName() $= "Player")
 	{
-		chatMessageTeam(%obj.client,'fakedeathmessage',"<color:FFFF00><bitmapk:add-ons/gamemode_left4block/modules/add-ins/player_survivor/icons/downci.png>" SPC %obj.client.name);
+		chatMessageTeam(%obj.client,'fakedeathmessage',"<color:FFFF00><bitmapk:Add-Ons/Gamemode_Left4Block/modules/add-ins/player_l4b/icons/ci_down>" SPC %obj.client.name);
 
 		%minigame = %obj.client.minigame;
 		%minigame.L4B_PlaySound("victim_needshelp_sound");

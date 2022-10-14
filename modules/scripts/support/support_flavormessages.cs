@@ -1,32 +1,24 @@
-$L4B_lastSupportMessageTime = getSimTime();
-function MiniGameSO::chatSupportMessage(%obj, %text, %sound)
-{
-    announce("[" @ %text @ "]");
-    if(%sound $= "")
-    {
-        %sound = victim_revived_sound;
-    }
-    %obj.L4B_PlaySound("victim_revived_sound");
-    $L4B_lastSupportMessageTime = getSimTime();
+function L4B_isInFOV(%viewer, %target)
+{    
+    if(isObject(%viewer) && isObject(%target)) return vectorDot(%viewer.getEyeVector(), vectorNormalize(vectorSub(%target.getPosition(), %viewer.getPosition()))) >= 0.7;
 }
 
-package Gamemode_Left4Block_FlavorMessages
+package L4B_SupportMessages
 {
     function Armor::Damage(%data, %obj, %sourceObject, %position, %damage, %damageType)
     {
-        parent::Damage(%data, %obj, %sourceObject, %position, %damage, %damageType);
-        if(%obj.getState() $= "Dead" || getSimTime() - $L4B_lastSupportMessageTime < 30000)
-	    {
-            //If the bot is dead or it's been less than 30 seconds since the last support message, return.
-		    return;
-	    }
-        %minigame = getMiniGameFromObject(%obj);
-        %target = %obj.hFollowing;
-        //If the bot is a zombie, in a mingame, has a human target, was dealt enough damage to die and isn't being looked at by said target, play a support message.
-        if(%obj.hType $= "zombie" && %minigame && %target && %target.getClassName() $= "Player" && (%obj.getDamageLevel() + %damage / getWord(%obj.getScale(), 2) >= %obj.getDatablock().maxDamage) && !L4B_isInFOV(%obj.hFollowing, %obj))
-        {
-            %minigame.chatSupportMessage(%obj, %sourceObject.sourceClient.getName() SPC "protected" SPC %obj.hFollowing.client.getName());
-        }
+        Parent::Damage(%data, %obj, %sourceObject, %position, %damage, %damageType);
+
+        if(%obj.hType !$= "Zombie" || %obj.getState() !$= "Dead" || !isObject(%obj.hFollowing)) return;//Return if the object is not a zombie, not dead, is not targetting, 
+
+        if(isObject(%sourceObject) && %sourceObject.getClassName() $= "Player") %source = %sourceObject;
+        else if(isObject(%sourceObject.sourceObject) && %sourceObject.sourceObject.getClassName() $= "Player") %source = %sourceObject.sourceObject;
+        else return;
+
+        //Check if the minigame exists, along with the target, and make sure its a player and the killer isnt itself, and make sure the player is unaware of the bot
+        if(isObject(%minigame = getMiniGameFromObject(%obj)) && isObject(%target = %obj.hFollowing) && %target.getClassName() $= "Player" && %source !$= %target && !L4B_isInFOV(%target, %obj))
+        %minigame.L4B_ChatMessage(%source.client.name SPC "protected" SPC %target.client.name,"victim_revived_sound",false); 
+        
     }
 };
-activatepackage(Gamemode_Left4Block_FlavorMessages);
+activatepackage(L4B_SupportMessages);

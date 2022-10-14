@@ -365,17 +365,20 @@ function Armor::RBloodSimulate(%this, %obj, %position, %damagetype, %damage)
 {
 	//if(!%damageType.rBlood) %damage = %damage/4;
 	%effectPosition = %position;
-	for(%i = 0; %i < mCeil(%damage / 25); %i++) doBloodExplosion(%effectPosition, getWord(%obj.getScale(), 2));
-	serverPlay3D("blood_impact" @ getRandom(1,4) @ "_sound", %effectPosition);
-	if($Pref::Server::L4BBlood::BloodDecals) %this.doSplatterBlood(%obj,5);
-
-	%limb = %obj.rgetDamageLocation(%position);
-	%obj.lastLimbHitTime[%limb] = getSimTime();
-	%obj.lastLimbDamage[%limb] = %damage;
-	%obj.lastLimbDamagePosition[%limb] = %effectPosition;
+	if(%obj.lastDamaged < getSimTime())
+	{
+		for(%i = 0; %i < mCeil(%damage / 25); %i++)
+		{			
+			doBloodExplosion(%effectPosition, getWord(%obj.getScale(), 2));
+			if($Pref::Server::L4BBlood::BloodDecals) %this.doSplatterBlood(%obj,5);
+		}
+		serverPlay3D("blood_impact" @ getRandom(1,4) @ "_sound", %effectPosition);
+		%obj.lastDamaged = getSimTime()+50;
+	}
 
 	if(%damage >= %this.maxDamage/2 || %obj.limbShotgunStrike >= 2)
 	{
+		%limb = %obj.rgetDamageLocation(%position);
 		%time = mClampF(%obj.getDamagePercent()*10, 0, 10);
 		%obj.SapHealth(0,25);
 		%obj.markLimbForDismember[%limb] = true;
@@ -385,7 +388,7 @@ function Armor::RBloodSimulate(%this, %obj, %position, %damagetype, %damage)
 
 $RBloodLimbString0 = "headskin helmet pointyhelmet flarehelmet scouthat bicorn cophat knithat plume triplume septplume visor shades gloweyes ballistichelmet constructionhelmet constructionhelmetbuds";
 $RBloodLimbString1 = "armor bucket cape pack quiver tank";
-$RBloodLimbString2 = "rarm rarmslim rhand_blood rarmcharger ";
+$RBloodLimbString2 = "rarm rarmslim rhand_blood rarmcharger";
 $RBloodLimbString3 = "larm larmslim larmsmall";
 $RBloodLimbString4 = "rhook rhand rhandwitchclaws rhandwitch";
 $RBloodLimbString5 = "lhand lhook lhand_blood lhandwitchclaws lhandwitch lhandsmall";
@@ -399,6 +402,10 @@ package RBloodPackage
 	{
 		Parent::reset(%this, %client);
 
+		%currTime = getSimTime();
+		if(%obj.lastResetTime + 5000 > %currTime) return;
+		%minigame.lastResetTime = %currTime;
+		
 		if(isObject(DecalGroup)) DecalGroup.deleteAll();
 	}
 
@@ -450,10 +457,10 @@ package RBloodPackage
 			if(%obj.markLimbForDismember[%limb])
 			{
 				for(%i = 0; %i < getWordCount($RBloodLimbString[%limb]); %i++) %obj.hideNode(getWord($RBloodLimbString[%limb], %i));
-				doBloodDismemberExplosion(%position, 1);
 				
+				doBloodExplosion(%position, 1.5);
 				if($Pref::Server::L4BBlood::BloodDecals) %this.doSplatterBlood(%obj,5);
-				serverPlay3D("blood_dismember" @ getRandom(1,4) @ "_sound", %position);
+				serverPlay3D("blood_dismember" @ getRandom(1,4) @ "_sound", %position);				
 
 				switch(%limb)
 				{

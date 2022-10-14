@@ -38,7 +38,7 @@ function L4B_holeChargerKill(%obj,%col)
 		%obj.schedule(100,playThread,2,shiftdown);
 		%obj.schedule(100,playaudio,3,"charger_smash_sound");
 		%col.schedule(100,playThread,2,plant);
-		%col.schedule(100,damage,%obj.hFakeProjectile, %col.getposition(), $Pref::Server::L4B2Bots::SpecialsDamage/2, $DamageType::Charger);
+		%col.schedule(100,damage,%obj.hFakeProjectile, %col.getposition(), $Pref::Server::L4B2Bots::SpecialsDamage/1.5, $DamageType::Charger);
 		%obj.schedule(100,spawnExplosion,pushBroomProjectile,"0.5 0.5 0.5");
 		%obj.hSharkEatDelay = schedule(1250,0,L4B_holeChargerKill,%obj,%col);
 		%obj.playaudio(0,"charger_pummel" @ getrandom(1,4) @ "_sound");

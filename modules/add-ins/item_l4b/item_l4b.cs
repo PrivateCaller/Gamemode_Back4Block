@@ -367,8 +367,6 @@ package Defibrillator
 		{
 			%time = $Game::MinRespawnTime;
 		}
-
-		schedule(%time + 150, %client, eval, "if(!isObject(" @ %client @ ".player) && isObject(" @ %client @ ".corpse)) commandToClient(" @ %client @ ", 'centerPrint', \"\c5Click to respawn.\" NL \"\c5Or wait for someone to revive you with the \c6Defibrillator\c5.\", 0);");
 	}
 
 	function MiniGameSO::removeMember(%mini, %client)

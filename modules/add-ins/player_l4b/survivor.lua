@@ -82,7 +82,7 @@ function Survivor_LeftClick(val,obj)
         if ts.isobject(ts.getobj(obj,"LastActivated")) then
 
             local client = ts.getobj(obj,"client")
-            local touchedobj = ts.getobj(obj, "LastActivated")
+            local touchedobj = ts.callobj(ts.getobj(obj, "LastActivated"),"getID")
             local touchedobjclass = ts.callobj(touchedobj, "getClassName")
 
             if touchedobjclass == "WheeledVehicle" then
@@ -110,7 +110,7 @@ function Survivor_LeftClick(val,obj)
 
                             local touchedobjclient = ts.getobj(touchedobj,"client")
                             local touchedobjminigame = ts.getobj(touchedobjclient,"minigame")
-                            ts.call("chatMessageTeam",touchedobjclient,'fakedeathmessage',"<color:00FF00> "..ts.getobj(client,"name").." <bitmapk:add-ons/Gamemode_Left4Block/modules/add-ins/player_survivor/icons/CI_VictimSaved> "..ts.getobj(touchedobjclient,"name"));
+                            ts.call("chatMessageTeam",touchedobjclient,'fakedeathmessage',"<color:00FF00> "..ts.getobj(client,"name").." <bitmapk:add-ons/Gamemode_Left4Block/modules/add-ins/player_l4b/icons/CI_VictimSaved> "..ts.getobj(touchedobjclient,"name"));
                             ts.callobj(touchedobjminigame,"L4B_PlaySound","victim_saved_sound")                          
 
                         elseif touchedobjclass == "AIPlayer" then ts.callobj(touchedobj,"resetHoleLoop")

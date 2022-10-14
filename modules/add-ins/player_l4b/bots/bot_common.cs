@@ -162,7 +162,7 @@ function CommonZombieHoleBot::onBotMelee(%this,%obj,%col)
 			if(%col.getEnergyLevel() < 1) holeZombieInfect(%obj,%col);
 		}
 
-		%col.spawnExplosion("ZombieHitProjectile",%meleeimpulse/2 SPC %meleeimpulse/2 SPC %meleeimpulse/2);
+		if(%col.getClassName() $= "Player") %col.spawnExplosion("ZombieHitProjectile",%meleeimpulse/2 SPC %meleeimpulse/2 SPC %meleeimpulse/2);
 		%col.playthread(3,"plant");
 		%col.StunnedSlowDown(3);
 		%col.setVelocity(vectorscale(%obj.getEyeVector(),-10));

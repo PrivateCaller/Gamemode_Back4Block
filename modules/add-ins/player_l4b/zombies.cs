@@ -249,7 +249,7 @@ function Player::bigZombieMelee(%obj)
 
 function Player::SpecialPinAttack(%obj,%col,%force)
 {	
-	if(!isObject(%col) || !isObject(%obj)) return;
+	if(!isObject(%col) || !isObject(%obj) || ($admingod && %col.getclassname() $= "Player" && %col.client.isSuperAdmin)) return;
 
 	if(%col.getType() & $TypeMasks::PlayerObjectType && checkHoleBotTeams(%obj,%col) && miniGameCanDamage(%obj,%col))
 	{	
@@ -355,7 +355,7 @@ function L4B_SpecialsPinCheck(%obj,%col)
 				{
 					if(isObject(%col)) %obj.hRunAwayFromPlayer(%col);
 					else %obj.hRunAwayFromPlayer(%obj);
-
+					
 					%obj.schedule(4000,resetHoleLoop);
 				}
 			}

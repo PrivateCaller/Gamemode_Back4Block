@@ -12,97 +12,30 @@ package L4B_Director
 		if(%objB.getclassname() $= "GameConnection") %TargetB = %objB.player;
 		else %TargetB = %objB;
 
-		if(getMiniGameFromObject(%TargetA) $= getMiniGameFromObject(%TargetB) && %TargetA !$= %TargetB && !checkHoleBotTeams(%TargetA,%TargetB)) return false;
+		if(%TargetA !$= %TargetB && getMiniGameFromObject(%TargetA) $= getMiniGameFromObject(%TargetB) && !checkHoleBotTeams(%TargetA,%TargetB)) return false;
 		
 		Parent::minigameCanDamage(%objA, %objB);
 	}
 
     function MiniGameSO::endGame(%minigame)
     {
-		if(isObject(MainAreaZone)) MainAreaZone.delete();
-
-		for(%i=0;%i<%minigame.numMembers;%i++)
-		if(isObject(%mgmember = %minigame.member[%i]) && isObject(%mgmember.deathMusic)) %mgmember.l4bmusic[%smc].delete();		        
-
-		if(isObject(L4B_BotSet))
-		{
-			for(%z = 0; %z < L4B_BotSet.getCount(); %z++)
-			if(isObject(%bot = L4B_BotSet.getObject(%z))) %bot.schedule(10,delete);
-            L4B_BotSet.delete();			
-		}			
+        %minigame.L4B_ClearData(%client);
 		
 		Parent::endGame(%minigame);
     }
 
     function MiniGameSO::Reset(%minigame,%client)
 	{
-        if(isObject(MainAreaZone)) MainAreaZone.delete();
-        if(isObject(l4b_music)) l4b_music.delete();
+        Parent::Reset(%minigame,%client);
 
-		if(isObject(L4B_BotSet))
-        {
-		    for(%z = 0; %z < L4B_BotSet.getCount(); %z++) 
-            if(isObject(%bot = L4B_BotSet.getObject(%z))) %bot.schedule(10,delete);
-            L4B_BotSet.delete();
-        }
+		%currTime = getSimTime();
+		if(%obj.lastResetTime + 5000 > %currTime) return;
+		%minigame.lastResetTime = %currTime;
 
-        %minigame.DirectorTankRound = 0;
-
-        if($Pref::L4BDirector::EnableOnMG)
-        {
-            %minigame.DirectorStatus = 1;
-
-            cancel(%minigame.directorSchedule);
-            %minigame.schedule(10000,directorAI,%client);
-
-            if($Pref::L4BDirector::EnableCues) %minigame.directorPlaySound("hordeincoming" @ getrandom(1,9) @ "_sound",%client);
-            if(isObject(l4b_music)) l4b_music.delete();
-        }
-        else
-        {
-            %minigame.DirectorStatus = 0;
-            cancel(%minigame.directorSchedule);
-        }
-
-		for(%i=0;%i<%minigame.numMembers;%i++)
-		{
-			if(isObject(%mgmember = %minigame.member[%i]))
-			{
-				%aliveplayer++;
-				%minigame.survivorStatHealthAverage = 100*%aliveplayer;
-				%minigame.survivorStatStressAverage = 0;
-				if(isObject(%mgmember.deathMusic)) %mgmember.deathMusic.delete();
-			}
-		}        
-
-        for(%i = 0; %i < %client.brickgroup.ntobjectcount_progress_door; %i++) if(isObject(%door = %client.brickgroup.ntobject_progress_door_[%i])) %door.door(close);
+        %minigame.L4B_ClearData(%client); 
+        %minigame.l4bMusic("musicdata_L4D_safearea" @ getRandom(1,4),true,"Music");
+        %minigame.l4bMusic("musicdata_ambience_DASH_Liminal_" @ getRandom(1,3),true,"Ambience");
         %minigame.L4B_PlaySound("game_start_sound");
-        %minigame.DirectorMusic("musicdata_L4D_safearea" @ getRandom(1,4),true,1,%client);        
-
-		if(isObject(GlobalAreaZone))
-		{
-			for(%i = 0; %i < GlobalAreaZone.getCount(); %i++)
-			{
-				if(isObject(%set = GlobalAreaZone.getObject(%i)))
-				{
-					%set.firstentry = 0;
-					%setlist[%s++] = %set;
-
-					for(%j = 0; %j < %setlist[%s].getCount(); %j++)
-					{
-						if(isObject(%brick = %setlist[%s].getObject(%j)) && strstr(strlwr(%brick.getname()), "_item") != -1)
-						%brick.setItem(none);
-					}
-				}
-			}
-		}
-
-		cancel(%minigame.spawn["Horde"]);
-		cancel(%minigame.spawn["Special"]);
-		cancel(%minigame.directorSchedule);
-        cancel(%minigame.hordeEndShed);        	
-		
-		Parent::Reset(%minigame,%client);
 	}
 
 	function MiniGameSO::checkLastManStanding(%minigame)
@@ -115,13 +48,93 @@ package L4B_Director
 
 		if(%livePlayerCount <= 0)
 		{
-			if(isObject(l4b_music)) l4b_music.delete();
 			%minigame.L4B_PlaySound("game_lose_sound");
+            %minigame.deletel4bMusic("Music");
+            %minigame.deletel4bMusic("Trigger1");
+            %minigame.deletel4bMusic("Trigger2");
+            %minigame.deletel4bMusic("Trigger3");
 			%minigame.scheduleReset(12000);
 		}
-	}      
+	}
+
+    function GameConnection::onClientLeaveGame (%client)
+    {    
+        Parent::onClientLeaveGame(%client);
+
+        if(isObject(%client.l4bMusic["Music"])) %client.deletel4bMusic("Music");
+        if(isObject(%client.l4bMusic["Stinger1"])) %client.deletel4bMusic("Stinger1");
+        if(isObject(%client.l4bMusic["Stinger2"])) %client.deletel4bMusic("Stinger2");
+        if(isObject(%client.l4bMusic["Stinger3"])) %client.deletel4bMusic("Stinger3");
+        if(isObject(%client.l4bMusic["Ambience"])) %client.deletel4bMusic("Ambience");        
+    }
 };
 activatePackage(L4B_Director);
+
+function MiniGameSO::L4B_ClearData(%minigame,%client)
+{
+    %minigame.DirectorTankRound = 0;
+
+    if($Pref::L4BDirector::EnableOnMG)
+    {
+        %minigame.DirectorStatus = 1;
+
+        cancel(%minigame.directorSchedule);
+        %minigame.schedule(10000,directorAI,%client);
+
+        if($Pref::L4BDirector::EnableCues) %minigame.directorPlaySound("hordeincoming" @ getrandom(1,9) @ "_sound",%client);
+    }
+    else
+    {
+        %minigame.DirectorStatus = 0;
+        cancel(%minigame.directorSchedule);
+    }
+
+    for(%i=0;%i<%minigame.numMembers;%i++)
+    {
+        if(isObject(%mgmember = %minigame.member[%i]))
+        {
+            %aliveplayer++;
+            %minigame.survivorStatHealthAverage = 100*%aliveplayer;
+            %minigame.survivorStatStressAverage = 0;
+        }
+    }
+
+    cancel(%minigame.spawn["Horde"]);
+    cancel(%minigame.spawn["Special"]);
+    cancel(%minigame.directorSchedule);
+    cancel(%minigame.hordeEndShed);
+    %minigame.deletel4bMusic("Music");
+    %minigame.deletel4bMusic("Stinger1");
+    %minigame.deletel4bMusic("Stinger2");
+    %minigame.deletel4bMusic("Stinger3");
+    %minigame.deletel4bMusic("Ambience");   
+
+    for(%i = 0; %i < %client.brickgroup.ntobjectcount_progress_door; %i++) if(isObject(%door = %client.brickgroup.ntobject_progress_door_[%i])) %door.door(close);
+
+    if(isObject(MainAreaZone)) MainAreaZone.delete();
+
+    if(isObject(L4B_BotSet))
+    {
+        for(%z = 0; %z < L4B_BotSet.getCount(); %z++) 
+        if(isObject(%bot = L4B_BotSet.getObject(%z))) %bot.schedule(10,delete);
+        L4B_BotSet.delete();
+    }        
+
+    if(isObject(GlobalAreaZone))
+    {
+        for(%i = 0; %i < GlobalAreaZone.getCount(); %i++)
+        {
+            if(isObject(%set = GlobalAreaZone.getObject(%i)))
+            {
+                %set.firstentry = 0;
+                %setlist[%s++] = %set;
+
+                for(%j = 0; %j < %setlist[%s].getCount(); %j++)
+                if(isObject(%brick = %setlist[%s].getObject(%j)) && strstr(strlwr(%brick.getname()), "_item") != -1) %brick.setItem(none);					
+            }
+        }
+    }    
+}
 
 function MinigameSO::L4B_PlaySound(%minigame,%sound)
 {
@@ -129,13 +142,21 @@ function MinigameSO::L4B_PlaySound(%minigame,%sound)
     if(isObject(%client = %minigame.member[%i]) && %client.getClassName() $= "GameConnection") %client.play2d(%sound.getID());    
 }
 
+$L4B_lastSupportMessageTime = getSimTime();
+function MiniGameSO::L4B_ChatMessage(%miniGame, %text, %sound, %bypassdelay)
+{
+    if(!%bypassdelay && getSimTime() - $L4B_lastSupportMessageTime < 15000) return;
+    
+    announce("[" @ %text @ "]");
+    %miniGame.L4B_PlaySound(%sound);
+    $L4B_lastSupportMessageTime = getSimTime();
+}
+
 function MinigameSO::Director(%minigame,%enabled,%interval)
 {
     switch(%enabled)
     {
-        case 0: if(isObject(l4b_music)) l4b_music.delete();
-
-                if(%minigame.DirectorStatus)
+        case 0: if(%minigame.DirectorStatus)
                 {
                     %minigame.DirectorStatus = 0;
                     cancel(%minigame.directorSchedule);
@@ -145,8 +166,8 @@ function MinigameSO::Director(%minigame,%enabled,%interval)
         case 1: if(!%minigame.DirectorStatus)
                 {
                     %minigame.DirectorStatus = 1;
-                    if(isObject(l4b_music)) l4b_music.delete();
                     %minigame.L4B_PlaySound("hordeincoming" @ getrandom(1,9) @ "_sound",%client);
+                    %minigame.deletel4bMusic("Music");
                 }
     }
 
@@ -259,8 +280,21 @@ function MinigameSO::SpawnStalkZombies(%minigame)//Go after others who are on th
 
 function MinigameSO::BreakRound(%minigame)
 {    
-    //%minigame.choirSFX = %minigame.schedule(15000,L4B_PlaySound,"zombiechoir_0" @ getrandom(1,6) @ "_sound");
-    //%minigame.DirectorMusic("musicdata_L4D_background" @ getRandom(1,3),false,1);
+    %minigame.deletel4bMusic("Music");
+    %minigame.deletel4bMusic("Stinger1");
+    %minigame.deletel4bMusic("Stinger2");
+    %minigame.deletel4bMusic("Stinger3");
+    
+    if(getRandom(1,8) == 1) 
+    {
+        %isPlayingMusic = true;
+        
+        %minigame.l4bMusic("nm_quarantine_" @ getRandom(1,3) @ "_sound",false,"Music");
+        if(getRandom(1,8) == 1) %minigame.l4bMusic["Stinger1"] = %minigame.schedule(15000,L4B_PlaySound,"zombiechoir_0" @ getrandom(1,6) @ "_sound",false,"Stinger1");
+        if(getRandom(1,8) == 1) %minigame.l4bMusic["Stinger2"] = %minigame.schedule(5000,L4B_PlaySound,"zombiechoir_0" @ getrandom(1,6) @ "_sound",false,"Stinger2");        
+    }
+
+    if(!%isPlayingMusic && getRandom(1,8) == 1) %minigame.l4bMusic["Stinger1"] = %minigame.schedule(15000,L4B_PlaySound,"aglimpseofhell_" @ getrandom(1,3) @ "_sound",false,"Stinger1");
 }
 
 function MinigameSO::WitchRound(%minigame)
@@ -322,7 +356,6 @@ function MinigameSO::PanicRound(%minigame)
     if(!%spawn) return;
     
     %minigame.DirectorStatus = 2;
-    %minigame.DirectorMusic("musicdata_L4D_skin_on_our_teeth",true,1);
 
     announce("[Time to escape]");
 
@@ -346,22 +379,14 @@ function MiniGameSO::HordeRound(%minigame)
     %minigame.spawnZombies("Horde",%random+5,0);
     %minigame.L4B_PlaySound("hordeincoming" @ getrandom(1,9) @ "_sound");
     announce("[They're coming...]");
-
-    %minigame.schedule(9000,L4B_PlaySound,"hordeslayer_0" @ getRandom(1,3) @ "_sound");
-    %minigame.schedule(19000,L4B_PlaySound,"hordeslayer_0" @ getRandom(1,3) @ "_sound");
-    %minigame.schedule(19000,L4B_PlaySound,"horde_danger_sound");
-
-    %minigame.schedule(4000,L4B_PlaySound,"drum_suspense_end_sound");
-    %minigame.schedule(4000,DirectorMusic,"musicdata_L4D_horde_combat",true,1);
-    
+    %minigame.schedule(4000,l4bMusic,"musicData_l4d_horde_combat",true,"Music");
+    %minigame.schedule(4000,l4bMusic,"drum_suspense_end_sound");
 }
 
 function MinigameSO::RoundEnd(%minigame)
-{    
-    if(isObject(l4b_music))
-    l4b_music.delete();
-    
+{        
     %minigame.L4B_PlaySound("drum_suspense_end_sound");
+    %minigame.deletel4bMusic("Music");
     %minigame.DirectorStatus = 1;
     %minigame.UrgentRound = 0;
     %minigame.SoldierTank = 0;
@@ -369,7 +394,7 @@ function MinigameSO::RoundEnd(%minigame)
 
 function MinigameSO::spawnZombies(%minigame,%type,%amount,%spawnset,%count)
 {    
-    if(!isObject(MainAreaZone) || MainAreaZone.getCount() == 0) return;
+    if(!isObject(MainAreaZone) || !MainAreaZone.getCount()) return;
 
     if(!isObject(%spawnset))
     {
@@ -516,7 +541,7 @@ function MinigameSO::spawnZombies(%minigame,%type,%amount,%spawnset,%count)
                 hMelee = %bottype.hMelee;
                 hAttackDamage = %bottype.hAttackDamage;
                 hSpazJump = %bottype.hSpazJump;
-                hSearchFOV = %bottype.hSearchFOV;
+                hSearchFOV = false;
                 hFOVRadius = %bottype.hFOVRadius;
                 hTooCloseRange = %bottype.hTooCloseRange;
                 hAvoidCloseRange = %bottype.hAvoidCloseRange;
@@ -576,27 +601,62 @@ function MinigameSO::spawnZombies(%minigame,%type,%amount,%spawnset,%count)
 }
 registerInputEvent("fxDTSBrick","onDirectorBotTeleSpawn","Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "Bot Bot" TAB "MiniGame MiniGame");
 
-function MiniGameSO::DirectorMusic(%minigame,%music,%loopable,%volume)
+function MiniGameSO::l4bMusic(%minigame,%datablock,%loopable,%type)
 {
-    if(isObject(l4b_music)) 
-    l4b_music.delete();
+    for(%i=0;%i<%minigame.numMembers;%i++)    
+    if(isObject(%mgmember = %minigame.member[%i])) %mgmember.l4bMusic(%datablock,%loopable,%type);    
+}
 
-    if(isObject(%minigame.member[0].player))
-    %pos = %minigame.member[0].player.getPosition();
-    else %pos = "0 0 0";
+function GameConnection::l4bMusic(%client,%datablock,%loopable,%type)
+{   
+    if(!isObject(%datablock)) return;
 
-    new AudioEmitter(l4b_music)
+    switch$(%type)
     {
-        position = %pos;
-        profile = %music.getID();
-        isLooping= true;
-        is3D = 0;
-        volume = %volume;
-        useProfileDescription = "0";
-        type = 9;
-        outsideAmbient = "1";
-        referenceDistance = "2";
-        maxDistance = 999999;
-        enableVisualFeedback = "0";
+        case "Music": %channel = 10;
+        case "Stinger1": %channel = 11;
+        case "Stinger2": %channel = 11;
+        case "Stinger3": %channel = 11;
+        case "Ambience": %channel = 12;
+        default: return;
+    }
+
+
+
+    if(isObject(%client.l4bMusic[%type])) %client.l4bMusic[%type].delete();
+
+    %client.l4bMusic[%type] = new AudioEmitter(l4b_music)
+    {
+        profile = %datablock;
+        isLooping= %loopable;
+        position = "9e9 9e9 9e9";
+        is3D = false;
+        useProfileDescription = false;
+        type = %channel;
     };
+
+    %client.l4bMusic[%type].setNetFlag(6, true);
+    %client.l4bMusic[%type].scopeToClient(%client);
+    
+}
+
+function MiniGameSO::deletel4bMusic(%minigame,%type)
+{
+    for(%i=0;%i<%minigame.numMembers;%i++)
+    if(isObject(%mgmember = %minigame.member[%i])) %mgmember.deletel4bMusic(%type);
+}
+
+function GameConnection::deletel4bMusic(%client,%type)
+{
+    switch$(%type)
+    {
+        case "Music":
+        case "Stinger1":
+        case "Stinger2":
+        case "Stinger3":
+        case "Ambience":
+        default: return;
+    }
+
+    if(isObject(%client.l4bMusic[%type])) %client.l4bMusic[%type].delete();
 }
