@@ -14,7 +14,7 @@ package Gamemode_Left4Block_FlavorMessages
 {
     function Armor::Damage(%data, %obj, %sourceObject, %position, %damage, %damageType)
     {
-        parent`::Damage(%data, %obj, %sourceObject, %position, %damage, %damageType);
+        parent::Damage(%data, %obj, %sourceObject, %position, %damage, %damageType);
         if(%obj.getState() $= "Dead" || getSimTime() - $L4B_lastSupportMessageTime < 30000)
 	    {
             //If the bot is dead or it's been less than 30 seconds since the last support message, return.
