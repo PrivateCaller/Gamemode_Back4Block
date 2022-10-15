@@ -72,11 +72,12 @@ function ZombieFallenHoleBot::onDisabled(%this,%obj)
 
 function ZombieFallenHoleBot::holeAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {	
-	if(getRandom(1,8) == 1 && isObject($L4B_clientLog) && $L4B_clientLog.getCount() > 0)
+	if(getRandom(1,4) == 1)
 	{ 
 		%obj.armor = 1;
 		%obj.armorColor = getRandomBotColor();
-		L4B_pushZombifiedSnapshot(%obj);
+		L4B_pushClientSnapshot(%obj,0,true);
+		return;
 	}
 	else
 	{

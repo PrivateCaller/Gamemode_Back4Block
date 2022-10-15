@@ -420,7 +420,7 @@ package L4B_PlayerBot
 				case 1: %obj.unHideNode("epaulets");
 						%obj.setNodeColor("epaulets",%client.secondPackColor);
 				case 6: %obj.unHideNode("shoulderpads");
-						%obj.setNodeColor("shoulderpads",%cl.secondPackColor);
+						%obj.setNodeColor("shoulderpads",%client.secondPackColor);
 			}
 		}
 
