@@ -271,7 +271,9 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 
 			switch$(%col.getclassname())
 			{
-				case "Player":	chatMessageTeam(%col.client,'fakedeathmessage',"<color:FFFF00>" @ %obj.getDatablock().hName SPC %obj.getdataBlock().hPinCI SPC %col.client.name);
+				case "Player":	if(isObject(%minigame = getMiniGameFromObject(%col)))
+								%minigame.L4B_ChatMessage("<color:FFFF00>" @ %obj.getDatablock().hName SPC %obj.getdataBlock().hPinCI SPC %col.client.name,"victim_needshelp_sound",true);
+								
 								%col.client.minigame.L4B_PlaySound("victim_needshelp_sound");							
 								%col.client.camera.setOrbitMode(%col, %col.getTransform(), 0, 5, 0, 1);
 								//Billboard_NeedySurvivor(%col, "Strangled");

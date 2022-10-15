@@ -74,7 +74,7 @@ package L4B_PlayerBot
 
 				case "Player": 	if(isObject(%minigame = getMiniGameFromObject(%obj)))
 								{
-							   		%minigame.L4B_ChatMessage("<color:00FF00>" @ %obj.getDatablock().hName SPC "<bitmapk:Add-Ons/Gamemode_Left4Block/add-ins/player_l4b/icons/ci_infected>" SPC %col.client.name,"survivor_left4dead_sound",true);
+							   		%minigame.L4B_ChatMessage("\c0" @ %obj.getDatablock().hName SPC "<bitmapk:Add-Ons/Gamemode_Left4Block/add-ins/player_l4b/icons/ci_infected>" SPC %col.client.name,"survivor_left4dead_sound",true);
 							   		%minigame.checkLastManStanding();
 								}
 
@@ -182,6 +182,13 @@ package L4B_PlayerBot
 	{
 		if(%force < 40) serverPlay3D("impact_medium" @ getRandom(1,3) @ "_sound",%obj.getPosition());
 		else serverPlay3D("impact_hard" @ getRandom(1,3) @ "_sound",%obj.getPosition());
+
+		if(getWord(%vec,2) > %obj.getdataBlock().minImpactSpeed)
+        {
+			serverPlay3D("impact_fall_sound",%obj.getPosition());
+			if(%obj.getClassName() $= "Player") %obj.spawnExplosion("ZombieHitProjectile",%force/15 SPC %force/15 SPC %force/15);
+
+		}
 
 		Parent::onImpact(%this, %obj, %col, %vec, %force);
 	}

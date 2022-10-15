@@ -1,20 +1,6 @@
 luaexec("./survivor.lua");
 if(LoadRequiredAddOn("Support_BotHolePlus") == $Error::None) exec("./bots/survivorally.cs");
 
-function removeAreaFromZone(%brick)
-{
-    if(isObject(%brick.AreaZone))
-    {
-        for(%i = 0; %i < %brick.AreaZone.getcount(); %i++)
-        {
-            %areazone = %brick.AreaZone.getObject(%i);
-
-            if(isObject(MainAreaZone) && MainAreaZone.isMember(%areazone))
-            MainAreaZone.remove(%areazone);
-        }
-    }
-}
-
 registerInputEvent("fxDTSBrick","onAZFirstEntry","Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "Bot Bot" TAB "MiniGame MiniGame");
 
 function Player::Safehouse(%player,%bool)
@@ -320,7 +306,7 @@ function SurvivorPlayerDowned::onNewDataBlock(%this,%obj)
 	
 	if(%obj.getClassName() $= "Player")
 	{
-		chatMessageTeam(%obj.client,'fakedeathmessage',"<color:FFFF00><bitmapk:Add-Ons/Gamemode_Left4Block/modules/add-ins/player_l4b/icons/ci_down>" SPC %obj.client.name);
+		%minigame.L4B_ChatMessage("<color:FFFF00><bitmapk:Add-Ons/Gamemode_Left4Block/modules/add-ins/player_l4b/icons/ci_down>" SPC %obj.client.name,"victim_needshelp_sound",true);
 
 		%minigame = %obj.client.minigame;
 		%minigame.L4B_PlaySound("victim_needshelp_sound");

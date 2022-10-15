@@ -1,4 +1,8 @@
-function serverCmdClearDecals(%client) 
+$DamageType::Fall.rBlood = false;
+$DamageType::Lava.rBlood = false;
+$DamageType::Suicide.rBlood = false;
+
+function serverCmdClearDecals(%client)
 {	
 	if(!%client.isAdmin) 
 	{
@@ -26,7 +30,7 @@ function Player::SapHealth(%obj,%amount,%maxamount)
 	%obj.AddHealth(%obj.getDataBlock().maxDamage*-0.0005);
 
 	cancel(%obj.SapHealthSched);
-	%obj.schedule(500,SapHealth,%amount++,%maxamount);
+	%obj.schedule(100,SapHealth,%amount++,%maxamount);
 }
 
 function AIPlayer::SapHealth(%obj,%amount,%maxamount) { Player::SapHealth(%obj,%amount,%maxamount); }
@@ -363,7 +367,6 @@ function AIPlayer::woundappearance(%obj,%type) { Player::woundappearance(%obj,%t
 
 function Armor::RBloodSimulate(%this, %obj, %position, %damagetype, %damage)
 {
-	//if(!%damageType.rBlood) %damage = %damage/4;
 	%effectPosition = %position;
 	if(%obj.lastDamaged < getSimTime())
 	{
@@ -418,8 +421,11 @@ package RBloodPackage
 
 	function Armor::Damage(%this, %obj, %sourceObject, %position, %damage, %damageType)
 	{						
-		if(!$Pref::Server::L4BBlood::Enable || !%this.enableRBlood || %damage < %this.maxDamage/8 || %damageType == $DamageType::Lava || %damageType == $DamageType::Suicide) 
+		if(!$Pref::Server::L4BBlood::Enable || !%obj.getdataBlock().enableRBlood || %damage < %this.maxDamage/8) 
 		return Parent::Damage(%this, %obj, %sourceObject, %position, %damage, %damageType);
+
+		if(!%damageType.rBlood) %rblooddamage = %damage / %obj.getdataBlock().maxDamage/2;
+		else %rblooddamage = %damage;
 
 		%rbloodPosition = %position;
 		%scale = getWord(%obj.scale, 2);
@@ -431,7 +437,7 @@ package RBloodPackage
 			%obj.limbShotgunStrike = 0;
 			%obj.lastHitTime = getSimTime();
 		}
-		%this.RBloodSimulate(%obj, %rbloodPosition, %damagetype, %damage);
+		%this.RBloodSimulate(%obj, %rbloodPosition, %damagetype, %rblooddamage);
 		
 		Parent::Damage(%this, %obj, %sourceObject, %position, %damage, %damageType);
 	}

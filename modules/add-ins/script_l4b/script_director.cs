@@ -147,7 +147,7 @@ function MiniGameSO::L4B_ChatMessage(%miniGame, %text, %sound, %bypassdelay)
 {
     if(!%bypassdelay && getSimTime() - $L4B_lastSupportMessageTime < 15000) return;
     
-    announce("[" @ %text @ "]");
+    announce(%text);
     %miniGame.L4B_PlaySound(%sound);
     $L4B_lastSupportMessageTime = getSimTime();
 }
@@ -303,14 +303,11 @@ function MinigameSO::WitchRound(%minigame)
     return;    
 
     for(%i = 0; %i < MainAreaZone.getCount(); %i++) 
-    {				
-        if(strstr(strlwr(MainAreaZone.getObject(%i).getName()),"witch") != -1)
-        %spawn++;
-    }
-
+    if(strstr(strlwr(MainAreaZone.getObject(%i).getName()),"witch") != -1) %spawn++;
+    
     if(!%spawn) return;
-
-    announce("[A witch is nearby]");
+    
+    %minigame.L4B_ChatMessage("[A witch is nearby]","victim_needshelp",true); 
     %minigame.spawnZombies("Witch",1,0);
     %minigame.DirectorStatus = 2;
 }
@@ -339,7 +336,7 @@ function MinigameSO::TankRound(%minigame)
         else %minigame.SoldierTank = 0;
 
         %minigame.spawnZombies("Tank",1,0);
-        announce("[A tank is nearby]");
+        %minigame.L4B_ChatMessage("[A tank is nearby]","victim_needshelp",true); 
     } 
 }
 
@@ -356,9 +353,7 @@ function MinigameSO::PanicRound(%minigame)
     if(!%spawn) return;
     
     %minigame.DirectorStatus = 2;
-
-    announce("[Time to escape]");
-
+    %minigame.L4B_ChatMessage("[Escape!]","victim_needshelp",true); 
     %minigame.spawnZombies("Horde",25,0);
     %minigame.DirectorStatus = 2;
     cancel(%minigame.directorSchedule);
@@ -377,8 +372,7 @@ function MiniGameSO::HordeRound(%minigame)
     %random = getRandom(35,45);
     %minigame.zhordecount = %random;
     %minigame.spawnZombies("Horde",%random+5,0);
-    %minigame.L4B_PlaySound("hordeincoming" @ getrandom(1,9) @ "_sound");
-    announce("[They're coming...]");
+    %minigame.L4B_ChatMessage("[They're coming...]","hordeincoming" @ getrandom(1,9) @ "_sound",true); 
     %minigame.schedule(4000,l4bMusic,"musicData_l4d_horde_combat",true,"Music");
     %minigame.schedule(4000,l4bMusic,"drum_suspense_end_sound");
 }

@@ -219,11 +219,6 @@ function Survivor_DownCheck(obj,damage,damageType)
     local damagedlevel = tonumber(damage)+damagelevel
     local maxdamage = tonumber(ts.getcallobj(obj,"getdatablock().maxDamage"))
 
-    if damageType == ts.get("DamageType::Fall") then
-        ts.call("serverPlay3D","impact_fall_sound",ts.callobj(obj,"getHackPosition"))
-        ts.call("LuaProjecitle",ts.callobj(obj,"getHackPosition"),"ZombieHitProjectile")
-    end    
-
     if ts.getstate(obj) ~= "Dead" and ts.callobj(obj,"getWaterCoverage") ~= "1" and damagedlevel >= maxdamage and tonumber(damage) < maxdamage/1.333 then
 
 		ts.callobj(obj,"setdamagelevel",0)
