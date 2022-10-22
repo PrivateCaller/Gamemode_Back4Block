@@ -290,6 +290,7 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 											 %obj.hSharkEatDelay = schedule(2000,0,L4B_holeChargerKill,%obj,%col);
 											 %forcedam = %force/4;
 											 %col.damage(%obj.hFakeProjectile, %col.getposition(),%forcedam, %obj.hDamageType);
+											 %col.client.l4bMusic(charger_pin_sound, true, "Private");
 
 											%p = new Projectile()
 											{
@@ -312,6 +313,7 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 
 											%forcedam = %force/4;
 											%col.damage(%obj.hFakeProjectile, %col.getposition(),%forcedam, %obj.hDamageType);
+											%col.client.l4bMusic(hunter_pin_sound, true, "Private");
 
 				case "ZombieJockeyHoleBot":	%col.mountObject(%obj,2);
 											%obj.setControlObject(%col);
@@ -321,12 +323,14 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 											%obj.playaudio(0,"jockey_attack_loop" @ getrandom(1,2) @ "_sound");
 
 											%obj.JockeyHurt = schedule(1000,0,L4B_holeJockeyKill,%obj,%col);
+											%col.client.l4bMusic(jockey_pin_sound, true, "Private");
 
 				case "ZombieSmokerHoleBot":  %obj.playaudio(1,"smoker_launch_tongue_sound");
 											 %col.playaudio(2,"smoker_tongue_hit_sound");
 											 %obj.playthread(2,"plant");
 											 %obj.playthread(3,"shiftup");
 											 %col.mountImage(ZombieSmokerConstrictImage, 2);
+											 %col.client.l4bMusic(smoker_pin_sound, true, "Private");
 			}
 		}
 	}
@@ -366,6 +370,8 @@ function L4B_SpecialsPinCheck(%obj,%col)
 		if(isObject(%col))
 		{
 			%col.isBeingStrangled = 0;
+			%col.client.deletel4bMusic("Private");
+			%col.client.musicCatchUp();
 
 			if(%col.getstate() !$= "Dead")
 			{

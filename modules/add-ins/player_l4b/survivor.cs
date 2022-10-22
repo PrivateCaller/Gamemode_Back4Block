@@ -292,6 +292,23 @@ function SurvivorPlayerDowned::Damage(%this,%obj,%sourceObject,%position,%damage
 	Parent::Damage(%this,%obj,%sourceObject,%position,%damage/4,%damageType,%damageLoc);
 }
 
+function SurvivorPlayerDowned::onDamage(%this, %obj, %delta)
+{
+	Parent::onDamage(%this, %obj, %delta);
+	if(%delta > 0 && %obj.getState () !$= "Dead")
+	{
+		%painThreshold = 7;
+		if(%this.painThreshold !$= "")
+		{
+			%painThreshold = %this.painThreshold;
+		}
+		if(%delta > %painThreshold)
+		{
+			%obj.playaudio(0, "survivor_painhigh" @ getRandom(1, 4) @ "_sound");
+		}
+	}
+}
+
 function SurvivorPlayerDowned::onDisabled(%this,%obj)
 {	
 	%obj.playaudio(0,"survivor_death" @ getRandom(1, 8) @ "_sound");

@@ -595,15 +595,18 @@ function MinigameSO::spawnZombies(%minigame,%type,%amount,%spawnset,%count)
 }
 registerInputEvent("fxDTSBrick","onDirectorBotTeleSpawn","Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "Bot Bot" TAB "MiniGame MiniGame");
 
-function MiniGameSO::l4bMusic(%minigame,%datablock,%loopable,%type)
-{
-    for(%i=0;%i<%minigame.numMembers;%i++)    
-    if(isObject(%mgmember = %minigame.member[%i])) %mgmember.l4bMusic(%datablock,%loopable,%type);    
-}
+$L4B_Music["Music"] = 0;
+$L4B_Music["Stinger1"] = 0;
+$L4B_Music["Stinger2"] = 0;
+$L4B_Music["Stinger3"] = 0;
+$L4B_Music["Ambience"] = 0;
 
-function GameConnection::l4bMusic(%client,%datablock,%loopable,%type)
-{   
-    if(!isObject(%datablock)) return;
+function MiniGameSO::l4bMusic(%minigame, %datablock, %loopable, %type)
+{
+    if(isObject($L4B_Music[%type])) 
+    {
+        $L4B_Music[%type].delete();
+    }
 
     switch$(%type)
     {
@@ -614,10 +617,47 @@ function GameConnection::l4bMusic(%client,%datablock,%loopable,%type)
         case "Ambience": %channel = 12;
         default: return;
     }
+    $L4B_Music[%type] = new AudioEmitter(l4b_music)
+    {
+        profile = %datablock;
+        isLooping= %loopable;
+        position = "9e9 9e9 9e9";
+        is3D = false;
+        useProfileDescription = false;
+        type = %channel;
+    };
+    $L4B_Music[%type].setNetFlag(6, true);
 
+    for(%i = 0; %i < %minigame.numMembers; %i++)   
+    {
+        if(isObject(%mgmember = %minigame.member[%i]) && !isObject(%mgmember.l4bMusic["Private"]))
+        {
+            %mgmember.scopeToClient($L4B_Music[%type]);
+        }
+    }
+}
 
+function GameConnection::l4bMusic(%client, %datablock, %loopable, %type)
+{   
+    if(!isObject(%datablock))
+    {
+        return;
+    }
+    if(isObject(%client.l4bMusic[%type])) 
+    {
+        %client.l4bMusic[%type].delete();
+    }
 
-    if(isObject(%client.l4bMusic[%type])) %client.l4bMusic[%type].delete();
+    switch$(%type)
+    {
+        case "Music": %channel = 10;
+        case "Private": %channel = 10;
+        case "Stinger1": %channel = 11;
+        case "Stinger2": %channel = 11;
+        case "Stinger3": %channel = 11;
+        case "Ambience": %channel = 12;
+        default: return;
+    }
 
     %client.l4bMusic[%type] = new AudioEmitter(l4b_music)
     {
@@ -628,29 +668,43 @@ function GameConnection::l4bMusic(%client,%datablock,%loopable,%type)
         useProfileDescription = false;
         type = %channel;
     };
-
     %client.l4bMusic[%type].setNetFlag(6, true);
     %client.l4bMusic[%type].scopeToClient(%client);
-    
 }
 
-function MiniGameSO::deletel4bMusic(%minigame,%type)
+function MiniGameSO::deletel4bMusic(%minigame, %type)
 {
-    for(%i=0;%i<%minigame.numMembers;%i++)
-    if(isObject(%mgmember = %minigame.member[%i])) %mgmember.deletel4bMusic(%type);
-}
-
-function GameConnection::deletel4bMusic(%client,%type)
-{
-    switch$(%type)
+    if(isObject($L4B_Music[%type])) 
     {
-        case "Music":
-        case "Stinger1":
-        case "Stinger2":
-        case "Stinger3":
-        case "Ambience":
-        default: return;
+        $L4B_Music[%type].delete();
+    }
+    for(%i = 0; %i < %minigame.numMembers; %i++)
+    {
+        if(isObject(%mgmember = %minigame.member[%i]) && isObject(%mgmember.l4bMusic["Private"]))
+        {
+            %mgmember.l4bMusic["Private"].delete();
+        }
+    }
+}
+
+function GameConnection::deletel4bMusic(%client, %type)
+{
+    if(isObject(%client.l4bMusic[%type])) 
+    {
+        %client.l4bMusic[%type].delete();
+    }
+}
+
+function GameConnection::musicCatchUp(%client)
+{
+    if(isObject(%client.l4bMusic["Private"])) 
+    {
+        %client.l4bMusic["Private"].delete();
     }
 
-    if(isObject(%client.l4bMusic[%type])) %client.l4bMusic[%type].delete();
+    %music_tags = "Music Stinger1 Stinger2 Stinger3 Ambience";
+    for(%i = 0; %i < getWordCount(%music_tags); %i++)
+    {
+        $L4B_Music[getWord(%music_tags, %i)].scopeToClient(%client);
+    }
 }
