@@ -64,7 +64,7 @@ datablock ExplosionData(ZombieHitExplosion)
 {
 	shakeCamera = true;
 	camShakeDuration = 1;
-	camShakeRadius = 10.0;
+	camShakeRadius = 1;
 	camShakeFreq = "3 3 3";
 	camShakeAmp = "0.6 0.6 0.6";
 };
@@ -1770,6 +1770,7 @@ datablock PlayerData(CommonZombieHoleBot : L4BStandardPlayer)
 	hSmoothWander = 1;
 	hReturnToSpawn = 0;//Returns to spawn when too far
 	hSpawnDist = 32;//Defines the distance bot can travel away from spawnbrick
+	hMoveSlowdown = false;
 
 	//Searching options
 	hSearch = 1;//Search for Players
@@ -1782,14 +1783,13 @@ datablock PlayerData(CommonZombieHoleBot : L4BStandardPlayer)
 
 	//Attack Options
 	hMelee = 1;
-	hAttackDamage = $Pref::Server::L4B2Bots::NormalDamage;
+	hAttackDamage = $Pref::L4B::Zombies::NormalDamage;
 	hShoot = 1;
 	hWep = "";
 	hShootTimes = 4;
 	hMaxShootRange = 60;
 	hAvoidCloseRange = 0;
 	hTooCloseRange = 0;
-
 	
 	//Misc options
 	hAvoidObstacles = 1;
@@ -1827,11 +1827,11 @@ datablock PlayerData(ZombieChargerHoleBot : CommonZombieHoleBot)
 	minImpactSpeed = 25;
 	airControl = 0.1;
 	speedDamageScale = 0.2;
-	maxdamage = 300;//Health
+	maxdamage = 100;//Health
 	hName = "Charger";//cannot contain spaces
-	hTickRate = 5000;
+	hTickRate = 4000;
 	hMeleeCI = "Charger";
-	hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
+	hAttackDamage = $Pref::L4B::Zombies::SpecialsDamage;
 
 	cameramaxdist = 4;
     cameraVerticalOffset = 1;
@@ -1897,7 +1897,7 @@ datablock PlayerData(ZombieTankHoleBot : CommonZombieHoleBot)
 {
 	uiName = "Tank Infected";
 	shapeFile = "add-ons/gamemode_left4block/modules/add-ins/player_l4b/models/tank/zTank.dts";
-	maxDamage = $Pref::Server::L4B2Bots::TankHealth;//Health
+	maxDamage = $Pref::L4B::Zombies::TankHealth;//Health
 	mass = 500;
 
 	runforce = 100 * 75;
@@ -1932,7 +1932,7 @@ datablock PlayerData(ZombieTankHoleBot : CommonZombieHoleBot)
 	jumpForce = 8.3 * 90;
 
 	hName = "Tank";//cannot contain spaces
-	hTickRate = 5000;
+	hTickRate = 4000;
 	jumpSound = "HorseJumpSound";
 	resistMelee = true;
 	
@@ -1941,7 +1941,7 @@ datablock PlayerData(ZombieTankHoleBot : CommonZombieHoleBot)
 	hSearchFOV = 1;//if enabled disables normal hSearch
 	hMaxShootRange = 120;//The range in which the bot will shoot the player
 
-	hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage*2.5;
+	hAttackDamage = $Pref::L4B::Zombies::SpecialsDamage*2.5;
 	hMeleeCI = "Tank";
 
 	hMaxShootRange = 512;
@@ -2001,12 +2001,12 @@ datablock PlayerData(ZombieHunterHoleBot : CommonZombieHoleBot)
 	SpecialCPMessage = "Hold shift, then press space to leap <br>\c6Pounce to pin non-infected";
 	hBigMeleeSound = "";
 
-	maxdamage = 150;//Health
-	hTickRate = 5000;
+	maxdamage = 100;//Health
+	hTickRate = 4000;
 
 	hName = "Hunter";//cannot contain spaces
 	hStrafe = 0;//Randomly strafe while following player
-	hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
+	hAttackDamage = $Pref::L4B::Zombies::SpecialsDamage;
 
 	rechargeRate = 1.75;
 	maxenergy = 100;
@@ -2043,12 +2043,12 @@ datablock PlayerData(ZombieJockeyHoleBot : CommonZombieHoleBot)
     cameratilt = 0.1;
     maxfreelookangle = 2;
 
-	maxdamage = 150;//Health
+	maxdamage = 100;//Health
 	jumpForce = 100 * 10; //8.3 * 90;
-	hTickRate = 5000;
+	hTickRate = 4000;
 
 	hName = "Jockey";//cannot contain spaces
-	hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
+	hAttackDamage = $Pref::L4B::Zombies::SpecialsDamage;
 	
 	hIsInfected = 2;
 	hZombieL4BType = "Special";
@@ -2075,7 +2075,7 @@ datablock PlayerData(ZombieSpitterHoleBot : CommonZombieHoleBot)
 	minImpactSpeed = 16;
 	speedDamageScale = 2;
 
-	maxdamage = 150;//Health
+	maxdamage = 100;//Health
 
     maxForwardSpeed = 8;
     maxBackwardSpeed = 7;
@@ -2092,12 +2092,11 @@ datablock PlayerData(ZombieSpitterHoleBot : CommonZombieHoleBot)
     maxfreelookangle = 2;
 
 	hName = "Spitter";//cannot contain spaces
-	hTickRate = 5000;
+	hTickRate = 4000;
 	hShoot = 1;
 	hMaxShootRange = 100;//The range in which the bot will shoot the player
 	hTooCloseRange = 50;//in brick units
-	hMoveSlowdown = 1;
-	hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
+	hAttackDamage = $Pref::L4B::Zombies::SpecialsDamage;
 
 	hIsInfected = 1;
 	hZombieL4BType = "Special";
@@ -2133,11 +2132,11 @@ datablock PlayerData(ZombieSmokerHoleBot : CommonZombieHoleBot)
 	minImpactSpeed = 24;
 	speedDamageScale = 2;
 
-	maxdamage = 200;//Health
+	maxdamage = 100;//Health
 
 	hName = "Smoker";//cannot contain spaces
-	hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
-	hTickRate = 5000;
+	hAttackDamage = $Pref::L4B::Zombies::SpecialsDamage;
+	hTickRate = 4000;
 
     maxForwardSpeed = 8;
     maxBackwardSpeed = 7;
@@ -2210,15 +2209,15 @@ datablock PlayerData(ZombieBoomerHoleBot : CommonZombieHoleBot)
 	hBigMeleeSound = "";
 	hNeedsWeapons = 1;
 
-	maxdamage = 250;//Thicc health
-	hTickRate = 5000;
+	maxdamage = 100;
+	hTickRate = 4000;
 
 	hShoot = 1;
 	hMaxShootRange = 2.5;//The range in which the bot will shoot the player
 	hMoveSlowdown = 1;
 
 	hName = "Boomer";//cannot contain spaces
-	hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
+	hAttackDamage = $Pref::L4B::Zombies::SpecialsDamage;
 
 	rechargeRate = 1.25;
 	maxenergy = 100;
@@ -2272,14 +2271,14 @@ datablock PlayerData(ZombieWitchHoleBot : CommonZombieHoleBot)
     shapeFile = "./models/zombie_claws.dts";
     uiName = "";
     maxdamage = 2500;//Health
-    hTickRate = 5000;
+    hTickRate = 4000;
 
     hName = "Witch";//cannot contain spaces
     hMeleeCI = "Witched";
     hZombieL4BType = "Special";
 	hSearch = false;
     runforce = 100 * 75;
-    hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage*5;//15;//Melee Damage
+    hAttackDamage = $Pref::L4B::Zombies::SpecialsDamage*5;//15;//Melee Damage
     resistMelee = true;
 };
 

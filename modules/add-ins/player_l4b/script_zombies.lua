@@ -1,8 +1,8 @@
 ---@diagnostic disable: undefined-global, lowercase-global, redundant-parameter
 
 function hNoSeeIdleTeleport(obj)
-
-    if ts.getstate(obj) == "Dead" or ts.isobject(ts.call("getMinigameFromObject",obj)) == false or ts.callobj(obj,"hState") == "Following" then 
+    
+    if ts.getstate(obj) == "Dead" or ts.isobject(ts.call("getMinigameFromObject",obj)) == false or ts.getobj(obj,"hState") == "Following" then 
         ts.setobj(obj,"hTimeLeftToTele",0)
         return 
     end--If we are not in a minigame, dead or following a targetet, quickly return the function
@@ -10,8 +10,12 @@ function hNoSeeIdleTeleport(obj)
     if tonumber(ts.getobj(obj,"hTimeLeftToTele")) == nil then ts.setobj(obj,"hTimeLeftToTele",0) end
     local hTimeLeftToTele = tonumber(ts.getobj(obj,"hTimeLeftToTele"))
     ts.setobj(obj,"hTimeLeftToTele",hTimeLeftToTele+1)    
+    
+    if ts.getobj(obj,"hState") == "Wandering" then TimeMax = 5
+    elseif ts.getobj(obj,"hState") == "Pathing" then TimeMax = 10
+    else TimeMax = 10 end
 
-    if hTimeLeftToTele >= 5 then--Only begin after a certain amount of time has passed, which is the amount of hole loops the bot does when its not in any of the returned states above
+    if hTimeLeftToTele >= TimeMax then--Only begin after a certain amount of time has passed, which is the amount of hole loops the bot does when its not in any of the returned states above
         ts.setobj(obj,"hTimeLeftToTele",0)
 
         if ts.isobject(ts.call("getMinigameFromObject",obj)) then
@@ -37,9 +41,9 @@ function hNoSeeIdleTeleport(obj)
                             local posnormal = VectorNormalize(VectorSub(headpos,playereyepoint))
 
                             if tonumber(VectorDot(playereyevector,posnormal)) > 0.55 then--Can they see us?
-                                cansee = true--We can be seen
+                                cansee = true
                                 break
-                                else cansee = false--We cannot be seen                          
+                                else cansee = false                  
                             end
                         end
                     end
@@ -61,7 +65,7 @@ function L4B_ZombieLunge(obj,target,power)
         local normvector = VectorNormalize(VectorAdd(distancepos,"0 0 "..0.15*VectorDist(targetpos,objpos)))
         local eye = VectorScale(normvector,2);
 
-        ts.callobj(obj,"setvelocity",VectorScale(eye,power))
+        ts.callobj(obj,"setvelocity",VectorAdd(VectorScale(eye,power),tonumber(ts.call("getWord",ts.callobj(target,"getVelocity"),0)) .. " " .. tonumber(ts.call("getWord",ts.callobj(target,"getVelocity"),1)) .. " " .. tonumber(ts.call("getWord",ts.callobj(target,"getVelocity"),2))))
         ts.callobj(obj,"playthread",0,"jump")
 end
 

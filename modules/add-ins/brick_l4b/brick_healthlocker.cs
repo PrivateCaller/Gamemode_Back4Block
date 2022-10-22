@@ -1,36 +1,3 @@
-datablock ItemData(RHealthLockerItem)
-{
-	category = "Item";  // Mission editor category
-	//className = "Item"; // For inventory system
-
-	 // Basic Item Properties
-	shapeFile = "./HealthLocker15.dts";
-	rotate = false;
-	mass = 1;
-	density = 0.2;
-	elasticity = 0.2;
-	friction = 0.6;
-	emap = true;
-
-	//gui stuff
-	uiName = "";
-	iconName = "";
-	doColorShift = false;
-
-	 // Dynamic properties defined by the scripts
-	image = "";
-	canDrop = true;
-};
-datablock fxDTSBrickData (BrickLockerData)
-{
-	brickFile = "./LockerBrick.blb";
-	category = "Special";
-	subCategory = "Interactive";
-	uiName = "Health Locker";
-	iconName = "add-ons/gamemode_left4block/modules/add-ins/brick_interactive/health_locker/Icon_HealthLocker";
-	indestructable = 1;
-};
-
 function RHealthLockerItem::onAdd(%this, %obj)
 {
 	Parent::onAdd(%this, %obj);
@@ -55,8 +22,6 @@ function BrickLockerData::onPlant(%this, %obj)
 		datablock = "RHealthLockerItem";
 		static = 1;
 		spawnbrick = %obj;		
-		AmmoSupplies = $Pref::L4BHealthLocker::SupplyAmount;
-		AmmoSupplyMax = $Pref::L4BHealthLocker::SupplyAmount;
 	};
 
 	%healthlocker.canPickup = false;
@@ -108,34 +73,11 @@ package HealthLockerColFunctions
 			if(%obj.getdamagelevel() < 5 || %obj.getstate() $= "Dead" || %obj.hIsInfected) return;	
 
 			%brick = %col.spawnbrick;
-			if(%col.lasttouch+$Pref::L4BHealthLocker::AcquireDelay < getsimtime() && !%col.isshutting)
+			if(%col.lasttouch+250 < getsimtime() && !%col.isshutting)
 			{
 				%col.lasttouch = getsimtime();
-
-				if($Pref::L4BHealthLocker::Supplies)//Functions if supplycount equals supply amount
-				{
-					if(isObject(getMiniGamefromObject(%obj,%col)))
-					{
-						if(%col.AmmoSupplies > 0)
-						{
-							GiveHealth(%obj,%col);
-
-							%col.AmmoSupplies -= mFloatLength(%obj.getdamagepercent()*2,2);
-							%col.AmmoSupplies = mClampF(%col.AmmoSupplies, 0, $Pref::L4BHealthLocker::SupplyAmount);
-
-							AmmoShapeName(%brick,"Supplies:" SPC mFloatLength(%col.AmmoSupplies,2));
-						}
-						else
-						AmmoShapeName(%brick,"Supplies:" SPC mFloatLength(%col.AmmoSupplies,2));
-					}
-					else GiveHealth(%obj,%col);
-        		}
-				else
-				{
-					GiveHealth(%obj,%col);
-					AmmoShapeName(%brick,"");
-				}
-
+				GiveHealth(%obj,%col);
+				AmmoShapeName(%brick,"");
 			}		
 			return;
 		}

@@ -4,7 +4,10 @@ function ZombieJockeyHoleBot::onAdd(%this,%obj)
 	CommonZombieHoleBot::onAdd(%this,%obj);
 }
 
-function ZombieJockeyHoleBot::doDismount(%this, %obj, %forced) { return; }
+function ZombieJockeyHoleBot::doDismount(%this, %obj, %forced) 
+{ 
+	if(isObject(%obj.hEating)) return Parent::doDismount(%this, %obj, %forced);
+}
 
 function ZombieJockeyHoleBot::onNewDataBlock(%this,%obj)
 {
@@ -17,14 +20,13 @@ function L4B_holeJockeyKill(%obj,%col)
 {
 	if(L4B_SpecialsPinCheck(%obj,%col))
 	{
-		if(%obj.getClassName() $= "AIPlayer")
-		%obj.hRunAwayFromPlayer(%col);
+		if(%obj.getClassName() $= "AIPlayer") %obj.hRunAwayFromPlayer(%col);
 
-		%col.damage(%obj.hFakeProjectile, %col.getposition(), $Pref::Server::L4B2Bots::SpecialsDamage/2, $DamageType::Jockey);
-		%col.playaudio(1,"zombie_hit" @ getrandom(1,8) @ "_sound");
-		%obj.playThread(2,shiftdown);
+		%col.damage(%obj.hFakeProjectile, %col.getposition(), $Pref::L4B::Zombies::SpecialsDamage/1.25, $DamageType::Jockey);
+		%obj.playthread(2,"zAttack" @ getRandom(1,3));
 		%obj.playThread(3,talk);
 		%col.playThread(2,plant);
+		%obj.playaudio(1,"melee_hit" @ getrandom(1,8) @ "_sound");
 
 		%obj.JockeyHurt = schedule(1000,0,L4B_holeJockeyKill,%obj,%col);
 	}
@@ -37,13 +39,13 @@ function L4B_holeJockeyKill(%obj,%col)
 
 	function ZombieJockeyHoleBot::OnCollision(%this, %obj, %col, %fade, %pos, %norm)
 {
-	if(%obj.getState() $= "Dead") return Parent::OnCollision(%this, %obj, %col, %fade, %pos, %norm);
-	
-	if(checkHoleBotTeams(%obj,%col))
-	%obj.hJump();
-	
-	%oScale = getWord(%obj.getScale(),0);
-	if(%oScale >= 0.75 && %oScale <= 0.85 && getWord(%obj.getvelocity(),2) != 0) %obj.SpecialPinAttack(%col);
+	Parent::OnCollision(%this, %obj, %col, %fade, %pos, %norm);	
+
+
+	if(%obj.getState $= "Dead" || %col.getdatablock().isDowned) return;
+
+	if(checkHoleBotTeams(%obj,%col)) %obj.hJump();	
+	if((%oScale = getWord(%obj.getScale(),0)) == 0.75 && getWord(%obj.getvelocity(),2) != 0) %obj.SpecialPinAttack(%col);
 	
 
 	Parent::oncollision(%this, %obj, %col, %fade, %pos, %norm);
@@ -52,10 +54,8 @@ function L4B_holeJockeyKill(%obj,%col)
 	function ZombieJockeyHoleBot::onBotLoop(%this,%obj)
 {
 	%obj.hNoSeeIdleTeleport();
-	%obj.hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
 
-	if(%obj.hEating)
-	return;
+	if(%obj.hEating) return;
 
 	if(!%obj.hFollowing)
 	{
@@ -67,20 +67,27 @@ function L4B_holeJockeyKill(%obj,%col)
 
 function ZombieJockeyHoleBot::onBotFollow( %this, %obj, %targ )
 {
-	if(VectorDist(%obj.getposition(), %targ.getposition()) < 5)
+	if((!isObject(%obj) || %obj.getState() $= "Dead") || (!isObject(%targ) || %targ.getState() $= "Dead")) return;
+	
+	if(VectorDist(%obj.getposition(), %targ.getposition()) < 15)
 	{
-		%obj.hJump();
+		L4B_ZombieLunge(%obj,%targ,5);
+		%obj.setvelocity(vectorAdd(%obj.getVelocity(),"0 0 7.5"));
+
 		%obj.playThread(1,activate2);
 		%obj.playThread(2,shiftUp);
 		%obj.playThread(3,jump);
-
-		%tPos = %obj.getPosition();//our position
-		%oPos = %targ.getPosition();
-		%dis = VectorSub(%oPos, %tPos); //displacement is distance and direction of object from us, it's pos - our pos
-		%normVec = vectorscale(VectorNormalize(%dis),500); //get rid of the distance (setting it to 1) so we only have direction left
-	
-		%obj.schedule(500,applyImpulse,%targ.getPosition(), %normVec);
 	}
+	else if(VectorDist(%obj.getposition(), %targ.getposition()) < 25) %this.schedule(1000,onBotFollow,%obj,%targ);
+}
+
+function ZombieJockeyHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
+{
+	%limb = %obj.rgetDamageLocation(%position);
+	if(%damageType !$= $DamageType::FallDamage || %damageType !$= $DamageType::Impact)
+	if(%limb) %damage = %damage/6;
+	
+	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
 }
 
 function ZombieJockeyHoleBot::onDamage(%this,%obj,%source,%pos,%damage,%type)
@@ -136,7 +143,7 @@ function ZombieJockeyHoleBot::onDamage(%this,%obj,%source,%pos,%damage,%type)
 		%forcescale = %oscale+%force/50;
 		%obj.spawnExplosion(pushBroomProjectile,%forcescale SPC %forcescale SPC %forcescale);
 
-		if(isObject(%obj.hFollowing) && %obj.hFollowing.getState() !$= "Dead" && !%obj.isStrangling && !%obj.hFollowing.isBeingStrangled) %obj.getDatablock().onBotFollow(%obj,%obj.hFollowing);
+		if(isObject(%obj.hFollowing) && %obj.hFollowing.getState() !$= "Dead") %this.onBotFollow(%obj,%obj.hFollowing);
 	}
 }
 

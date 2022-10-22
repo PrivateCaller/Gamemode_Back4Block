@@ -238,6 +238,13 @@ function ZombieMedpackImage::onTrigger(%this, %obj, %trigger, %state)
 	return parent::onTrigger(%this, %obj, %trigger, %state);
 }
 
+function ColaBoxImage::onActivate(%this, %obj, %slot)
+{
+	%obj.playaudio(1,"colaboxequip" @ getrandom(1,4) @ "_sound");
+	%obj.playthread(2, "armReadyBoth");
+	%obj.playthread(2, "plant");
+}
+
 function DefibrillatorImage::onFire(%data, %obj, %slot)
 {
 	parent::onFire(%data, %obj, %slot);

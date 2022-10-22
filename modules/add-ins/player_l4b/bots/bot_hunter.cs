@@ -22,11 +22,19 @@ function L4B_holeHunterKill(%obj,%col)
 			%obj.hMeleeAttack(%col);
 		}
 		
-		%obj.HunterHurt = schedule(1000,0,L4B_holeHunterKill,%obj,%col);
+		%obj.HunterHurt = schedule(500,0,L4B_holeHunterKill,%obj,%col);
 		%obj.unmount();
-		%col.damage(%obj.hFakeProjectile, %col.getposition(), $Pref::Server::L4B2Bots::SpecialsDamage*1.25, $DamageType::Hunter);
-		//%col.damage(%obj.hFakeProjectile, %col.getposition(), -100, $DamageType::Hunter);
+		%col.damage(%obj.hFakeProjectile, %col.getposition(), $Pref::L4B::Zombies::SpecialsDamage/50, $DamageType::Hunter);
 	}
+}
+
+function ZombieHunterHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
+{
+	%limb = %obj.rgetDamageLocation(%position);
+	if(%damageType !$= $DamageType::FallDamage || %damageType !$= $DamageType::Impact)
+	if(%limb) %damage = %damage/5;
+	
+	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
 }
 
 function ZombieHunterHoleBot::onDamage(%this,%obj)
@@ -60,8 +68,7 @@ function ZombieHunterHoleBot::onDamage(%this,%obj)
 
 function ZombieHunterHoleBot::onDisabled(%this,%obj)
 {
-	if(%obj.getstate() !$= "Dead")
-	return;
+	if(%obj.getstate() !$= "Dead") return;
 
 	%obj.playaudio(0,"hunter_death" @ getrandom(1,3) @ "_sound");
 
@@ -77,7 +84,6 @@ function ZombieHunterHoleBot::onDisabled(%this,%obj)
 
 function ZombieHunterHoleBot::onBotLoop(%this,%obj)
 {
-	%obj.hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
 	%obj.hNoSeeIdleTeleport();
 	
 	if(!%obj.hFollowing)
@@ -111,6 +117,7 @@ function ZombieHunterHoleBot::onBotFollow( %this, %obj, %targ )
 	
 		%obj.hCrouch(1750);
 		%obj.playaudio(0,"hunter_recognize" @ getrandom(1,3) @ "_sound");
+		%obj.schedule(900,hShootAim,%targ);
 		%obj.hAbouttoattack = schedule(1000,0,L4B_HunterZombieLunge,%obj,%targ);
 	}
 }
@@ -121,9 +128,6 @@ function L4B_HunterZombieLunge(%obj,%targ)
 
 	%obj.playaudio(0,"hunter_attack" @ getrandom(1,3) @ "_sound");
 	%obj.playaudio(1,"hunter_lunge_sound");
-
-	if(isObject(%obj.light))
-	%obj.light.delete();
 
 	%obj.playthread(3,activate2);
 	%obj.playthread(0,jump); 
@@ -143,12 +147,12 @@ function ZombieHunterHoleBot::onBotMelee(%this,%obj,%col)
 
 	function ZombieHunterHoleBot::onImpact(%this, %obj, %col, %vec, %force)
 {
-	%oScale = getWord(%obj.getScale(),0);
-	%forcescale = %oscale+%force/50;
+	%oScale = getWord(%obj.getScale(),2);
+	%forcescale = %force/25 * %oscale;
 	%obj.spawnExplosion(pushBroomProjectile,%forcescale SPC %forcescale SPC %forcescale);
 	%obj.setMaxForwardSpeed(9);
 	
-	if(%oScale >= 0.9 && %obj.getstate() !$= "Dead") %obj.SpecialPinAttack(%col,%force);
+	if(%oScale >= 0.9 && %obj.getstate() !$= "Dead") %obj.SpecialPinAttack(%col,%force/2.5);
 
 	Parent::onImpact(%this, %obj, %col, %vec, %force);
 }

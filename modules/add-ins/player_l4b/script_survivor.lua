@@ -85,15 +85,7 @@ function Survivor_LeftClick(val,obj)
             local touchedobj = ts.callobj(ts.getobj(obj, "LastActivated"),"getID")
             local touchedobjclass = ts.callobj(touchedobj, "getClassName")
 
-            if touchedobjclass == "WheeledVehicle" then
-                
-                local otdatablockimage = ts.getcallobj(touchedobj,"getDatablock().image")
-                if otdatablockimage ~= "" then
-                    ts.callobj(obj,"mountImage",otdatablockimage, 0);
-                    ts.callobj(touchedobj,"delete")
-                end
-
-            elseif touchedobjclass == "Player" or touchedobjclass == "AIPlayer" then
+            if touchedobjclass == "Player" or touchedobjclass == "AIPlayer" then
 
                 if ts.getcallobj(touchedobj,"getdatablock().isDowned") == "1" then Survivor_ReviveDowned(obj) end
                 if tonumber(ts.getobj(touchedobj,"isbeingstrangled")) == 1 and tonumber(ts.getobj(touchedobj,"hisinfected")) ~= 1 then
@@ -237,9 +229,9 @@ function Survivor_FallDamage(obj,vector,force)--Default falling damage is garbag
     local vectorz = math.abs(tonumber(ts.call("getword",vector,2)))
     local falldamage = vectorz/2 * tonumber(force)/2
 
-    if vectorz > tonumber(ts.getcallobj(obj,"getdatablock().minimpactspeed")) and vectorz < 20 then ts.callobj(obj,"damage",obj,pos,falldamage/3.75,ts.get("DamageType::Fall"))
-    elseif vectorz > 20 and vectorz < 25 then ts.callobj(obj,"damage",obj,pos,falldamage/1.875,ts.get("DamageType::Fall"))
-    elseif vectorz > 25 and vectorz < 50 then ts.callobj(obj,"damage",obj,pos,tonumber(ts.getcallobj(obj,"getdatablock().maxDamage")),ts.get("DamageType::Fall"))
+    if vectorz > tonumber(ts.getcallobj(obj,"getdatablock().minimpactspeed")) and vectorz < 25 then ts.callobj(obj,"damage",obj,pos,falldamage/3.75,ts.get("DamageType::Fall"))
+    elseif vectorz > 30 and vectorz < 35 then ts.callobj(obj,"damage",obj,pos,falldamage/1.875,ts.get("DamageType::Fall"))
+    elseif vectorz > 35 and vectorz < 60 then ts.callobj(obj,"damage",obj,pos,tonumber(ts.getcallobj(obj,"getdatablock().maxDamage")),ts.get("DamageType::Fall"))
     else ts.callobj(obj,"damage",obj,pos,falldamage*2.5,ts.get("DamageType::Fall"))--Ouch
     end
 end

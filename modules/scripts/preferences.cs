@@ -130,12 +130,6 @@ function configLoadL4BItemSlots()
 	%read.delete();
 }
 
-configLoadL4BItemScavenge();
-configLoadL4BItemSlots(); 
-
-$DecalSystem::DecalLimit = 200;
-$DecalSystem::DecalTimeout = 300000;
-
 if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 {
 	registerPreferenceAddon("Gamemode_Left4Block", "Left 4 Block", "bios");				
@@ -148,7 +142,7 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 		title          = "Difficulty";
 		type           = "dropdown";
 		params         = "Normal 0 Advanced 1";
-		variable       = "$Pref::Server::L4B2Bots::Difficulty";
+		variable       = "$Pref::L4B::Zombies::Difficulty";
 		defaultValue   = "Normal 1";
 		updateCallback = "";
 		loadCallback   = "";
@@ -170,61 +164,9 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 		type           = "bool";
 		params         = "";
 
-		variable       = "$Pref::L4BDirector::EnableOnMG";
+		variable       = "$Pref::L4B::Director::EnableOnMG";
 
 		defaultValue   = "0";
-
-		updateCallback = "";
-		loadCallback   = "";
-
-		hostOnly       = false;
-		secret         = false;
-
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "Gamemode_Left4Block";
-
-		addon          = "Gamemode_Left4Block";
-		category       = "Interactive Bricks";
-		title          = "Ammo crate delay (ms)";
-
-		type           = "num";
-		params         = "0 750 0";
-
-		variable       = "$Pref::Server::L4BAmmocrate::AmmoAcquireDelay";
-
-		defaultValue   = "500";
-
-		updateCallback = "";
-		loadCallback   = "";
-
-		hostOnly       = false;
-		secret         = false;
-
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "Gamemode_Left4Block";
-
-		addon          = "Gamemode_Left4Block";
-		category       = "Interactive Bricks";
-		title          = "Health locker delay (ms)";
-
-		type           = "num";
-		params         = "0 750 0";
-
-		variable       = "$Pref::L4BHealthLocker::AcquireDelay";
-
-		defaultValue   = "500";
 
 		updateCallback = "";
 		loadCallback   = "";
@@ -247,7 +189,7 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 		type           = "bool";
 		params         = "";
 
-		variable       = "$Pref::Server::L4BBlood::Enable";
+		variable       = "$Pref::L4B::Blood::Enable";
 
 		defaultValue   = "1";
 
@@ -272,7 +214,7 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 		type           = "bool";
 		params         = "";
 
-		variable       = "$Pref::Server::L4BBlood::BloodDecals";
+		variable       = "$Pref::L4B::Blood::BloodDecals";
 
 		defaultValue   = "1";
 
@@ -295,7 +237,7 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 		title          = "Blood Decals Limit";
 		type           = "num";
 		params         = "0 300 0";
-		variable       = "$Pref::Server::L4BBlood::BloodDecalsLimit";
+		variable       = "$Pref::L4B::Blood::BloodDecalsLimit";
 		defaultValue   = "150";
 		updateCallback = "";
 		loadCallback   = "";
@@ -314,7 +256,7 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 		title          = "Blood Decals Timeout (ms)";
 		type           = "num";
 		params         = "0 30000 0";
-		variable       = "$Pref::Server::L4BBlood::BloodDecalsTimeout";
+		variable       = "$Pref::L4B::Blood::BloodDecalsTimeout";
 		defaultValue   = "15000";
 		updateCallback = "";
 		loadCallback   = "";
@@ -327,74 +269,50 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 }
 else
 {
-	$Pref::Server::L4BBlood::Enable = true;
-	$Pref::Server::L4BBlood::BloodDecals = true;
-	$Pref::Server::L4BAmmocrate::BloodDecalsLimit = 300;
-	$Pref::Server::L4BAmmocrate::BloodDecalsTimeout = 15000;
-	$Pref::Server::L4BAmmocrate::AcquireDelay = 500;
-	$Pref::L4BHealthLocker::AcquireDelay = 500;
-	$Pref::L4BDirector::EnableOnMG = false;	
-	$Pref::Server::L4B2Bots::Difficulty = 1;
-	$Pref::Server::L4B2Bots::NormalDamage = 5;
-	$Pref::Server::L4B2Bots::SpecialsDamage = 15;
-	$Pref::Server::L4B2Bots::TankRounds = 1;
-	$Pref::Server::L4B2Bots::TankRoundChance = 25;
-	$Pref::Server::L4B2Bots::TankHealth = 5000;
-	$Pref::Server::L4B2Bots::SurvivorImmunity = 1;
-	$Pref::Server::L4B2Bots::MaxSpecial = 4;
-	$Pref::Server::L4B2Bots::MaxHorde = 60;
-	$Pref::Server::L4B2Bots::MaxTank = 1;
+	$Pref::L4B::Blood::Enable = true;
+	$Pref::L4B::Blood::BloodDecals = true;
+	$Pref::L4B::Blood::BloodDecalsLimit = 300;
+	$Pref::L4B::Blood::BloodDecalsTimeout = 15000;
+	$Pref::L4B:MapRotation::Enabled = true;
+	$Pref::L4B:MapRotation::RequiredVotes = 0;
+	$Pref::L4B:MapRotation::RequiredNext = 2;
+	$Pref::L4B:MapRotation::RequiredReload = 2;
+	$Pref::L4B:MapRotation::VoteMin = 5;
+	$Pref::L4B:MapRotation::MinReset = 5;
+	$Pref::L4B:MapRotation::CoolDown = 10;	
+	$Pref::L4B::L4B::Director::EnableOnMG = false;	
+	$Pref::L4B::Zombies::Difficulty = 1;
 }
-
-%time = strreplace(getDateTime(), "/", " ");
-$L4B_CurrentMonth = getWord(%time,0);
-
-$hZombieSkin[%hzskin++] = "0.16 0.25 0.21 1";
-$hZombieSkinAmount = %hzskin;
-
-$hZombieSpecialType[%hzs++] = "ZombieChargerHoleBot";
-$hZombieSpecialType[%hzs++] = "ZombieBoomerHoleBot";
-$hZombieSpecialType[%hzs++] = "ZombieSpitterHoleBot";
-$hZombieSpecialType[%hzs++] = "ZombieHunterHoleBot";
-$hZombieSpecialType[%hzs++] = "ZombieSmokerHoleBot";
-$hZombieSpecialType[%hzs++] = "ZombieJockeyHoleBot";
-$hZombieSpecialTypeAmount = %hzs;
-
-$hZombieUncommonType[%hzu++] = "ZombieConstructionHoleBot";
-$hZombieUncommonType[%hzu++] = "ZombieFallenHoleBot";
-$hZombieUncommonType[%hzu++] = "ZombieCedaHoleBot";
-$hZombieUncommonType[%hzu++] = "ZombieSoldierHoleBot";
-$hZombieUncommonType[%hzu++] = "ZombiePoliceHoleBot";
-$hZombieUncommonTypeAmount = %hzu;
 
 function L4B_DifficultyAdjustment()
 {
-	switch($Pref::Server::L4B2Bots::Difficulty)
+	switch($Pref::L4B::Zombies::Difficulty)
 	{
-		case 0: $Pref::Server::L4B2Bots::NormalDamage = 5;
-				$Pref::Server::L4B2Bots::SpecialsDamage = 15;
-				$Pref::Server::L4B2Bots::TankRounds = 1;
-				$Pref::Server::L4B2Bots::TankRoundChance = 25;
-				$Pref::Server::L4B2Bots::TankHealth = 2500;
-				$Pref::Server::L4B2Bots::SurvivorImmunity = 1;
-				$Pref::Server::L4B2Bots::MaxSpecial = 4;
-				$Pref::Server::L4B2Bots::MaxHorde = 60;
-				$Pref::Server::L4B2Bots::MaxTank = 1;
+		case 0: $Pref::L4B::Zombies::NormalDamage = 5;
+				$Pref::L4B::Zombies::SpecialsDamage = $Pref::L4B::Zombies::NormalDamage*3;
+				$Pref::L4B::Zombies::TankRounds = 1;
+				$Pref::L4B::Zombies::TankRoundChance = 50;
+				$Pref::L4B::Zombies::TankHealth = 5000;
+				$Pref::L4B::Zombies::SurvivorImmunity = 1;
+				$Pref::L4B::Zombies::MaxSpecial = 4;
+				$Pref::L4B::Zombies::MaxHorde = 50;
+				$Pref::L4B::Zombies::MaxTank = 1;
 
-		case 1: $Pref::Server::L4B2Bots::NormalDamage = 10;
-				$Pref::Server::L4B2Bots::SpecialsDamage = 25;
-				$Pref::Server::L4B2Bots::TankRounds = 2;
-				$Pref::Server::L4B2Bots::TankRoundChance = 60;
-				$Pref::Server::L4B2Bots::TankHealth = 5000;
-				$Pref::Server::L4B2Bots::SurvivorImmunity = 0;
-				$Pref::Server::L4B2Bots::MaxSpecial = 8;
-				$Pref::Server::L4B2Bots::MaxHorde = 35;
-				$Pref::Server::L4B2Bots::MaxTank = 2;
+		case 1: $Pref::L4B::Zombies::NormalDamage = 10;
+				$Pref::L4B::Zombies::SpecialsDamage = $Pref::L4B::Zombies::NormalDamage*4;
+				$Pref::L4B::Zombies::TankRounds = 2;
+				$Pref::L4B::Zombies::TankRoundChance = 75;
+				$Pref::L4B::Zombies::TankHealth = 10000;
+				$Pref::L4B::Zombies::SurvivorImmunity = 0;
+				$Pref::L4B::Zombies::MaxSpecial = 8;
+				$Pref::L4B::Zombies::MaxHorde = 75;
+				$Pref::L4B::Zombies::MaxTank = 2;
 
 		default:
 	}
-
-	eval("ZombieTankHoleBot.maxDamage =" @ $Pref::Server::L4B2Bots::TankHealth @ ";");
+	eval("ZombieTankHoleBot.maxDamage =" @ $Pref::L4B::Zombies::TankHealth @ ";");
 }
+L4B_DifficultyAdjustment();
+
 
 function Gamemode_Left4Block_Difficulty::onUpdate(%this, %val) { L4B_DifficultyAdjustment(); }

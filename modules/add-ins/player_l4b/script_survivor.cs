@@ -1,4 +1,4 @@
-luaexec("./survivor.lua");
+luaexec("./script_survivor.lua");
 if(LoadRequiredAddOn("Support_BotHolePlus") == $Error::None) exec("./bots/survivorally.cs");
 
 registerInputEvent("fxDTSBrick","onAZFirstEntry","Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "Bot Bot" TAB "MiniGame MiniGame");
@@ -34,7 +34,10 @@ function MiniGameSO::SafehouseCheck(%minigame,%client)
 		if(isObject(l4b_music)) l4b_music.delete();
 
    		%minigame.scheduleReset(8000);
-		%minigame.L4B_PlaySound("game_win_sound");
+		%minigame.l4bMusic("game_win_sound",false,"Music");
+		%minigame.deletel4bMusic("Trigger1");
+		%minigame.deletel4bMusic("Trigger2");
+		%minigame.deletel4bMusic("Trigger3");	
 
     	for(%i=0;%i<%minigame.numMembers;%i++)
     	{
@@ -43,7 +46,7 @@ function MiniGameSO::SafehouseCheck(%minigame,%client)
 			if(isObject(%member.player))
 			{
 				if(%member.player.hType $= "Survivors")
-				%member.player.emote(winStarProjectile, 1);
+				%member.player.emote(winStarProjectile, 1);	
 
 				%member.Camera.setOrbitMode(%member.player, %member.player.getTransform(), 0, 5, 0, 1);
 				%member.setControlObject(%member.Camera);
@@ -61,6 +64,11 @@ function SurvivorPlayer::onImpact(%this, %obj, %col, %vec, %force)
 {
 	luacall(Survivor_FallDamage,%obj,%vec,%force);
 	Parent::onImpact(%this, %obj, %col, %vec, %force);
+}
+
+function SurvivorPlayer::onCollision(%this, %obj, %col, %fade, %pos, %norm)
+{	
+	Parent::onCollision(%this, %obj, %col, %fade, %pos, %norm);
 }
 
 function SurvivorPlayerMed::onImpact(%this, %obj, %col, %vec, %force) { SurvivorPlayer::onImpact(%this, %obj, %col, %vec, %force); }
@@ -144,7 +152,7 @@ function SurvivorPlayer::onNewDataBlock(%this,%obj)
 {	
 	Parent::onNewDataBlock(%this,%obj);
 
-	if($Pref::Server::L4B2Bots::SurvivorImmunity) %obj.hIsImmune = 1;
+	if($Pref::L4B::Bots::SurvivorImmunity) %obj.hIsImmune = 1;
 	%obj.SurvivorStress = 0;
 	%obj.hType = "Survivors";
 
@@ -289,7 +297,9 @@ function SurvivorPlayerDowned::onImpact(%this, %obj, %col, %vec, %force)
 
 function SurvivorPlayerDowned::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
 {
-	Parent::Damage(%this,%obj,%sourceObject,%position,%damage/4,%damageType,%damageLoc);
+	if(!%obj.isBeingStrangled) %damage = %damage/3;
+	
+	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
 }
 
 function SurvivorPlayerDowned::onDamage(%this, %obj, %delta)
@@ -312,7 +322,7 @@ function SurvivorPlayerDowned::onDamage(%this, %obj, %delta)
 function SurvivorPlayerDowned::onDisabled(%this,%obj)
 {	
 	%obj.playaudio(0,"survivor_death" @ getRandom(1, 8) @ "_sound");
-	commandToClient(%obj.client,'SetVignette',$EnvGuiServer::VignetteMultiply,$EnvGuiServer::VignetteColor);
+	commandToClient(%obj.client,'SetVignette',$EnvGuiL4B::VignetteMultiply,$EnvGuiL4B::VignetteColor);
 
 	Parent::onDisabled(%this, %obj);
 }

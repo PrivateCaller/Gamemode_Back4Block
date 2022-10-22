@@ -72,68 +72,66 @@ function ZombieFallenHoleBot::onDisabled(%this,%obj)
 
 function ZombieFallenHoleBot::holeAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {	
-	if(getRandom(1,4) == 1)
+	if(getRandom(1,8) == 1)
 	{ 
 		%obj.armor = 1;
 		%obj.armorColor = getRandomBotColor();
 		L4B_pushClientSnapshot(%obj,0,true);
 		return;
 	}
-	else
+
+	%hatColor = getRandomBotRGBColor();
+	%packColor = getRandomBotRGBColor();
+	%shirtColor = getRandomBotRGBColor();
+	%pantsColor = getRandomBotPantsColor();
+	%shoeColor = getRandomBotPantsColor();
+	%accentColor = getRandomBotRGBColor();
+	%handColor = %skinColor;
+
+	%larmColor = %shirtColor;
+	%rarmColor = %shirtColor;
+	%rLegColor = %shoeColor;
+	%lLegColor = %shoeColor;
+
+	if(getRandom(1,4) == 1)
 	{
-		%hatColor = getRandomBotRGBColor();
-		%packColor = getRandomBotRGBColor();
-		%shirtColor = getRandomBotRGBColor();
-		%pantsColor = getRandomBotPantsColor();
-		%shoeColor = getRandomBotPantsColor();
-		%accentColor = getRandomBotRGBColor();
-		%handColor = %skinColor;
-
-		%larmColor = %shirtColor;
-		%rarmColor = %shirtColor;
-		%rLegColor = %shoeColor;
-		%lLegColor = %shoeColor;
-
-		if(getRandom(1,4) == 1)
-		{
-			if(getRandom(1,0)) %larmColor = %skinColor;
-			if(getRandom(1,0)) %rarmColor = %skinColor;
-			if(getRandom(1,0)) %rLegColor = %skinColor;
-			if(getRandom(1,0)) %lLegColor = %skinColor;
-		}
-
-		%obj.armor = 1;
-		%obj.armorColor = getRandomBotColor();
-		%obj.accentColor = %accentColor;
-		%obj.accent =  "0";
-		%obj.hatColor = %hatColor;
-		%obj.hat = %hat;
-		%obj.headColor = %skinColor;
-		%obj.faceName = %face;
-		%obj.chest =  0;
-		%obj.decalName = "Hoodie";
-		%obj.chestColor = %shirtColor;
-		%obj.pack = 4;
-		%obj.packColor =  %packColor;
-		%obj.secondPack =  "0";
-		%obj.secondPackColor =  %packColor;
-		%obj.larm =  "0";
-		%obj.larmColor = %larmColor;
-		%obj.lhand =  "0";
-		%obj.lhandColor = %handColor;
-		%obj.rarm =  "0";
-		%obj.rarmColor = %rarmColor;
-		%obj.rhandColor = %handColor;
-		%obj.rhand =  "0";
-		%obj.hip =  "0";
-		%obj.hipColor = %pantsColor;
-		%obj.lleg =  "0";
-		%obj.llegColor = %llegColor;
-		%obj.rleg =  "0";
-		%obj.rlegColor = %rlegColor;
-		%obj.vestColor = getRandomBotRGBColor();
-
-		GameConnection::ApplyBodyParts(%obj);
-		GameConnection::ApplyBodyColors(%obj);
+		if(getRandom(1,0)) %larmColor = %skinColor;
+		if(getRandom(1,0)) %rarmColor = %skinColor;
+		if(getRandom(1,0)) %rLegColor = %skinColor;
+		if(getRandom(1,0)) %lLegColor = %skinColor;
 	}
+
+	%obj.armor = 1;
+	%obj.armorColor = getRandomBotColor();
+	%obj.accentColor = %accentColor;
+	%obj.accent =  "0";
+	%obj.hatColor = %hatColor;
+	%obj.hat = %hat;
+	%obj.headColor = %skinColor;
+	%obj.faceName = %face;
+	%obj.chest =  0;
+	%obj.decalName = "Hoodie";
+	%obj.chestColor = %shirtColor;
+	%obj.pack = 4;
+	%obj.packColor =  %packColor;
+	%obj.secondPack =  "0";
+	%obj.secondPackColor =  %packColor;
+	%obj.larm =  "0";
+	%obj.larmColor = %larmColor;
+	%obj.lhand =  "0";
+	%obj.lhandColor = %handColor;
+	%obj.rarm =  "0";
+	%obj.rarmColor = %rarmColor;
+	%obj.rhandColor = %handColor;
+	%obj.rhand =  "0";
+	%obj.hip =  "0";
+	%obj.hipColor = %pantsColor;
+	%obj.lleg =  "0";
+	%obj.llegColor = %llegColor;
+	%obj.rleg =  "0";
+	%obj.rlegColor = %rlegColor;
+	%obj.vestColor = getRandomBotRGBColor();
+
+	GameConnection::ApplyBodyParts(%obj);
+	GameConnection::ApplyBodyColors(%obj);
 }

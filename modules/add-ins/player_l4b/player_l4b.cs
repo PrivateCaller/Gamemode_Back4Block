@@ -18,11 +18,35 @@ $hZombiePack[%d++] = 4;
 $hZombiePackAmount = %d;
 
 exec("./datablocks.cs");
-exec("./survivor.cs");
-exec("./zombies.cs");
+exec("./script_survivor.cs");
+exec("./script_zombies.cs");
 
 package L4B_PlayerBot
 {
+
+	function AIPlayer::setCrouching(%player,%bool)
+	{
+		if(%player.nolegs == 2 && !%bool) return;		
+		Parent::setCrouching(%player,%bool);
+	}
+
+	function AIPlayer::setJumping(%player,%bool)
+	{
+		if(%player.nolegs == 2 && !%bool) return;		
+		Parent::setJumping(%player,%bool);
+	}
+
+	function AIPlayer::hLoop(%obj)
+	{
+		Parent::hLoop(%obj);
+
+		if(%obj.getDataBlock().hZombieL4BType !$= "")//Bypass the default garbage
+		{
+			%obj.setMoveTolerance(2.5);
+			%obj.setMoveSlowdown(0);
+		}
+	}
+
 	function onObjectCollisionTest(%obj, %col)
 	{	
 		if(isObject(%obj) && isObject(%col))
@@ -31,18 +55,29 @@ package L4B_PlayerBot
 			{
 				if(%obj.getdataBlock().getName().isSurvivor && %col.getdataBlock().getName().isSurvivor) return false;
 
-				if(vectordist(%obj.getposition(),%col.getposition()) < 2 && %obj.getdataBlock().getName() $= "ZombieChargerHoleBot" && (%force = vectorDot(%obj.getVelocity(), %obj.getForwardVector())) > 20 && %col.getdataBlock().getName() !$= "ZombieTankHoleBot")
+				if(%obj.getdataBlock().getName() $= "ZombieChargerHoleBot" && %col.getdataBlock().getName() !$= "ZombieTankHoleBot")
 				{
-					return false;
-						
-					%obj.playaudio(3,"charger_smash_sound");			
-					%obj.playthread(2,"shiftUp");
+					if(vectordist(%obj.getposition(),%col.getposition()) < 2.5 && (%force = mFloor(vectorDot(getWords(%obj.getVelocity(),0,1), %obj.getForwardVector()))) > 15)
+					{
+						if(!%obj.hEating)
+						{
+							%obj.SpecialPinAttack(%col,%force);
+							%obj.playaudio(3,"charger_smash_sound");
+						}
 
-					%eye = vectorscale(VectorNormalize(vectorAdd(%obj.getForwardVector(),"0" SPC "0" SPC "0.25")),%force);
-					%col.setvelocity(%eye);					
+						if(%col != %obj.hEating)
+						{
+							%obj.playaudio(3,"charger_smash_sound");			
+							%obj.playthread(2,"shiftUp");
 
-					%col.damage(%obj.hFakeProjectile, %col.getposition(),5, %obj.hDamageType);
-					%obj.spawnExplosion(pushBroomProjectile,"1 1 1");					
+							%eye = vectorscale(VectorNormalize(vectorAdd(%obj.getForwardVector(),"0" SPC "0" SPC "0.25")),%force);
+							%col.setvelocity(%eye);					
+							%col.damage(%obj.hFakeProjectile, %col.getposition(),5, %obj.hDamageType);
+							%obj.spawnExplosion(pushBroomProjectile,"1 1 1");
+						}
+
+						return false;
+					}					
 				}
 			}
 		return true;
@@ -96,7 +131,7 @@ package L4B_PlayerBot
 
 	function AIPlayer::hMeleeAttack(%obj,%col)
 	{						
-		if(%obj.getState() $= "Dead" || ($admingod && %col.getclassname() $= "Player" && %col.client.isSuperAdmin)) return;
+		if(%obj.getState() $= "Dead") return;
 
 		if(%col.getType() & $TypeMasks::VehicleObjectType || %col.getType() & $TypeMasks::PlayerObjectType)
 		{
@@ -239,10 +274,23 @@ package L4B_PlayerBot
 				case "fxDtsBrick":%search.onActivate (%player, %client, %pos, %vec);
 				case "Item":if(%search.canPickup)
 							{
+								if(%search.getdataBlock().throwableExplosive)
+								{									            
+									%player.mountImage(%search.getdataBlock().image,0);
+									%search.delete();
+									return;
+								}
+
 								for(%i=0;%i<%player.getdataBlock().maxTools;%i++)
 								if(%search.getDataBlock() == %player.tool[%i]) return;
 								%player.pickup(%search);
 							}
+				case "WheeledVehicle": 	if(isFunction(%search, onActivate)) %search.onActivate(%player, %client, %pos, %vec);
+										if(isObject(%search.getdatablock().image))
+										{
+											%player.mountImage(%search.getdataBlock().image,0);
+											%search.delete();
+										}
 
 				default: if(isFunction(%search, onActivate)) %search.onActivate(%player, %client, %pos, %vec);
 			}
@@ -350,8 +398,8 @@ package L4B_PlayerBot
 	}		
 };
 
-	function Armor::L4BAppearance(%this,%obj,%client)
-	{
+function Armor::L4BAppearance(%this,%obj,%client)
+{
 		%obj.hideNode("ALL");
 		%obj.unHideNode((%client.chest ? "femChest" : "chest"));
 		%obj.unHideNode("rhand");
@@ -499,7 +547,7 @@ package L4B_PlayerBot
 			%obj.unhidenode("gloweyes");
 			%obj.setnodeColor("gloweyes","1 1 0 1");	
 		}					
-	}
+}
 
 if(isPackage(holeZombiePackage)) deactivatePackage(holeZombiePackage);
 if(isPackage(BotHolePackage))

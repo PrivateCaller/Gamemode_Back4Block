@@ -35,6 +35,9 @@ function PropaneTankImage::onFire(%this, %obj, %slot)
 	%item.setTransform (%muzzlepoint @ " " @ %playerRot);
 	%item.applyimpulse(%item.gettransform(),vectoradd(vectorscale(%obj.getEyeVector(),10000),"0" SPC "0" SPC 5000));
 
+	%obj.tool[%currSlot] = 0;
+	messageClient(%obj.client,'MsgItemPickup','',%currSlot,0);
+
 	%obj.droppedExplosiveVeh = 1;
 	%obj.playthread(1,root);
 	%obj.unMountImage(0);

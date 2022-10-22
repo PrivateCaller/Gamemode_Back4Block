@@ -2,8 +2,7 @@ package L4B_Projectiles
 {	
 	function Projectile::onAdd(%obj)
 	{
-		if(%obj.getdataBlock().isDistraction)
-		%obj.schedule(%obj.getDataBlock().distractionDelay,%obj.getDataBlock().distractionFunction,0);
+		if(%obj.getdataBlock().isDistraction) %obj.schedule(%obj.getDataBlock().distractionDelay,%obj.getDataBlock().distractionFunction,0);
 
 		Parent::onAdd(%obj,%datablock);
 	}
@@ -14,8 +13,8 @@ package L4B_Projectiles
 		{
 			if(!%obj.sourceObject.hIsInfected && %col.isBeingStrangled && %col.hEater.getDataBlock().getName() $= "ZombieSmokerHoleBot")
 			{
-				%col.isBeingStrangled = 0;
-				%col.hEater.SmokerTongueTarget = 0;
+				%col.hEater.isBeingStrangled = false;
+				%obj.isStrangling = false;
 				L4B_SpecialsPinCheck(%col.hEater,%col);
 				%col.hEater.damage(%obj, %pos, %this.directDamage/2, %this.directDamageType);
 			}

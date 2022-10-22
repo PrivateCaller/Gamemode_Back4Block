@@ -1,4 +1,4 @@
-luaexec("./zombies.lua");
+luaexec("./script_zombies.lua");
 exec("./bots/bot_boomer.cs");
 exec("./bots/bot_charger.cs");
 exec("./bots/bot_common.cs");
@@ -29,14 +29,11 @@ function fxDTSBrick::zfakeKillBrick(%obj)
 	%obj.fakeKillBrick("0 0 1", "5");
 	%obj.schedule(5100,disappear,-1);
 
-	if(isObject(BreakBrickSet)) BreakBrickSet.add(%obj);
-	else
-	{
-		new SimSet(BreakBrickSet);
-		missionCleanup.add(BreakBrickSet);
-		BreakBrickSet.add(%obj);
-	}
+	$InputTarget_["Self"] = %obj;
+	%obj.processInputEvent("onzFakeKillBrick");
 }
+
+registerInputEvent("fxDTSBrick","onzFakeKillBrick","Self fxDTSBrick");
 
 function Player::hMeleeAttack(%obj,%col)
 {						
@@ -69,7 +66,6 @@ function Player::hChangeBotToInfectedAppearance(%obj)
 {
 	%this = %obj.getdataBlock();
 	%obj.resetHoleLoop();
-	if(!%this.hNeedsWeapons) %obj.setWeapon(1);
 
 	%obj.hNeutralAttackChance = %this.hNeutralAttackChance;
 	%obj.hSearch = %this.hSearch;
@@ -100,24 +96,24 @@ function AIPlayer::hNoSeeIdleTeleport(%obj) { luacall(hNoSeeIdleTeleport,%obj); 
 function Player::onL4BDatablockAttributes(%obj)
 {
 	%this = %obj.getdataBlock();
-	%obj.setDamageLevel(0);
-	%obj.schedule(10,setenergylevel,0);
-	
-	if(%obj.hZombieL4BType $= "Special") %obj.playaudio(3,strlwr(%obj.name) @ "_spawn" @ getRandom(1,2) @ "_sound");
 
 	%obj.hIsInfected = %this.hIsInfected;
 	%obj.hZombieL4BType = %this.hZombieL4BType;
 	%obj.hType = "Zombie";
-	%obj.isStrangling = 0;
+	%obj.isStrangling = false;
 	%obj.hEating = 0;
 	%obj.hAttackDamage = %this.hAttackDamage;
 
 	if(strlen(%this.hMeleeCI)) eval("%obj.hDamageType = $DamageType::" @ %this.hMeleeCI @ ";");
 	else %obj.hDamageType = $DamageType::HoleMelee;
 
+	%obj.setDamageLevel(0);
+	%obj.schedule(10,setenergylevel,0);	
+	if(%obj.hZombieL4BType $= "Special") %obj.playaudio(3,strlwr(%obj.name) @ "_spawn" @ getRandom(1,2) @ "_sound");	
+
 	if(%obj.getClassName() $= "Player")
 	{
-		%obj.client.isInInfectedTeam = 1;
+		%obj.client.isInInfectedTeam = true;
 		commandToClient(%obj.client, 'SetVignette', true, "0.25 0.15 0 1" );
 		if(%obj.getdataBlock().getName() $= "CommonZombieHoleBot")
 		schedule(10,0,commandToClient,%obj.client, 'centerPrint', "<just:right><font:impact:30>\c6You are \c0" @ %obj.getdataBlock().hName @ "\c6! <br><font:impact:20>\c6Left click to attack or <br>\c6Plant brick key to change zombie types", 5);
@@ -193,7 +189,7 @@ function Player::bigZombieMelee(%obj)
 				%eye = vectorscale(%normVec,30);
 				%hit.setvelocity(%eye/2);
 			}
-			%hit.damage(%obj.hFakeProjectile, %hit.getposition(), $Pref::Server::L4B2Bots::SpecialsDamage*%oScale, %obj.hDamageType);
+			%hit.damage(%obj.hFakeProjectile, %hit.getposition(), $Pref::L4B::Zombies::SpecialsDamage*%oScale, %obj.hDamageType);
 
 			%p = new Projectile()
 			{
@@ -249,7 +245,7 @@ function Player::bigZombieMelee(%obj)
 
 function Player::SpecialPinAttack(%obj,%col,%force)
 {	
-	if(!isObject(%col) || !isObject(%obj) || ($admingod && %col.getclassname() $= "Player" && %col.client.isSuperAdmin)) return;
+	if(!isObject(%col) || !isObject(%obj)) return;
 
 	if(%col.getType() & $TypeMasks::PlayerObjectType && checkHoleBotTeams(%obj,%col) && miniGameCanDamage(%obj,%col))
 	{	
@@ -257,15 +253,19 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 
 		if(%obj.getState() !$= "Dead" && %col.getState() !$= "Dead" && !%obj.isStrangling && !%col.isBeingStrangled && %shape $= "newm.dts")
 		{
-			%col.isBeingStrangled = 1;
-			%obj.isStrangling = 1;
+			%col.isBeingStrangled = true;
+			%obj.isStrangling = true;
 			%obj.hEating = %col;
 			%col.hEater = %obj;
 
 			if(%obj.getClassName() $= "AIPlayer")
 			{
-				%obj.schedule(100,hClearMovement);
-				%obj.stopHoleLoop();
+				if(%obj.getdataBlock().getName() !$= "ZombieChargerHoleBot")
+				{
+					%obj.schedule(100,hClearMovement);
+					%obj.stopHoleLoop();
+				}
+				
 				%obj.hIgnore = %col;
 			}
 
@@ -286,9 +286,8 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 			switch$(%obj.getdataBlock().getName()) 
 			{
 				case "ZombieChargerHoleBot": %obj.mountObject(%col,0);
-											 %obj.playthread(1,"root");
 											 %obj.hSharkEatDelay = schedule(2000,0,L4B_holeChargerKill,%obj,%col);
-											 %forcedam = %force/4;
+											 %forcedam = %force/2;
 											 %col.damage(%obj.hFakeProjectile, %col.getposition(),%forcedam, %obj.hDamageType);
 											 %col.client.l4bMusic(charger_pin_sound, true, "Private");
 
@@ -338,23 +337,41 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 
 function L4B_SpecialsPinCheck(%obj,%col)
 {
-	if(!miniGameCanDamage(%obj,%col) || !isObject(%obj) || %obj.getstate() $= "Dead" || !isObject(%col) || (isObject(%col) & %col.getState() $= "Dead" || !%col.isBeingStrangled || %col.hIsInfected))
+	if((isObject(%obj) && isObject(%col) && !miniGameCanDamage(%obj,%col)) || (!isObject(%obj) || %obj.getstate() $= "Dead" || !%obj.isStrangling) || (!isObject(%col) || !%col.isBeingStrangled || %col.hIsInfected || %col.getState() $= "Dead") || (%obj.getdatablock().getName() $= "ZombieJockeyHoleBot" && %col.getdatablock().isDowned))
 	{
+		if(isObject(%col))
+		{
+			%col.isBeingStrangled = false;
+
+			if(%col.getstate() !$= "Dead")
+			{
+				switch$(%col.getClassName())
+				{
+					case "Player": %col.client.setControlObject(%col);
+					case "AIPlayer": %col.setControlObject(%col);
+									 %col.resetHoleLoop();
+				}
+				%col.playthread(0,root);
+			}
+		}		
+		
 		if(isObject(%obj))
 		{
-			%obj.isStrangling = 0;	
+			%obj.isStrangling = false;	
 			%obj.hIgnore = 0;
 			%obj.hEating = 0;
 			%obj.stopAudio(0);
-	
-			if(%obj.getdataBlock().getName() $= "ZombieJockeyHoleBot")
-			{
-				%obj.dismount();
-				%obj.setControlObject(%obj);
-			}
 
 			if(%obj.getState() !$= "Dead")
 			{
+				switch$(%obj.getdataBlock().getName())
+				{					
+					case "ZombieJockeyHoleBot": %obj.unmount();
+												%obj.setControlObject(%obj);
+												%obj.hIgnore = %col;
+					default:
+				}
+
 				%obj.playThread(1,root);
 
 				if(%obj.getClassName() $= "AIPlayer")

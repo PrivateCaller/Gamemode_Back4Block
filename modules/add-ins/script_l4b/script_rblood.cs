@@ -1,7 +1,3 @@
-$DamageType::Fall.rBlood = false;
-$DamageType::Lava.rBlood = false;
-$DamageType::Suicide.rBlood = false;
-
 function serverCmdClearDecals(%client)
 {	
 	if(!%client.isAdmin) 
@@ -21,12 +17,6 @@ function Player::SapHealth(%obj,%amount,%maxamount)
 {	
 	if(!isObject(%obj) || %amount > %maxamount) return;
 
-	%projectile = new Projectile() 
-	{
-		dataBlock = BloodDripProjectile;
-		initialPosition = %obj.getMuzzlePoint(2);
-		initialVelocity = "0 0 -2";
-	};
 	%obj.AddHealth(%obj.getDataBlock().maxDamage*-0.0005);
 
 	cancel(%obj.SapHealthSched);
@@ -65,7 +55,7 @@ function spawnDecal(%dataBlock, %position, %vector,%scale)
 {
 	if(!isObject(MissionCleanup) || !isObject(%dataBlock) || %dataBlock.getClassName() !$= StaticShapeData) return;
 	if(!isObject(DecalGroup)) MissionCleanup.add(new SimGroup(DecalGroup));	
-	else if(DecalGroup.getCount() >= $Pref::Server::L4BBlood::BloodDecalsLimit) return; 
+	else if(DecalGroup.getCount() >= $Pref::L4B::Blood::BloodDecalsLimit) return; 
 
 	%obj = new StaticShape() { dataBlock = %dataBlock; };
 	if(getRandom(1,4) == 1)
@@ -80,7 +70,7 @@ function spawnDecal(%dataBlock, %position, %vector,%scale)
 	%obj.setScale(getRandom(10,%scale)*0.1 SPC getRandom(10,%scale)*0.1 SPC 1);
 	DecalGroup.add(%obj);
 	%obj.setNodeColor("ALL", %dataBlock.colorShiftColor);
-	if($Pref::Server::L4BBlood::BloodDecalsTimeout >= 0) %obj.schedule($Pref::Server::L4BBlood::BloodDecalsTimeout, delete);
+	if($Pref::L4B::Blood::BloodDecalsTimeout >= 0) %obj.schedule($Pref::L4B::Blood::BloodDecalsTimeout, delete);
 	return %obj;
 }
 
@@ -317,7 +307,7 @@ function Player::woundappearance(%obj,%type)
 							%hat.setvelocity(vectorAdd(%objhalfvelocity,getRandom(-8,8) SPC getRandom(-8,8) SPC getRandom(5,10)));
 						}	
 
-						if(getRandom(1,1)) 
+						if(getRandom(1)) 
 						{
 							%obj.unhidenode("brain");
 							if(getRandom(0,1)) %obj.unHideNode("headpart3");
@@ -345,9 +335,11 @@ function Player::woundappearance(%obj,%type)
 
 		case "rightleg":	%obj.unhideNode("legstumpr");
 							%obj.setNodeColor("legstumpr","1 0.5 0.5 1");
+							%obj.nolegs++;
 
 		case "leftleg":		%obj.unhideNode("legstumpl");
 							%obj.setNodeColor("legstumpl","1 0.5 0.5 1");
+							%obj.nolegs++;
 
 		case "hip":			//%pantsbloodbot = new Player() { dataBlock = "EmptyPlayer"; };
 							//%obj.pantsbloodbot = %pantsbloodbot;
@@ -357,13 +349,42 @@ function Player::woundappearance(%obj,%type)
 							%obj.HideNode("pants");
 							%obj.unHideNode("skelepants");
 							%obj.unHideNode("pantswound");
-
-							if(%obj.getClassName() $= "AIPlayer") %obj.setcrouching(1);
-							%obj.nolegs = 1;
 	}
+
+	if(%obj.nolegs == 2 && %obj.getClassName() $= "AIPlayer") %obj.setcrouching(1);
+	
 }
 
 function AIPlayer::woundappearance(%obj,%type) { Player::woundappearance(%obj,%type); }
+
+function Armor::RbloodDismember(%this,%obj,%limb,%position)
+{
+	if((%obj.getstate() !$= "Dead" && !%limb) || %obj.limbDismembered[%limb]) return;
+	for(%i = 0; %i < getWordCount($RBloodLimbString[%limb]); %i++) %obj.hideNode(getWord($RBloodLimbString[%limb], %i));
+	
+	doBloodExplosion(%position, 1.5);
+	if($Pref::L4B::Blood::BloodDecals) %this.doSplatterBlood(%obj,5);
+	serverPlay3D("blood_dismember" @ getRandom(1,4) @ "_sound", %obj.getHackPosition());				
+
+	switch(%limb)
+	{
+		case 0: %obj.schedule(1,woundappearance,"head");//head
+				%obj.schedule(1,stopAudio,0);
+				%obj.SapHealth(0,15);
+		case 1: %obj.woundappearance("chest");//chest
+				%obj.SapHealth(0,15);
+		case 2: %obj.schedule(1,woundappearance,"rightarm");//rightarm
+		case 3: %obj.schedule(1,woundappearance,"leftarm");//leftarm
+		case 4: //%obj.schedule(1,woundappearance,"rightarm");//righthand
+		case 5: //%obj.schedule(1,woundappearance,"leftarm");//lefthand
+		case 6: %obj.woundappearance("hip");//hip
+				%obj.SapHealth(0,15);
+		case 7: %obj.schedule(1,woundappearance,"rightleg");//rightleg
+		case 8: %obj.schedule(1,woundappearance,"leftleg");//leftleg
+	}
+
+	%obj.limbDismembered[%limb] = true;
+}
 
 function Armor::RBloodSimulate(%this, %obj, %position, %damagetype, %damage)
 {
@@ -373,18 +394,20 @@ function Armor::RBloodSimulate(%this, %obj, %position, %damagetype, %damage)
 		for(%i = 0; %i < mCeil(%damage / 25); %i++)
 		{			
 			doBloodExplosion(%effectPosition, getWord(%obj.getScale(), 2));
-			if($Pref::Server::L4BBlood::BloodDecals) %this.doSplatterBlood(%obj,5);
+			if($Pref::L4B::Blood::BloodDecals) %this.doSplatterBlood(%obj,5);
 		}
 		serverPlay3D("blood_impact" @ getRandom(1,4) @ "_sound", %effectPosition);
 		%obj.lastDamaged = getSimTime()+50;
 	}
 
-	if(%damage >= %this.maxDamage/2 || %obj.limbShotgunStrike >= 2)
+	if(%damage >= %obj.getDataBlock().maxDamage/4 || %obj.limbShotgunStrike > 1)
 	{
 		%limb = %obj.rgetDamageLocation(%position);
 		%time = mClampF(%obj.getDamagePercent()*10, 0, 10);
 		%obj.SapHealth(0,25);
-		%obj.markLimbForDismember[%limb] = true;
+		%obj.markForLimbDismember[%limb] = true;
+		%obj.markForLimbDismemberPos[%limb] = %position;	
+		%this.RbloodDismember(%obj,%limb,%position);
 	} 
 	if(%damage > %this.maxDamage*2.5) %obj.markForGibExplosion = true;
 }
@@ -421,10 +444,11 @@ package RBloodPackage
 
 	function Armor::Damage(%this, %obj, %sourceObject, %position, %damage, %damageType)
 	{						
-		if(!$Pref::Server::L4BBlood::Enable || !%obj.getdataBlock().enableRBlood || %damage < %this.maxDamage/8) 
-		return Parent::Damage(%this, %obj, %sourceObject, %position, %damage, %damageType);
-
-		if(!%damageType.rBlood) %rblooddamage = %damage / %obj.getdataBlock().maxDamage/2;
+		Parent::Damage(%this, %obj, %sourceObject, %position, %damage, %damageType);
+		
+		if(!$Pref::L4B::Blood::Enable || !%obj.getdataBlock().enableRBlood || %damage < %this.maxDamage/8) return;
+		
+		if(%damageType == $DamageType::Fall || %damageType == $DamageType::Lava || %damageType == $DamageType::Suicide) %rblooddamage = %damage / %obj.getdataBlock().maxDamage/1.333;
 		else %rblooddamage = %damage;
 
 		%rbloodPosition = %position;
@@ -438,8 +462,6 @@ package RBloodPackage
 			%obj.lastHitTime = getSimTime();
 		}
 		%this.RBloodSimulate(%obj, %rbloodPosition, %damagetype, %rblooddamage);
-		
-		Parent::Damage(%this, %obj, %sourceObject, %position, %damage, %damageType);
 	}
 
 	function Armor::onDisabled(%this, %obj, %state)
@@ -453,38 +475,9 @@ package RBloodPackage
 			%obj.hideNode("ALL");
 			%obj.schedule(50,delete);
 			doBloodDismemberExplosion(%position, 1.5);
-			if($Pref::Server::L4BBlood::BloodDecals) %this.doSplatterBlood(%obj,10);
+			if($Pref::L4B::Blood::BloodDecals) %this.doSplatterBlood(%obj,10);
 			serverPlay3D("blood_explosion" @ getRandom(1,2) @ "_sound", %position);
 			doGibLimbsExplosion(%position, getWord(%obj.scale, 2));
-		}
-		else
-		for(%limb = 0; %limb <= 8; %limb++)
-		{			
-			if(%obj.markLimbForDismember[%limb])
-			{
-				for(%i = 0; %i < getWordCount($RBloodLimbString[%limb]); %i++) %obj.hideNode(getWord($RBloodLimbString[%limb], %i));
-				
-				doBloodExplosion(%position, 1.5);
-				if($Pref::Server::L4BBlood::BloodDecals) %this.doSplatterBlood(%obj,5);
-				serverPlay3D("blood_dismember" @ getRandom(1,4) @ "_sound", %position);				
-
-				switch(%limb)
-				{
-					case 0: %obj.schedule(1,woundappearance,"head");//head
-							%obj.schedule(1,stopAudio,0);
-							%obj.SapHealth(0,15);
-					case 1: %obj.woundappearance("chest");//chest
-							%obj.SapHealth(0,15);
-					case 2: %obj.schedule(1,woundappearance,"rightarm");//rightarm
-					case 3: %obj.schedule(1,woundappearance,"leftarm");//leftarm
-					case 4: //%obj.schedule(1,woundappearance,"rightarm");//righthand
-					case 5: //%obj.schedule(1,woundappearance,"leftarm");//lefthand
-					case 6: %obj.woundappearance("hip");//hip
-							%obj.SapHealth(0,15);
-					case 7: %obj.schedule(1,woundappearance,"rightleg");//rightleg
-					case 8: %obj.schedule(1,woundappearance,"leftleg");//leftleg
-				}
-			}
 		}
 	}
 };

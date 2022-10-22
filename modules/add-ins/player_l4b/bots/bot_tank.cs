@@ -14,16 +14,17 @@ function ZombieTankHoleBot::onImpact(%this, %obj, %col, %vec, %force)
 
 function ZombieTankHoleBot::onBotFollow( %this, %obj, %targ )
 {
-	if(getRandom(1,100) <= $Pref::Server::L4B2Bots::TankChance && getWord(%obj.getvelocity(),2) == 0 && vectorDist(%obj.getPosition(),%targ.getPosition()) >= 35)
+	if((getRandom(1,100) <= $Pref::L4B::Zombies::TankChance && getWord(%obj.getvelocity(),2) == 0 && vectorDist(%obj.getPosition(),%targ.getPosition()) >= 35) || %obj.tankstress >= 10)
 	{
 		%obj.setaimobject(%targ);
 		%obj.mountImage(BoulderImage,0);
 		%obj.schedule(2500,setImageTrigger,0,1);
+		%obj.tankstress = 0;
 	}
 
 	if(!%obj.startMusic)
 	{
-		if(isObject(%minigame = getMiniGameFromObject(%obj))) %minigame.DirectorMusic("musicdata_L4D_tank",true,1,%client);
+		if(isObject(%minigame = getMiniGameFromObject(%obj)) && !%minigame.finalround) %minigame.l4bMusic("musicData_l4d_tank",true,"Music");
 		%obj.startMusic = 1;
 	}
 }
@@ -76,6 +77,7 @@ function ZombieTankHoleBot::onDamage(%this,%obj,%Am,%Type )
 	{
 		%obj.playaudio(0,"tank_pain" @ getrandom(1,5) @ "_sound");
 		%obj.lastdamage = getsimtime();
+		%obj.tankstress++;
 	}
 }
 
@@ -84,8 +86,7 @@ function ZombieTankHoleBot::onDisabled(%this,%obj)
 	%obj.playaudio(0,"tank_death" @ getrandom(1,4) @ "_sound");
 	Parent::OnDisabled(%this,%obj);
 	
-	if(isObject(%minigame = getMiniGamefromObject(%obj)))
-	%minigame.RoundEnd();
+	if(isObject(%minigame = getMiniGameFromObject(%obj)) && !%minigame.finalround) %minigame.RoundEnd();
 
 	if(isObject(%rock = %obj.getMountedImage(0)) && %rock.getName() $= "BoulderImage")
 	{

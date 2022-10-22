@@ -38,7 +38,7 @@ function ZombieBoomerHoleBot::onBotMelee(%this,%obj,%col)
 
 	function ZombieBoomerHoleBot::onBotLoop(%this,%obj)
 {
-	%obj.hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
+	%obj.hAttackDamage = $Pref::L4B::Zombies::SpecialsDamage;
 	%obj.hNoSeeIdleTeleport();
 
 	%obj.playthread(3,plant);
@@ -62,10 +62,18 @@ function ZombieBoomerHoleBot::onBotFollow( %this, %obj, %targ )
 	}
 }
 
-    function ZombieBoomerHoleBot::onDamage(%this,%obj,%Am)
+function ZombieBoomerHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
+{
+	%limb = %obj.rgetDamageLocation(%position);
+	if(%damageType !$= $DamageType::FallDamage || %damageType !$= $DamageType::Impact)
+	if(%limb) %damage = %damage/6;
+	
+	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
+}
+
+function ZombieBoomerHoleBot::onDamage(%this,%obj,%Am)
 {	
-	if(%obj.getstate() $= "Dead")
-	return;
+	if(%obj.getstate() $= "Dead") return;
 
 	if(%obj.lastdamage+500 < getsimtime())
 	{
@@ -140,7 +148,7 @@ function BoomerProjectile::radiusDamage(%this, %obj, %col, %distanceFactor, %pos
 
 			if(%col.getClassName() $= "Player")
 			{
-				if($Pref::Server::L4B2Bots::MinigameMessages && %col.getState() !$= "Dead" && %obj.sourceObject.getDataBlock().hName)
+				if(%col.getState() !$= "Dead" && %obj.sourceObject.getDataBlock().hName)
 				{
 					chatMessageTeam(%col.client,'fakedeathmessage',"<color:FFFF00>" @ %obj.sourceObject.getDatablock().hName SPC "<bitmapk:Add-Ons/Gamemode_Left4Block/modules/add-ins/player_l4b/icons/ci_boomer2>" SPC %col.client.name);
 					MinigameSO::L4B_PlaySound(%col.client.minigame,"victim_needshelp_sound");
@@ -349,7 +357,7 @@ function BoomerVomitSpewedProjectile::onExplode(%obj,%this)
 				return Parent::onExplode(%obj,%this);
 				else
 				{
-					if($Pref::Server::L4B2Bots::MinigameMessages && isObject(%targetid.client))
+					if(isObject(%targetid.client))
 					{
 						chatMessageTeam(%targetid.client,'fakedeathmessage',"<color:FFFF00>" @ %this.sourceObject.getDatablock().hName SPC "<bitmapk:Add-Ons/Gamemode_Left4Block/modules/add-ins/player_l4b/icons/ci_boomer2>" SPC %targetid.client.name);
 						MinigameSO::L4B_PlaySound(%targetid.client.minigame,"victim_needshelp_sound");

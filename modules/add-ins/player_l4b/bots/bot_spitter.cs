@@ -33,21 +33,39 @@ function ZombieSpitterHoleBot::onBotLoop(%this,%obj)
 
 function ZombieSpitterHoleBot::onBotFollow( %this, %obj, %targ )
 {
-	%distance = vectorDist(%obj.getposition(),%targ.getposition());
-	if(%distance > 12 && %distance < 24)
-	{
-		%obj.getDatablock().schedule(750 * %n,Spit,%obj);
-		%obj.hClearMovement();
-		%obj.setaimobject(%targ);
-	}
-	else if(%distance < 12) %obj.hRunAwayFromPlayer(%targ);	
+	if((!isObject(%obj) || %obj.getState() $= "Dead") || (!isObject(%targ) || %targ.getState() $= "Dead")) return;
 
-	Parent::onBotFollow(%this,%obj,%targ);
+	if((%distance = vectorDist(%obj.getposition(),%targ.getposition())) > 10 && %distance < 25)
+	{
+		%obj.setaimobject(%targ);
+		%obj.hClearMovement();
+		
+		for (%n = 0; %n < 4; %n++) 
+		{
+			%obj.schedule(650 * %n,hShootAim,%targ);
+			%obj.getDatablock().schedule(750 * %n,Spit,%obj);
+		}
+	}
+	else if(%distance < 12) 
+	{
+		%obj.hRunAwayFromPlayer(%targ);	
+		%this.schedule(1000,onBotFollow,%obj,%targ);
+	}
+	else %this.schedule(1000,onBotFollow,%obj,%targ);
 }
 
 	function ZombieSpitterHoleBot::onBotMelee(%this,%obj,%col)
 {
 	CommonZombieHoleBot::onBotMelee(%this,%obj,%col);
+}
+
+function ZombieSpitterHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
+{
+	%limb = %obj.rgetDamageLocation(%position);
+	if(%damageType !$= $DamageType::FallDamage || %damageType !$= $DamageType::Impact)
+	if(%limb) %damage = %damage/6;
+	
+	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
 }
 
 function ZombieSpitterHoleBot::onDamage(%this,%obj)
@@ -103,23 +121,19 @@ function ZombieSpitterHoleBot::holeAppearance(%this,%obj,%skinColor,%face,%decal
 	%pantsColor = getRandomBotPantsColor();
 	%shoeColor = getRandomBotPantsColor();
 
-	%larmColor = getRandom(0,1);
-	if(%larmColor)
-	%larmColor = %shirtColor;
-	else %larmColor = %skinColor;
-	%rarmColor = getRandom(0,1);
-	if(%rarmColor)
-	%rarmColor = %shirtColor;
-	else %rarmColor = %skinColor;
-	%rLegColor = getRandom(0,1);
-	if(%rLegColor)
-	%rLegColor = %shoeColor;
-	else %rLegColor = %skinColor;
-	%lLegColor = getRandom(0,1);
-	if(%lLegColor)
-	%lLegColor = %shoeColor;
-	else %lLegColor = %skinColor;
 	%handColor = %skinColor;
+	%larmColor = %shirtColor;
+	%rarmColor = %shirtColor;
+	%rLegColor = %shoeColor;
+	%lLegColor = %shoeColor;
+
+	if(getRandom(1,4) == 1)
+	{
+		if(getRandom(1,0)) %larmColor = %skinColor;
+		if(getRandom(1,0)) %rarmColor = %skinColor;
+		if(getRandom(1,0)) %rLegColor = %skinColor;
+		if(getRandom(1,0)) %lLegColor = %skinColor;
+	}
 
 	%obj.llegColor =  %lLegColor;
 	%obj.secondPackColor =  "0 0.435 0.831 1";
@@ -155,18 +169,15 @@ function ZombieSpitterHoleBot::holeAppearance(%this,%obj,%skinColor,%face,%decal
 
 function ZombieSpitterHoleBot::Spit(%this, %obj)
 {
-	if(!isObject(%obj) || %obj.getstate() $= "Dead")
-	return;
-
-	if(isObject(%obj.light))
-	%obj.light.delete();
+	if(!isObject(%obj) || %obj.getstate() $= "Dead") return;
 	
 	%obj.setenergylevel(0);
 	%obj.playaudio(2,"spitter_spit_sound");
 	%obj.playthread(0,"plant");
 
 	%muzzle = vectorAdd(%obj.getMuzzlePoint(2),"0 0 0.35");
-	%vector = vectorAdd(vectorscale(getProjectileVector(%obj.hFollowing, 1000, %pm.gravityMod * %pm.isBallistic, %muzzle),75),"0 0 2.5");
+	%vector = vectorAdd(vectorscale(%obj.getEyeVector(),40),"0 0 2.5");
+	if(isObject(%obj.hFollowing)) %velocity = vectorAdd(%velocity,getWord(%obj.hFollowing.getVelocity(),0)/2 SPC getWord(%obj.hFollowing.getVelocity(),1)/2 SPC getWord(%obj.hFollowing.getVelocity(),2)/2);
 
 	%pm = new projectile()
 	{
@@ -177,26 +188,6 @@ function ZombieSpitterHoleBot::Spit(%this, %obj)
 		client = %obj.client;
 	};
 	MissionCleanup.add(%pm);
-
-	%shellcount = 8;
-	for(%shell=0; %shell<%shellcount; %shell++)
-	{
-		%x = (getRandom() - 0.5) * 10 * $pi * 0.001;
-		%y = (getRandom() - 0.5) * 10 * $pi * 0.001;
-		%z = (getRandom() - 0.5) * 10 * $pi * 0.001;
-		%mat = MatrixCreateFromEuler(%x @ " " @ %y @ " " @ %z);
-		%velocity = MatrixMulVector(%mat, %obj.getEyeVector());
-
-		%p = new projectile()
-		{
-			dataBlock = "SpitterSpewedProjectile";
-			initialVelocity = vectorscale(%velocity,40);
-			initialPosition = %muzzle;
-			sourceObject = %obj;
-			client = %obj.client;
-		};
-		MissionCleanup.add(%p);
-	}
 }
 
 
@@ -218,7 +209,7 @@ function ZombieSpitterHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
 
 function SpitterSpitProjectile::onExplode(%obj,%this)
 {
-	for(%i=0;%i<3;%i++)
+	for(%i=0;%i<8;%i++)
 	{
 		%rnd = getRandom();
 		%dist = getRandom()*15;
@@ -256,7 +247,7 @@ function SpitterSpewedProjectile::damage(%this,%obj,%col,%fade,%pos,%normal)
    %scale = getWord(%obj.getScale(), 2);
    %directDamage = mClampF(%this.directDamage, -100, 100) * %scale;
 
-   if(%col.getType() & $TypeMasks::PlayerObjectType)
+   	if(%col.getType() & $TypeMasks::PlayerObjectType)
 	if(checkHoleBotTeams(%obj.sourceObject,%col))
 	%col.damage(%obj, %pos, %directDamage, %damageType);
 }
@@ -265,23 +256,16 @@ function SpitterSpewedProjectile::damage(%this,%obj,%col,%fade,%pos,%normal)
 function SpitterSpewedProjectile::radiusDamage(%this, %obj, %col, %distanceFactor, %pos, %damageAmt)
 {
    //validate distance factor
-   if(%distanceFactor <= 0)
-      return;
-   else if(%distanceFactor > 1)
-      %distanceFactor = 1;
-
+   if(%distanceFactor <= 0) return;
+   else if(%distanceFactor > 1) %distanceFactor = 1;
    %damageAmt *= %distanceFactor;
-
    if(%damageAmt)
    {
       //use default damage type if no damage type is given
          %damageType = $DamageType::SpitAcidBall;
         if(%col.getType() & $TypeMasks::PlayerObjectType)
         {
-			if(checkHoleBotTeams(%obj.sourceObject,%col))
-			{
-				%col.damage(%obj, %pos, %directDamage, %damageType);
-			}
+			if(checkHoleBotTeams(%obj.sourceObject,%col)) %col.damage(%obj, %pos, %directDamage, %damageType);
 			//Toxicity(%col,%obj.sourceObject);
         }
    }

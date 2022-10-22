@@ -15,7 +15,10 @@ function ZombieChargerHoleBot::onAdd(%this,%obj)
 
 function ZombieChargerHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
 {
-	if(%damageType !$= $DamageType::FallDamage || %damageType !$= $DamageType::Impact) %damage = %damage/1.5;
+	%limb = %obj.rgetDamageLocation(%position);
+	if(%damageType !$= $DamageType::FallDamage || %damageType !$= $DamageType::Impact)
+	if(%limb) %damage = %damage/4;
+	else %damage = %damage/2;
 	
 	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
 }
@@ -26,6 +29,7 @@ function L4B_holeChargerKill(%obj,%col)
 	{
 		%obj.mountImage(HateImage, 3);
 		%obj.setenergylevel(0);
+		%obj.playthread(1,"root");
 
 		if(%obj.getclassname() $= "AIPlayer")
 		{
@@ -38,7 +42,7 @@ function L4B_holeChargerKill(%obj,%col)
 		%obj.schedule(100,playThread,2,shiftdown);
 		%obj.schedule(100,playaudio,3,"charger_smash_sound");
 		%col.schedule(100,playThread,2,plant);
-		%col.schedule(100,damage,%obj.hFakeProjectile, %col.getposition(), $Pref::Server::L4B2Bots::SpecialsDamage/1.5, $DamageType::Charger);
+		%col.schedule(100,damage,%obj.hFakeProjectile, %col.getposition(), $Pref::L4B::Zombies::SpecialsDamage/1.15, $DamageType::Charger);
 		%obj.schedule(100,spawnExplosion,pushBroomProjectile,"0.5 0.5 0.5");
 		%obj.hSharkEatDelay = schedule(1250,0,L4B_holeChargerKill,%obj,%col);
 		%obj.playaudio(0,"charger_pummel" @ getrandom(1,4) @ "_sound");
@@ -52,11 +56,7 @@ function L4B_Charging(%obj,%targ)
 {
 	if(isObject(%obj) && %obj.getState() !$= "Dead")
 	{
-		if(isObject(%obj.light))
-		%obj.light.delete();
-
-		%obj.WalkAfterCharge = %obj.schedule(4000,setMaxForwardSpeed,9);
-		%obj.WalkAfterCharge = %obj.schedule(4000,playthread,1,"root");
+		%obj.WalkAfterCharge = %obj.schedule(6000,setMaxForwardSpeed,9);
 		%obj.playaudio(0,"charger_charge" @ getrandom(1,2) @ "_sound");
 		%obj.mountImage(HateImage, 3);
 		%obj.setMaxForwardSpeed(50);
@@ -65,20 +65,15 @@ function L4B_Charging(%obj,%targ)
 		if(%obj.getClassName() $= "AIPlayer")
 		{
 			%obj.stopHoleLoop();
+			%obj.setAimLocation(vectoradd(%targ.gethackposition(),%targ.getVelocity()));
 			%obj.StartAfterCharge = %obj.schedule(4000,startHoleLoop);
-			%obj.setmoveY(100);
-
-			if(isObject(%targ) && %targ.getState() !$= "Dead")
-			%obj.setAimLocation(%targ.getEyePoint());
-
-			%obj.schedule(100,clearaim);
+			%obj.setmoveY(1);
 		}
 	}
 }
 
 function ZombieChargerHoleBot::onBotLoop(%this,%obj)
 {
-	%obj.hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage;
 	%obj.hNoSeeIdleTeleport();
 	
 	if(!%obj.hFollowing)
@@ -95,6 +90,7 @@ function ZombieChargerHoleBot::onBotFollow( %this, %obj, %targ )
 {
 	if(%obj.lastsaw+8000 < getsimtime() && vectorDist(%obj.getposition(),%targ.getposition()) > 8)
 	{
+		%obj.setAimObject(%targ);
 		%obj.lastsaw = getsimtime();
 		%obj.AboutToCharge = schedule(1000,0,L4B_Charging,%obj,%targ);
 	
@@ -112,19 +108,6 @@ function ZombieChargerHoleBot::onCollision(%this, %obj, %col, %fade, %pos, %norm
 
 function ZombieChargerHoleBot::onImpact(%this, %obj, %col, %vec, %force)
 {
-	if(%obj.getstate() $= "Dead") return;
-	if(%obj.getclassname() $= "AIPlayer") %obj.startHoleLoop();
-
-	if(%force >= 20)
-	{
-		%forcecalc = %force/20;
-		%oScale = 2*getWord(%obj.getScale(),0);
-		%obj.spawnExplosion(pushBroomProjectile,%forcecalc SPC %forcecalc SPC %forcecalc);
-		%obj.SpecialPinAttack(%col,%force);
-		%obj.playaudio(3,"charger_smash_sound");
-
-		%obj.setMaxForwardSpeed(9);
-	}
 	Parent::onImpact(%this, %obj, %col, %vec, %force);
 }
 

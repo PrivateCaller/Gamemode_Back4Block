@@ -66,7 +66,7 @@ package Gamemode_Left4Block_Billboards
     {
 		%r = Parent::onClientEnterGame(%client);
 		%client.avBillboardGroup = %group = AVBillboardGroup_Make();
-		%group.Load(%client, $Pref::Server::MaxPlayers * 2);
+		%group.Load(%client, $Pref::L4B::MaxPlayers * 2);
 		%client.loadingbillboards = true;
 		return %r;
 	}

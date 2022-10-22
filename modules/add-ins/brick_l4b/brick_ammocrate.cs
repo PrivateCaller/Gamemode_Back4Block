@@ -1,38 +1,3 @@
-datablock ItemData(RAmmoCrateItem)
-{
-	category = "Item";  // Mission editor category
-	//className = "Item"; // For inventory system
-
-	 // Basic Item Properties
-	shapeFile = "./RotCoAmmoCrate2.dts";
-	rotate = false;
-	mass = 1;
-	density = 0.2;
-	elasticity = 0.2;
-	friction = 0.6;
-	emap = true;
-
-	//gui stuff
-	uiName = "";
-	iconName = "";
-	doColorShift = false;
-	isAmmoCrate = 1;
-
-	 // Dynamic properties defined by the scripts
-	image = "";
-	canDrop = true;
-};
-datablock fxDTSBrickData (BrickAmmoCrateData)
-{
-	brickFile = "./AmmoCrateBrick.blb";
-	category = "Special";
-	subCategory = "Interactive";
-	uiName = "Ammo Crate";
-	iconName = "add-ons/gamemode_left4block/modules/add-ins/brick_interactive/ammo_crate/icon_ammocrate";
-	indestructable = 1;
-	isAmmoCrate = 1;
-};
-
 function BrickAmmoCrateData::onPlant(%this, %obj)
 {
 	%obj.setName("_Ammocrate");
@@ -40,39 +5,27 @@ function BrickAmmoCrateData::onPlant(%this, %obj)
 	%ammocrate = new Item()
 	{
 		datablock = "RAmmoCrateItem";
-		static = 1;
 		spawnbrick = %obj;
-		AmmoSupplies = $Pref::L4BAmmoCrate::SupplyAmount;
-		AmmoSupplyMax = $Pref::L4BAmmoCrate::SupplyAmount;
+		color = getColorIdTable(%obj.colorid);
+		canPickup = false;
+		position = %obj.getPosition();
 	};
-	%ammocrate.canPickup = false;
 	%obj.setrendering(0);
-	%ammocrate.settransform(vectoradd(%obj.gettransform(),"0 0 -0.4") SPC getwords(%obj.gettransform(),3,6));
 	%obj.ammocrate = %ammocrate;
+	%ammocrate.settransform(vectoradd(%obj.gettransform(),"0 0 -0.4") SPC getwords(%obj.gettransform(),3,6));
 }
 
 function RAmmoCrateItem::onAdd(%this, %obj)
 {
 	Parent::onAdd(%this, %obj);
-
-	if(!isObject(LockerCrateSet))
-	{
-		new simset(LockerCrateSet);
-		missionCleanup.add(LockerCrateSet);
-		LockerCrateSet.add(%obj);
-	}
-	else if(!LockerCrateSet.isMember(%obj))
-	LockerCrateSet.add(%obj);
-
-	%obj.schedule(5000,setnodecolor,"ALL",getwords(getColorIdTable(%obj.spawnBrick.colorid),0,2) SPC "1");
+	%obj.schedule(100,setnodecolor,"ALL",%obj.color);
 }
 
 function BrickAmmoCrateData::onloadPlant(%this, %obj) { BrickAmmoCrateData::onPlant(%this, %obj); }
 
 function BrickAmmoCrateData::onRemove(%data, %brick)
 {
-	if(isObject(%brick.ammocrate))
-	%brick.ammocrate.delete();
+	if(isObject(%brick.ammocrate)) %brick.ammocrate.delete();
 
 	Parent::OnRemove(%data,%brick);
 }
@@ -84,8 +37,7 @@ function BrickAmmoCrateData::onDeath(%data, %brick)
 
 function AmmoCrateAnim(%obj,%oc)
 {
-	if(!isObject(%obj))
-	return;
+	if(!isObject(%obj)) return;
 	
 	if(%oc)
 	{
@@ -171,8 +123,7 @@ package CrateColFunctions
 {
 	function Armor::onCollision(%this,%obj,%col)
 	{	
-		if(isObject(%col))
-		if(%col.getdatablock().getname() $= "RAmmoCrateItem")
+		if(isObject(%col) && %col.getdatablock().getname() $= "RAmmoCrateItem")
 		{
 			if(%obj.getstate() $= "Dead" || %obj.hIsInfected) return;	
 
@@ -187,44 +138,15 @@ package CrateColFunctions
 			%brick = %col.spawnbrick;
 			%obj.lasttouch = getsimtime();
 
-			if(%col.lasttouch+$Pref::L4BAmmoCrate::AcquireDelay < getsimtime() && !%col.isshutting)
+			if(%col.lasttouch+50 < getsimtime() && !%col.isshutting)
 			{
 				%col.lasttouch = getsimtime();
 
 				if(%ammoneeded < %max)
 				{
-					if($Pref::L4BAmmoCrate::Supplies) //If supplies is enabled
-					{
-						if(isObject(getMiniGamefromObject(%obj,%col)))
-						{
-							if(%col.AmmoSupplies > 0)//Functions if supplycount is greater than or equal to supply amount (Empty)
-							{
-								GiveAmmo(%obj,%col);
-
-								%col.AmmoSupplies -= %ammocompensate;
-								%col.AmmoSupplies = mClampF(%col.AmmoSupplies, 0, $Pref::L4BAmmoCrate::SupplyAmount);
-
-								AmmoShapeName(%brick,"Supplies:" SPC mFloatLength(%col.AmmoSupplies,0));
-								%col.unhideNode(ammobox);
-							}
-							else 
-							{
-								AmmoShapeName(%brick,"Supplies:" SPC mFloatLength(%col.AmmoSupplies,0));
-								%col.hideNode(ammobox);
-							}
-						}
-						else 
-						{
-							GiveAmmo(%obj,%col);
-							%col.unhideNode(ammobox);
-						}
-					}
-					else 
-					{
-						GiveAmmo(%obj,%col);
-						AmmoShapeName(%brick,"");
-						%col.unhideNode(ammobox);
-					}
+					GiveAmmo(%obj,%col);
+					AmmoShapeName(%brick,"");
+					%col.unhideNode(ammobox);
 				}
 				return;
 			}

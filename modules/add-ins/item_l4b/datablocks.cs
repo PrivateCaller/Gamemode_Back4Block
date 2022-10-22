@@ -2,15 +2,43 @@
 %file = findFirstFile(%pattern);
 while(%file !$= "")
 {
-	%soundName = strlwr(%file);
-	%soundName = strreplace(%soundName, "add-ons/gamemode_left4block/modules/add-ins/item_l4b/sound/", "");
-	%soundName = strreplace(%soundName, "/", "");
-	%soundName = strreplace(%soundName, ".wav", "");
+	%soundName = strreplace(filename(strlwr(%file)), ".wav", "");
 	eval("datablock AudioProfile(" @ %soundName @ "_sound) { preload = true; description = AudioClosest3d; filename = \"" @ %file @ "\"; };");
 
 	%file = findNextFile(%pattern);
 }
 
+datablock ItemData(ColaBoxItem)
+{
+	category = "Weapon";
+	className = "Weapon";
+	shapeFile = "./models/ColaBox.dts";
+	mass = 1;
+	density = 0.2;
+	elasticity = 0.2;
+	friction = 0.6;
+	emap = true;
+	uiName = "Cola Box";
+	iconName = "./icons/icon_ColaBox";
+	doColorShift = false;
+	image = ColaBoxImage;
+	canDrop = true;
+};
+datablock ShapeBaseImageData(ColaBoxImage)
+{
+   	className = "WeaponImage";
+   	shapeFile = "./models/ColaBox.dts";
+   	emap = true;
+   	mountPoint = 0;
+   	item = ColaBoxItem;
+   	armReady = true;
+   	melee = false;
+   	doRetraction = false;
+   	doColorShift = false;
+	stateName[0]                     = "Activate";
+	stateScript[0]                  = "onActivate";
+	stateTimeoutValue[0]             = 0;
+};
 
 datablock ParticleData(HealParticle)
 {

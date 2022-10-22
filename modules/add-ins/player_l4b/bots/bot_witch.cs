@@ -42,7 +42,6 @@ function ZombieWitchHoleBot::onBotMelee(%this,%obj,%col)
 function ZombieWitchHoleBot::onBotLoop(%this,%obj)
 {
     %obj.hNoSeeIdleTeleport();
-    %obj.hAttackDamage = $Pref::Server::L4B2Bots::SpecialsDamage*5;
 
     if(%obj.hMelee)
     {
@@ -157,7 +156,7 @@ function ZombieWitchHoleBot::OnDamage(%this,%obj,%am)
         %obj.setMaxForwardSpeed(20);
         %obj.onBotFollow();
 
-        if(%attacker && %attacker.client && %attacker.getclassname() $= "player" && $Pref::Server::L4B2Bots::MinigameMessages && !%obj.hWhoAttacked)
+        if(%attacker && %attacker.client && %attacker.getclassname() $= "player" && !%obj.hWhoAttacked)
         {
             chatMessageTeam(%attacker.client,'fakedeathmessage',"<color:FFFF00>" @ %attacker.client.name SPC "<bitmapk:Add-Ons/Gamemode_Left4Block/modules/add-ins/player_l4b/icons/ci_skull2>" SPC %obj.getDatablock().hName);
             %minigame = %attacker.client.minigame;
@@ -179,8 +178,7 @@ function ZombieWitchHoleBot::onDisabled(%this,%obj)
 
         %obj.playaudio(0,"witch_death" @ getrandom(1,3) @ "_sound");
 
-        if(isObject(%minigame = getMiniGameFromObject(%obj)))
-        %minigame.RoundEnd();
+        if(isObject(%minigame = getMiniGameFromObject(%obj)) && !%minigame.finalround) %minigame.RoundEnd();
 
     	Parent::OnDisabled(%this,%obj);
 }
@@ -280,7 +278,7 @@ function ZombieWitchHoleBot::WitchStartleLoop(%this,%obj)
 
                             if(%obj.StartleCount == 10)
                             {
-                                if(%target.client && %target.getclassname() $= "player" && $Pref::Server::L4B2Bots::MinigameMessages)
+                                if(%target.client && %target.getclassname() $= "player")
                                 {
                                     chatMessageTeam(%target.client,'fakedeathmessage',"<color:FFFF00>" @ %target.client.name SPC "<bitmapk:Add-Ons/Gamemode_Left4Block/modules/add-ins/player_l4b/icons/ci_witchclose>" SPC %obj.getDatablock().hName);
                                     %minigame = %target.client.minigame;
