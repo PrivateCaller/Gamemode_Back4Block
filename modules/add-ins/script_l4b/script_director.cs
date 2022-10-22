@@ -706,7 +706,7 @@ function GameConnection::musicCatchUp(%client)
     for(%i = 0; %i < getWordCount(%music_tags); %i++)
     {
         
-        if(isObject(%music_object = $L4B_Music[getWord(%music_tags, %i)];))
+        if(isObject(%music_object = $L4B_Music[getWord(%music_tags, %i)]))
         {
             %music_object.scopeToClient(%client);
         }
