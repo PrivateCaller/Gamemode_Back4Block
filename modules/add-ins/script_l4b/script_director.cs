@@ -705,6 +705,10 @@ function GameConnection::musicCatchUp(%client)
     %music_tags = "Music Stinger1 Stinger2 Stinger3 Ambience";
     for(%i = 0; %i < getWordCount(%music_tags); %i++)
     {
-        $L4B_Music[getWord(%music_tags, %i)].scopeToClient(%client);
+        
+        if(isObject(%music_object = $L4B_Music[getWord(%music_tags, %i)];))
+        {
+            %music_object.scopeToClient(%client);
+        }
     }
 }
