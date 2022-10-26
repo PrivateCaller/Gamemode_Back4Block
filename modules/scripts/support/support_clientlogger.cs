@@ -128,10 +128,6 @@ function L4B_pushClientSnapshot(%obj,%sourceClient,%zombify)
 	%skin = %sourceClient.headColor;
 	%zskin = getWord(%skin,0)/2.75 SPC getWord(%skin,1)/1.5 SPC getWord(%skin,2)/2.75 SPC 1;
 
-	%obj.setShapeName("Infected" SPC %sourceClient.name, 8564862);
-	%obj.setShapeNameColor("1 0 0");
-	%obj.setShapeNameDistance(25);
-
 	%obj.headColor = %zskin;
 	%obj.chestColor = %sourceClient.chestColor;
 	%obj.hipColor = %sourceClient.hipColor;

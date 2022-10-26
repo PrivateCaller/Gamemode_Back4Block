@@ -11,11 +11,11 @@ function hNoSeeIdleTeleport(obj)
     local hTimeLeftToTele = tonumber(ts.getobj(obj,"hTimeLeftToTele"))
     ts.setobj(obj,"hTimeLeftToTele",hTimeLeftToTele+1)    
     
-    if ts.getobj(obj,"hState") == "Wandering" then TimeMax = 5
-    elseif ts.getobj(obj,"hState") == "Pathing" then TimeMax = 10
+    if ts.getobj(obj,"hState") == "Wandering" then TimeMax = 10
+    elseif ts.getobj(obj,"hState") == "Pathing" then TimeMax = 20
     else TimeMax = 10 end
 
-    if hTimeLeftToTele >= TimeMax then--Only begin after a certain amount of time has passed, which is the amount of hole loops the bot does when its not in any of the returned states above
+    if hTimeLeftToTele >= TimeMax or (ts.getcallobj(obj,"currentZone.presencecount") == "" or ts.getcallobj(obj,"currentZone.presencecount") == "0") then--Only begin after a certain amount of time has passed, which is the amount of hole loops the bot does when its not in any of the returned states above
         ts.setobj(obj,"hTimeLeftToTele",0)
 
         if ts.isobject(ts.call("getMinigameFromObject",obj)) then

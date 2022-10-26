@@ -22,7 +22,7 @@ function L4B_holeHunterKill(%obj,%col)
 			%obj.hMeleeAttack(%col);
 		}
 		
-		%obj.HunterHurt = schedule(500,0,L4B_holeHunterKill,%obj,%col);
+		%obj.HunterHurt = schedule(250,0,L4B_holeHunterKill,%obj,%col);
 		%obj.unmount();
 		%col.damage(%obj.hFakeProjectile, %col.getposition(), $Pref::L4B::Zombies::SpecialsDamage/50, $DamageType::Hunter);
 	}
@@ -39,8 +39,7 @@ function ZombieHunterHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,
 
 function ZombieHunterHoleBot::onDamage(%this,%obj)
 {
-	if(%obj.getstate() $= "Dead")
-	return;
+	if(%obj.getstate() $= "Dead") return;
 
     if(%obj.lastdamage+1000 < getsimtime())//Check if the chest is the female variant and add a 1 second cooldown
 	{

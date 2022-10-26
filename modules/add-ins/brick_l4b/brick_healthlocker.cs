@@ -1,33 +1,20 @@
-function RHealthLockerItem::onAdd(%this, %obj)
-{
-	Parent::onAdd(%this, %obj);
-	%obj.schedule(5000,setnodecolor,"ALL",getwords(getColorIdTable(%obj.spawnBrick.colorid),0,2) SPC "1");
-
-	if(!isObject(LockerCrateSet))
-	{
-		new simset(LockerCrateSet);
-		missionCleanup.add(LockerCrateSet);
-		LockerCrateSet.add(%obj);
-	}
-	else if(!LockerCrateSet.isMember(%obj))
-	LockerCrateSet.add(%obj);
-}
-
 function BrickLockerData::onPlant(%this, %obj)
 {
-  	%obj.setName("_Healthlocker");
-	
-	%healthlocker = new Item()
-	{
-		datablock = "RHealthLockerItem";
-		static = 1;
-		spawnbrick = %obj;		
-	};
+	Parent::onPlant(%this,%obj);
 
-	%healthlocker.canPickup = false;
-	%healthlocker.settransform(vectoradd(%obj.gettransform(),"0 0 -1.42") SPC getwords(%obj.gettransform(),3,6));
-  	%obj.healthlocker = %healthlocker;
+	%obj.setName("_HealthLocker");
+
+	%interactiveshape = new StaticShape()
+	{
+		datablock = %this.ShapeDatablock;
+		spawnbrick = %obj;
+		color = getColorIdTable(%obj.colorid);
+	};
 	%obj.setrendering(0);
+	%obj.setcolliding(0);
+	%obj.setraycasting(0);
+	%obj.interactiveshape = %interactiveshape;
+	%interactiveshape.settransform(vectoradd(%obj.gettransform(),%interactiveshape.getdatablock().shapeBrickPos) SPC getwords(%obj.gettransform(),3,6));
 }
 
 function BrickLockerData::onloadPlant(%this, %obj)
@@ -37,52 +24,41 @@ function BrickLockerData::onloadPlant(%this, %obj)
 
 function BrickLockerData::onRemove(%this, %obj)
 {
-	if(isObject(%obj.healthlocker))
-	{
-		%obj.healthlocker.delete();
-		cancel(%obj.healthlocker.HealthlockerAnim);
-		cancel(%obj.healthlocker.slowd);
-	}
-	parent::OnRemove(%this,%obj);
+	Parent::OnRemove(%this,%obj);
+	if(isObject(%obj.interactiveshape)) %obj.interactiveshape.delete();
 }
 
 function BrickLockerData::onDeath(%this, %obj)
 {
-   if(isObject(%obj.healthlocker))
-    %obj.healthlocker.delete();
-
-    parent::OnDeath(%this,%obj);
+   BrickLockerData::onRemove(%this, %obj);
 }
 
-function GiveHealth(%obj,%col)
+function HealthLockerShape::onAdd(%this, %obj)
 {
-	%obj.addhealth(%obj.getDatablock().maxDamage/5);
+	Parent::onAdd(%this,%obj);
+	%obj.schedule(100,setnodecolor,"ALL",%obj.color);
+}
+
+function HealthLockerShape::Interact(%this,%col,%obj)
+{
+	cancel(%col.closedoor);
+	%col.closedoor = schedule(2000,0,InteractiveBrickAnim,%col,0);
+
+	InteractiveBrickAnim(%col,1);
+	%obj.addhealth(%obj.getDatablock().maxDamage);	
+	%obj.mountImage(HealImage, 3);
+	serverPlay3D("locker_stockheal_sound",%obj.getPosition());
 	%obj.playthread(3, plant);
-	%obj.emote(HealImage, 3);
-	serverPlay3D(PrintFireSound,%obj.getPosition());
-	toggleCloseOpen(%col);
 }
 
-package HealthLockerColFunctions
+function HealthLockerShape::CheckConditions(%this,%col,%obj)
 {
-	function Armor::onCollision(%this,%obj,%col)
+	if(%obj.getdamagelevel() < 5 || %obj.getstate() $= "Dead" || %obj.hIsInfected) return false;	
+
+	%brick = %col.spawnbrick;
+	if(%col.lasttouch+250 < getsimtime() && !%col.isshutting)
 	{
-		if(isObject(%col))
-		if(%col.getdatablock().getname() $= "RHealthLockerItem")
-		{
-			if(%obj.getdamagelevel() < 5 || %obj.getstate() $= "Dead" || %obj.hIsInfected) return;	
-
-			%brick = %col.spawnbrick;
-			if(%col.lasttouch+250 < getsimtime() && !%col.isshutting)
-			{
-				%col.lasttouch = getsimtime();
-				GiveHealth(%obj,%col);
-				AmmoShapeName(%brick,"");
-			}		
-			return;
-		}
-		else return Parent::onCollision(%this,%obj,%col,%a,%b,%c,%d);
+		%col.lasttouch = getsimtime();
+		%col.getdatablock().Interact(%col,%obj);
 	}
-
-};
-activatePackage(HealthLockerColFunctions);
+}

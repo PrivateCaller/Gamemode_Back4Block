@@ -23,7 +23,6 @@ exec("./script_zombies.cs");
 
 package L4B_PlayerBot
 {
-
 	function AIPlayer::setCrouching(%player,%bool)
 	{
 		if(%player.nolegs == 2 && !%bool) return;		
@@ -38,6 +37,8 @@ package L4B_PlayerBot
 
 	function AIPlayer::hLoop(%obj)
 	{
+		if(!isObject(%obj)) return;
+		
 		Parent::hLoop(%obj);
 
 		if(%obj.getDataBlock().hZombieL4BType !$= "")//Bypass the default garbage
@@ -102,6 +103,8 @@ package L4B_PlayerBot
 
 		if(%col.getDataBlock().usesL4Bappearance)
 		{		
+			%col.isBeingStrangled = false;
+
 			%col.setDataBlock(CommonZombieHoleBot);
 			switch$(%col.getclassname())
 			{
@@ -109,7 +112,9 @@ package L4B_PlayerBot
 
 				case "Player": 	if(isObject(%minigame = getMiniGameFromObject(%obj)))
 								{
-							   		%minigame.L4B_ChatMessage("\c0" @ %obj.getDatablock().hName SPC "<bitmapk:Add-Ons/Gamemode_Left4Block/add-ins/player_l4b/icons/ci_infected>" SPC %col.client.name,"survivor_left4dead_sound",true);
+							   		%col.client.deletel4bMusic("Music");
+									%col.client.deletel4bMusic("Music2");									
+									%minigame.L4B_ChatMessage("\c0" @ %obj.getDatablock().hName SPC "<bitmapk:Add-Ons/Gamemode_Left4Block/add-ins/player_l4b/icons/ci_infected>" SPC %col.client.name,"survivor_left4dead_sound",true);
 							   		%minigame.checkLastManStanding();
 								}
 
@@ -472,9 +477,8 @@ function Armor::L4BAppearance(%this,%obj,%client)
 		{
 			switch(%client.secondPack)
 			{
-				case 1: %obj.unHideNode("epaulets");
-						%obj.setNodeColor("epaulets",%client.secondPackColor);
-				case 6: %obj.unHideNode("shoulderpads");
+				case 0:
+				default: %obj.unHideNode("shoulderpads");
 						%obj.setNodeColor("shoulderpads",%client.secondPackColor);
 			}
 		}

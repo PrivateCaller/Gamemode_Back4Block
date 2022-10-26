@@ -20,24 +20,20 @@ function MiniGameSO::SafehouseCheck(%minigame,%client)
 	{
 		%client = %minigame.member[%i];
 
-		if(isObject(%player = %client.player) && !%player.hIsInfected && %player.getdataBlock().getname() !$= "SurvivorPlayerDowned")
-		%livePlayerCount++;
-
-		if(isObject(%player) && %player.InSafehouse)
-		%safehousecount++;
+		if(isObject(%player = %client.player) && !%player.hIsInfected && %player.getdataBlock().getname() !$= "SurvivorPlayerDowned") %livePlayerCount++;
+		if(isObject(%player) && %player.InSafehouse) %safehousecount++;
 	}
 	
 	if(%safehousecount >= %livePlayerCount && isObject(%minigame))
 	{
 		if(isEventPending(%minigame.resetSchedule))	return;
 
-		if(isObject(l4b_music)) l4b_music.delete();
-
-   		%minigame.scheduleReset(8000);
+   		%minigame.VictoryTo = "Survivors";
+		%minigame.scheduleReset(8000);
 		%minigame.l4bMusic("game_win_sound",false,"Music");
-		%minigame.deletel4bMusic("Trigger1");
-		%minigame.deletel4bMusic("Trigger2");
-		%minigame.deletel4bMusic("Trigger3");	
+		%minigame.deletel4bMusic("Stinger1");
+		%minigame.deletel4bMusic("Stinger2");
+		%minigame.deletel4bMusic("Stinger3");	
 
     	for(%i=0;%i<%minigame.numMembers;%i++)
     	{
@@ -45,8 +41,7 @@ function MiniGameSO::SafehouseCheck(%minigame,%client)
 
 			if(isObject(%member.player))
 			{
-				if(%member.player.hType $= "Survivors")
-				%member.player.emote(winStarProjectile, 1);	
+				if(%member.player.hType $= "Survivors") %member.player.emote(winStarProjectile, 1);	
 
 				%member.Camera.setOrbitMode(%member.player, %member.player.getTransform(), 0, 5, 0, 1);
 				%member.setControlObject(%member.Camera);
@@ -171,8 +166,17 @@ function SurvivorPlayerLow::onNewDataBlock(%this,%obj)
 
 function SurvivorPlayerLow::onDisabled(%this,%obj,%state)
 {
-	%obj.playaudio(0,"survivor_death" @ getRandom(1, 8) @ "_sound");
+	Parent::onDisabled(%this,%obj,%state);
 
+	if(isObject(%client = %obj.client))
+	{
+		%client.delayMusicTime = getSimTime();
+		%client.l4bMusic("musicData_L4D_death",false,"Music");
+		%client.deletel4bMusic("Stinger1");
+		%client.deletel4bMusic("Stinger2");
+		%client.deletel4bMusic("Stinger3");
+	}	 
+	
 	if(%obj.getWaterCoverage() == 1)
 	{
 		%obj.playaudio(0,"survivor_death_underwater" @ getRandom(1, 2) @ "_sound");
@@ -180,8 +184,9 @@ function SurvivorPlayerLow::onDisabled(%this,%obj,%state)
 		serverPlay3D("drown_bubbles_sound",%obj.getPosition());
 		serverPlay3D("die_underwater_bubbles_sound",%obj.getPosition());
 	}
+	else %obj.playaudio(0,"survivor_death" @ getRandom(1, 8) @ "_sound");
 
-	Parent::onDisabled(%this,%obj,%state);
+	commandToClient(%obj.client,'SetVignette',$EnvGuiL4B::VignetteMultiply,$EnvGuiL4B::VignetteColor);	
 }
 
 function SurvivorPlayerMed::onDisabled(%this,%obj,%state)
@@ -297,7 +302,7 @@ function SurvivorPlayerDowned::onImpact(%this, %obj, %col, %vec, %force)
 
 function SurvivorPlayerDowned::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
 {
-	if(!%obj.isBeingStrangled) %damage = %damage/3;
+	if(!%obj.isBeingStrangled) %damage = %damage/2.5;//Make the downed player last a little longer
 	
 	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
 }
@@ -305,25 +310,12 @@ function SurvivorPlayerDowned::Damage(%this,%obj,%sourceObject,%position,%damage
 function SurvivorPlayerDowned::onDamage(%this, %obj, %delta)
 {
 	Parent::onDamage(%this, %obj, %delta);
-	if(%delta > 0 && %obj.getState () !$= "Dead")
-	{
-		%painThreshold = 7;
-		if(%this.painThreshold !$= "")
-		{
-			%painThreshold = %this.painThreshold;
-		}
-		if(%delta > %painThreshold)
-		{
-			%obj.playaudio(0, "survivor_painhigh" @ getRandom(1, 4) @ "_sound");
-		}
-	}
+	if(%delta > %this.maxDamage/15 && %obj.getState () !$= "Dead") %obj.playaudio(0, "survivor_painhigh" @ getRandom(1, 4) @ "_sound");
 }
 
 function SurvivorPlayerDowned::onDisabled(%this,%obj)
 {	
-	%obj.playaudio(0,"survivor_death" @ getRandom(1, 8) @ "_sound");
-	commandToClient(%obj.client,'SetVignette',$EnvGuiL4B::VignetteMultiply,$EnvGuiL4B::VignetteColor);
-
+	SurvivorPlayerLow::onDisabled(%this,%obj,%state);
 	Parent::onDisabled(%this, %obj);
 }
 
@@ -352,9 +344,7 @@ function Player::checkIfUnderwater(%obj)
 {
    if(%obj.getWaterCoverage() == 0)
    {
-      if(%obj.oxygenCount == 6 && %obj.getState() !$= "Dead")
-      %obj.playaudio(0,"survivor_painhigh" @ getRandom(1, 4) @ "_sound");
-
+      if(%obj.oxygenCount == 6 && %obj.getState() !$= "Dead") %obj.playaudio(0,"survivor_painhigh" @ getRandom(1, 4) @ "_sound");
 	  %obj.oxygenCount = 0;
    }
    cancel(%obj.oxygenTick);

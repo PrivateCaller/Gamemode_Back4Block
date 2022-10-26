@@ -351,7 +351,7 @@ function Player::woundappearance(%obj,%type)
 							%obj.unHideNode("pantswound");
 	}
 
-	if(%obj.nolegs == 2 && %obj.getClassName() $= "AIPlayer") %obj.setcrouching(1);
+	if(%obj.nolegs && %obj.getClassName() $= "AIPlayer") %obj.setcrouching(1);
 	
 }
 
@@ -388,15 +388,21 @@ function Armor::RbloodDismember(%this,%obj,%limb,%position)
 
 function Armor::RBloodSimulate(%this, %obj, %position, %damagetype, %damage)
 {
-	%effectPosition = %position;
+	%obj.limbShotgunStrike++;
+	if(%obj.lastHitTime+5 < getSimTime())
+	{
+		%obj.limbShotgunStrike = 0;
+		%obj.lastHitTime = getSimTime();
+	}	
+
 	if(%obj.lastDamaged < getSimTime())
 	{
 		for(%i = 0; %i < mCeil(%damage / 25); %i++)
 		{			
-			doBloodExplosion(%effectPosition, getWord(%obj.getScale(), 2));
+			doBloodExplosion(%position, getWord(%obj.getScale(), 2));
 			if($Pref::L4B::Blood::BloodDecals) %this.doSplatterBlood(%obj,5);
 		}
-		serverPlay3D("blood_impact" @ getRandom(1,4) @ "_sound", %effectPosition);
+		serverPlay3D("blood_impact" @ getRandom(1,4) @ "_sound", %position);
 		%obj.lastDamaged = getSimTime()+50;
 	}
 
@@ -406,7 +412,6 @@ function Armor::RBloodSimulate(%this, %obj, %position, %damagetype, %damage)
 		%time = mClampF(%obj.getDamagePercent()*10, 0, 10);
 		%obj.SapHealth(0,25);
 		%obj.markForLimbDismember[%limb] = true;
-		%obj.markForLimbDismemberPos[%limb] = %position;	
 		%this.RbloodDismember(%obj,%limb,%position);
 	} 
 	if(%damage > %this.maxDamage*2.5) %obj.markForGibExplosion = true;
@@ -424,6 +429,14 @@ $RBloodLimbString8 = "lshoe lpeg lshoe_blood";
 
 package RBloodPackage
 {
+	function Armor::onRemove(%this,%obj)
+	{
+		Parent::onRemove(%this,%obj);
+
+		if(isObject(%obj.hatprop)) %obj.hatprop.delete();
+		if(isObject(%obj.headbloodbot)) %obj.headbloodbot.delete();
+	}
+
 	function MiniGameSO::reset(%this, %client) 
 	{
 		Parent::reset(%this, %client);
@@ -437,7 +450,8 @@ package RBloodPackage
 
 	function ProjectileData::radiusDamage(%this, %obj, %col, %distanceFactor, %pos, %damageAmt)
 	{	
-		if((vectorDist(%pos, %col.getHackPosition()) / getWord(%col.getScale(), 2)) < 5) %col.markForGibExplosion = true;
+		if(%col.getType() & $TypeMasks::PlayerObjectType && %col.getDamageLevel()+%damageAmt > %col.getdataBlock().maxDamage && (vectorDist(%pos, %col.getHackPosition()) / getWord(%col.getScale(), 2)) < %obj.getdataBlock().damageRadius) 
+		%col.markForGibExplosion = true;
 		
 		Parent::radiusDamage(%this, %obj, %col, %distanceFactor, %pos, %damageAmt);
 	}	
@@ -451,34 +465,22 @@ package RBloodPackage
 		if(%damageType == $DamageType::Fall || %damageType == $DamageType::Lava || %damageType == $DamageType::Suicide) %rblooddamage = %damage / %obj.getdataBlock().maxDamage/1.333;
 		else %rblooddamage = %damage;
 
-		%rbloodPosition = %position;
-		%scale = getWord(%obj.scale, 2);
-		%randomString = ((getRandom() - 0.5) * 1 * %scale) SPC ((getRandom() - 0.5) * 1 * %scale) SPC ((getRandom() - 0.5) * 2 * %scale);
-		if(%rbloodPosition $= "" || %rbloodPosition $= "0 0 0" || vectorDist(%rbloodPosition, %obj.getHackPosition()) > (1.5 * %scale)) %rbloodPosition = vectorAdd(%obj.getHackPosition(), %randomString);
-		%obj.limbShotgunStrike++;
-		if(%obj.lastHitTime+5 < getSimTime())
-		{
-			%obj.limbShotgunStrike = 0;
-			%obj.lastHitTime = getSimTime();
-		}
+		if(%position $= "" || %position $= "0 0 0" || vectorDist(%position, %obj.getHackPosition()) > 1.5*getWord(%obj.getScale(), 2)) %rbloodPosition = %obj.getHackPosition();
 		%this.RBloodSimulate(%obj, %rbloodPosition, %damagetype, %rblooddamage);
-	}
 
-	function Armor::onDisabled(%this, %obj, %state)
-	{
-		Parent::onDisabled(%this, %obj, %state);
-		
-		%position = %obj.getHackPosition();
-		if(%obj.markForGibExplosion)
+		if(%obj.getState() $= "Dead")
 		{
-			%obj.SapHealth(0,25);			
-			%obj.hideNode("ALL");
-			%obj.schedule(50,delete);
-			doBloodDismemberExplosion(%position, 1.5);
-			if($Pref::L4B::Blood::BloodDecals) %this.doSplatterBlood(%obj,10);
-			serverPlay3D("blood_explosion" @ getRandom(1,2) @ "_sound", %position);
-			doGibLimbsExplosion(%position, getWord(%obj.scale, 2));
-		}
+			if(%obj.markForGibExplosion)
+			{
+				%obj.SapHealth(0,25);			
+				%obj.hideNode("ALL");
+				%obj.schedule(50,delete);
+				for(%dismember = 0; getRandom(5,10) <= 10; %dismember++) doBloodDismemberExplosion(%obj.getHackPosition(), 1.5); 
+				if($Pref::Server::BO2Zombies::BloodDecals) %this.doSplatterBlood(%obj,10);
+				serverPlay3D("blood_explosion" @ getRandom(1,2) @ "_sound", %obj.getHackPosition());
+				doGibLimbsExplosion(%obj.getHackPosition(), getWord(%obj.scale, 2));
+			}
+		}		
 	}
 };
 activatePackage(RBloodPackage);

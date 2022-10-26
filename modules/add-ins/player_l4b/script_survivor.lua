@@ -113,7 +113,7 @@ function Survivor_LeftClick(val,obj)
         end
     elseif tonumber(val) == 0 and ts.isobject(ts.getobj(obj,"LastActivated")) then
 
-        local touchedobj = ts.getobj(obj, "LastActivated")
+        local touchedobj = ts.callobj(ts.getobj(obj, "LastActivated"),"getID")
         local touchedobjclass = ts.callobj(touchedobj, "getClassName")
 
         if touchedobjclass == "Player" or touchedobjclass == "AIPlayer" then
