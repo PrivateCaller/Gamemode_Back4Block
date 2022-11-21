@@ -176,7 +176,7 @@ function ZombieChargerHoleBot::holeAppearance(%this,%obj,%skinColor,%face,%decal
 	%obj.accentColor = %accentColor;
 	%obj.accent =  0;
 	%obj.hatColor = %hatColor;
-	%obj.hat = %hat;
+	%obj.hat = 0;
 	%obj.headColor = %skinColor;
 	%obj.faceName = %face;
 	%obj.chest =  0;

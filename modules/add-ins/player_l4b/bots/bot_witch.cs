@@ -339,59 +339,7 @@ function ZombieWitchHoleBot::holeAppearance(%this,%obj,%skinColor,%face,%decal,%
         GameConnection::ApplyBodyColors(%obj);
 }
 
-function ZombieWitchHoleBot::L4BAppearance(%this,%client,%obj)
+function ZombieWitchHoleBot::L4BAppearance(%this,%obj,%client)
 {
-    %obj.hideNode("ALL");
-	%obj.unHideNode("femchest");
-	%obj.unHideNode("rhand");
-	%obj.unHideNode("lhand");
-	%obj.unHideNode(("rarm"));
-	%obj.unHideNode(("larm"));
-	%obj.unHideNode("headskin");
-	%obj.unHideNode("pants");
-	%obj.unHideNode("rshoe");
-	%obj.unHideNode("lshoe");
-	%obj.unhidenode("gloweyes");
-	%obj.setHeadUp(0);		
-
-	%obj.setnodeColor("gloweyes","1 1 0 1");
-	%obj.setFaceName("asciiTerror");
-	%obj.setDecalName(%client.decalName);
-	%obj.setNodeColor("headskin",%client.headColor);
-	%obj.setNodeColor("femchest",%client.chestColor);
-	%obj.setNodeColor("pants",%client.hipColor);
-	%obj.setNodeColor("rarm",%client.rarmColor);
-	%obj.setNodeColor("larm",%client.larmColor);
-	%obj.setNodeColor("rarmSlim",%client.rarmColor);
-	%obj.setNodeColor("larmSlim",%client.larmColor);
-	%obj.setNodeColor("rhand",%client.rhandColor);
-	%obj.setNodeColor("lhand",%client.lhandColor);
-	%obj.setNodeColor("rshoe",%client.rlegColor);
-	%obj.setNodeColor("lshoe",%client.llegColor);
-	%obj.setNodeColor("headpart1",%client.headColor);
-	%obj.setNodeColor("headpart2",%client.headColor);
-	%obj.setNodeColor("headpart3",%client.headColor);
-	%obj.setNodeColor("headpart4",%client.headColor);
-	%obj.setNodeColor("headpart5",%client.headColor);
-	%obj.setNodeColor("headpart6",%client.headColor);
-	%obj.setNodeColor("headskullpart1","1 0.5 0.5 1");
-	%obj.setNodeColor("headskullpart2","1 0.5 0.5 1");
-	%obj.setNodeColor("headskullpart3","1 0.5 0.5 1");
-	%obj.setNodeColor("headskullpart4","1 0.5 0.5 1");
-	%obj.setNodeColor("headskullpart5","1 0.5 0.5 1");
-	%obj.setNodeColor("headskullpart6","1 0.5 0.5 1");
-	%obj.setNodeColor("headstump","1 0 0 1");
-	%obj.setNodeColor("legstumpr","1 0 0 1");
-	%obj.setNodeColor("legstumpl","1 0 0 1");
-	%obj.setNodeColor("femchestpart1",%client.chestColor);
-	%obj.setNodeColor("femchestpart2",%client.chestColor);
-	%obj.setNodeColor("femchestpart3",%client.chestColor);
-	%obj.setNodeColor("femchestpart4",%client.chestColor);
-	%obj.setNodeColor("femchestpart5",%client.chestColor);
-	%obj.setNodeColor("pants",%client.hipColor);
-	%obj.setNodeColor("pantswound",%client.hipColor);
-	%obj.setNodeColor("skeletonchest","1 0.5 0.5 1");
-	%obj.setNodeColor("skelepants","1 0.5 0.5 1");
-	%obj.setNodeColor("organs","1 0.6 0.5 1");
-	%obj.setNodeColor("brain","1 0.75 0.746814 1");
+    Parent::L4BAppearance(%this,%obj,%client);
 }

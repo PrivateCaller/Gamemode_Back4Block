@@ -257,34 +257,6 @@ datablock ProjectileData(SecondaryMeleeProjectile)
 	explosion = SecondaryMeleeExplosion;
 };
 
-datablock PlayerData(PlayerHatModel)
-{
-	shapeFile = "./models/hat.dts";
-};
-
-datablock PlayerData(EmptyPlayer)
-{
-	shapeFile = "base/data/shapes/empty.dts";
-};
-
-datablock TSShapeConstructor(NewMDts) 
-{
-	baseShape = "./models/newm.dts";
-	sequence0 = "./models/default.dsq";
-	sequence1 = "./models/melee.dsq";
-	sequence2 = "./models/actions.dsq";
-	sequence3 = "./models/zombie.dsq";
-};
-
-datablock PlayerData(L4BStandardPlayer : PlayerStandardArmor)
-{
-	shapeFile = "./models/newm.dts";
-	canJet = false;
-	enableRBlood = true;
-	usesL4Bappearance = true;
-	uiName = "L4B Player";	
-};
-
 datablock ParticleData(oxygenBubbleParticle : painMidParticle)
 {
 	dragCoefficient		= 3.0;
@@ -340,8 +312,22 @@ datablock ShapeBaseImageData(oxygenBubbleImage : painMidImage)
 
 function oxygenBubbleImage::onDone(%this,%obj,%slot) { %obj.unMountImage(%slot); }
 
-datablock PlayerData(SurvivorPlayer : L4BStandardPlayer)
+datablock TSShapeConstructor(NewMDts) 
 {
+	baseShape = "./models/newm.dts";
+	sequence0 = "./models/default.dsq";
+	sequence1 = "./models/survivor.dsq";
+};
+
+datablock TSShapeConstructor(NewMDtsAiming : NewMDts) 
+{
+	baseShape = "./models/newm_aiming.dts";
+	sequence0 = "./models/default_aiming.dsq";
+};
+
+datablock PlayerData(SurvivorPlayer : PlayerStandardArmor)
+{
+	shapeFile = NewMDts.baseshape;
 	canJet = false;
 	runForce = 100 * 45;
 	jumpforce = 100*9.25;
@@ -375,41 +361,29 @@ datablock PlayerData(SurvivorPlayer : L4BStandardPlayer)
 	usesL4DItems = true;
 	isSurvivor = true;
 	hType = "Survivors";
+	enableRBlood = true;
+	usesL4Bappearance = true;
+	renderFirstPerson = true;
 	maxtools = 5;
 	maxWeapons = 5;
 
+	boundingBox = "4.5 4 10.6";
+	crouchboundingBox = "4.5 4 9";
+	
 	jumpSound 		= JumpSound;
 	PainSound		= "";
 	DeathSound		= "";
 	useCustomPainEffects = true;
 	rechargeRate = 0.025;
 	maxenergy = 100;
-	showEnergyBar = true;
+	showEnergyBar = false;
 };
-datablock PlayerData(SurvivorPlayerMed : SurvivorPlayer)
+datablock PlayerData(SurvivorPlayerAiming : SurvivorPlayer)
 {
-	maxForwardSpeed = SurvivorPlayer.maxForwardSpeed/1.375;
-   	maxBackwardSpeed = SurvivorPlayer.maxBackwardSpeed/1.375;
-   	maxSideSpeed = SurvivorPlayer.maxSideSpeed/1.375;
- 	maxForwardCrouchSpeed = SurvivorPlayer.maxForwardCrouchSpeed/1.375;
-    maxBackwardCrouchSpeed = SurvivorPlayer.maxBackwardCrouchSpeed/1.375;
-    maxSideCrouchSpeed = SurvivorPlayer.maxSideCrouchSpeed/1.375;
-
+	shapeFile = NewMDtsAiming.baseshape;
 	uiName = "";
 };
-datablock PlayerData(SurvivorPlayerLow : SurvivorPlayer)
-{
-	maxForwardSpeed = SurvivorPlayer.maxForwardSpeed/1.75;
-   	maxBackwardSpeed = SurvivorPlayer.maxBackwardSpeed/1.75;
-   	maxSideSpeed = SurvivorPlayer.maxSideSpeed/1.75;
- 	maxForwardCrouchSpeed = SurvivorPlayer.maxForwardCrouchSpeed/1.75;
-    maxBackwardCrouchSpeed = SurvivorPlayer.maxBackwardCrouchSpeed/1.75;
-    maxSideCrouchSpeed = SurvivorPlayer.maxSideCrouchSpeed/1.75;
-
-	uiName = "";
-};
-
-datablock PlayerData(SurvivorPlayerDowned : SurvivorPlayerLow)
+datablock PlayerData(SurvivorPlayerDowned : SurvivorPlayer)
 {	
    	runForce = SurvivorPlayer.runForce;
    	maxForwardSpeed = 0;
@@ -427,7 +401,7 @@ datablock PlayerData(SurvivorPlayerDowned : SurvivorPlayerLow)
 //Smoker Datablocks
 datablock StaticShapeData(SmokerTongueShape)
 {
-	shapeFile = "./models/smoker/tongue.dts";
+	shapeFile = "./models/tongue.dts";
 	isSmokerTongue = 1;
 };
 
@@ -544,28 +518,24 @@ datablock ParticleEmitterData(SmokerPulseEmitter)
 
 datablock ShapeBaseImageData(SmokeStatusPlayerImage)
 {
-   shapeFile = "base/data/shapes/empty.dts";
-   emap = true;
+	shapeFile = "base/data/shapes/empty.dts";
+	emap = true;
 
-   mountPoint = 2;
-   offset = "0 -0.25 -0.75";
-   eyeOffset = 0;
-   rotation = "0 0 0";
+	mountPoint = 2;
+	offset = "0 -0.25 -0.75";
+	eyeOffset = 0;
+	rotation = "0 0 0";
+	correctMuzzleVector = true;
+	className = "WeaponImage";
 
-   correctMuzzleVector = true;
+	item = "";
+	ammo = " ";
+	projectile = "";
+	projectileType = Projectile;
 
-   className = "WeaponImage";
-
-   item = "";
-   ammo = " ";
-   projectile = "";
-   projectileType = Projectile;
-
-   melee = false;
-   armReady = false;
-
-   doColorShift = false;
-
+   	melee = false;
+   	armReady = false;
+   	doColorShift = false;
 	stateName[0]                   = "Smoke";
 	stateTimeoutValue[0]           = 0.3;
 	stateEmitter[0]                = SmokerPulseEmitter;
@@ -579,9 +549,9 @@ datablock ShapeBaseImageData(SmokeStatusPlayerImage)
 	stateTransitionOnTimeout[1]    = "Smoke";
 };
 
-datablock shapeBaseImageData( ConstructionConeSpeakerImage )
+datablock shapeBaseImageData(ConstructionConeSpeakerImage)
 {
-	shapefile = "./models/construction/conespeaker.dts";
+	shapefile = "./models/conespeaker.dts";
 
 	mountPoint = 1;
 	offset = "0 0.18 0.25";
@@ -592,7 +562,7 @@ datablock shapeBaseImageData( ConstructionConeSpeakerImage )
 
 datablock ShapeBaseImageData(ZombieSmokerConstrictImage)
 {
-	shapeFile = "./models/smoker/constricted.dts";
+	shapeFile = "./models/constricted.dts";
 	emap = true;
 	mountPoint = $BackSlot;
 	offset = "0 0 0";
@@ -1706,13 +1676,25 @@ datablock fxDTSBrickData (BrickCommonZombie_HoleSpawnData)
 	holeBot = "CommonZombieHoleBot";
 };
 
-datablock PlayerData(CommonZombieHoleBot : L4BStandardPlayer)
+datablock TSShapeConstructor(ZombieMDts) 
 {
-	canJet = false;
+	baseShape = "./models/oldm.dts";
+	sequence0 = "./models/default_old.dsq";
+	sequence1 = "./models/zombie.dsq";
+};
+
+datablock PlayerData(CommonZombieHoleBot : SurvivorPlayer)
+{
+	shapeFile = ZombieMDts.baseShape;
+	boundingBox = VectorScale ("1.25 1.25 2.65", 4);
+	crouchBoundingBox = VectorScale ("1.25 1.25 1.00", 4);	
+	renderFirstPerson = false;
+	thirdpersononly = true;
 	jumpForce = 9.5*100;
 	minImpactSpeed = 20;
 	airControl = 0.1;
 	speedDamageScale = 0.5;
+	isSurvivor = false;
 
     maxForwardSpeed = 10;
     maxSideSpeed = 9;
@@ -1816,7 +1798,7 @@ datablock fxDTSBrickData (BrickZombieCharger_HoleSpawnData : BrickCommonZombie_H
 datablock TSShapeConstructor(ChargerMDts) 
 {
 	baseShape = "./models/zombie_charger.dts";
-	sequence0 = "./models/default.dsq";
+	sequence0 = "./models/default_old.dsq";
 	sequence1 = "./models/zombie.dsq";
 };
 
@@ -1862,27 +1844,8 @@ datablock PlayerData(ZombieChargerHoleBot : CommonZombieHoleBot)
 // Tank Datablocks
 datablock TSShapeConstructor(RotZTankDts)
 {
-	baseshape  = "./models/tank/ztank.dts";
-	sequence0  = "./models/tank/ztankroot.dsq root";
-	sequence1  = "./models/tank/ztankrun.dsq run";
-	sequence2  = "./models/tank/ztankrun.dsq walk";
-	sequence3  = "./models/tank/ztankback.dsq back";
-	sequence4  = "./models/tank/ztankrunside.dsq side";
-	sequence5  = "./models/tank/ztankcrouch.dsq crouch";
-	sequence6  = "./models/tank/ztankcrouchrun.dsq crouchrun";
-	sequence7  = "./models/tank/ztankcrouchback.dsq crouchback";
-	sequence8 = "./models/tank/ztankheadside.dsq headside";
-	sequence9 = "./models/tank/ztankjump.dsq jump";
-	sequence10 = "./models/tank/ztankjump.dsq standjump";
-	sequence11 = "./models/tank/ztankfall.dsq fall";
-	sequence12 = "./models/tank/ztankland.dsq land";
-	sequence13 = "./models/tank/ztankattack.dsq armattack";
-	sequence14 = "./models/tank/ztankactivate.dsq activate";
-    sequence15 = "./models/tank/ztankactivate2.dsq activate2";
-	sequence16 = "./models/tank/ztankarmcharge.dsq spearready";  
-	sequence17 = "./models/tank/ztankarmthrow.dsq spearthrow";  
-	sequence18 = "./models/tank/ztankdie.dsq death1";
-	sequence19  = "./models/tank/zTankLook.dsq look";
+	baseshape  = "./models/zombie_tank.dts";
+	sequence0  = "./models/tank.dsq root";
 };
 
 datablock fxDTSBrickData (BrickZombieTankBot_HoleSpawnData : BrickCommonZombie_HoleSpawnData)
@@ -1896,7 +1859,7 @@ datablock fxDTSBrickData (BrickZombieTankBot_HoleSpawnData : BrickCommonZombie_H
 datablock PlayerData(ZombieTankHoleBot : CommonZombieHoleBot)
 {
 	uiName = "Tank Infected";
-	shapeFile = "add-ons/gamemode_left4block/modules/add-ins/player_l4b/models/tank/zTank.dts";
+	shapeFile = RotZTankDts.baseShape;
 	maxDamage = $Pref::L4B::Zombies::TankHealth;//Health
 	mass = 500;
 
@@ -1971,7 +1934,7 @@ datablock fxDTSBrickData (BrickHunter_HoleSpawnData : BrickCommonZombie_HoleSpaw
 datablock TSShapeConstructor(ClawsMDts) 
 {
 	baseShape = "./models/zombie_claws.dts";
-	sequence0 = "./models/default.dsq";
+	sequence0 = "./models/default_old.dsq";
 	sequence1 = "./models/zombie.dsq";
 };
 
@@ -1980,6 +1943,7 @@ datablock PlayerData(ZombieHunterHoleBot : CommonZombieHoleBot)
 	shapeFile = "./models/zombie_claws.dts";
 	uiName = "Hunter Infected";
 	speedDamageScale = 0;
+	jumpForce = 90*8;
 
 	cameramaxdist = 4;
     cameraVerticalOffset = 1;
@@ -2006,7 +1970,7 @@ datablock PlayerData(ZombieHunterHoleBot : CommonZombieHoleBot)
 
 	hName = "Hunter";//cannot contain spaces
 	hStrafe = 0;//Randomly strafe while following player
-	hAttackDamage = $Pref::L4B::Zombies::SpecialsDamage;
+	hAttackDamage = $Pref::L4B::Zombies::SpecialsDamage*0.75;
 
 	rechargeRate = 1.75;
 	maxenergy = 100;
@@ -2121,7 +2085,7 @@ datablock fxDTSBrickData (BrickZombieSmoker_HoleSpawnData : BrickCommonZombie_Ho
 datablock TSShapeConstructor(SmokerMDts) 
 {
 	baseShape = "./models/zombie_smoker.dts";
-	sequence0 = "./models/default.dsq";
+	sequence0 = "./models/default_old.dsq";
 	sequence1 = "./models/zombie.dsq";
 };
 
@@ -2174,7 +2138,7 @@ datablock fxDTSBrickData (BrickZombieBoomer_HoleSpawnData : BrickCommonZombie_Ho
 datablock TSShapeConstructor(BoomerMDts) 
 {
 	baseShape = "./models/zombie_boomer.dts";
-	sequence0 = "./models/default.dsq";
+	sequence0 = "./models/default_old.dsq";
 	sequence1 = "./models/zombie.dsq";
 };
 
@@ -2227,7 +2191,7 @@ datablock PlayerData(ZombieBoomerHoleBot : CommonZombieHoleBot)
 datablock TSShapeConstructor(UncommonMDts) 
 {
 	baseShape = "./models/zombie_uncommon.dts";
-	sequence0 = "./models/default.dsq";
+	sequence0 = "./models/default_old.dsq";
 	sequence1 = "./models/zombie.dsq";
 };
 
@@ -2324,101 +2288,13 @@ datablock DebrisData(handLeftDebris : skeleheadDebris)
    fade = true;
    gravModifier = 2;
 };
-datablock DebrisData(skeleshoulderDebris : skeleheadDebris)
-{
-   shapeFile = "./models/skeleton_shoulder.dts";
-   lifetime = 6.0;
-   minSpinSpeed = -400.0;
-   maxSpinSpeed = 200.0;
-   elasticity = 0.5;
-   friction = 0.2;
-   numBounces = 3;
-   staticOnMaxBounce = true;
-   snapOnMaxBounce = false;
-   fade = true;
-   gravModifier = 2;
-};
-datablock DebrisData(footDebris : skeleheadDebris)
-{
-   shapeFile = "./models/skeleton_foot.dts";
-   lifetime = 6.0;
-   minSpinSpeed = -400.0;
-   maxSpinSpeed = 200.0;
-   elasticity = 0.5;
-   friction = 0.2;
-   numBounces = 3;
-   staticOnMaxBounce = true;
-   snapOnMaxBounce = false;
-   fade = true;
-   gravModifier = 2;
-};
-datablock ExplosionData(SkeletalDeathExplosion1)
-{
-   lifetimeMS = 33;
-   particleEmitter = "";
-   debrisNumVariance      = 0;
-   debrisPhiMin           = 0;
-   debrisPhiMax           = 360;
-   debrisThetaMin         = 5;
-   debrisThetaMax         = 105;
-   debrisVelocity         = 5;
-   debrisVelocityVariance = 1;
-   debris = skeleheadDebris;
-   debrisNum = 0;
-   faceViewer     = true;
-   explosionScale = "1 1 1";
-   shakeCamera = false;
-   lightStartRadius = 0;
-   lightEndRadius = 0;
-   impulseRadius = 100;
-   impulseForce = 100;
-   radiusDamage = 0;
-   damageRadius = 0;
-};
-datablock ExplosionData(SkeletalDeathExplosion2 : SkeletalDeathExplosion1)
-{
-   debris = footDebris;
-   debrisNum = 2;
-};
-datablock ExplosionData(SkeletalDeathExplosion3 : SkeletalDeathExplosion1)
-{
-   debris = skeleshoulderDebris;
-   debrisNum = 2;
-};
-datablock ExplosionData(SkeletalDeathExplosion4 : SkeletalDeathExplosion1)
-{
-   debris = handDebris;
-   debrisNum = 1;
-};
-datablock ExplosionData(SkeletalDeathExplosion5 : SkeletalDeathExplosion1)
-{
-   debris = handLeftDebris;
-   debrisNum = 1;
-};
-datablock ExplosionData(SkeletalDeathExplosion : SkeletalDeathExplosion1)
-{
-   lifeTimeMS = 500;
-   debris = skeleheadDebris;
-   debrisNum = 1;
-   soundProfile = breakBrickSound;
-   subExplosion[0] = SkeletalDeathExplosion1;
-   subExplosion[1] = SkeletalDeathExplosion2;
-   subExplosion[2] = SkeletalDeathExplosion3;
-   subExplosion[3] = SkeletalDeathExplosion4;
-   subExplosion[4] = SkeletalDeathExplosion5;
-};
-
-datablock ProjectileData(SkeletalDeathExplosionProjectile)
-{
-   explosion        = SkeletalDeathExplosion;
-};
 
 datablock TSShapeConstructor(mSkeletonMDts)
 {
 	baseShape = "./models/skeleton.dts";
-	sequence0 = "./models/default.dsq";
+	sequence0 = "./models/default_old.dsq";
 	sequence1 = "./models/zombie.dsq";
-	sequence2 = "./models/melee.dsq";	
+	sequence2 = "./models/survivor.dsq";
 };
 
 datablock PlayerData(SkeletonHoleBot : CommonZombieHoleBot)

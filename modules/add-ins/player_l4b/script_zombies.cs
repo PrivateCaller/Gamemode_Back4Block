@@ -42,6 +42,7 @@ function Player::hMeleeAttack(%obj,%col)
 
 function Player::StunnedSlowDown(%obj,%slowdowndivider)
 {						
+	return;
 	if(!isObject(%obj) || %obj.getstate() $= "Dead") return;
 
 	%datablock = %obj.getDataBlock();
@@ -129,10 +130,8 @@ function Player::hDefaultL4BAppearance(%obj)
 	if(getRandom(1,50) == 1) %obj.shades = 1;
 	if(getRandom(1,3) == 1)
 	{
-		%hat = $hZombieHat[getRandom(1,$hZombieHatAmount)];
-
-		if(getRandom(1,12) == 1) %pack = $hZombiePack[getRandom(1,$hZombiePackAmount)];
-		else %pack = 0;
+		%hat = getRandom(1,8);
+		if(getRandom(1,12) == 1) %pack = 1;
 	}
 	else 
 	{
@@ -249,9 +248,7 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 
 	if(%col.getType() & $TypeMasks::PlayerObjectType && checkHoleBotTeams(%obj,%col) && miniGameCanDamage(%obj,%col))
 	{	
-		%shape = fileName(%col.getDataBlock().shapeFile);
-
-		if(%obj.getState() !$= "Dead" && %col.getState() !$= "Dead" && !%obj.isStrangling && !%col.isBeingStrangled && %shape $= "newm.dts")
+		if(%obj.getState() !$= "Dead" && %col.getState() !$= "Dead" && !%obj.isStrangling && !%col.isBeingStrangled && %col.getdataBlock().isSurvivor)
 		{
 			%col.isBeingStrangled = true;
 			%obj.isStrangling = true;

@@ -7,25 +7,7 @@ function ZombieHunterHoleBot::onNewDataBlock(%this,%obj)
 function ZombieHunterHoleBot::onAdd(%this,%obj,%style)
 {
 	Parent::onAdd(%this,%obj);
-	CommonZombieHoleBot::onAdd(%this,%obj);
-}
-
-function L4B_holeHunterKill(%obj,%col)
-{
-	if(L4B_SpecialsPinCheck(%obj,%col))
-	{
-		%obj.setenergylevel(0);
-		if(%obj.getClassName() !$= "Player")
-		{
-			%obj.setmoveobject(%col);
-			%obj.setaimobject(%col.gethackposition());
-			%obj.hMeleeAttack(%col);
-		}
-		
-		%obj.HunterHurt = schedule(250,0,L4B_holeHunterKill,%obj,%col);
-		%obj.unmount();
-		%col.damage(%obj.hFakeProjectile, %col.getposition(), $Pref::L4B::Zombies::SpecialsDamage/50, $DamageType::Hunter);
-	}
+	CommonZombieHoleBot::onAdd(%this,%obj);	
 }
 
 function ZombieHunterHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
@@ -37,120 +19,132 @@ function ZombieHunterHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,
 	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
 }
 
-function ZombieHunterHoleBot::onDamage(%this,%obj)
+function ZombieHunterHoleBot::onDamage(%this,%obj,%delta)
 {
-	if(%obj.getstate() $= "Dead") return;
+	Parent::onDamage(%this,%obj,%delta);	
 
-    if(%obj.lastdamage+1000 < getsimtime())//Check if the chest is the female variant and add a 1 second cooldown
-	{
-		%obj.playaudio(0,"hunter_pain" @ getrandom(1,3) @ "_sound");
+    if(%delta > 5 && %obj.lastdamage+1000 < getsimtime())
+	{			
+		if(%obj.getstate() !$= "Dead") %obj.playaudio(0,"hunter_pain" @ getrandom(1,3) @ "_sound");
+		else %obj.playaudio(0,"hunter_death" @ getrandom(1,3) @ "_sound");
+
 		%obj.playthread(2,"plant");
 		%obj.lastdamage = getsimtime();
-	}
 
-	if(%obj.raisearms)
+		if(%obj.raisearms)
+		{
+			%obj.raisearms = false;	
+			%obj.playthread(1,plant);
+		}
+
+		if(isObject(%obj.hEating))
+		{
+			%obj.hEating.isBeingStrangled = 0;
+			L4B_SpecialsPinCheck(%obj,%obj.hEating);
+		}		
+	}
+}
+
+function ZombieHunterHoleBot::PinAttackLoop(%obj,%col)
+{
+	if(L4B_SpecialsPinCheck(%obj,%col))
 	{
-		%obj.raisearms = 0;	
-		%obj.playthread(1,plant);
-	}
+		%obj.setenergylevel(0);
+		%obj.unmount();
 
-	if(isObject(%obj.hEating))
-	{
-		%obj.hEating.isBeingStrangled = 0;
-		L4B_SpecialsPinCheck(%obj,%obj.hEating);
-		%obj.lastpounce = getsimtime()+5000;
-		cancel(%obj.hAbouttoattack);
+		if(%obj.getClassName() !$= "Player")
+		{
+			%obj.setmoveobject(%col);
+			%obj.setaimobject(%col.gethackposition());
+			%obj.hMeleeAttack(%col);
+		}
+		
+		%obj.HunterHurt = %this.schedule(250,PinAttackLoop,%obj,%col);		
 	}
-
-	Parent::onDamage(%this,%obj);
 }
 
 function ZombieHunterHoleBot::onDisabled(%this,%obj)
 {
-	if(%obj.getstate() !$= "Dead") return;
-
-	%obj.playaudio(0,"hunter_death" @ getrandom(1,3) @ "_sound");
-
-	if(isObject(%obj.hEating))
-	{
-		%obj.hEating.isBeingStrangled = 0;
-		L4B_SpecialsPinCheck(%obj,%obj.hEating);
-		cancel(%obj.hAbouttoattack);
-	}
-
 	Parent::onDisabled(%this,%obj);
 }
 
 function ZombieHunterHoleBot::onBotLoop(%this,%obj)
-{
-	%obj.hNoSeeIdleTeleport();
-	
-	if(!%obj.hFollowing)
+{	
+	switch$(%obj.hState)
 	{
-		%obj.setMaxForwardSpeed(9);
-		%obj.raisearms = 0;
-		%obj.isstrangling = 0;
-		%obj.playthread(1,"root");
-		%obj.playthread(0,root);
+		case "Wandering":	%obj.setMaxForwardSpeed(9);
+							%obj.isStrangling = false;
+							%obj.hNoSeeIdleTeleport();
 
-		if(getsimtime() >= %obj.lastidle+8000 && !%obj.isstrangling)
-		{
-			%obj.playaudio(0,"hunter_idle" @ getrandom(1,3) @ "_sound");
-			%obj.playthread(3,"plant");
-			%obj.lastidle = getSimTime();
-		}
+							if(getsimtime() >= %obj.lastidle+8000)
+							{
+								%obj.playaudio(0,"hunter_idle" @ getrandom(1,3) @ "_sound");
+								%obj.playthread(3,"plant");
+								%obj.lastidle = getSimTime();
+							}
+		default:
 	}
 }
 
 function ZombieHunterHoleBot::onBotFollow( %this, %obj, %targ )
-{
-	if(!%obj.raisearms)
-	{	
-		%obj.playthread(1,"armReadyboth");
-		%obj.raisearms = 1;
-	}
-
-	if(%obj.lastpounce+5000 < getsimtime() && !%obj.isstrangling)
+{	
+	if(!isObject(%targ) || !isObject(%obj) || %obj.isStrangling || %obj.GetEnergyLevel() < %this.maxenergy)
 	{
-		%obj.lastpounce = getsimtime();
-	
-		%obj.hCrouch(1750);
-		%obj.playaudio(0,"hunter_recognize" @ getrandom(1,3) @ "_sound");
-		%obj.schedule(900,hShootAim,%targ);
-		%obj.hAbouttoattack = schedule(1000,0,L4B_HunterZombieLunge,%obj,%targ);
+		if(isObject(%targ) && isObject(%obj) && !isEventPending(%obj.hAboutToAttack)) %this.schedule(500,onBotFollow,%obj,%targ);
+		return;
 	}
-}
 
-function L4B_HunterZombieLunge(%obj,%targ)
-{
-	if(!isObject(%obj) || !isObject(%targ) || getWord(%obj.getvelocity(),2) >= 1 || %obj.getState() $= "Dead" || %obj.isstrangling) return;
+	if((%distance = vectordist(%obj.getposition(),%targ.getposition())) < 50)
+	{
+		if(!%obj.raisearms)
+		{	
+			%obj.playthread(1,"armReadyboth");
+			%obj.raisearms = true;
+		}
+		
+		%ray = containerRayCast(%obj.gethackposition(),%targ.gethackposition(),$TypeMasks::StaticObjectType | $TypeMasks::PlayerObjectType | $TypeMasks::VehicleObjectType | $TypeMasks::FxBrickObjectType,%obj);	
+		if(isObject(%ray) && %ray.getID() == %targ)
+		{
+			if(%distance > 15) %time = 1000;
+			else %time = 500;
 
-	%obj.playaudio(0,"hunter_attack" @ getrandom(1,3) @ "_sound");
-	%obj.playaudio(1,"hunter_lunge_sound");
+			%obj.hCrouch(%time);
+			%obj.schedule(%time-50,hShootAim,%targ);
+			%obj.hAboutToAttack = %obj.schedule(%time,hJump);
+		}
+	}
+	else if(%obj.raisearms)
+	{	
+		%obj.playthread(1,"root");
+		%obj.raisearms = false;
+	}
 
-	%obj.playthread(3,activate2);
-	%obj.playthread(0,jump); 
-
-	%dis = mClamp(vectordist(%targ.getposition(),%obj.getposition())*0.65, 30, 200);
-	L4B_ZombieLunge(%obj,%targ,%dis);
-
-	cancel(%obj.hAbouttoattack);
-	%obj.spawnExplosion(pushBroomProjectile,%dis*0.01 SPC %dis*0.01 SPC %dis*0.01);
+	if(isObject(%targ) && isObject(%obj) && !isEventPending(%obj.hAboutToAttack)) %this.schedule(500,onBotFollow,%obj,%targ);
 }
 
 function ZombieHunterHoleBot::onBotMelee(%this,%obj,%col)
 {
-	CommonZombieHoleBot::onBotMelee(%this,%obj,%col);
-	%obj.playaudio(2,"hunter_hit" @ getrandom(1,3) @ "_sound");
+	%meleeimpulse = mClamp(%obj.hLastMeleeDamage, 1, 10);	
+	%obj.playthread(2,"zAttack" @ getRandom(1,3));
+	%obj.setaimobject(%col);
+	
+	if(%col.getType() & $TypeMasks::PlayerObjectType)
+	{
+		if(%col.getClassName() $= "Player") %col.spawnExplosion("ZombieHitProjectile",%meleeimpulse/2 SPC %meleeimpulse/2 SPC %meleeimpulse/2);
+		%col.playthread(3,"plant");		
+		%obj.playaudio(2,"hunter_hit" @ getrandom(1,3) @ "_sound");
+	}
+	else
+	{ 
+		%col.applyimpulse(%col.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),getrandom(100,100*%meleeimpulse)),"0" SPC "0" SPC getrandom(100,100*%meleeimpulse)));	
+		%obj.playaudio(1,"melee_hit" @ getrandom(1,8) @ "_sound");
+	}
 }
 
-	function ZombieHunterHoleBot::onImpact(%this, %obj, %col, %vec, %force)
+function ZombieHunterHoleBot::onImpact(%this, %obj, %col, %vec, %force)
 {
-	%oScale = getWord(%obj.getScale(),2);
-	%forcescale = %force/25 * %oscale;
-	%obj.spawnExplosion(pushBroomProjectile,%forcescale SPC %forcescale SPC %forcescale);
 	%obj.setMaxForwardSpeed(9);
-	
+	%oScale = getWord(%obj.getScale(),0);
 	if(%oScale >= 0.9 && %obj.getstate() !$= "Dead") %obj.SpecialPinAttack(%col,%force/2.5);
 
 	Parent::onImpact(%this, %obj, %col, %vec, %force);
@@ -171,8 +165,7 @@ function ZombieHunterHoleBot::holeAppearance(%this,%obj,%skinColor,%face,%decal,
 	%pack = 0;
 	%pack2 = 0;
 	%accent = 0;
-	%chest = 0;
-
+	%chest = 0; 
 	%handColor = %skinColor;
 	%larmColor = %shirtColor;
 	%rarmColor = %shirtColor;
@@ -187,190 +180,69 @@ function ZombieHunterHoleBot::holeAppearance(%this,%obj,%skinColor,%face,%decal,
 		if(getRandom(1,0)) %lLegColor = %skinColor;
 	}
 
-	// accent
 	%obj.accentColor = %accentColor;
 	%obj.accent =  %accent;
-	
-	// hat
 	%obj.hatColor = %hatColor;
 	%obj.hat = 0;
-	
-	// head
 	%obj.headColor = %skinColor;
 	%obj.faceName = %face;
-	
-	// chest
 	%obj.chest =  %chest;
-
 	%obj.decalName = %decal;
 	%obj.chestColor = %shirtColor;
-		
-	// packs
 	%obj.pack =  %pack;
 	%obj.packColor =  %packColor;
-
 	%obj.secondPack =  %pack2;
 	%obj.secondPackColor =  %packColor;
-		
-	// left arm
 	%obj.larm =  "0";
 	%obj.larmColor = %larmColor;
-	
 	%obj.lhand =  0;
 	%obj.lhandColor = %handColor;
-	
-	// right arm
 	%obj.rarm =  "0";
 	%obj.rarmColor = %rarmColor;
-	
 	%obj.rhandColor = %handColor;
 	%obj.rhand = 0;
-	
-	// hip
 	%obj.hip =  "0";
 	%obj.hipColor = %pantsColor;
-	
-	// left leg
 	%obj.lleg =  0;
 	%obj.llegColor = %lLegColor;
-	
-	// right leg
 	%obj.rleg =  0;
 	%obj.rlegColor = %rLegColor;
-
 	GameConnection::ApplyBodyParts(%obj);
 	GameConnection::ApplyBodyColors(%obj);
 }
 
-function ZombieHunterHoleBot::L4BAppearance(%this,%client,%obj)
+function ZombieHunterHoleBot::L4BAppearance(%this,%obj,%client)
 {
-	%obj.hideNode("ALL");
-	%obj.unHideNode("chest");
-	%obj.unHideNode("rhand");
-	%obj.unHideNode("lhand");
-	%obj.unHideNode(("rarm"));
-	%obj.unHideNode(("larm"));
-	%obj.unHideNode("headskin");
-	%obj.unHideNode("pants");
-	%obj.unHideNode("rshoe");
-	%obj.unHideNode("lshoe");
-	%obj.unhidenode("hoodie");
-	%obj.unhidenode("gloweyes");
-	%obj.setHeadUp(0);
-
-	%headColor = %client.headcolor;
-	%chestColor = %client.chestColor;
-	%rarmcolor = %client.rarmColor;
-	%larmcolor = %client.larmColor;
-	%rhandcolor = %client.rhandColor;
-	%lhandcolor = %client.lhandColor;
-	%hipcolor = %client.hipColor;
-	%rlegcolor = %client.rlegColor;
-	%llegColor = %client.llegColor;
-	%faceName = "asciiTerror";
-	%obj.unhidenode("gloweyes");
-	%obj.setnodeColor("gloweyes","1 1 0 1");	
-
-	if(%obj.getclassname() $= "Player")
-	{
-		%skin = %client.headColor;
-		%zskin = getWord(%skin,0)/2.75 SPC getWord(%skin,1)/1.5 SPC getWord(%skin,2)/2.75 SPC 1;			
-
-		%headColor = %zskin;
-		if(%client.chestColor $= %skin) %chestColor = %zskin;
-		if(%client.rArmColor $= %skin) %rarmcolor = %zskin;
-		if(%client.lArmColor $= %skin) %larmcolor = %zskin;
-		if(%client.rhandColor $= %skin) %rhandcolor = %zskin;
-		if(%client.lhandColor $= %skin) %lhandcolor = %zskin;
-		if(%client.hipColor $= %skin) %hipcolor = %zskin;
-		if(%client.rLegColor $= %skin) %rlegcolor = %zskin;
-		if(%client.lLegColor $= %skin) %llegColor = %zskin;
-	}			
-	
-	%obj.setFaceName(%faceName);
-	%obj.setDecalName(%client.decalName);
-	%obj.setNodeColor("headskin",%headColor);
+	Parent::L4BAppearance(%this,%obj,%client);
+	%obj.unhideNode("hoodie");
 	%obj.setNodeColor("hoodie",%client.hatColor);
-	%obj.setNodeColor("chest",%chestColor);
-	%obj.setNodeColor("pants",%hipColor);
-	%obj.setNodeColor("rarm",%rarmColor);
-	%obj.setNodeColor("larm",%larmColor);
-	%obj.setNodeColor("rhand",%rhandColor);
-	%obj.setNodeColor("lhand",%lhandColor);
-	%obj.setNodeColor("rshoe",%rlegColor);
-	%obj.setNodeColor("lshoe",%llegColor);
-	%obj.setNodeColor("headpart1",%headColor);
-	%obj.setNodeColor("headpart2",%headColor);
-	%obj.setNodeColor("headpart3",%headColor);
-	%obj.setNodeColor("headpart4",%headColor);
-	%obj.setNodeColor("headpart5",%headColor);
-	%obj.setNodeColor("headpart6",%headColor);
-	%obj.setNodeColor("chestpart1",%chestColor);
-	%obj.setNodeColor("chestpart2",%chestColor);
-	%obj.setNodeColor("chestpart3",%chestColor);
-	%obj.setNodeColor("chestpart4",%chestColor);
-	%obj.setNodeColor("chestpart5",%chestColor);
-	%obj.setNodeColor("pants",%hipColor);
-	%obj.setNodeColor("pantswound",%hipColor);
-	%obj.setnodeColor("gloweyes","1 1 0 1");	
-	%obj.setNodeColor("rarmSlim","1 0.5 0.5 1");
-	%obj.setNodeColor("larmSlim","1 0.5 0.5 1");	
-	%obj.setNodeColor("headskullpart1","1 0.5 0.5 1");
-	%obj.setNodeColor("headskullpart2","1 0.5 0.5 1");
-	%obj.setNodeColor("headskullpart3","1 0.5 0.5 1");
-	%obj.setNodeColor("headskullpart4","1 0.5 0.5 1");
-	%obj.setNodeColor("headskullpart5","1 0.5 0.5 1");
-	%obj.setNodeColor("headskullpart6","1 0.5 0.5 1");
-	%obj.setNodeColor("headstump","1 0 0 1");
-	%obj.setNodeColor("legstumpr","1 0 0 1");
-	%obj.setNodeColor("legstumpl","1 0 0 1");
-	%obj.setNodeColor("skeletonchest","1 0.5 0.5 1");
-	%obj.setNodeColor("skelepants","1 0.5 0.5 1");
-	%obj.setNodeColor("organs","1 0.6 0.5 1");
-	%obj.setNodeColor("brain","1 0.75 0.746814 1");
 }
 
 function ZombieHunterHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
 {	
 	CommonZombieHoleBot::onTrigger (%this, %obj, %triggerNum, %val);
 
-	if(%obj.getClassName() $= "Player" && %obj.getstate() !$= "Dead")
-	if(%obj.GetEnergyLevel() >= %this.maxenergy)
+	if(%obj.getstate() !$= "Dead" && %obj.GetEnergyLevel() >= %this.maxenergy)
 	{
-		switch(%triggerNum)
+		if(%val) switch(%triggerNum)
 		{
-			case 3: if(%val)
+			case 3: %obj.playaudio(0,"hunter_recognize" @ getrandom(1,3) @ "_sound");
+					%obj.BeginPounce = true;
+									
+			case 2: if(getWord(%obj.getvelocity(),2) <= 5 && %obj.BeginPounce)
 					{
-						%obj.playaudio(0,"hunter_recognize" @ getrandom(1,3) @ "_sound");
-						%obj.BeginPounce = 1;
-					}
-					else {
-							%obj.BeginPounce = 0;
-							if(isObject(%obj.light))
-							%obj.light.delete();
-						 }
-
-			case 2: if(%val && getWord(%obj.getvelocity(),2) <= 5)
-					if(%obj.BeginPounce)
-					{
-						%obj.BeginPounce = 0;
-						
-						if(isObject(%obj.light))
-						%obj.light.delete();
-
+						%obj.BeginPounce = false;
 						%obj.setenergylevel(0);
-
 						%obj.playaudio(0,"hunter_attack" @ getrandom(1,3) @ "_sound");
 						%obj.playaudio(1,"hunter_lunge_sound");
 						%obj.playthread(0,jump);
-						%obj.playthread(1,activate2);
-
+						%obj.playthread(1,activate2);											
 						%normVec = VectorNormalize(vectoradd(%obj.getEyeVector(),"0 0 0.005"));
 						%eye = vectorscale(%normVec,50);
-						%obj.setvelocity(%eye);
+						%obj.setvelocity(%eye);												
 					}
-			default:
 		}
+		else %obj.BeginPounce = false;
 	}
 	Parent::onTrigger (%this, %obj, %triggerNum, %val);
 }

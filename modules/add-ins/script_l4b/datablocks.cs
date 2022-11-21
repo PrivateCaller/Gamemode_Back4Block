@@ -22,29 +22,33 @@ while(%file !$= "")
 datablock ParticleData(largeRBloodParticle)
 {
    dragCoefficient = 3;
-   gravityCoefficient = 0.0;
+   gravityCoefficient = 2.5;
    inheritedVelFactor = 1;
    constantAcceleration = 0;
    lifetimeMS         = 600;
    lifetimeVarianceMS = 250;
-   textureName = "base/data/particles/cloud";
+   textureName = "base/data/particles/dot";
    spinSpeed     = 0;
    spinRandomMin = -20;
    spinRandomMax = 20;
-   colors[0] = "0.6 0 0 1";
-   colors[1] = "0.5 0 0 1";
-   colors[2] = "0.4 0 0 0";
-   sizes[0] = 1.5;
-   sizes[1] = 0.3;
-   sizes[2] = 0.04;
+   colors[0] = "0.3 0 0 1";
+   colors[1] = "0.2 0 0 0.75";
+   colors[2] = "0.1 0 0 0.5";
+   colors[3] = "0.05 0 0 0.25";
+   sizes[0] = 0.5;
+   sizes[1] = 0.4;
+   sizes[2] = 0.3;
+   sizes[3] = 0.2;
+   times[0] = 0.25;
    times[1] = 0.5;
-   times[2] = 1;
+   times[2] = 0.75;
+   times[3] = 1;
    useInvAlpha = true;
 };
 
 datablock ParticleEmitterData(largeRBloodEmitter)
 {
-   ejectionPeriodMS = 50;
+   ejectionPeriodMS = 25;
    periodVarianceMS = 0;
    ejectionVelocity = 4;
    velocityVariance = 0;
@@ -54,7 +58,7 @@ datablock ParticleEmitterData(largeRBloodEmitter)
    phiReferenceVel = 0;
    phiVariance     = 360;
    overrideAdvance = false;
-   lifetimeMS = 3500;
+   lifetimeMS = 4500;
    particles = "largeRBloodParticle";
 
    uiName = "";
@@ -72,9 +76,9 @@ datablock ParticleData(smallBloodParticle)
    spinSpeed     = 0;
    spinRandomMin = -20;
    spinRandomMax = 20;
-   colors[0] = "0.6 0 0 1";
-   colors[1] = "0.5 0 0 0.3 ";
-   colors[2] = "0.4 0 0 0";
+   colors[0] = "0.4 0 0 1";
+   colors[1] = "0.3 0 0 0.3 ";
+   colors[2] = "0.2 0 0 0";
    sizes[0] = 0.06;
    sizes[1] = 0.2;
    sizes[2] = 0.04;
@@ -118,9 +122,9 @@ datablock ParticleData(bloodBurstSprinkleSmallParticle)
 	
 	textureName		= "base/data/particles/dot";
 	
-	colors[0]	= "0.9 0.0 0.0 0.0";
-	colors[1]	= "0.8 0.0 0.0 0.5";
-	colors[2]	= "0.7 0.0 0.0 0.3";
+	colors[0]	= "0.5 0.0 0.0 0.0";
+	colors[1]	= "0.4 0.0 0.0 0.5";
+	colors[2]	= "0.3 0.0 0.0 0.3";
 
 	sizes[0]	= 0.0;
 	sizes[1]	= 0.1;
@@ -146,7 +150,6 @@ datablock ParticleEmitterData(bloodBurstSprinkleSmallEmitter)
    particles = "bloodBurstSprinkleSmallParticle";
 };
 
-// small blood explosion
 datablock ParticleData(bloodBurstSmallParticle)
 {
 	dragCoefficient			= 1.0;
@@ -162,14 +165,14 @@ datablock ParticleData(bloodBurstSmallParticle)
 	useInvAlpha				= true;
 	animateTexture			= false;
 	
-	textureName		= "base/data/particles/cloud";
+	textureName		= "base/data/particles/dot";
 	
 	colors[0]	= "0.5 0.0 0.0 0.0";
-	colors[1]	= "0.5 0.0 0.0 0.5";
-	colors[2]	= "0.5 0.0 0.0 0.3";
+	colors[1]	= "0.4 0.0 0.0 0.5";
+	colors[2]	= "0.3 0.0 0.0 0.3";
 
-	sizes[0]	= 0.2;
-	sizes[1]	= 1.0;
+	sizes[0]	= 0.5;
+	sizes[1]	= 0.25;
 	sizes[2]	= 0.0;
 
 	times[0]	= 0.0;
@@ -192,7 +195,6 @@ datablock ParticleEmitterData(bloodBurstSmallEmitter)
    particles = "bloodBurstSmallParticle";
 };
 
-// large blood explosion (dismembering)
 datablock ParticleData(bloodBurstLargeParticle)
 {
 	dragCoefficient			= 1.0;
@@ -208,15 +210,15 @@ datablock ParticleData(bloodBurstLargeParticle)
 	useInvAlpha				= true;
 	animateTexture			= false;
 	
-	textureName		= "base/data/particles/cloud";
+	textureName		= "base/data/particles/dot";
 	
 	colors[0]	= "0.5 0.0 0.0 0.0";
-	colors[1]	= "0.5 0.0 0.0 0.5";
-	colors[2]	= "0.5 0.0 0.0 0.3";
+	colors[1]	= "0.4 0.0 0.0 0.5";
+	colors[2]	= "0.3 0.0 0.0 0.3";
 
-	sizes[0]	= 0.2;
-	sizes[1]	= 2.0;
-	sizes[2]	= 0.0;
+	sizes[0]	= 0.25;
+	sizes[1]	= 1.0;
+	sizes[2]	= 0.25;
 
 	times[0]	= 0.0;
 	times[1]	= 0.1;
@@ -238,8 +240,55 @@ datablock ParticleEmitterData(bloodBurstLargeEmitter)
    particles = "bloodBurstLargeParticle";
 };
 
+datablock PlayerData(L4BHatModel)
+{
+	shapeFile = "./models/hats.dts";
+};
+function L4BHatModel::onAdd(%this, %obj) 
+{
+	if(!isObject(%wearer = %obj.wearer))
+	{ 
+		%obj.delete();
+		return;
+	}
 
-// Bloodbot Image
+	%obj.setDamageLevel(%this.maxDamage);
+	%obj.hideNode("ALL");
+	%obj.unhideNode(%obj.currentHat);
+	%obj.setNodeColor(%obj.currentHat,%obj.color);	
+	%obj.setTransform(%wearer.getTransform());
+	%obj.position = vectorAdd(%wearer.getMuzzlePoint(2),"0 0 0.35");
+	%objhalfvelocity = getWord(%wearer.getVelocity(),0)/2 SPC getWord(%wearer.getVelocity(),1)/2 SPC getWord(%wearer.getVelocity(),2)/2;
+	%obj.setvelocity(vectorAdd(%objhalfvelocity,getRandom(-8,8) SPC getRandom(-8,8) SPC getRandom(5,10)));	
+}
+
+datablock PlayerData(EmptyPlayer)
+{
+	shapeFile = "base/data/shapes/empty.dts";
+};
+function emptyPlayer::onAdd(%this, %obj) 
+{
+	%obj.setDamageLevel(%this.maxDamage);
+
+	if(isObject(%zombie = %obj.zombie))
+	{
+		%zombie.mountObject(%obj,%obj.slotToMountBot);
+		%obj.mountImage(%obj.imageToMount,0);
+	}
+	else
+	{
+		%obj.delete();
+		return;
+	}
+}
+function emptyPlayer::doDismount(%this, %obj, %forced) 
+{
+	return;
+}
+function emptyPlayer::onDisabled(%this, %obj) 
+{
+	return;
+}
 datablock ShapeBaseImageData(RBloodLargeImage)
 {
 	shapeFile = "base/data/shapes/empty.dts";
@@ -253,29 +302,24 @@ datablock ShapeBaseImageData(RBloodLargeImage)
 	colorShiftColor = "0.500 0.000 0.000 1.000";
 	
 	stateName[0] = "Ready";
-	stateName[1] = "FireA";
-	stateName[2] = "Done";
-   stateScript[2] = "onDone";
-	
-	stateTimeoutValue[0] = 0.01;
-	stateTimeoutValue[1] = 2.5;
-	stateTimeoutValue[2] = 0;
-	
-	stateTransitionOnTimeout[0] = "FireA";
-	stateTransitionOnTimeout[1]	= "Done";
-	
-	stateEmitter[1]      = largeRBloodEmitter;
-	stateEmitterTime[1]  = 2.5;
+	stateEmitter[0]      = "largeRBloodEmitter";
+	stateEmitterTime[0]  = 4;
+	stateTimeoutValue[0] = 4;
+	stateTransitionOnTimeout[0] = "Done";
+	stateName[1] = "Done";
+	stateScript[1]			= "onDone";	
 };
-
-function RBloodLargeImage::onDone(%this,%obj) { if(isObject((%obj))) %obj.delete(); }
+function RBloodLargeImage::onDone(%this, %obj)
+{
+	if(isObject(%obj)) %obj.delete();
+}
 
 datablock DebrisData(rBloodFootDebris)
 {
-   emitters = smallBloodEmitter;
-   
-	shapeFile = "./models/shoe.dts";
+   	emitters = "bloodBurstSmallEmitter";
+	shapeFile = "./models/gibs/shoe.dts";
 	lifetime = 5.0;
+	spinSpeed = 500.0;
 	minSpinSpeed = -500.0;
 	maxSpinSpeed = 500.0;
 	elasticity = 0.2;
@@ -283,63 +327,208 @@ datablock DebrisData(rBloodFootDebris)
 	numBounces = 2;
 	staticOnMaxBounce = true;
 	snapOnMaxBounce = false;
-	fade = true;
-
-	gravModifier = 1;
+	fade = false;
+	gravModifier = 2.5;
 };
-datablock DebrisData(rBloodHeadDebris)
+datablock DebrisData(bloodChunkDebris : rBloodFootDebris)
 {
-   emitters = largeRBloodEmitter;
-   
-	shapeFile = "./models/head.dts";
-	lifetime = 5.0;
-	minSpinSpeed = -500.0;
-	maxSpinSpeed = 500.0;
-	elasticity = 0.2;
-	friction = 0.8;
-	numBounces = 2;
-	staticOnMaxBounce = true;
-	snapOnMaxBounce = false;
-	fade = true;
-
-	gravModifier = 1;
+	shapeFile = "./models/gibs/chunk.dts";
 };
-datablock DebrisData(rBloodHandDebris)
+datablock DebrisData(rBloodHeadDebris : rBloodFootDebris)
 {
-   emitters = smallBloodEmitter;
-   
-	shapeFile = "./models/hand.dts";
-	lifetime = 5.0;
-	minSpinSpeed = -500.0;
-	maxSpinSpeed = 500.0;
-	elasticity = 0.2;
-	friction = 0.8;
-	numBounces = 2;
-	staticOnMaxBounce = true;
-	snapOnMaxBounce = false;
-	fade = true;
-
-	gravModifier = 1;
+   	emitters = "bloodBurstSmallEmitter";
+	shapeFile = "./models/gibs/head.dts";
 };
-datablock DebrisData(bloodChunkDebris)
+datablock DebrisData(rBloodHandDebris : rBloodFootDebris)
+{   
+	shapeFile = "./models/gibs/hand.dts";
+};
+datablock DebrisData(rBloodStomachDebris : rBloodFootDebris)
+{   
+	shapeFile = "./models/gibs/stomach.dts";
+};
+datablock DebrisData(rBloodLungRDebris : rBloodFootDebris)
+{   
+	shapeFile = "./models/gibs/lungsr.dts";
+};
+datablock DebrisData(rBloodLungLDebris : rBloodFootDebris)
+{   
+	shapeFile = "./models/gibs/lungsl.dts";
+};
+datablock DebrisData(rBloodLiverDebris : rBloodFootDebris)
+{   
+	shapeFile = "./models/gibs/liver.dts";
+};
+datablock DebrisData(rBloodIntestinesDebris : rBloodFootDebris)
+{   
+	shapeFile = "./models/gibs/intestines.dts";
+};
+datablock DebrisData(rBloodHeartDebris : rBloodFootDebris)
+{   
+	shapeFile = "./models/gibs/heart.dts";
+};
+datablock DebrisData(rBloodEsophagusDebris : rBloodFootDebris)
+{   
+	shapeFile = "./models/gibs/esophagus.dts";
+};
+datablock DebrisData(rBloodRibsDebris : rBloodFootDebris)
+{   
+	shapeFile = "./models/gibs/ribs.dts";
+};
+datablock DebrisData(rBloodBrain1Debris : rBloodFootDebris)
+{   
+	shapeFile = "./models/gibs/brain1.dts";
+};
+datablock DebrisData(rBloodBrain2Debris : rBloodFootDebris)
+{   
+	shapeFile = "./models/gibs/brain2.dts";
+};
+datablock DebrisData(rBloodBrain3Debris : rBloodFootDebris)
+{   
+	shapeFile = "./models/gibs/brain3.dts";
+};
+datablock DebrisData(rBloodBrain4Debris : rBloodFootDebris)
+{   
+	shapeFile = "./models/gibs/brain4.dts";
+};
+
+datablock ExplosionData(rBloodStomachDebrisExplosion)
 {
-   emitters = smallBloodEmitter;
-
-	shapeFile = "./models/chunk.dts";
-	lifetime = 5.0;
-	minSpinSpeed = -2000.0;
-	maxSpinSpeed = 2000.0;
-	elasticity = 0.2;
-	friction = 0.8;
-	numBounces = 2;
-	staticOnMaxBounce = true;
-	snapOnMaxBounce = false;
-	fade = true;
-
-	gravModifier = 2;
+   debris = rBloodStomachDebris;
+   debrisNum = 1;
+   debrisNumVariance = 0;
+   debrisPhiMin = 0;
+   debrisPhiMax = 360;
+   debrisThetaMin = 0;
+   debrisThetaMax = 180;
+   debrisVelocity = 10;
+   debrisVelocityVariance = 8;
+};
+datablock ExplosionData(rBloodLungRDebrisExplosion : rBloodStomachDebrisExplosion)
+{
+   debris = rBloodLungRDebris;
+};
+datablock ExplosionData(rBloodLungLDebrisExplosion : rBloodStomachDebrisExplosion)
+{
+   debris = rBloodLungLDebris;
+   subExplosion[0] = rBloodLungRDebrisExplosion;
+};
+datablock ExplosionData(rBloodIntestinesDebrisExplosion : rBloodStomachDebrisExplosion)
+{
+	debrisNum = 2;
+	debris = rBloodIntestinesDebris;
+};
+datablock ExplosionData(rBloodHeartDebrisExplosion : rBloodStomachDebrisExplosion)
+{
+   debris = rBloodHeartDebris;
+};
+datablock ExplosionData(rBloodEsophagusDebrisExplosion : rBloodStomachDebrisExplosion)
+{
+   debris = rBloodEsophagusDebris;
+};
+datablock ExplosionData(rBloodLiverDebrisExplosion : rBloodStomachDebrisExplosion)
+{
+   	debris = rBloodLiverDebris;
+	subExplosion[0] = rBloodIntestinesDebrisExplosion;
+   	subExplosion[1] = rBloodHeartDebrisExplosion;
+   	subExplosion[2] = rBloodEsophagusDebrisExplosion;
 };
 
-// Explosions
+datablock ExplosionData(rBloodBrain1DebrisExplosion : rBloodStomachDebrisExplosion)
+{
+   debris = rBloodBrain1Debris;
+};
+datablock ExplosionData(rBloodBrain2DebrisExplosion : rBloodStomachDebrisExplosion)
+{
+   debris = rBloodBrain2Debris;
+};
+datablock ExplosionData(rBloodBrain3DebrisExplosion : rBloodStomachDebrisExplosion)
+{
+   debris = rBloodBrain3Debris;
+};
+datablock ExplosionData(rBloodBrain4DebrisExplosion : rBloodStomachDebrisExplosion)
+{
+   debris = rBloodBrain4Debris;
+};
+datablock ExplosionData(rBloodRibsDebrisExplosion : rBloodStomachDebrisExplosion)
+{
+   debris = rBloodRibsDebris;
+};
+
+datablock ExplosionData(RBloodOrganExplosion)
+{
+	soundProfile	= "";
+	explosionShape = "";
+   	lifeTimeMS = 150;
+   	debris = "bloodChunkDebris";
+   	debrisNum = 4;
+   	debrisNumVariance = 2;
+   	debrisPhiMin = 0;
+   	debrisPhiMax = 360;
+   	debrisThetaMin = 0;
+   	debrisThetaMax = 180;
+   	debrisVelocity = 10;
+   	debrisVelocityVariance = 8;
+   	particleEmitter = bloodBurstSmallEmitter;
+   	particleDensity = 10;
+   	particleRadius = 0.2;
+   	emitter[0] = bloodBurstSprinkleSmallEmitter;
+   	subExplosion[0] = rBloodStomachDebrisExplosion;
+   	subExplosion[1] = rBloodLungRDebrisExplosion;
+   	subExplosion[2] = rBloodLiverDebrisExplosion;
+	subExplosion[3] = rBloodRibsDebrisExplosion;
+
+   	faceViewer     = true;
+   	explosionScale = "1 1 1";
+   	shakeCamera = false;
+};
+
+datablock ExplosionData(RBloodBrainExplosion)
+{
+	soundProfile		= "";
+	explosionShape = "";
+   	lifeTimeMS = 150;
+   	debris = "bloodChunkDebris";
+   	debrisNum = 4;
+   	debrisNumVariance = 3;
+   	debrisPhiMin = 0;
+   	debrisPhiMax = 360;
+   	debrisThetaMin = 0;
+   	debrisThetaMax = 180;
+   	debrisVelocity = 10;
+   	debrisVelocityVariance = 8;
+   	particleEmitter = bloodBurstSmallEmitter;
+   	particleDensity = 10;
+   	particleRadius = 0.2;
+   	emitter[0] = bloodBurstSprinkleSmallEmitter;
+   	subExplosion[0] = rBloodBrain1DebrisExplosion;
+   	subExplosion[1] = rBloodBrain2DebrisExplosion;
+   	subExplosion[2] = rBloodBrain3DebrisExplosion;
+   	subExplosion[3] = rBloodBrain4DebrisExplosion;
+
+   	faceViewer     = true;
+   	explosionScale = "1 1 1";
+   	shakeCamera = false;
+};
+
+datablock ProjectileData(RBloodBrainProjectile)
+{
+	uiname							= "";
+	lifetime						= 10;
+	fadeDelay						= 10;
+	explodeondeath						= true;
+	explosion						= RBloodBrainExplosion;
+};
+
+datablock ProjectileData(RBloodOrganProjectile)
+{
+	uiname							= "";
+	lifetime						= 10;
+	fadeDelay						= 10;
+	explodeondeath						= true;
+	explosion						= RBloodOrganExplosion;
+};
+
 datablock ExplosionData(bloodBurstFinalExplosion)
 {
    //explosionShape = "";
@@ -361,8 +550,8 @@ datablock ExplosionData(bloodBurstFinalExplosion)
    debrisPhiMax = 360;
    debrisThetaMin = 0;
    debrisThetaMax = 180;
-   debrisVelocity = 5;
-   debrisVelocityVariance = 3;
+   debrisVelocity = 10;
+   debrisVelocityVariance = 8;
 
    faceViewer     = true;
    explosionScale = "1 1 1";
@@ -408,7 +597,7 @@ datablock ExplosionData(bloodDismemberExplosion : bloodBurstFinalExplosion)
    debrisThetaMin = 0;
    debrisThetaMax = 180;
    debrisVelocity = 10;
-   debrisVelocityVariance = 3;
+   debrisVelocityVariance = 8;
 };
 datablock ExplosionData(bloodFootDebrisExplosion : bloodBurstFinalExplosion)
 {   
@@ -419,26 +608,7 @@ datablock ExplosionData(bloodFootDebrisExplosion : bloodBurstFinalExplosion)
    particleDensity = 20;
    particleRadius = 1.0;
 
-   debris = rBloodFootDebris;
-   debrisNum = 2;
-   debrisNumVariance = 0;
-   debrisPhiMin = 0;
-   debrisPhiMax = 360;
-   debrisThetaMin = 0;
-   debrisThetaMax = 180;
-   debrisVelocity = 10;
-   debrisVelocityVariance = 5;
-};
-datablock ExplosionData(bloodHeadDebrisExplosion : bloodBurstFinalExplosion)
-{   
-   emitter[0] = "";
-   emitter[1] = "";
-
-   particleEmitter = "";
-   particleDensity = 20;
-   particleRadius = 1.0;
-
-   debris = rBloodHeadDebris;
+   debris = "rBloodFootDebris";
    debrisNum = 1;
    debrisNumVariance = 0;
    debrisPhiMin = 0;
@@ -446,29 +616,33 @@ datablock ExplosionData(bloodHeadDebrisExplosion : bloodBurstFinalExplosion)
    debrisThetaMin = 0;
    debrisThetaMax = 180;
    debrisVelocity = 10;
-   debrisVelocityVariance = 5;
+   debrisVelocityVariance = 8;
 };
-datablock ExplosionData(bloodHandDebrisExplosion : bloodBurstFinalExplosion)
+datablock ExplosionData(bloodHeadDebrisExplosion : bloodFootDebrisExplosion)
 {   
-   emitter[0] = "";
-   emitter[1] = "";
-
-   particleEmitter = "";
-   particleDensity = 20;
-   particleRadius = 1.0;
-
-   debris = rBloodHandDebris;
-   debrisNum = 2;
-   debrisNumVariance = 0;
-   debrisPhiMin = 0;
-   debrisPhiMax = 360;
-   debrisThetaMin = 0;
-   debrisThetaMax = 180;
-   debrisVelocity = 10;
-   debrisVelocityVariance = 5;
+   debris = "rBloodHeadDebris";
+};
+datablock ExplosionData(bloodHandDebrisExplosion : bloodFootDebrisExplosion)
+{   
+   debris = "rBloodHandDebris";
 };
 
-// Projectiles
+datablock ProjectileData(bloodFootDebrisProjectile)
+{
+	uiname			= "";
+	lifetime		= 10;
+	fadeDelay		= 10;
+	explodeondeath	= true;
+	explosion		= "bloodFootDebrisExplosion";
+};
+datablock ProjectileData(bloodHeadDebrisProjectile : bloodFootDebrisProjectile)
+{
+	explosion	= "bloodHeadDebrisExplosion";
+};
+datablock ProjectileData(bloodHandDebrisProjectile : bloodFootDebrisProjectile)
+{
+	explosion	= "bloodHandDebrisExplosion";
+};
 datablock ProjectileData(bloodBurstFinalExplosionProjectile)
 {
    directDamage        = 0;
@@ -488,43 +662,22 @@ datablock ProjectileData(bloodDismemberProjectile : bloodBurstFinalExplosionProj
 {
    explosion           = bloodDismemberExplosion;
 };
-datablock ProjectileData(footGibProjectile : bloodBurstFinalExplosionProjectile)
+
+datablock staticShapeData(BloodDecal1) 
 {
-   explosion           = bloodFootDebrisExplosion;
+	shapeFile = "./models/gibs/blood1trans.dts";
 };
-datablock ProjectileData(headGibProjectile : bloodBurstFinalExplosionProjectile)
+
+datablock staticShapeData(BloodDecal2 : BloodDecal1) 
 {
-   explosion           = bloodHeadDebrisExplosion;
-};
-datablock ProjectileData(handGibProjectile : bloodBurstFinalExplosionProjectile)
-{
-   explosion           = bloodHandDebrisExplosion;
-};
-
-$RBloodGib0 = footGibProjectile;
-$RBloodGib1 = headGibProjectile;
-$RBloodGib2 = handGibProjectile;
-
-
-datablock staticShapeData(BloodDecal1) {
-	shapeFile = "./models/decals/blood1.dts";
-
-	doColorShift = true;
-	colorShiftColor = "0.7 0 0 1";
-};
-
-datablock staticShapeData(BloodDecal2) {
-	shapeFile = "./models/decals/blood2.dts";
-
-	doColorShift = true;
-	colorShiftColor = "0.7 0 0 1";
+	shapeFile = "./models/gibs/blood2trans.dts";
 };
 
 datablock ParticleData(bloodParticle)
 {
 	dragCoefficient		= 3.0;
 	windCoefficient		= 0.2;
-	gravityCoefficient	= 0.2;
+	gravityCoefficient	= 0.5;
 	inheritedVelFactor	= 1;
 	constantAcceleration	= 0.0;
 	lifetimeMS		= 500;
@@ -534,20 +687,19 @@ datablock ParticleData(bloodParticle)
 	spinRandomMax		= 50.0;
 	useInvAlpha		= true;
 	animateTexture		= false;
-	//framesPerSec		= 1;
 
-	textureName		= "./models/decals/blood2.png";
-	//animTexName		= " ";
-
-	// Interpolation variables
-	colors[0]	= "0.7 0 0 1";
-	colors[1]	= "0.7 0 0 0";
+	textureName		= "./models/blood2.png";
+	colors[0]	= "0.4 0 0 1";
+	colors[1]	= "0.2 0 0 0";
 	sizes[0]	= 0.4;
 	sizes[1]	= 2;
-	//times[0]	= 0.5;
-	//times[1]	= 0.5;
+	times[0]	= 0.5;
+	times[1]	= 1;
 };
-
+datablock ParticleData(bloodParticle2 : bloodParticle)
+{
+	textureName		= "./models/blood3.png";
+};
 datablock ParticleEmitterData(bloodEmitter)
 {
 	ejectionPeriodMS = 3;
@@ -566,132 +718,23 @@ datablock ParticleEmitterData(bloodEmitter)
 	useEmitterColors = true;
 	uiName = "";
 };
-
+datablock ParticleEmitterData(bloodEmitter2 : bloodEmitter)
+{
+	particles = bloodParticle2;
+};
 datablock ExplosionData(bloodExplosion)
 {
-	//explosionShape = "";
-	//soundProfile = bulletHitSound;
 	lifeTimeMS = 300;
-
 	particleEmitter = bloodEmitter;
 	particleDensity = 5;
 	particleRadius = 0.2;
-	//emitter[0] = bloodEmitter;
-
 	faceViewer     = true;
 	explosionScale = "1 1 1";
 };
-
-datablock ProjectileData(bloodExplosionProjectile1)
+datablock ExplosionData(bloodExplosion2 : bloodExplosion)
 {
-	directDamage        = 0;
-	impactImpulse	     = 0;
-	verticalImpulse	  = 0;
-	explosion           = bloodExplosion;
-	particleEmitter     = bloodEmitter;
-
-	muzzleVelocity      = 50;
-	velInheritFactor    = 1;
-
-	armingDelay         = 0;
-	lifetime            = 2000;
-	fadeDelay           = 1000;
-	bounceElasticity    = 0.5;
-	bounceFriction      = 0.20;
-	isBallistic         = true;
-	gravityMod = 0.1;
-
-	hasLight    = false;
-	lightRadius = 3.0;
-	lightColor  = "0 0 0.5";
-};
-
-
-
-datablock ParticleData(bloodParticle2)
-{
-	dragCoefficient		= 3.0;
-	windCoefficient		= 0.1;
-	gravityCoefficient	= 0.3;
-	inheritedVelFactor	= 1;
-	constantAcceleration	= 0.0;
-	lifetimeMS		= 300;
-	lifetimeVarianceMS	= 10;
-	spinSpeed		= 20.0;
-	spinRandomMin		= -10.0;
-	spinRandomMax		= 10.0;
-	useInvAlpha		= true;
-	animateTexture		= false;
-	//framesPerSec		= 1;
-
-	textureName		= "./models/decals/blood3.png";
-	//animTexName		= " ";
-
-	// Interpolation variables
-	colors[0]	= "0.7 0 0 1";
-	colors[1]	= "0.7 0 0 0";
-	sizes[0]	= 1;
-	sizes[1]	= 0;
-	//times[0]	= 0.5;
-	//times[1]	= 0.5;
-};
-
-datablock ParticleEmitterData(bloodEmitter2)
-{
-	ejectionPeriodMS = 5;
-	periodVarianceMS = 0;
-
-	ejectionVelocity = 0; //0.25;
-	velocityVariance = 0; //0.10;
-
-	ejectionOffset = 0;
-
-	thetaMin         = 0.0;
-	thetaMax         = 90.0;  
-
-	particles = bloodParticle2;
-
-	useEmitterColors = true;
-	uiName = "";
-};
-
-datablock ExplosionData(bloodExplosion2)
-{
-	//explosionShape = "";
-	//soundProfile = bulletHitSound;
-	lifeTimeMS = 300;
-
 	particleEmitter = bloodEmitter2;
-	particleDensity = 5;
-	particleRadius = 0.2;
-	//emitter[0] = bloodEmitter;
-
-	faceViewer     = true;
-	explosionScale = "1 1 1";
-};
-
-datablock ProjectileData(bloodExplosionProjectile2)
-{
-	directDamage        = 0;
-	impactImpulse	     = 0;
-	verticalImpulse	  = 0;
-	explosion           = bloodExplosion2;
-	particleEmitter     = bloodEmitter2;
-
-	muzzleVelocity      = 50;
-	velInheritFactor    = 1;
-
-	armingDelay         = 0;
-	lifetime            = 2000;
-	fadeDelay           = 1000;
-	bounceElasticity    = 0.5;
-	bounceFriction      = 0.20;
-	isBallistic         = true;
-	gravityMod = 0.1;
-
-	hasLight    = false;
-	lightRadius = 3.0;
-	lightColor  = "0 0 0.5";
+	subExplosion[0] = bloodExplosion;
 };
 
 datablock ParticleData(bloodDripParticle)
@@ -714,14 +757,13 @@ datablock ParticleData(bloodDripParticle)
 	//animTexName		= " ";
 
 	// Interpolation variables
-	colors[0]	= "0.7 0 0 1";
-	colors[1]	= "0.7 0 0 0.8";
+	colors[0]	= "0.4 0 0 1";
+	colors[1]	= "0.2 0 0 0.8";
 	sizes[0]	= 0.1;
 	sizes[1]	= 0;
 	//times[0]	= 0.5;
 	//times[1]	= 0.5;
 };
-
 datablock ParticleEmitterData(bloodDripEmitter)
 {
 	ejectionPeriodMS = 1;
@@ -729,18 +771,36 @@ datablock ParticleEmitterData(bloodDripEmitter)
 
 	ejectionVelocity = 0; //0.25;
 	velocityVariance = 0; //0.10;
-
 	ejectionOffset = 0;
-
 	thetaMin         = 0.0;
 	thetaMax         = 90.0;  
-
 	particles = bloodDripParticle;
-
 	useEmitterColors = true;
 	uiName = "";
 };
+datablock ProjectileData(bloodExplosionProjectile1)
+{
+	directDamage        = 0;
+	impactImpulse	     = 0;
+	verticalImpulse	  = 0;
+	explosion           = bloodExplosion;
+	particleEmitter     = bloodDripEmitter;
 
+	muzzleVelocity      = 60;
+	velInheritFactor    = 1;
+
+	armingDelay         = 3000;
+	lifetime            = 3000;
+	fadeDelay           = 2000;
+	bounceElasticity    = 0.5;
+	bounceFriction      = 0.20;
+	isBallistic         = true;
+	gravityMod = 1;
+
+	hasLight    = false;
+	lightRadius = 3.0;
+	lightColor  = "0 0 0.5";	
+};
 datablock ProjectileData(bloodDripProjectile)
 {
 	directDamage        = 0;
@@ -763,4 +823,82 @@ datablock ProjectileData(bloodDripProjectile)
 	hasLight    = false;
 	lightRadius = 3.0;
 	lightColor  = "0 0 0.5";
+};
+
+datablock DebrisData(skeleheadDebris)
+{
+   shapeFile = "./models/gibs/skeleton_head.dts";
+   lifetime = 6.0;
+   minSpinSpeed = -400.0;
+   maxSpinSpeed = 200.0;
+   elasticity = 0.5;
+   friction = 0.2;
+   numBounces = 3;
+   staticOnMaxBounce = true;
+   snapOnMaxBounce = false;
+   fade = true;
+   gravModifier = 2;
+};
+datablock DebrisData(skeleShoulderDebris : skeleheadDebris)
+{
+   shapeFile = "./models/gibs/skeleton_shoulder.dts";
+};
+datablock DebrisData(skelefootDebris : skeleheadDebris)
+{
+   shapeFile = "./models/gibs/skeleton_foot.dts";
+};
+datablock DebrisData(skeleHandDebris : skeleheadDebris)
+{
+   shapeFile = "./models/gibs/skeleton_hand.dts";
+};
+datablock DebrisData(skeleribcageDebris : skeleheadDebris)
+{
+   shapeFile = "./models/gibs/skeleton_hand.dts";
+};
+datablock ExplosionData(skelefootDebrisExplosion)
+{
+   lifeTimeMS = 100;
+   debris = skelefootDebris;
+   debrisNum = 2;
+};
+datablock ExplosionData(skeleHandDebrisExplosion : skelefootDebrisExplosion)
+{
+   debris = skeleHandDebris;
+};
+datablock ExplosionData(skeleribcageDebrisExplosion : skelefootDebrisExplosion)
+{
+   debris = skeleribcageDebris;
+   debrisNum = 1;
+};
+
+datablock ExplosionData(SkeletalDeathExplosion)
+{
+   lifetimeMS = 33;
+   particleEmitter = "";
+   debrisNumVariance      = 0;
+   debrisPhiMin           = 0;
+   debrisPhiMax           = 360;
+   debrisThetaMin         = 5;
+   debrisThetaMax         = 105;
+   debrisVelocity         = 5;
+   debrisVelocityVariance = 1;
+   debris = skeleheadDebris;
+   debrisNum = 0;
+   faceViewer     = true;
+   explosionScale = "1 1 1";
+   shakeCamera = false;
+   lightStartRadius = 0;
+   lightEndRadius = 0;
+   impulseRadius = 100;
+   impulseForce = 100;
+   radiusDamage = 0;
+   damageRadius = 0;
+   soundProfile = breakBrickSound;
+   subExplosion[0] = skelefootDebrisExplosion;
+   subExplosion[1] = skeleHandDebrisExplosion;
+   subExplosion[2] = skeleribcageDebrisExplosion;
+};
+datablock ProjectileData(SkeletalDeathExplosionProjectile)
+{
+   explosion        = SkeletalDeathExplosion;
 };

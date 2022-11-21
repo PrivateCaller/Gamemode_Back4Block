@@ -3,28 +3,7 @@ luaexec("./script_director.lua");
 registerOutputEvent(Minigame, "Director", "List Disable 0 Enable 1",0);
 registerOutputEvent(Minigame, "RoundEnd");
 registerOutputEvent(Minigame, "PanicRound");
-registerOutputEvent(Player,RemoveItem,"datablock ItemData",1);
-
-function Player::removeItem(%pl,%item,%cl)  
-{
-	if(isObject(%pl))
-	{
-		for(%i=0;%i<%pl.dataBlock.maxTools;%i++)
-		{
-			%tool = %pl.tool[%i];
-			if(%tool == %item)
-			{
-				%pl.tool[%i] = 0;
-				messageClient(%cl,'MsgItemPickup','',%i,0);
-				if(%pl.currTool==%i) 
-				{
-					%pl.updateArm(0);
-					%pl.unMountImage(0);
-				}
-			}
-		}
-	}
-}
+registerOutputEvent(Minigame, "SafehouseCheck");
 
 package L4B_Director
 {
@@ -38,7 +17,7 @@ package L4B_Director
         if(%objB.getClassName() $= "GameConnection") %TargetB = %objB.player;
         else %TargetB = %objB;
 
-		if(%TargetA !$= %TargetB && getMiniGameFromObject(%TargetA) $= getMiniGameFromObject(%TargetB) && !checkHoleBotTeams(%TargetA,%TargetB)) return false;
+		if(%TargetA !$= %TargetB && getMiniGameFromObject(%TargetA) $= getMiniGameFromObject(%TargetB) && %TargetA.hType $= %TargetB.hType) return false;
 		
 		Parent::minigameCanDamage(%objA, %objB);
 	}
@@ -83,7 +62,7 @@ package L4B_Director
 	}
 
     function GameConnection::onClientLeaveGame (%client)
-    {    
+    {
         Parent::onClientLeaveGame(%client);
 
         %client.deletel4bMusic("Music");
@@ -93,6 +72,25 @@ package L4B_Director
         %client.deletel4bMusic("Stinger3");
         %client.deletel4bMusic("Ambience");        
     }
+
+    function Armor::Damage(%data, %obj, %sourceObject, %position, %damage, %damageType)
+    {
+        Parent::Damage(%data, %obj, %sourceObject, %position, %damage, %damageType);
+
+        if(!isObject(%minigame = getMiniGameFromObject(%obj)) || %obj.hType !$= "Zombie" || %obj.getState() !$= "Dead") return;//Return if the object is not a zombie, not dead, is not targetting, 
+
+        if(isObject(%sourceObject) && %sourceObject.getClassName() $= "Player") %source = %sourceObject;
+        else if(isObject(%sourceObject.sourceObject) && %sourceObject.sourceObject.getClassName() $= "Player") %source = %sourceObject.sourceObject;
+        else return;
+        
+        //When the bot is a special and dies
+        if(%obj.getdataBlock().hZombieL4BType $= "Special") 
+        %minigame.L4B_ChatMessage("\c0" @ %source.client.name SPC "<bitmapk:" @ $DamageType::MurderBitmap[%damageType] @ ">" SPC %obj.getdataBlock().hName @ "","victim_revived_sound",true); 
+
+        //When a player kills a zombie the victim is unaware of
+        if(isObject(%target = %obj.hFollowing) && %target.getClassName() $= "Player" && %source !$= %target && !L4B_isInFOV(%target, %obj))
+        %minigame.L4B_ChatMessage("<color:00FF00>" @ %source.client.name SPC "protected" SPC %target.client.name,"victim_revived_sound",false);       
+    }    
 };
 activatePackage(L4B_Director);
 
@@ -151,10 +149,47 @@ function MiniGameSO::L4B_ClearData(%minigame,%client)
     }    
 }
 
+function MiniGameSO::SafehouseCheck(%minigame,%client)
+{
+	for(%i = 0; %i < %minigame.numMembers; %i++)
+	{
+		%client = %minigame.member[%i];
+
+		if(isObject(%player = %client.player) && !%player.hIsInfected && %player.getdataBlock().getname() !$= "SurvivorPlayerDowned") %livePlayerCount++;
+		if(isObject(%player) && %player.InSafehouse) %safehousecount++;
+	}
+	
+	if(%safehousecount >= %livePlayerCount && isObject(%minigame))
+	{
+		if(isEventPending(%minigame.resetSchedule))	return;
+
+   		%minigame.VictoryTo = "Survivors";
+		%minigame.scheduleReset(8000);
+		%minigame.l4bMusic("game_win_sound",false,"Music");
+		%minigame.deletel4bMusic("Stinger1");
+		%minigame.deletel4bMusic("Stinger2");
+		%minigame.deletel4bMusic("Stinger3");	
+
+    	for(%i=0;%i<%minigame.numMembers;%i++)
+    	{
+			%member = %minigame.member[%i];
+
+			if(isObject(%member.player))
+			{
+				if(%member.player.hType $= "Survivors") %member.player.emote(winStarProjectile, 1);	
+
+				%member.Camera.setOrbitMode(%member.player, %member.player.getTransform(), 0, 5, 0, 1);
+				%member.setControlObject(%member.Camera);
+			}
+    	}
+		return;
+	}
+}
+
 function MinigameSO::L4B_PlaySound(%minigame,%sound)
 {
-    for(%i=0;%i<%minigame.numMembers;%i++)
-    if(isObject(%client = %minigame.member[%i]) && %client.getClassName() $= "GameConnection") %client.play2d(%sound.getID());    
+    for(%i=0;%i<%minigame.numMembers;%i++) if(isObject(%client = %minigame.member[%i]) && %client.getClassName() $= "GameConnection") 
+    %client.play2d(%sound.getID());    
 }
 
 $L4B_lastSupportMessageTime = getSimTime();
@@ -206,7 +241,7 @@ function MinigameSO::Director(%minigame,%enabled,%interval)
                                 
                                 if(isObject(%mgmember.player))
                                 {
-                                    if(%mgmember.player.getdataBlock().getName() $= "SurvivorPlayer")
+                                    if(%mgmember.player.getdataBlock().isSurvivor)
                                     {                                    
                                         %health += %mgmember.player.getdamagelevel();
                                         %stresslevel += %mgmember.player.survivorStress;
@@ -338,7 +373,6 @@ function MinigameSO::WitchRound(%minigame)
     }
     
     %minigame.RoundType = "Witch";
-    %minigame.L4B_ChatMessage("[A witch is nearby]","victim_needshelp_sound",true); 
     %minigame.DirectorStatus = 2;
 }
 
@@ -355,7 +389,6 @@ function MinigameSO::TankRound(%minigame)
     %minigame.zhordecount = 9999;
 
     %minigame.spawnZombies("Tank",1,0);
-    %minigame.L4B_ChatMessage("[A tank is nearby]","victim_needshelp_sound",true);  
 }
 
 function MinigameSO::PanicRound(%minigame)
@@ -388,7 +421,7 @@ function MiniGameSO::HordeRound(%minigame)
 function MinigameSO::RoundEnd(%minigame)
 {        
     %minigame.RoundType = "";
-    %minigame.l4bMusic("drum_suspense_end_sound",false,"Stinger3");
+    %minigame.l4bMusic("drum_suspense_end_sound",false,"Stinger1");
     %minigame.deletel4bMusic("Music");
     %minigame.deletel4bMusic("Music2");
     %minigame.DirectorStatus = 1;
@@ -517,8 +550,8 @@ function MinigameSO::spawnZombies(%minigame,%type,%amount,%spawnzone,%count)
             switch$(%type)
             {
                 case "Horde": %bottype = "CommonZombieHoleBot";
-                              if(getRandom(1,8) == 1) %bottype = $hZombieUncommonType[getRandom(1,$hZombieUncommonTypeAmount)];
-                              if(getRandom(1,16) == 1 && $L4B_CurrentMonth == 10) %bottype = "SkeletonHoleBot";
+                              //if(getRandom(1,8) == 1) %bottype = $hZombieUncommonType[getRandom(1,$hZombieUncommonTypeAmount)];
+                              //if(getRandom(1,16) == 1 && $L4B_CurrentMonth == 10) %bottype = "SkeletonHoleBot";
                 case "Tank": %bottype = "ZombieTankHoleBot";
                 case "Witch": %bottype = "ZombieWitchHoleBot";    
                 case "Special": %bottype = $hZombieSpecialType[getRandom(1,$hZombieSpecialTypeAmount)];
@@ -673,4 +706,9 @@ function GameConnection::musicCatchUp(%client)
     %music_tags = "Music Music2 Stinger1 Stinger2 Stinger3 Ambience";
     for(%i = 0; %i < getWordCount(%music_tags); %i++)
     if(isObject(%music_object = $L4B_Music[getWord(%music_tags, %i)])) %music_object.scopeToClient(%client);
+}
+
+function L4B_isInFOV(%viewer, %target)
+{    
+    if(isObject(%viewer) && isObject(%target)) return vectorDot(%viewer.getEyeVector(), vectorNormalize(vectorSub(%target.getPosition(), %viewer.getPosition()))) >= 0.7;
 }

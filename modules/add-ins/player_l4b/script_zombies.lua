@@ -62,7 +62,7 @@ function L4B_ZombieLunge(obj,target,power)
         local targetpos = ts.getposition(target)
         local objpos = ts.getposition(obj)
         local distancepos = VectorSub(targetpos,objpos)
-        local normvector = VectorNormalize(VectorAdd(distancepos,"0 0 "..0.15*VectorDist(targetpos,objpos)))
+        local normvector = VectorNormalize(VectorAdd(distancepos,"0 0 "..0.125*VectorDist(targetpos,objpos)))
         local eye = VectorScale(normvector,2);
 
         ts.callobj(obj,"setvelocity",VectorAdd(VectorScale(eye,power),tonumber(ts.call("getWord",ts.callobj(target,"getVelocity"),0)) .. " " .. tonumber(ts.call("getWord",ts.callobj(target,"getVelocity"),1)) .. " " .. tonumber(ts.call("getWord",ts.callobj(target,"getVelocity"),2))))

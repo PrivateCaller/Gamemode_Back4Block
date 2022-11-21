@@ -32,53 +32,59 @@ function L4B_holeJockeyKill(%obj,%col)
 	}
 }
 
-	function ZombieJockeyHoleBot::onBotMelee(%this,%obj,%col)
+function ZombieJockeyHoleBot::onBotMelee(%this,%obj,%col)
 {
 	CommonZombieHoleBot::onBotMelee(%this,%obj,%col);	
 }
 
-	function ZombieJockeyHoleBot::OnCollision(%this, %obj, %col, %fade, %pos, %norm)
+function ZombieJockeyHoleBot::OnCollision(%this, %obj, %col, %fade, %pos, %norm)
 {
 	Parent::OnCollision(%this, %obj, %col, %fade, %pos, %norm);	
 
-
 	if(%obj.getState $= "Dead" || %col.getdatablock().isDowned) return;
 
-	if(checkHoleBotTeams(%obj,%col)) %obj.hJump();	
-	if((%oScale = getWord(%obj.getScale(),0)) == 0.75 && getWord(%obj.getvelocity(),2) != 0) %obj.SpecialPinAttack(%col);
 	
+	if(getWord(%obj.getvelocity(),2) != 0) if((%oScale = getWord(%obj.getScale(),0)) == 0.75) %obj.SpecialPinAttack(%col);
+	else if(checkHoleBotTeams(%obj,%col)) %obj.hJump();
 
-	Parent::oncollision(%this, %obj, %col, %fade, %pos, %norm);
+	Parent::onCollision(%this, %obj, %col, %fade, %pos, %norm);
 }
 
-	function ZombieJockeyHoleBot::onBotLoop(%this,%obj)
-{
-	%obj.hNoSeeIdleTeleport();
-
-	if(%obj.hEating) return;
-
-	if(!%obj.hFollowing)
+function ZombieJockeyHoleBot::onBotLoop(%this,%obj)
+{	
+	switch$(%obj.hState)
 	{
-		%obj.playaudio(0,"jockey_lurk" @ getrandom(1,4) @ "_sound");
-		%obj.playThread(0,talk);
+		case "Wandering":	%obj.setMaxForwardSpeed(9);
+							%obj.isStrangling = false;
+							%obj.hNoSeeIdleTeleport();
+							%obj.playThread(0,talk);
+							%sound = "jockey_lurk" @ getrandom(1,4) @ "_sound";				
+		case "Following": 	%sound = "jockey_recognize" @ getrandom(1,2) @ "_sound";
 	}
-	else %obj.playaudio(0,"jockey_recognize" @ getrandom(1,2) @ "_sound");
+
+	if(getsimtime() >= %obj.LastLoopSound+4000)
+	{
+		%obj.playaudio(0,%sound);		
+		%obj.LastLoopSound = getSimTime();
+	}
 }
 
-function ZombieJockeyHoleBot::onBotFollow( %this, %obj, %targ )
+function ZombieJockeyHoleBot::onBotFollow(%this,%obj,%targ)
 {
-	if((!isObject(%obj) || %obj.getState() $= "Dead") || (!isObject(%targ) || %targ.getState() $= "Dead")) return;
-	
-	if(VectorDist(%obj.getposition(), %targ.getposition()) < 15)
+	if(!isObject(%targ) || !isObject(%obj) || %obj.isStrangling || %obj.GetEnergyLevel() < %this.maxenergy)
 	{
-		L4B_ZombieLunge(%obj,%targ,5);
-		%obj.setvelocity(vectorAdd(%obj.getVelocity(),"0 0 7.5"));
-
-		%obj.playThread(1,activate2);
-		%obj.playThread(2,shiftUp);
-		%obj.playThread(3,jump);
+		if(isObject(%targ) && isObject(%obj)) %this.schedule(500,onBotFollow,%obj,%targ);
+		return;
 	}
-	else if(VectorDist(%obj.getposition(), %targ.getposition()) < 25) %this.schedule(1000,onBotFollow,%obj,%targ);
+	
+	if(VectorDist(%obj.getposition(), %targ.getposition()) < 20 && getWord(%obj.getvelocity(),2) <= 5)
+	{	
+		%obj.hJump();
+		%obj.schedule(325,hShootAim,%targ);
+		%this.schedule(375,onTrigger,%obj,4,1);
+	}
+	
+	%this.schedule(500,onBotFollow,%obj,%targ);
 }
 
 function ZombieJockeyHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
@@ -90,20 +96,12 @@ function ZombieJockeyHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,
 	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
 }
 
-function ZombieJockeyHoleBot::onDamage(%this,%obj,%source,%pos,%damage,%type)
+function ZombieJockeyHoleBot::onDamage(%this,%obj,%delta)
 {	
-	if(isObject(%obj.hEating))
+	if(%delta > 5 && %obj.lastdamage+500 < getsimtime())
 	{
-		%obj.hEating.isBeingStrangled = 0;
-		L4B_SpecialsPinCheck(%obj,%obj.hEating);
-	}
-
-	if(%obj.getstate() $= "Dead")
-	return;
-
-	if(%obj.lastdamage+500 < getsimtime())
-	{
-		%obj.playaudio(0,"jockey_pain" @ getrandom(1,4) @ "_sound");
+		if(%obj.getstate() !$= "Dead") %obj.playaudio(0,"jockey_pain" @ getrandom(1,4) @ "_sound");
+		else %obj.playaudio(0,"jockey_death" @ getrandom(1,3) @ "_sound");
 
 		if(%obj.raisearms)
 		{
@@ -112,46 +110,32 @@ function ZombieJockeyHoleBot::onDamage(%this,%obj,%source,%pos,%damage,%type)
 			%obj.playthread(2,"plant");
 		}
 
+		if(isObject(%obj.hEating))
+		{
+			%obj.hEating.isBeingStrangled = false;
+			L4B_SpecialsPinCheck(%obj,%obj.hEating);
+		}
+
 		%obj.lastdamage = getsimtime();
 	}
-	parent::onDamage(%this,%obj,%source,%pos,%damage,%type);
+	Parent::onDamage(%this,%obj,%source,%pos,%damage,%type);
 }
 
-	function ZombieJockeyHoleBot::onDisabled(%this, %obj)
+function ZombieJockeyHoleBot::onDisabled(%this, %obj)
 {
-	if(isObject(%obj.hEating))
-	{
-		%obj.hEating.isBeingStrangled = 0;
-		L4B_SpecialsPinCheck(%obj,%obj.hEating);
-	}
-	
-	if(%obj.getstate() !$= "Dead")
-	return;
-
-	%obj.playaudio(0,"jockey_death" @ getrandom(1,3) @ "_sound");
-
-	parent::onDisabled(%this,%obj);
+	Parent::onDisabled(%this,%obj);
 }
 
-	function ZombieJockeyHoleBot::onImpact(%this, %obj, %col, %vec, %force)
+function ZombieJockeyHoleBot::onImpact(%this, %obj, %col, %vec, %force)
 {
-	Parent::onImpact(%this, %obj, %col, %vec, %force);
-	
-	if(%obj.getState() $= "Dead") return;
-	else 
-	{
-		%forcescale = %oscale+%force/50;
-		%obj.spawnExplosion(pushBroomProjectile,%forcescale SPC %forcescale SPC %forcescale);
-
-		if(isObject(%obj.hFollowing) && %obj.hFollowing.getState() !$= "Dead") %this.onBotFollow(%obj,%obj.hFollowing);
-	}
+	Parent::onImpact(%this, %obj, %col, %vec, %force);	
 }
 
-function ZombieJockeyHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
+function ZombieJockeyHoleBot::onTrigger(%this, %obj, %triggerNum, %val)
 {	
-	if(%obj.getClassName() $= "Player" && %obj.getstate() !$= "Dead")
+	if(%obj.getstate() !$= "Dead")
 	{
-		switch(%triggerNum)
+		if(%val) switch(%triggerNum)
 		{
 			case 0: CommonZombieHoleBot::onTrigger(%this, %obj, %triggerNum, %val);
 			case 4: if(%obj.GetEnergyLevel() >= %this.maxenergy && !%obj.isStrangling)
@@ -164,7 +148,6 @@ function ZombieJockeyHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
 						%obj.playthread(0,"jump");
 						%obj.setenergylevel(0);
 					}
-			default:
 		}
 	}
 	Parent::onTrigger (%this, %obj, %triggerNum, %val);

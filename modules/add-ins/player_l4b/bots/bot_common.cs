@@ -9,6 +9,7 @@ function CommonZombieHoleBot::onNewDataBlock(%this,%obj)
 	Parent::onNewDataBlock(%this,%obj);
 	%obj.onL4BDatablockAttributes();
 	%obj.setscale("1 1 1");
+	%obj.schedule(10,setenergylevel,%this.maxenergy);
 }
 
 function CommonZombieHoleBot::onDamage(%this,%obj)
@@ -61,26 +62,22 @@ function CommonZombieHoleBot::onImpact(%this, %obj, %col, %vec, %force)
 
 function CommonZombieHoleBot::onDisabled(%this,%obj)
 {
-	if(%obj.getstate() !$= "Dead") return;
-
 	Parent::OnDisabled(%this,%obj);
-	
+
+	if(%obj.getstate() !$= "Dead") return;	
 	if(isObject(%obj.client)) commandToClient(%obj.client,'SetVignette',$EnvGuiServer::VignetteMultiply,$EnvGuiServer::VignetteColor);
 
 	if(isObject(%minigame = getMiniGameFromObject(%obj)) && %minigame.DirectorStatus == 2) 
 	{
 		%minigame.zhordecount--;
-
 		if(%minigame.zhordecount < 1)
 		{
 			%minigame.RoundEnd();
 			%minigmae.zhordecount = 0;
 		}
-	}
-	
+	}	
 
-	if(%obj.getWaterCoverage() == 1) serverPlay3D("die_underwater_bubbles_sound",%obj.getPosition());
-	
+	if(%obj.getWaterCoverage() == 1) serverPlay3D("die_underwater_bubbles_sound",%obj.getPosition());	
 	else switch(%obj.chest)
 	{
 		case 0: %obj.playaudio(0,"zombiemale_death" @ getrandom(1,10) @ "_sound");
@@ -155,12 +152,6 @@ function CommonZombieHoleBot::onBotMelee(%this,%obj,%col)
 	
 	if(%col.getType() & $TypeMasks::PlayerObjectType)
 	{
-		if(%obj.hIsInfected && !%col.hIsImmune && !%col.hIsInfected)
-		{
-			%col.setenergylevel(%col.getEnergyLevel()-%meleeimpulse*2);
-			if(%col.getEnergyLevel() < 1) holeZombieInfect(%obj,%col);
-		}
-
 		if(%col.getClassName() $= "Player") %col.spawnExplosion("ZombieHitProjectile",%meleeimpulse/2 SPC %meleeimpulse/2 SPC %meleeimpulse/2);
 		%col.playthread(3,"plant");
 		%col.StunnedSlowDown(3);
@@ -206,11 +197,11 @@ function Player::ZombieLowerArms(%player)
 
 function CommonZombieHoleBot::holeAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {	
-	if(getRandom(1,8) == 1)
-	{ 
-		L4B_pushClientSnapshot(%obj,0,true);
-		return;
-	}
+	//if(getRandom(1,8) == 1)
+	//{ 
+	//	L4B_pushClientSnapshot(%obj,0,true);
+	//	return;
+	//}
 
 	%shirtColor = getRandomBotRGBColor();
 	%accentColor = getRandomBotRGBColor();

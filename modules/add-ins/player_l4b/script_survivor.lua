@@ -162,7 +162,7 @@ function Survivor_ReviveDowned(obj)
             ts.callobj(victimclient,"play2d","victim_revived_sound")
 
             ts.setobj(victim,"lastdamage",ts.call("getsimtime"))
-            ts.callobj(victim,"SetDataBlock","SurvivorPlayerLow")
+            ts.callobj(victim,"SetDataBlock","SurvivorPlayer")
             ts.callobj(victim,"sethealth",25)
             ts.setobj(victim,"isbeingsaved",0)
         end
@@ -180,11 +180,6 @@ function Survivor_DamageCheck(obj,damage)
     local damagepercent = tonumber(ts.callobj(obj,"getDamagePercent"))
     local lastdamagetime = ts.getobj(obj, "lastdamage")
     local stresslevel = tonumber(ts.getobj(obj,"survivorstress"))
-    
-    if damagepercent < 0.5 then ts.callobj(obj,"SetDataBlock","SurvivorPlayer")
-    elseif damagepercent > 0.5 then ts.callobj(obj,"SetDataBlock","SurvivorPlayerMed")
-    elseif damagepercent > 0.75 then ts.callobj(obj,"SetDataBlock","SurvivorPlayerLow")
-    end
 
     if tonumber(damage) ~= nil and tonumber(damage) > 0 then
         local quarterdamage = damage*0.25

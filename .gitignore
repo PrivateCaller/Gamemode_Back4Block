@@ -1,0 +1,112 @@
+
+external assets/bilebombsticker.psd
+external assets/femaleshirttemplate.psd
+external assets/models/ammocrate.blend
+external assets/models/elevator.blend
+external assets/models/healthlocker.blend
+external assets/models/melee/axe.blend
+external assets/models/melee/baton.blend
+external assets/models/melee/cknife.blend
+external assets/models/melee/crowbar.blend
+external assets/models/melee/hatchet.blend
+external assets/models/melee/katana.blend
+external assets/models/melee/machete.blend
+external assets/models/melee/shovel.blend
+external assets/models/melee/sledgehammer.blend
+external assets/models/melee/spikebat.blend
+external assets/models/new playermodel/animations/default animations.blend
+external assets/models/new playermodel/animations/survivor animations.blend
+external assets/models/new playermodel/animations/Tank Animations.blend
+external assets/models/new playermodel/animations/Tank Animations.blend1
+external assets/models/new playermodel/animations/zombie animations.blend
+external assets/models/new playermodel/boomer.blend
+external assets/models/new playermodel/charger.blend
+external assets/models/new playermodel/charger.blend1
+external assets/models/new playermodel/default.blend
+external assets/models/new playermodel/default.blend1
+external assets/models/new playermodel/default.blendbackup
+external assets/models/new playermodel/halloweenskeleton.blend
+external assets/models/new playermodel/hunterwitch.blend
+external assets/models/new playermodel/smoker.blend
+external assets/models/new playermodel/Tank.blend
+external assets/models/new playermodel/Tank.blend1
+external assets/models/new playermodel/uncommon.blend
+external assets/models/new playermodel/zombie accessories/boomer.blend
+external assets/models/new playermodel/zombie accessories/charger.blend
+external assets/models/new playermodel/zombie accessories/clown.blend
+external assets/models/new playermodel/zombie accessories/construction.blend
+external assets/models/new playermodel/zombie accessories/construction.blend1
+external assets/models/new playermodel/zombie accessories/gibs.blend
+external assets/models/new playermodel/zombie accessories/gibs.blend1
+external assets/models/new playermodel/zombie accessories/hat.blend
+external assets/models/new playermodel/zombie accessories/hazmat.blend
+external assets/models/new playermodel/zombie accessories/hazmat.blend1
+external assets/models/new playermodel/zombie accessories/hunterwitch.blend
+external assets/models/new playermodel/zombie accessories/hunterwitch.blend1
+external assets/models/new playermodel/zombie accessories/new stuff.blend1
+external assets/models/new playermodel/zombie accessories/smoker.blend
+external assets/models/new playermodel/zombie accessories/smoker.blend1
+external assets/models/new playermodel/zombie accessories/soldier.blend
+external assets/models/new playermodel/zombie accessories/soldier.blend1
+external assets/moosic/Backup/CustomTankTheme_20220917T151514.948826.sesx
+external assets/moosic/Backup/CustomTankTheme_20220919T020820.957789.sesx
+external assets/moosic/Backup/CustomTankTheme_20221029T021220.010896.sesx
+external assets/moosic/Backup/CustomTankTheme_20221031T001353.964146.sesx
+external assets/moosic/Backup/CustomTankTheme_20221031T001754.386546.sesx
+external assets/moosic/Backup/HordeTheme_20220919T020438.521802.sesx
+external assets/moosic/Backup/HordeTheme_20220919T020738.531665.sesx
+external assets/moosic/Backup/HordeTheme_20220923T030426.228338.sesx
+external assets/moosic/Backup/HordeTheme_20220923T030757.581930.sesx
+external assets/moosic/Backup/HordeTheme_20221023T210921.750292.sesx
+external assets/moosic/Backup/HordeTheme_20221023T211221.763616.sesx
+external assets/moosic/Backup/HordeTheme_20221029T020715.486215.sesx
+external assets/moosic/Backup/HordeTheme_20221029T021015.507038.sesx
+external assets/moosic/CustomTankTheme.sesx
+external assets/moosic/CustomTankTheme_mixdown.wav
+external assets/moosic/HordeTheme.sesx
+external assets/moosic/icon.psd
+external assets/moosic/Imported Files/dotd_170_08.wav
+external assets/moosic/Imported Files/drums03a.wav
+external assets/moosic/Imported Files/drums03b.wav
+external assets/moosic/Imported Files/horde_01.wav
+external assets/moosic/Imported Files/horde_02.wav
+external assets/moosic/Imported Files/horde_03.wav
+external assets/moosic/Imported Files/L4D1 Beta Style Tank Theme 44100 1.pkf
+external assets/moosic/Imported Files/L4D1 Beta Style Tank Theme 44100 1.wav
+external assets/moosic/Imported Files/snare_horde_01_01a.wav
+external assets/moosic/Imported Files/snare_horde_01_01b.wav
+external assets/moosic/Imported Files/tank.pkf
+external assets/moosic/Imported Files/tank.wav
+external assets/models/new playermodel/boomer.blend1
+external assets/models/new playermodel/gibs.blend
+external assets/models/new playermodel/halloweenskeleton.blend1
+external assets/models/new playermodel/hat.blend
+external assets/models/new playermodel/hat.blend1
+external assets/models/new playermodel/hunterwitch.blend1
+external assets/models/new playermodel/new/default animations.blend
+external assets/models/new playermodel/new/default animations.blend1
+external assets/models/new playermodel/new/new default.blend
+external assets/models/new playermodel/new/old default animations.blend
+external assets/models/new playermodel/new/old default animations.blend1
+external assets/models/new playermodel/new/survivor animations.blend
+external assets/models/new playermodel/new/tank animations.blend
+external assets/models/new playermodel/new/zombie animations.blend
+external assets/models/new playermodel/smoker.blend1
+external assets/models/new playermodel/uncommon.blend1
+external assets/moosic/Backup/HordeTheme_20221101T230412.274713.sesx
+external assets/moosic/Backup/HordeTheme_20221101T230723.495743.sesx
+external assets/moosic/Backup/HordeTheme_20221101T231045.351621.sesx
+external assets/moosic/Imported Files/banjo_02_06.wav
+external assets/moosic/Imported Files/banjo_02_07.wav
+external assets/moosic/Imported Files/banjo_02_08.wav
+external assets/moosic/Imported Files/banjo_02_13.wav
+external assets/moosic/Imported Files/banjo_02_14.wav
+external assets/moosic/Imported Files/banjo_02_15.wav
+external assets/moosic/Imported Files/drums02c.wav
+external assets/moosic/Imported Files/drums02d.wav
+external assets/moosic/Imported Files/drums08a.wav
+external assets/moosic/Imported Files/drums08b.wav
+external assets/moosic/Imported Files/drums08e.wav
+external assets/moosic/Imported Files/drums5b.wav
+external assets/moosic/Imported Files/drums5d.wav
+external assets/moosic/Imported Files/drums5e.wav

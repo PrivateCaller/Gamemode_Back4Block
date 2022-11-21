@@ -165,7 +165,7 @@ AddDamageType("mudRadius",   '<bitmap:add-ons/gamemode_left4block/modules/add-in
 
 datablock ProjectileData(mud_Projectile)
 {
-	projectileShapeName = "add-ons/gamemode_left4block/modules/add-ins/player_l4b/models/mud/mudball.dts";
+	projectileShapeName = "add-ons/gamemode_left4block/modules/add-ins/player_l4b/models/mudball.dts";
 	directDamage = 1;
 	directDamageType = $DamageType::mudDirect;
 	radiusDamageType = $DamageType::mudRadius;
@@ -200,7 +200,7 @@ datablock ProjectileData(mud_Projectile)
 
 datablock ShapeBaseImageData(mud_Image)
 {
-	shapeFile  = "add-ons/gamemode_left4block/modules/add-ins/player_l4b/models/mud/mudball.dts";
+	shapeFile  = "add-ons/gamemode_left4block/modules/add-ins/player_l4b/models/mudball.dts";
 	emap = true;
 	mountPoint = 0;
 	offset = "0 0 0";

@@ -279,7 +279,7 @@ function ZombieBoomerHoleBot::holeAppearance(%this,%obj,%skinColor,%face,%decal,
 	GameConnection::ApplyBodyColors(%obj);
 }
 
-function ZombieBoomerHoleBot::L4BAppearance(%this,%client,%obj)
+function ZombieBoomerHoleBot::L4BAppearance(%this,%obj,%client)
 {
 	%obj.hideNode("ALL");
 	%obj.unHideNode("boomerchest");

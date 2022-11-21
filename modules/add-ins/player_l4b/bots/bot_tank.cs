@@ -150,7 +150,6 @@ function ZombieTankHoleBot::holeAppearance(%this,%obj,%skinColor,%face,%decal,%h
 {
 	%obj.hidenode("BallisticHelmet");
 	%obj.hidenode("BallisticVest");
- 	%obj.hidenode("Headskin2");
 	%obj.unhidenode("gloweyes");
 	%obj.setnodeColor("gloweyes","1 1 0 1");
 
@@ -179,8 +178,7 @@ function ZombieTankHoleBot::holeAppearance(%this,%obj,%skinColor,%face,%decal,%h
 	%obj.lhandColor = %skincolor;
 
 	//Head
-	%obj.setnodecolor("HeadSkin1",%obj.headColor);
-	%obj.setnodecolor("HeadSkin2",%obj.headColor);
+	%obj.setnodecolor("HeadSkin",%obj.headColor);
 
 	//Lower Body
 	%obj.setnodecolor("Pants",%obj.hipColor);

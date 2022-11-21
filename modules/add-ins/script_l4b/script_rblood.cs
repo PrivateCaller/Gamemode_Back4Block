@@ -1,4 +1,4 @@
-function serverCmdClearDecals(%client)
+function serverCmdClearDecals(%client) 
 {	
 	if(!%client.isAdmin) 
 	{
@@ -12,18 +12,6 @@ function serverCmdClearDecals(%client)
 		if(isObject(DecalGroup)) DecalGroup.deleteAll();
 	}
 }
-
-function Player::SapHealth(%obj,%amount,%maxamount) 
-{	
-	if(!isObject(%obj) || %amount > %maxamount) return;
-
-	%obj.AddHealth(%obj.getDataBlock().maxDamage*-0.0005);
-
-	cancel(%obj.SapHealthSched);
-	%obj.schedule(100,SapHealth,%amount++,%maxamount);
-}
-
-function AIPlayer::SapHealth(%obj,%amount,%maxamount) { Player::SapHealth(%obj,%amount,%maxamount); }
 
 function BloodDripProjectile::onCollision(%this, %obj, %col, %pos, %fade, %normal) { %obj.explode(); }
 
@@ -69,13 +57,13 @@ function spawnDecal(%dataBlock, %position, %vector,%scale)
 	%obj.setTransform(%position SPC vectorToAxis(%vector));
 	%obj.setScale(getRandom(10,%scale)*0.1 SPC getRandom(10,%scale)*0.1 SPC 1);
 	DecalGroup.add(%obj);
-	%obj.setNodeColor("ALL", %dataBlock.colorShiftColor);
 	if($Pref::L4B::Blood::BloodDecalsTimeout >= 0) %obj.schedule($Pref::L4B::Blood::BloodDecalsTimeout, delete);
 	return %obj;
 }
 
 function Armor::doSplatterBlood(%this,%obj,%amount) 
 {	
+	if(!isObject(%obj) || !$Pref::L4B::Blood::BloodDecalsLimit) return;
 	%pos = %obj.getHackPosition();
 
 	for (%i = 0; %i < getRandom(%amount); %i++) 
@@ -91,7 +79,7 @@ function Armor::doSplatterBlood(%this,%obj,%amount)
 			spawnDecal(BloodDecal @ getRandom(1, 2),posFromRaycast(%ray),getWords(%ray, 4, 6),%amount*5);		
 			%projectile = new Projectile()
 			{
-				dataBlock = bloodExplosionProjectile @ getRandom(1, 2);
+				dataBlock = "bloodExplosionProjectile1";
 				initialPosition = posFromRaycast(%ray);
 			};
 			MissionCleanup.add(%projectile);
@@ -159,328 +147,214 @@ function doBloodExplosion(%position, %scale)
 	%bloodExplosionProjectile.setScale(%scale SPC %scale SPC %scale);
 	%bloodExplosionProjectile.explode();
 }
-function doBloodDismemberExplosion(%position, %scale)
+
+function doGibLimbExplosion(%datablock,%position,%scale)
 {
-	%bloodDismemberProjectile = new Projectile()
+	%bloodGibLimbsProjectile = new Projectile()
 	{
-		datablock = bloodDismemberProjectile;
+		datablock = %datablock;
 		initialPosition = %position;
 	};
-	MissionCleanup.add(%bloodDismemberProjectile);
-	%bloodDismemberProjectile.setScale(%scale SPC %scale SPC %scale);
-	%bloodDismemberProjectile.explode();
-}
-function doGibLimbsExplosion(%position, %scale)
-{
-	for(%i = 0; %i < 3; %i++)
-	{
-		%datablock = $RBloodGib[%i];
-		%bloodGibLimbsProjectile = new Projectile()
-		{
-			datablock = %datablock;
-			initialPosition = %position;
-		};
-		MissionCleanup.add(%bloodGibLimbsProjectile);
-		%bloodGibLimbsProjectile.setScale(%scale SPC %scale SPC %scale);
-		%bloodGibLimbsProjectile.explode();
-	}
-}
-
-function Player::woundappearance(%obj,%type)
-{
-	if(%obj.getdataBlock().getName() $= "ZombieBoomerHoleBot") return;
-
-	switch$(%type)
-	{
-		case "chest": 	//%chestbloodbot = new Player() { dataBlock = "EmptyPlayer"; };
-						//%obj.chestbloodbot = %chestbloodbot;
-						//%obj.mountobject(%chestbloodbot,2);
-						//%chestbloodbot.mountImage(RBloodLargeImage,0);
-		
-						if(!%obj.chest)
-						{								
-							if(!%chestwoundonce)
-							{
-								%obj.HideNode("chest");
-								%obj.unHideNode("chestpart1");
-								%obj.unHideNode("chestpart2");
-								%obj.unHideNode("chestpart3");
-								%obj.unHideNode("chestpart4");
-								%obj.unHideNode("chestpart5");
-								%obj.unHideNode("chestpart6");
-								%obj.unHideNode("chestpart7");
-								%obj.unHideNode("chestpart8");			
-
-								%chestwoundonce = true;
-								%chestwoundmaxcount = getRandom(4,8);
-
-								for (%cwc = 0; %cwc < %chestwoundmaxcount; %cwc++) 
-								{
-									%chestremove = getRandom(8);
-									%obj.HideNode("chestpart" @ %chestremove);
-
-									if(%chestremove)
-									{				
-										%obj.unHideNode("skeletonchest");
-										%obj.unhidenode("organs");
-									}
-								}
-							}
-							else
-							{
-								%obj.unHideNode("chest");
-								%obj.HideNode("chestpart1");
-								%obj.HideNode("chestpart2");
-								%obj.HideNode("chestpart3");
-								%obj.HideNode("chestpart4");
-								%obj.HideNode("chestpart5");
-								%obj.HideNode("chestpart6");
-								%obj.HideNode("chestpart7");
-								%obj.HideNode("chestpart8");
-							}
-						}
-						else 
-						{
-							if(!%chestwoundonce)
-							{
-								%obj.HideNode("femchest");
-								%obj.unHideNode("femchestpart1");
-								%obj.unHideNode("femchestpart2");
-								%obj.unHideNode("femchestpart3");
-								%obj.unHideNode("femchestpart4");
-								%obj.unHideNode("femchestpart5");
-								%obj.unHideNode("femchestpart6");
-								%obj.unHideNode("femchestpart7");
-								%obj.unHideNode("femchestpart8");			
-
-								%chestwoundonce = true;
-								%chestwoundmaxcount = getRandom(4,8);
-
-								for (%cwc = 0; %cwc < %chestwoundmaxcount; %cwc++) 
-								{
-									%chestremove = getRandom(8);
-									%obj.HideNode("femchestpart" @ %chestremove);
-
-									%obj.unHideNode("skeletonchest");
-									%obj.unhidenode("organs");
-								}
-							}
-							else
-							{
-								%obj.unHideNode("femchest");
-								%obj.HideNode("femchestpart1");
-								%obj.HideNode("femchestpart2");
-								%obj.HideNode("femchestpart3");
-								%obj.HideNode("femchestpart4");
-								%obj.HideNode("femchestpart5");
-								%obj.HideNode("femchestpart6");
-								%obj.HideNode("femchestpart7");
-								%obj.HideNode("femchestpart8");
-							}
-						}
-						
-		case "head": 	%obj.HideNode("headskin");
-						%obj.HideNode("gloweyes");
-
-						%headbloodbot = new Player() { dataBlock = "EmptyPlayer"; };
-						%obj.headbloodbot = %headbloodbot;
-						%obj.mountobject(%headbloodbot,5);
-						%headbloodbot.mountImage(RBloodLargeImage,0);
-
-						if(%obj.getClassName() $= "AIPlayer" && %obj.hat)
-						{
-							%hat = new Player() 
-							{ 
-								dataBlock = "PlayerHatModel"; 
-								currentHat = %obj.hat;
-								color = %obj.hatcolor;
-							};
-							%obj.hatprop = %hat;
-							%hat.hideNode("ALL");
-							%hat.unhideNode($hat[%hat.currentHat]);
-							%hat.setNodeColor($hat[%hat.currentHat],%hat.color);	
-							%hat.setTransform(%obj.getTransform());
-							%hat.setDamageLevel(%hat.getdataBlock().maxDamage);
-							%hat.position = vectorAdd(%obj.getMuzzlePoint(2),"0 0 0.35");
-							
-							%objhalfvelocity = "\"" @ getWord(%obj.getVelocity(),0)/2 SPC getWord(%obj.getVelocity(),1)/2 SPC getWord(%obj.getVelocity(),2)/2 @ "\"";
-							%hat.setvelocity(vectorAdd(%objhalfvelocity,getRandom(-8,8) SPC getRandom(-8,8) SPC getRandom(5,10)));
-						}	
-
-						if(getRandom(1)) 
-						{
-							%obj.unhidenode("brain");
-							if(getRandom(0,1)) %obj.unHideNode("headpart3");
-							if(getRandom(0,1)) %obj.unHideNode("headpart1");
-							if(getRandom(0,1)) %obj.unHideNode("headpart4");
-							if(getRandom(0,1)) %obj.unHideNode("headpart5");
-							if(getRandom(0,1)) %obj.unHideNode("headpart6");
-							if(getRandom(0,1)) %obj.unHideNode("headskullpart1");
-							if(getRandom(0,1)) %obj.unHideNode("headskullpart3");
-							if(getRandom(0,1)) %obj.unHideNode("headpart1");
-							if(getRandom(0,1)) %obj.unHideNode("headpart1");
-							if(getRandom(0,1)) %obj.unHideNode("headpart1");
-							if(getRandom(0,1)) %obj.unHideNode("headskullpart4");
-							if(getRandom(0,1)) %obj.unHideNode("headskullpart5");
-							if(getRandom(0,1)) %obj.unHideNode("headskullpart6");
-						}
-						else %obj.unhideNode("headstump");
-						
-													
-		case "rightarm":	%obj.unhidenode("rarmSlim");
-							%obj.setNodeColor("rarmSlim","1 0.5 0.5 1");
-
-		case "leftarm":		%obj.unhidenode("larmSlim");
-							%obj.setNodeColor("larmSlim","1 0.5 0.5 1");
-
-		case "rightleg":	%obj.unhideNode("legstumpr");
-							%obj.setNodeColor("legstumpr","1 0.5 0.5 1");
-							%obj.nolegs++;
-
-		case "leftleg":		%obj.unhideNode("legstumpl");
-							%obj.setNodeColor("legstumpl","1 0.5 0.5 1");
-							%obj.nolegs++;
-
-		case "hip":			//%pantsbloodbot = new Player() { dataBlock = "EmptyPlayer"; };
-							//%obj.pantsbloodbot = %pantsbloodbot;
-							//%obj.mountobject(%pantsbloodbot,7);
-							//%pantsbloodbot.mountImage(RBloodLargeImage,0);
-		
-							%obj.HideNode("pants");
-							%obj.unHideNode("skelepants");
-							%obj.unHideNode("pantswound");
-	}
-
-	if(%obj.nolegs && %obj.getClassName() $= "AIPlayer") %obj.setcrouching(1);
-	
-}
-
-function AIPlayer::woundappearance(%obj,%type) { Player::woundappearance(%obj,%type); }
-
-function Armor::RbloodDismember(%this,%obj,%limb,%position)
-{
-	if((%obj.getstate() !$= "Dead" && !%limb) || %obj.limbDismembered[%limb]) return;
-	for(%i = 0; %i < getWordCount($RBloodLimbString[%limb]); %i++) %obj.hideNode(getWord($RBloodLimbString[%limb], %i));
-	
-	doBloodExplosion(%position, 1.5);
-	if($Pref::L4B::Blood::BloodDecals) %this.doSplatterBlood(%obj,5);
-	serverPlay3D("blood_dismember" @ getRandom(1,4) @ "_sound", %obj.getHackPosition());				
-
-	switch(%limb)
-	{
-		case 0: %obj.schedule(1,woundappearance,"head");//head
-				%obj.schedule(1,stopAudio,0);
-				%obj.SapHealth(0,15);
-		case 1: %obj.woundappearance("chest");//chest
-				%obj.SapHealth(0,15);
-		case 2: %obj.schedule(1,woundappearance,"rightarm");//rightarm
-		case 3: %obj.schedule(1,woundappearance,"leftarm");//leftarm
-		case 4: //%obj.schedule(1,woundappearance,"rightarm");//righthand
-		case 5: //%obj.schedule(1,woundappearance,"leftarm");//lefthand
-		case 6: %obj.woundappearance("hip");//hip
-				%obj.SapHealth(0,15);
-		case 7: %obj.schedule(1,woundappearance,"rightleg");//rightleg
-		case 8: %obj.schedule(1,woundappearance,"leftleg");//leftleg
-	}
-
-	%obj.limbDismembered[%limb] = true;
+	MissionCleanup.add(%bloodGibLimbsProjectile);
+	%bloodGibLimbsProjectile.setScale(%scale SPC %scale SPC %scale);
+	%bloodGibLimbsProjectile.explode();
 }
 
 function Armor::RBloodSimulate(%this, %obj, %position, %damagetype, %damage)
 {
+	if(%position $= "" || %position $= "0 0 0" || vectorDist(%position, %obj.getHackPosition()) > 1.5*getWord(%obj.getScale(), 2)) %position = %obj.getHackPosition();
+	
 	%obj.limbShotgunStrike++;
 	if(%obj.lastHitTime+5 < getSimTime())
 	{
 		%obj.limbShotgunStrike = 0;
 		%obj.lastHitTime = getSimTime();
-	}	
+	}
+
+	%limb = %obj.rgetDamageLocation(%position);
+	%spraydamage = %damage*0.001;
 
 	if(%obj.lastDamaged < getSimTime())
 	{
-		for(%i = 0; %i < mCeil(%damage / 25); %i++)
+		for(%i = 0; %i < getRandom(1,4); %i++)
 		{			
 			doBloodExplosion(%position, getWord(%obj.getScale(), 2));
-			if($Pref::L4B::Blood::BloodDecals) %this.doSplatterBlood(%obj,5);
+			%this.doSplatterBlood(%obj,5);
 		}
 		serverPlay3D("blood_impact" @ getRandom(1,4) @ "_sound", %position);
 		%obj.lastDamaged = getSimTime()+50;
 	}
 
-	if(%damage >= %obj.getDataBlock().maxDamage/4 || %obj.limbShotgunStrike > 1)
-	{
-		%limb = %obj.rgetDamageLocation(%position);
-		%time = mClampF(%obj.getDamagePercent()*10, 0, 10);
-		%obj.SapHealth(0,25);
-		%obj.markForLimbDismember[%limb] = true;
-		%this.RbloodDismember(%obj,%limb,%position);
-	} 
-	if(%damage > %this.maxDamage*2.5) %obj.markForGibExplosion = true;
+	if(%obj.getstate() $= "Dead" && %damage > %obj.getdataBlock().maxDamage*2.5) %obj.markForGibExplosion = true;
+	if($Pref::L4B::Blood::BloodDismemberThreshold && (%damage >= $Pref::L4B::Blood::BloodDismemberThreshold || %obj.limbShotgunStrike >= 2)) %this.RbloodDismember(%obj,%limb,true,%position);	
 }
 
-$RBloodLimbString0 = "headskin helmet pointyhelmet flarehelmet scouthat bicorn cophat knithat plume triplume septplume visor shades gloweyes ballistichelmet constructionhelmet constructionhelmetbuds";
-$RBloodLimbString1 = "armor bucket cape pack quiver tank";
-$RBloodLimbString2 = "rarm rarmslim rhand_blood rarmcharger";
-$RBloodLimbString3 = "larm larmslim larmsmall";
-$RBloodLimbString4 = "rhook rhand rhandwitchclaws rhandwitch";
-$RBloodLimbString5 = "lhand lhook lhand_blood lhandwitchclaws lhandwitch lhandsmall";
-$RBloodLimbString6 = "";
-$RBloodLimbString7 = "rshoe rpeg rshoe_blood";
-$RBloodLimbString8 = "lshoe lpeg lshoe_blood";
+function Armor::RbloodDismember(%this,%obj,%limb,%doeffects,%position)
+{
+	if(!isObject(%obj)) return;
+
+	%scale = getWord(%obj.getScale(), 2);
+	%dismemberstring = $RBloodLimbDismemberString[%limb];
+
+	if(!%obj.limbDismemberedLevel[%limb])
+	{
+		%obj.limbDismemberedLevel[%limb] = 1;		
+		%dopartdismember = true;
+		if(%doeffects) %doeffects = 2;
+
+		switch(%limb)
+		{
+			case 0: %obj.unhidenode("brain");
+					if(%obj.getdataBlock().noHatRemoval) %dopartdismember = false;
+					else if(%doeffects)
+					{
+						%obj.headbloodbot = new Player() 
+						{ 
+							dataBlock = "EmptyPlayer";
+							zombie = %obj;
+							slotToMountBot = 5;
+							imageToMount = "RBloodLargeImage";
+						};
+	
+						if(%obj.hat)
+						{
+							%obj.hatprop = new Player() 
+							{ 
+								dataBlock = "L4BHatModel"; 
+								wearer = %obj;
+								currentHat = %obj.currenthat;
+								color = %obj.hatcolor;
+							};
+						}
+					}
+
+					%obj.headstrap = 0;
+					%obj.shades = 0;
+					%obj.hat = 0;
+
+			case 1: if(%obj.chest) %dismemberstring = $RBloodLimbDismemberStringF[%limb];
+					%obj.unHideNode("skeletonchest");
+					%obj.unHideNode("skeletonchestpiece1");
+					%obj.HideNode("skeletonchestpiece2");
+					%obj.unHideNode("organs");
+
+					if(%doeffects)
+					{
+						%obj.chestbloodbot = new Player() 
+						{ 
+							dataBlock = "EmptyPlayer";
+							zombie = %obj;
+							slotToMountBot = 2;
+							imageToMount = "RBloodLargeImage";
+						};						
+					}
+
+					%obj.cheststrap = 0;
+					%obj.pack = 0;
+
+			case 2:	%obj.unhidenode("rarmSlim");
+			case 3:	%obj.unhidenode("larmSlim");
+			case 4: if(%doeffects) doGibLimbExplosion("bloodHandDebrisProjectile",%position,%scale);
+			case 5: if(%doeffects) doGibLimbExplosion("bloodHandDebrisProjectile",%position,%scale);
+			case 6:	%obj.unHideNode("skelepants");
+					%obj.unHideNode("pantswound");
+			case 7:	if(%doeffects) doGibLimbExplosion("bloodFootDebrisProjectile",%position,%scale);
+					%obj.unhideNode("legstumpr");
+					%obj.nolegs++;
+			case 8:	doGibLimbExplosion("bloodFootDebrisProjectile",%position,%scale);
+					%obj.unhideNode("legstumpl");
+					%obj.nolegs++;
+		}
+	}
+
+	if(%obj.getState() $= "Dead" && %obj.limbDismemberedLevel[%limb] != 2)
+	{
+		%obj.limbDismemberedLevel[%limb] = 2;
+		%doeffects = 2;
+		%dopartdismember = true;
+
+		switch(%limb)
+		{
+			case 0:	if(%obj.getdataBlock().noHatRemoval) %dopartdismember = false;
+					%obj.hidenode("brain");
+					doGibLimbExplosion("RBloodBrainProjectile",%position,%scale);
+					%obj.schedule(5,stopAudio,0);
+			case 1: if(%obj.chest) %dismemberstring = $RBloodLimbDismemberStringF[%limb];
+					doGibLimbExplosion("RBloodOrganProjectile",%position,%scale);
+					%obj.HideNode("organs");
+					%obj.unHideNode("skeletonchest");
+					%obj.HideNode("skeletonchestpiece1");
+					%obj.unHideNode("skeletonchestpiece2");
+			default:
+		}
+	}	
+	
+	if(%dopartdismember)
+	{
+		for(%i = 0; %i < getWordCount($RBloodLimbString[%limb]); %i++) %obj.hideNode(getWord($RBloodLimbString[%limb], %i));
+		
+		for(%j = 0; %j < getWordCount(%dismemberstring); %j++)
+		{
+			%obj.unhideNode(getWord(%dismemberstring,%j));
+			if(%obj.limbPartDismembered[%limb,%j] || (!%obj.limbPartDismembered[%limb,%j] && getRandom(1)))
+			{
+				%obj.hideNode(getWord(%dismemberstring,%j));
+				%obj.limbPartDismembered[%limb,%j] = true;
+			}
+		}
+	}
+
+	if(%doeffects == 2)
+	{
+		%this.doSplatterBlood(%obj,10);
+		doBloodExplosion(%position, 1.5);
+		serverPlay3D("blood_dismember" @ getRandom(1,4) @ "_sound", %position);		
+	}
+
+	if(%obj.nolegs && %obj.getClassName() $= "AIPlayer") %obj.setcrouching(1);
+
+	if(%obj.getstate() $= "Dead" && %obj.markForGibExplosion)
+	{
+		%obj.hideNode("ALL");
+		%obj.schedule(50,delete);
+		%this.doSplatterBlood(%obj,15);
+		serverPlay3D("blood_explosion" @ getRandom(1,2) @ "_sound", %obj.getHackPosition());
+
+		%datablock = "bloodHeadDebrisProjectile RBloodOrganProjectile 0 0 bloodHandDebrisProjectile bloodHandDebrisProjectile 0 bloodFootDebrisProjectile bloodFootDebrisProjectile";
+		for(%i = 0; %i < getWordCount(%datablock); %i++) if(isObject(getWord(%datablock, %i)) && !%obj.limbDismemberedLevel[%i]) doGibLimbExplosion(getWord(%datablock, %i),%obj.getHackPosition(), getWord(%obj.getScale(), 2));
+		for (%j = 0; %j < getRandom(2,4); %j++) doGibLimbExplosion("bloodDismemberProjectile",%obj.getHackPosition(), getWord(%obj.getScale(), 2));
+		return;
+	}
+}
 
 package RBloodPackage
 {
-	function Armor::onRemove(%this,%obj)
-	{
-		Parent::onRemove(%this,%obj);
-
-		if(isObject(%obj.hatprop)) %obj.hatprop.delete();
-		if(isObject(%obj.headbloodbot)) %obj.headbloodbot.delete();
-	}
-
 	function MiniGameSO::reset(%this, %client) 
-	{
+	{		
 		Parent::reset(%this, %client);
 
 		%currTime = getSimTime();
 		if(%obj.lastResetTime + 5000 > %currTime) return;
 		%minigame.lastResetTime = %currTime;
-		
-		if(isObject(DecalGroup)) DecalGroup.deleteAll();
+
+		if(isObject(DecalGroup)) DecalGroup.deleteAll();		
 	}
 
 	function ProjectileData::radiusDamage(%this, %obj, %col, %distanceFactor, %pos, %damageAmt)
-	{	
+	{			
 		if(%col.getType() & $TypeMasks::PlayerObjectType && %col.getDamageLevel()+%damageAmt > %col.getdataBlock().maxDamage && (vectorDist(%pos, %col.getHackPosition()) / getWord(%col.getScale(), 2)) < %obj.getdataBlock().damageRadius) 
 		%col.markForGibExplosion = true;
-		
+
 		Parent::radiusDamage(%this, %obj, %col, %distanceFactor, %pos, %damageAmt);
 	}	
 
 	function Armor::Damage(%this, %obj, %sourceObject, %position, %damage, %damageType)
-	{						
-		Parent::Damage(%this, %obj, %sourceObject, %position, %damage, %damageType);
-		
-		if(!$Pref::L4B::Blood::Enable || !%obj.getdataBlock().enableRBlood || %damage < %this.maxDamage/8) return;
-		
-		if(%damageType == $DamageType::Fall || %damageType == $DamageType::Lava || %damageType == $DamageType::Suicide) %rblooddamage = %damage / %obj.getdataBlock().maxDamage/1.333;
-		else %rblooddamage = %damage;
+	{
+ 		Parent::Damage(%this, %obj, %sourceObject, %position, %damage, %damageType);
 
-		if(%position $= "" || %position $= "0 0 0" || vectorDist(%position, %obj.getHackPosition()) > 1.5*getWord(%obj.getScale(), 2)) %rbloodPosition = %obj.getHackPosition();
-		%this.RBloodSimulate(%obj, %rbloodPosition, %damagetype, %rblooddamage);
+		if(!$Pref::L4B::Blood::BloodDamageThreshold || !%this.enableRBlood || %damage < $Pref::L4B::Blood::BloodDamageThreshold || %damageType == $DamageType::Lava || %damageType == $DamageType::Suicide) return;
 
-		if(%obj.getState() $= "Dead")
-		{
-			if(%obj.markForGibExplosion)
-			{
-				%obj.SapHealth(0,25);			
-				%obj.hideNode("ALL");
-				%obj.schedule(50,delete);
-				for(%dismember = 0; getRandom(5,10) <= 10; %dismember++) doBloodDismemberExplosion(%obj.getHackPosition(), 1.5); 
-				if($Pref::Server::BO2Zombies::BloodDecals) %this.doSplatterBlood(%obj,10);
-				serverPlay3D("blood_explosion" @ getRandom(1,2) @ "_sound", %obj.getHackPosition());
-				doGibLimbsExplosion(%obj.getHackPosition(), getWord(%obj.scale, 2));
-			}
-		}		
+		%this.RBloodSimulate(%obj, %position, %damagetype, %damage);
 	}
 };
 activatePackage(RBloodPackage);

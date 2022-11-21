@@ -170,89 +170,16 @@ function ZombieSmokerHoleBot::holeAppearance(%this,%obj,%skinColor,%face,%decal,
 	GameConnection::ApplyBodyColors(%obj);
 }
 
-function ZombieSmokerHoleBot::L4BAppearance(%this,%client,%obj)
+function ZombieSmokerHoleBot::L4BAppearance(%this,%obj,%client)
 {
-	%obj.hideNode("ALL");
-	%obj.unHideNode("chest");
-	%obj.unHideNode("rhand");
-	%obj.unHideNode("lhand");
-	%obj.unHideNode(("rarm"));
-	%obj.unHideNode(("larm"));
-	%obj.unHideNode("headskin");
-	%obj.unHideNode("pants");
-	%obj.unHideNode("rshoe");
-	%obj.unHideNode("lshoe");
+	Parent::L4BAppearance(%this,%obj,%client);
 	%obj.unhidenode("smokerboil");
-	%obj.unhidenode("gloweyes");
-	%obj.setHeadUp(0);			
-
-	%headColor = %client.headcolor;
-	%chestColor = %client.chestColor;
-	%rarmcolor = %client.rarmColor;
-	%larmcolor = %client.larmColor;
-	%rhandcolor = %client.rhandColor;
-	%lhandcolor = %client.lhandColor;
-	%hipcolor = %client.hipColor;
-	%rlegcolor = %client.rlegColor;
-	%llegColor = %client.llegColor;	
-
-	if(%obj.getDatablock().hType $= "Zombie" && %obj.getclassname() $= "Player")
+	
+	switch$(%obj.getClassName())
 	{
-		%skin = %client.headColor;
-		%zskin = getWord(%skin,0)/2.75 SPC getWord(%skin,1)/1.5 SPC getWord(%skin,2)/2.75 SPC 1;			
-
-		%headColor = %zskin;
-		if(%client.chestColor $= %skin) %chestColor = %zskin;
-		if(%client.rArmColor $= %skin) %rarmcolor = %zskin;
-		if(%client.lArmColor $= %skin) %larmcolor = %zskin;
-		if(%client.rhandColor $= %skin) %rhandcolor = %zskin;
-		if(%client.lhandColor $= %skin) %lhandcolor = %zskin;
-		if(%client.hipColor $= %skin) %hipcolor = %zskin;
-		if(%client.rlegcolor $= %skin) %rlegcolor = %zskin;
-		if(%client.llegcolor $= %skin) %llegColor = %zskin;
+		case "Player": %obj.setNodeColor("smokerboil",%client.zombieskincolor);
+		case "AIPlayer": %obj.setNodeColor("smokerboil",%client.headcolor);
 	}
-
-	%obj.setFaceName("asciiTerror");
-	%obj.setDecalName(%client.decalName);
-	%obj.setNodeColor("headskin",%headColor);
-	%obj.setNodeColor("smokerboil",%headColor);
-	%obj.setNodeColor("chest",%chestColor);
-	%obj.setNodeColor("pants",%hipColor);
-	%obj.setNodeColor("rarm",%rarmColor);
-	%obj.setNodeColor("larm",%larmColor);
-	%obj.setNodeColor("rhand",%rhandColor);
-	%obj.setNodeColor("lhand",%lhandColor);
-	%obj.setNodeColor("rshoe",%rlegColor);
-	%obj.setNodeColor("lshoe",%llegColor);
-	%obj.setNodeColor("headpart1",%headColor);
-	%obj.setNodeColor("headpart2",%headColor);
-	%obj.setNodeColor("headpart3",%headColor);
-	%obj.setNodeColor("headpart4",%headColor);
-	%obj.setNodeColor("headpart5",%headColor);
-	%obj.setNodeColor("headpart6",%headColor);
-	%obj.setNodeColor("chestpart1",%chestColor);
-	%obj.setNodeColor("chestpart2",%chestColor);
-	%obj.setNodeColor("chestpart3",%chestColor);
-	%obj.setNodeColor("chestpart4",%chestColor);
-	%obj.setNodeColor("chestpart5",%chestColor);
-	%obj.setNodeColor("pants",%hipColor);
-	%obj.setNodeColor("pantswound",%hipColor);	
-	%obj.setnodeColor("gloweyes","1 1 0 1");
-	%obj.setNodeColor("rarmSlim","1 0.5 0.5 1");
-	%obj.setNodeColor("larmSlim","1 0.5 0.5 1");	
-	%obj.setNodeColor("headskullpart1","1 0.5 0.5 1");
-	%obj.setNodeColor("headskullpart2","1 0.5 0.5 1");
-	%obj.setNodeColor("headskullpart3","1 0.5 0.5 1");
-	%obj.setNodeColor("headskullpart4","1 0.5 0.5 1");
-	%obj.setNodeColor("headskullpart5","1 0.5 0.5 1");
-	%obj.setNodeColor("headskullpart6","1 0.5 0.5 1");
-	%obj.setNodeColor("headstump","1 0 0 1");
-	%obj.setNodeColor("legstumpr","1 0 0 1");
-	%obj.setNodeColor("legstumpl","1 0 0 1");
-	%obj.setNodeColor("skeletonchest","1 0.5 0.5 1");
-	%obj.setNodeColor("skelepants","1 0.5 0.5 1");
-	%obj.setNodeColor("organs","1 0.6 0.5 1");
-	%obj.setNodeColor("brain","1 0.75 0.746814 1");	
 }
 
 function ZombieSmokerHoleBot::ShootTongue(%this, %obj)

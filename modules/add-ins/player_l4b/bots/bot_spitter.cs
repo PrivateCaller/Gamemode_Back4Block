@@ -161,7 +161,7 @@ function ZombieSpitterHoleBot::holeAppearance(%this,%obj,%skinColor,%face,%decal
 	%obj.rhand =  "0";
 	%obj.lleg =  "0";
 	%obj.lhandColor =  %skinColor;
-	%obj.hat =  %hat;
+	%obj.hat =  0;
 
 	GameConnection::ApplyBodyParts(%obj);
 	GameConnection::ApplyBodyColors(%obj);

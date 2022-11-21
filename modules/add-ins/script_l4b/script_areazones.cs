@@ -1,5 +1,6 @@
 if(forceRequiredAddOn("Tool_NewDuplicator") == $Error::AddOn_NotFound || !isFunction(NetObject, setNetFlag)) return;
 if(!isObject(AreaZoneGroup)) new ScriptGroup(AreaZoneGroup);
+registerInputEvent("fxDTSBrick","onAZFirstEntry","Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "Bot Bot" TAB "MiniGame MiniGame");
 
 package L4B_AreaZones
 {
@@ -650,12 +651,13 @@ datablock TriggerData(AreaZoneTrigger)
 };
 
 function AreaZoneTrigger::onEnterTrigger(%this, %trigger, %obj)
-{
+{	
 	if(%obj.getType() & $TypeMasks::PlayerObjectType && %obj.getState() !$= "Dead" && %obj.getdataBlock().isSurvivor && isObject(%minigame = getMiniGameFromObject(%obj)))
 	{	
 		%zone = %trigger.zone;
+		%zonename = %zone.zonename;
 		%obj.currentZone = %zone;
-		%obj.currentZoneNumber = %zone.zonenumber;		
+		%obj.currentZoneNumber = %zone.zonenumber;
 		%zone.presencecount++;
 		
 		if(!%zone.firstentry)
@@ -670,20 +672,26 @@ function AreaZoneTrigger::onEnterTrigger(%this, %trigger, %obj)
 		    //    case "AIPlayer": $InputTarget_["Bot"] = %obj;
 		    //}
 		    //$InputTarget_["MiniGame"] = getMiniGameFromObject(%obj);
-		    //%brick.areazone.parbrick.processInputEvent("onAZFirstEntry",%obj.client);		    
-		
-		    for(%g = 0; %g < %zone.simset.getCount(); %g++) 
-			if(isObject(%itembricks = %zone.simset.getObject(%g)) && %itembricks.getdataBlock().ZoneBrickType $= "item")
-			{		            
-				%minigame.schedule(100,sortItemSpawns,%zone);
-				break;
-			}
+		    //%brick.areazone.parbrick.processInputEvent("onAZFirstEntry",%obj.client);
 
-		    for(%h = 0; %h < %zone.simset.getCount(); %h++) 
-			if(isObject(%spawnbricks = %zone.simset.getObject(%h)) && %spawnbricks.getdataBlock().ZoneBrickType $= "spawner" && strstr(strlwr(%spawnbricks.getname()),"_wander") != -1)
-			{	
-				%minigame.schedule(150,spawnZombies,"Wander",getRandom(15,25),%zone);
-				break;
+			switch$(%zonename)
+			{
+				case "Start": %minigame.director(true);
+				case "Checkpoint": %minigame.director(false);
+				case "End": %minigame.director(false);
+				default: 	for(%g = 0; %g < %zone.simset.getCount(); %g++) 
+							if(isObject(%itembricks = %zone.simset.getObject(%g)) && %itembricks.getdataBlock().ZoneBrickType $= "item")
+							{		            
+								%minigame.schedule(100,sortItemSpawns,%zone);
+								break;
+							}
+			
+							for(%h = 0; %h < %zone.simset.getCount(); %h++) 
+							if(isObject(%spawnbricks = %zone.simset.getObject(%h)) && %spawnbricks.getdataBlock().ZoneBrickType $= "spawner" && strstr(strlwr(%spawnbricks.getname()),"_wander") != -1)
+							{	
+								%minigame.schedule(150,spawnZombies,"Wander",getRandom(15,25),%zone);
+								break;
+							}				
 			}
 		}
 	}

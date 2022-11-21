@@ -34,9 +34,7 @@ function HataFootstepLoop(%obj)
 {
 	if(!isObject(%obj) || %obj.getState() $= "Dead") return;
 
-	%shapename = fileName(%obj.getDatablock().shapeFile);
-
-	if(%shapename $= "newm.dts")
+	if(%obj.getDatablock().usesL4Bappearance)
 	{		
 		cancel(%obj.HFsL); //don't double schedule
 		%obj.HFsL = schedule(320,0,HataFootstepLoop,%obj); //schedule next footstep
