@@ -197,11 +197,11 @@ function Player::ZombieLowerArms(%player)
 
 function CommonZombieHoleBot::holeAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {	
-	//if(getRandom(1,8) == 1)
-	//{ 
-	//	L4B_pushClientSnapshot(%obj,0,true);
-	//	return;
-	//}
+	if(getRandom(1,1) == 1)
+	{ 
+		L4B_pushClientSnapshot(%obj,0,true);
+		return;
+	}
 
 	%shirtColor = getRandomBotRGBColor();
 	%accentColor = getRandomBotRGBColor();

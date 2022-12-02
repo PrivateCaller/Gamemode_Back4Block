@@ -36,7 +36,7 @@ function SurvivorPlayer::L4BAppearance(%this,%obj,%client)
 
 function SurvivorPlayer::RbloodDismember(%this,%obj,%limb,%doeffects,%position)
 {
-	//ouch
+	if(%limb != 7 || %limb != 8) Parent::RbloodDismember(%this,%obj,%limb,%doeffects,%position);
 }
 
 function SurvivorPlayer::onImpact(%this, %obj, %col, %vec, %force)
@@ -164,7 +164,8 @@ function SurvivorPlayerDowned::onDamage(%this, %obj, %delta)
 
 function SurvivorPlayerDowned::onNewDataBlock(%this,%obj)
 {	
-	%obj.playthread(0,sit);
+	
+	if(!%obj.hEater) %obj.playthread(0,sit);
 	%obj.lastcry = getsimtime();
 	%obj.playaudio(0,"survivor_pain_high1_sound");
 	%this.DownLoop(%obj);	

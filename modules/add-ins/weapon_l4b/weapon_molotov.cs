@@ -387,7 +387,7 @@ function flameSetPlayAudio(%set)
 		{
 			datablock = emptyPlayer;
 			position = %set.median;
-			audioBot = 1;
+			source = %set;
 		};
 		%soundObj.setDamageLevel(100);
 		%soundObj.playAudio(0,"fire_loop" @ getRandom(1,2) @ "_sound");
@@ -395,10 +395,8 @@ function flameSetPlayAudio(%set)
 }
 function flameSetDestroy(%set)
 {
-	if(isObject(%set.soundObj))
-		%set.soundObj.delete();
-	if(isObject(%set.debugObj))
-		%set.debugObj.delete();
+	if(isObject(%set.soundObj)) %set.soundObj.delete();
+	if(isObject(%set.debugObj)) %set.debugObj.delete();
 	serverPlay3D("fire_end_sound",%set.median);
 	cleanFlameSet();
 }
@@ -421,16 +419,9 @@ package swol_sweps_extpack
 {
 	function player::emote(%pl,%im,%override)
 	{
-		if(%pl.getDatablock().isEmptyPlayer)
-			return;
-
-		if(%pl.isBurning)
-		{
-			if(isObject(%im))
-			{
-				if(%im.getClassName() !$= "ProjectileData") return;
-			}
-		}
+		if(%pl.getDatablock().isEmptyPlayer) return;
+		if(%pl.isBurning) if(isObject(%im)) if(%im.getClassName() !$= "ProjectileData") return;			
+	
 		parent::emote(%pl,%im,%override);
 	}
 

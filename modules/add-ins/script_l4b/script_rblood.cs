@@ -211,7 +211,7 @@ function Armor::RbloodDismember(%this,%obj,%limb,%doeffects,%position)
 						%obj.headbloodbot = new Player() 
 						{ 
 							dataBlock = "EmptyPlayer";
-							zombie = %obj;
+							source = %obj;
 							slotToMountBot = 5;
 							imageToMount = "RBloodLargeImage";
 						};
@@ -243,7 +243,7 @@ function Armor::RbloodDismember(%this,%obj,%limb,%doeffects,%position)
 						%obj.chestbloodbot = new Player() 
 						{ 
 							dataBlock = "EmptyPlayer";
-							zombie = %obj;
+							source = %obj;
 							slotToMountBot = 2;
 							imageToMount = "RBloodLargeImage";
 						};						

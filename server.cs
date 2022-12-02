@@ -162,32 +162,6 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 		noSave         = false;
 		requireRestart = false;
 	};
-	
-	new ScriptObject(Preference)
-	{
-		className      = "Gamemode_Left4Block";
-
-		addon          = "Gamemode_Left4Block";
-		category       = "General";
-		title          = "Director enable on minigame start/reset";
-
-		type           = "bool";
-		params         = "";
-
-		variable       = "$Pref::L4B::Director::EnableOnMG";
-
-		defaultValue   = "0";
-
-		updateCallback = "";
-		loadCallback   = "";
-
-		hostOnly       = false;
-		secret         = false;
-
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
 
 	new ScriptObject(Preference)
 	{
@@ -290,7 +264,6 @@ else
 	$Pref::L4B::MapRotation::VoteMin = 5;
 	$Pref::L4B::MapRotation::MinReset = 5;
 	$Pref::L4B:MapRotation::CoolDown = 10;	
-	$Pref::L4B::L4B::Director::EnableOnMG = false;	
 	$Pref::L4B::Zombies::Difficulty = 1;
 }
 

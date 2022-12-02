@@ -26,6 +26,19 @@ function Player::l4bdebug(%obj)
 //		%obj.playthread(3,"activate2");
 //		if(%target.hType $= "Zombie" && %target.getState() !$= "Dead") %target.damage(%obj, %target.getHackposition(), 500, $damageType::default);		
 //	}
+////if(isObject(%minigame = getMiniGameFromObject(%obj))) %minigame.spawnzombies(special,1);
 
-	if(isObject(%minigame = getMiniGameFromObject(%obj))) %minigame.spawnzombies(special,1);
+	//if(%obj.client.isSuperAdmin && isObject(%brickgroup = %obj.client.brickgroup))
+	//{		
+	//	//%count = %brickgroup.getCount();
+	//	//for (%i = 0; %i < %count; %i++) 
+	//	//{			
+	//	//	if(isObject(%brick = %brickgroup.getObject(%i)) && %brick.getDataBlock().ZoneBrickType $= "spawner") %brick.delete();
+	//	//}		
+	//}
+
+	//for (%i = 0; %i < $L4B_clientLog.getCount(); %i++) 
+	//{
+	//	talk($L4B_clientLog.getObject(%i).name);		
+	//}
 }

@@ -2,7 +2,6 @@ function ZombieBoomerHoleBot::onNewDataBlock(%this,%obj)
 {
 	Parent::onNewDataBlock(%this,%obj);
 	CommonZombieHoleBot::onNewDataBlock(%this,%obj);
-
 	%obj.setscale("1.6 2 1.1");
 }
 
@@ -12,53 +11,48 @@ function ZombieBoomerHoleBot::onAdd(%this,%obj)
 	CommonZombieHoleBot::onAdd(%this,%obj);
 }
 
+	function ZombieBoomerHoleBot::onBotLoop(%this,%obj)
+{
+	if(%obj.getstate() !$= "Dead" && !isEventPending(%obj.vomitschedule) && %obj.lastIdle+5000 < getsimtime())
+	{
+		switch$(%obj.hState)
+		{
+			case "Wandering":	%obj.isStrangling = false;
+								%obj.hNoSeeIdleTeleport();
+								%obj.playaudio(0,"boomer_lurk" @ getrandom(1,4) @ "_sound");
+			case "Following": 	%obj.playaudio(0,"boomer_recognize" @ getrandom(1,4) @ "_sound");
+		}
+
+		%obj.playthread(3,plant);
+		%obj.lastIdle = getsimtime();		
+	}
+}
+
 function ZombieBoomerHoleBot::onBotMelee(%this,%obj,%col)
 {
 	CommonZombieHoleBot::onBotMelee(%this,%obj,%col);
-
-	for(%i=0;%i<5;%i++)
-	{
-		%rnd = getRandom();
-		%dist = getRandom()*15;
-		%x = mCos(%rnd*$PI*3)*%dist;
-		%y = mSin(%rnd*$PI*3)*%dist;
-		%p = new projectile()
-		{
-			datablock = BoomerVomitSpewedProjectile;
-			initialPosition = %obj.getHackPosition();
-			initialVelocity = %x SPC %y SPC (getRandom()*4);
-			client = %obj.client;
-			sourceObject = %obj;
-			damageType = $DamageType::SpitAcidBall;
-		};
-	}
-	%obj.playaudio(0,"boomer_vomit" @ getrandom(1,4) @ "_sound");
-	%obj.playthread(3,"Plant");
-}
-
-	function ZombieBoomerHoleBot::onBotLoop(%this,%obj)
-{
-	%obj.hAttackDamage = $Pref::L4B::Zombies::SpecialsDamage;
-	%obj.hNoSeeIdleTeleport();
-
-	%obj.playthread(3,plant);
-	if(!%obj.hFollowing)
-	%obj.playaudio(0,"boomer_lurk" @ getrandom(1,4) @ "_sound");
-	else %obj.playaudio(0,"boomer_recognize" @ getrandom(1,4) @ "_sound");
 }
 
 function ZombieBoomerHoleBot::onBotFollow( %this, %obj, %targ )
 {
-	Parent::onBotFollow( %this, %obj, %targ );
-
-	%obj.setaimobject(%targ);
+	if((isObject(%obj) && %obj.getState() !$= "Dead" && %obj.hLoopActive) && (isObject(%targ) && %targ.getState() !$= "Dead") && (%distance = vectorDist(%obj.getposition(),%targ.getposition())) < 30)
+	%this.schedule(500,onBotFollow,%obj,%targ);
+	else return;
 	
-	if(vectorDist(%obj.getposition(),%targ.getposition()) < 8)
+	if(%distance < 10)
 	{
-		%obj.getDatablock().Vomit(%obj);
-
-		for (%n = 0; %n < 1; %n++)
-		%obj.getDatablock().schedule(750 * %n,Vomit,%obj);
+		%obj.stopHoleLoop();
+		%obj.hRunAwayFromPlayer(%targ);
+		%obj.schedule(1500,startHoleLoop);
+	}
+	else if(%distance < 20)
+	{
+		if(%obj.GetEnergyLevel() >= %this.maxenergy) %this.onTrigger(%obj,4,1);
+		%obj.setMoveX(0);
+		%obj.setMoveY(0);
+		%obj.setJumping(0);
+		%obj.setCrouching(0);
+		%obj.setaimobject(%targ);		
 	}
 }
 
@@ -71,158 +65,77 @@ function ZombieBoomerHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,
 	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
 }
 
-function ZombieBoomerHoleBot::onDamage(%this,%obj,%Am)
-{	
-	if(%obj.getstate() $= "Dead") return;
-
-	if(%obj.lastdamage+500 < getsimtime())
-	{
-		%obj.lastdamage = getsimtime();
-		%obj.playthread(3,plant);
-		%obj.playaudio(0,"boomer_pain" @ getrandom(1,4) @ "_sound");
-	}
-
-	if(%Obj.GetDamageLevel() > %obj.getDatablock().maxDamage/2)
-	%obj.playaudio(3,"boomer_indigestion_loop_sound");
-	
-	Parent::onDamage(%this,%obj,%Am);
-}
-
-	function ZombieBoomerHoleBot::onDisabled(%this, %obj)
+function ZombieBoomerHoleBot::onDamage(%this,%obj,%delta)
 {
-	if(%obj.getstate() !$= "Dead") return;
+	Parent::onDamage(%this,%obj,%delta);
 
-	%b = new projectile()
-	{
-		datablock = goreModProjectile;
-		initialPosition = %obj.getPosition();
-		client = %obj.client;
-		sourceObject = %obj;
-		damageType = $DamageType::Boomer;
-	};
-	%c = new projectile()
-	{
-		datablock = BoomerProjectile;
-		initialPosition = %obj.getPosition();
-		client = %obj.client;
-		sourceObject = %obj;
-		damageType = $DamageType::Boomer;
-	};
-
-	%obj.hideNode("ALL");
-	%obj.unhideNode("pants");
-	%obj.unhideNode("RShoe");
-	%obj.unhideNode("LShoe");
-
-	Parent::onDisabled(%this,%obj);
-}
-
-//Boomer Functions
-function BoomerProjectile::radiusDamage(%this, %obj, %col, %distanceFactor, %pos, %damageAmt)
-{
-   //validate distance factor
-   if(%distanceFactor <= 0)
-      return;
-   else if(%distanceFactor > 1)
-      %distanceFactor = 1;
-
-   %damageAmt *= %distanceFactor;
-
-   if(%damageAmt)
-   {
-      //use default damage type if no damage type is given
-      %damageType = $DamageType::Boomer;
-      if(%col.getType() & $TypeMasks::PlayerObjectType)
-      {
-            %col.damage(%obj, %pos, %damageAmt/2, %damageType);
-
-			if(%col.getState() !$= "Dead" && miniGameCanDamage(%obj.sourceObject, %col) && !%col.BoomerBiled) 
-			{
-			
-			if(%col.getClassName() $= "AIPlayer" && %col.hType $= "Zombie")
-			{
-				%col.hType = "biled" @ getRandom(1,9999);
-				%col.mountImage(BileStatusPlayerImage, 2);
-				%col.BoomerBiled = 1;
-			}
-
-			if(%col.getClassName() $= "Player")
-			{
-				if(%col.getState() !$= "Dead" && %obj.sourceObject.getDataBlock().hName)
-				{
-					chatMessageTeam(%col.client,'fakedeathmessage',"<color:FFFF00>" @ %obj.sourceObject.getDatablock().hName SPC "<bitmapk:Add-Ons/Gamemode_Left4Block/modules/add-ins/player_l4b/icons/ci_boomer2>" SPC %col.client.name);
-					MinigameSO::L4B_PlaySound(%col.client.minigame,"victim_needshelp_sound");
-				}
-
-				%col.setWhiteout(2);
-				%col.mountImage(BileStatusPlayerImage, 2);	
-				schedule(15000,0,L4B_BiledClear,%col,%this.sourceObject);
-				%col.BoomerBiled = 1;
-
-				L4B_ZombieMinionsAttack(%col);
-			}
-         }
-      }
-   }
-}
-
-function L4B_BiledClear(%targetid,%obj)
-{
-	if(isObject(%targetid) && %targetid.getState !$= "Dead" && %targetid.BoomerBiled)
-	{
-		%targetid.BoomerBiled = 0;
-		%targetid.unMountImage(2);
-
-		%targetid.setMaxForwardSpeed(%targetid.Datablock.maxForwardSpeed);
-
-		%word = strLwr(getSubStr(%targetid.hType, 0, 5));
-		if(%word $= "biled")
-			%targetid.hType = "Zombie";
-	}
-}
-
-
-function L4B_ZombieMinionsAttack(%targetid,%count)
-{
-	if(!%targetid.BoomerBiled || !isObject(%targetid) || %targetid.getclassname() $= "AIPlayer")
-	return;
-	
-		%pos = %targetid.getPosition();
-		%radius = 250;
-		%searchMasks = $TypeMasks::PlayerObjectType;
-		InitContainerRadiusSearch(%pos, %radius, %searchMasks);
-
-		while((%targetzombie = containerSearchNext()) != 0 )
+	if(%delta > 5 && %obj.lastdamage+500 < getsimtime())
+	{			
+		if(%obj.getstate() !$= "Dead")
 		{
-			%word = strLwr(getSubStr(%targetzombie.hType, 0, 5));
+			%obj.playaudio(0,"boomer_pain" @ getrandom(1,4) @ "_sound");
+			if(%Obj.GetDamageLevel() > %obj.getDatablock().maxDamage/2) %obj.playaudio(3,"boomer_indigestion_loop_sound");
+			%obj.playthread(2,"plant");
+		}				 
+		%obj.lastdamage = getsimtime();	
+	}
 
-			if(%targetzombie.getClassName() $= "AIPlayer" && %targetzombie.hType $= "Zombie" || %word $= "biled" && %targetid.getstate() !$= "Dead" && %targetzombie.hcanDistract >= 1 && !%targetzombie.isBurning)
-			{
-				if(%count < 14)
+	if(%obj.getState() $= "Dead")
+	{
+		%obj.hideNode("ALL");
+		%obj.unhideNode("pants");
+		%obj.unhideNode("RShoe");
+		%obj.unhideNode("LShoe");			
+	
+		%b = new projectile()
+		{
+			datablock = goreModProjectile;
+			initialPosition = %obj.getPosition();
+			sourceObject = %obj;
+			scale = "2.5 2.5 2.5";
+			damageType = $DamageType::Boomer;
+		};
+		%obj.unMountImage(0);
+		serverPlay3D("boomer_explode_sound",%obj.getPosition());
+	}	
+}
+
+function ZombieBoomerHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
+{		
+	Parent::onTrigger (%this, %obj, %triggerNum, %val);
+
+	CommonZombieHoleBot::onTrigger (%this, %obj, %triggerNum, %val);
+	if(%obj.getstate() !$= "Dead") switch(%triggerNum)
+	{
+		case 4: if(%val && %obj.GetEnergyLevel() >= %this.maxenergy)
 				{
-					if(!%targetzombie.Distraction)
-					{
-						%targetzombie.hSearch = 0;
-						%targetzombie.Distraction = %targetid.getID();
-						%targetid.hReturnToSpawn = 0;
-						%targetzombie.hClearMovement();
-						%targetzombie.spawnExplosion(alarmProjectile,"1 1 1");
-					}
-					else if(%targetzombie.Distraction $= %targetid.getID())
-					{
-						%targetzombie.setmoveobject(%targetid);
-						%targetzombie.setaimobject(%targetid);
-					}
+					%obj.setenergylevel(0);
+					%obj.playaudio(0,"boomer_warn_sound");
+					%obj.playthread(1,"boomerwarn");
+					%randomtime = getRandom(600,1000);
+					%obj.schedule(%randomtime,playaudio,0,"boomer_vomit" @ getrandom(1,4) @ "_sound");
+					%obj.schedule(%randomtime,playthread,1,"boomervomit");
+					%obj.vomitschedule = %this.schedule(%randomtime,Vomit,%obj,10);
 				}
-				else
-				{	
-					%targetzombie.hSearch = 1;
-					%targetzombie.Distraction = 0;
-					%targetid.hReturnToSpawn = 0;
-				}
-			}
-		}
-		schedule(1000,0,L4B_ZombieMinionsAttack,%targetid,%count+1);
+	}
+}
+
+function ZombieBoomerHoleBot::Vomit(%this,%obj,%limit,%count)
+{
+	if(isObject(%obj) && %obj.getState() !$= "Dead" && %count <= 10)
+	{
+		%obj.playthread(2,"plant");
+		%obj.vomitschedule = %this.schedule(100,Vomit,%obj,10,%count+1);
+		%p = new Projectile()
+		{
+			dataBlock = "BoomerVomitProjectile";
+			initialVelocity = VectorAdd(vectorScale(%obj.getEyeVector(),20),"0 0 2.5");
+			initialPosition = vectorAdd(%obj.getMuzzlePoint(2),"0 0 0.45");
+			sourceObject = %obj;
+			client = %obj.client;
+		};
+		MissionCleanup.add(%p);
+	}
 }
 
 function ZombieBoomerHoleBot::holeAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
@@ -337,98 +250,46 @@ function ZombieBoomerHoleBot::L4BAppearance(%this,%obj,%client)
 	%obj.setNodeColor("pants",%hipColor);	
 }
 
-function BoomerVomitSpewedProjectile::onExplode(%obj,%this)
+function BoomerVomitProjectile::onExplode(%this,%obj)
 {
-	Parent::onExplode(%obj,%this);
+	Parent::onExplode(%this,%obj);
 
-	%pos = %this.getPosition();
-    %radius = 1;
-    %searchMasks = $TypeMasks::PlayerObjectType;
-    InitContainerRadiusSearch(%pos, %radius, %searchMasks);
+    InitContainerRadiusSearch(%obj.getPosition(), 1, $TypeMasks::PlayerObjectType);
     while ((%targetid = containerSearchNext()) != 0)
     {
-        if(%targetid.getType() & $TypeMasks::PlayerObjectType)
+        if((%targetid.getType() & $TypeMasks::PlayerObjectType) && checkHoleBotTeams(%obj.sourceObject,%targetid) && miniGameCanDamage(%obj.sourceObject,%targetid))
         {
-			if(checkHoleBotTeams(%this.sourceObject,%targetid) && miniGameCanDamage(%this.sourceObject,%targetid))
+			%targetid.setWhiteout(2);
+			if(%targetid.BoomerBiled) return Parent::onExplode(%this,%obj);
+			else
 			{
-				%targetid.setWhiteout(2);
-
-				if(%targetid.BoomerBiled)
-				return Parent::onExplode(%obj,%this);
-				else
+				if(!%targetid.BoomerBiled)
 				{
-					if(isObject(%targetid.client))
+					if(isObject(%targetid.client) && isObject(%minigame = getMiniGameFromObject(%targetid))) 
 					{
-						chatMessageTeam(%targetid.client,'fakedeathmessage',"<color:FFFF00>" @ %this.sourceObject.getDatablock().hName SPC "<bitmapk:Add-Ons/Gamemode_Left4Block/modules/add-ins/player_l4b/icons/ci_boomer2>" SPC %targetid.client.name);
-						MinigameSO::L4B_PlaySound(%targetid.client.minigame,"victim_needshelp_sound");
+						%minigame.L4B_ChatMessage("<color:FFFF00>" @ %obj.sourceObject.getDatablock().hName SPC %obj.sourceObject.getdataBlock().hPinCI SPC %targetid.client.name,"victim_needshelp_sound",true);
+						if(%miniGame.DirectorStatus != 2 && %minigame.RoundType !$= "Horde") %minigame.schedule(1000,HordeRound);
 					}
-
-					%targetid.mountImage(BileStatusPlayerImage, 2);
-					schedule(15000,0,L4B_BiledClear,%targetid,%obj);	
-					L4B_ZombieMinionsAttack(%targetid);
-					%targetid.BoomerBiled = 1;
+					%targetid.vomitbot = new Player() 
+					{ 
+						dataBlock = "EmptyPlayer";
+						source = %targetid;
+						slotToMountBot = 2;
+						imageToMount = "BileStatusPlayerImage";
+					};
+					%targetid.BoomerBiled = true;
 				}
 			}
         }
     }
 }
-//Boomer Vomit Weapon
-function BoomerVomitProjectile::onExplode(%obj,%this)
+
+function BileStatusPlayerImage::onPulse(%this,%obj,%slot)
 {
-	for(%i=0;%i<15;%i++)
+	if(%obj.PulseCount <= 15) %obj.PulseCount++;
+	else 
 	{
-		%rnd = getRandom();
-		%dist = getRandom()*20;
-		%x = mCos(%rnd*$PI*3)*%dist;
-		%y = mSin(%rnd*$PI*3)*%dist;
-		%p = new projectile()
-		{
-			datablock = BoomerVomitSpewedProjectile;
-			initialPosition = %this.getPosition();
-			initialVelocity = %x SPC %y SPC (getRandom()*4);
-			client = %this.sourceObject.client;
-			sourceObject = %this.sourceObject;
-			damageType = $DamageType::SpitAcidBall;
-		};
+		%obj.source.BoomerBiled = false;
+		%obj.delete();	
 	}
-	BoomerVomitSpewedProjectile::onExplode(%obj,%this);
-}
-
-function ZombieBoomerHoleBot::Vomit(%this, %obj)
-{
-	if(!isObject(%obj) || %obj.getstate() $= "Dead") return;
-	
-	%obj.setenergylevel(0);
-	%obj.playaudio(0,"boomer_vomit" @ getrandom(1,4) @ "_sound");
-	%obj.playthread(0,"jump");
-	%obj.playthread(1,"jump");
-	%obj.playthread(2,"activate2");
-
-	%muzzle = vectorAdd(%obj.getMuzzlePoint(2),"0 0 0.35");
-	%velocity = vectorScale(%obj.getEyeVector(),20);
-	%velocity = getProjectileVector(%obj.hFollowing, %velocity, 1, %muzzle);
-	%p = new Projectile()
-	{
-		dataBlock = "BoomerVomitProjectile";
-		initialVelocity = %velocity;
-		initialPosition = %muzzle;
-		sourceObject = %obj;
-		client = %obj.client;
-	};
-	MissionCleanup.add(%p);
-}
-
-function ZombieBoomerHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
-{	
-	CommonZombieHoleBot::onTrigger (%this, %obj, %triggerNum, %val);
-	if(%obj.getClassName() $= "Player" && %obj.getstate() !$= "Dead")
-	{
-		switch(%triggerNum)
-		{
-			case 4: if(%val && %obj.GetEnergyLevel() >= %this.maxenergy)
-					%obj.getDatablock().Vomit(%obj);
-		}
-	}
-
-	Parent::onTrigger (%this, %obj, %triggerNum, %val);
 }

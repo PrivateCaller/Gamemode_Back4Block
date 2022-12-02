@@ -1,6 +1,5 @@
 if(forceRequiredAddOn("Tool_NewDuplicator") == $Error::AddOn_NotFound || !isFunction(NetObject, setNetFlag)) return;
 if(!isObject(AreaZoneGroup)) new ScriptGroup(AreaZoneGroup);
-registerInputEvent("fxDTSBrick","onAZFirstEntry","Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "Bot Bot" TAB "MiniGame MiniGame");
 
 package L4B_AreaZones
 {
@@ -117,6 +116,15 @@ datablock fxDTSBrickData (brickAreaZoneItemSpawnData:brick1x1fData)
 	alwaysShowWireFrame = false;
 };
 
+datablock fxDTSBrickData (brickAreaZoneEventCallerData:brick2x2Data)
+{
+	category = "Special";
+	subCategory = "Left 4 BLock";
+	uiName = "Area Zone Event Caller";
+	ZoneBrickType = "event";
+	alwaysShowWireFrame = false;
+};
+
 function brickAreaZoneSpawnerData::onPlant(%data,%obj)
 {
 	Parent::onPlant(%data, %obj);
@@ -175,53 +183,33 @@ function brickAreaZoneItemSpawnData::onDeath(%this,%obj)
 	Parent::onDeath(%this, %obj);
 }
 
-function Player::doMRandomTele(%obj)
-{		
-	if(isObject(AreaZoneGroup) && AreaZoneGroup.getCount())
-	{	
-		for(%i = 0; %i < AreaZoneGroup.getCount(); %i++) if(isObject(%zone = AreaZoneGroup.getObject(%i)) && %zone.presencecount)
-		for(%j = 0; %j < %zone.simset.getCount(); %j++) if(isObject(%brick = %zone.simset.getObject(%j)) && %brick.getdataBlock().ZoneBrickType $= "spawner" && strstr(strlwr(%brick.getName()),"_horde") != -1)
-		{
-			%teleportlist[%tb++] = %brick;//No, %tb is not tuberculosis, Arthur... It's for my lazy acronym of 'teleport brick'
-			%teleportlist[%tb].currentset = %zone;
-		}
+function brickAreaZoneEventCallerData::onPlant(%data,%obj)
+{
+	Parent::onPlant(%data, %obj);
 
-		if(%tb)
-		{		
-			
-			%random = getRandom(1,%tb);
-			%targetbrick = %teleportlist[%random];
-			%obj.currentZone = %teleportlist[%random].currentset;
+	%obj.setrendering(0);
+	%obj.setcolliding(0);
+	%obj.setraycasting(0);
 
-			%obj.settransform(vectorAdd(getwords(%targetbrick.gettransform(),0,2),"0 0 0.25"));
-			%obj.setvelocity(%obj.getvelocity());
-
-			$InputTarget_["Self"] = %targetbrick;
-			switch$(%obj.getclassname())
-			{
-				case "Player":	$InputTarget_["Player"] = %obj;
-								$InputTarget_["Client"] = %obj;
-				case "AIPlayer": $InputTarget_["Bot"] = %obj;
-			}
-			$InputTarget_["MiniGame"] = getMiniGameFromObject(%obj);
-			%targetbrick.processInputEvent("onBotTeleSpawn",%targetbrick.getgroup().client);
-		}
-		else
-		{
-			%obj.kill();
-			return false;
-		}
-	}
-	else
+	if(isObject(%zone = %obj.client.currAreaZone))
 	{
-		%obj.kill();
-		return false;
+		%simset = %zone.simset;
+		%simset.add(%obj);
+		%obj.setNTObjectName(%zone.ZoneName @ "_AZ_Event_Caller");
+
+		if(isObject(%obj.client)) %obj.client.centerprint("\c2Placed event caller to zone <br>" @ "\c2" @ %zone.ZoneName,3);
 	}
+	else if(isObject(%obj.client)) %obj.client.centerprint("\c2No zone detected! Please set one first before placing an event caller.",3);
 }
 
-function AIPlayer::doMRandomTele(%obj)
+function brickAreaZoneEventCallerData::onloadPlant(%data, %obj)
 {
-	Player::doMRandomTele(%obj);	
+	brickAreaZoneEventCallerData::onPlant(%this, %obj);
+}
+
+function brickAreaZoneEventCallerData::onDeath(%this,%obj)
+{
+	Parent::onDeath(%this, %obj);
 }
 
 function MiniGameSO::sortItemSpawns(%minigame,%zone,%client)
@@ -543,10 +531,10 @@ function servercmdazsave(%client, %f0, %f1, %f2, %f3, %f4, %f5, %f6, %f7)
 	messageClient(%client, '', "\c6All Area Zones have been saved.");
 }
 
-function exportAreaZones(%filename)
+function exportAreaZones(%filePath)
 {
 	%file = new FileObject();
-	if(!%file.openForWrite(%filename)) return false;
+	if(!%file.openForWrite(%filePath)) return false;
 
 	for(%i = 0; %i < AreaZoneGroup.getCount(); %i++)
 	{
@@ -650,48 +638,78 @@ datablock TriggerData(AreaZoneTrigger)
 	tickPeriodMS = 250;
 };
 
+registerInputEvent("fxDTSBrick","onAZFirstEntry","Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "Bot Bot" TAB "MiniGame MiniGame");
+registerInputEvent("fxDTSBrick","onAZAllEntered","Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "Bot Bot" TAB "MiniGame MiniGame");
 function AreaZoneTrigger::onEnterTrigger(%this, %trigger, %obj)
 {	
 	if(%obj.getType() & $TypeMasks::PlayerObjectType && %obj.getState() !$= "Dead" && %obj.getdataBlock().isSurvivor && isObject(%minigame = getMiniGameFromObject(%obj)))
 	{	
 		%zone = %trigger.zone;
+		%zone.presencecount++;
 		%zonename = %zone.zonename;
 		%obj.currentZone = %zone;
 		%obj.currentZoneNumber = %zone.zonenumber;
-		%zone.presencecount++;
+
+		for(%i = 0; %i < %minigame.numMembers; %i++) if(isObject(%player = %minigame.member[%i].player) && !%player.hIsInfected && !%player.getdataBlock().isDowned) %livePlayerCount++;
+		
+		if(%zone.presencecount == %livePlayerCount) for(%g = 0; %g < %zone.simset.getCount(); %g++)
+		{
+			
+			if(isObject(%eventbrick = %zone.simset.getObject(%g)) && %eventbrick.getdataBlock().ZoneBrickType $= "event")
+			{
+				$InputTarget_["Self"] = %eventbrick;
+				switch$(%obj.getclassname())
+				{
+					case "Player":	$InputTarget_["Player"] = %obj;
+									$InputTarget_["Client"] = %obj.client;
+					case "AIPlayer": $InputTarget_["Bot"] = %obj;
+				}
+				$InputTarget_["MiniGame"] = getMiniGameFromObject(%obj);
+				%eventbrick.processInputEvent("onAZAllEntered",%obj.client);
+			}
+		}		
 		
 		if(!%zone.firstentry)
 		{
 			%zone.firstentry = true;
 
-		    //$InputTarget_["Self"] = %brick.areazone.parbrick;
-		    //switch$(%obj.getclassname())
-		    //{
-		    //    case "Player":	$InputTarget_["Player"] = %obj;
-		    //                    $InputTarget_["Client"] = %obj.client;
-		    //    case "AIPlayer": $InputTarget_["Bot"] = %obj;
-		    //}
-		    //$InputTarget_["MiniGame"] = getMiniGameFromObject(%obj);
-		    //%brick.areazone.parbrick.processInputEvent("onAZFirstEntry",%obj.client);
+			for(%g = 0; %g < %zone.simset.getCount(); %g++)
+			{
+				if(isObject(%eventbrick = %zone.simset.getObject(%g)) && %eventbrick.getdataBlock().ZoneBrickType $= "event")
+				{
+		    		$InputTarget_["Self"] = %eventbrick;
+		    		switch$(%obj.getclassname())
+		    		{
+		    		    case "Player":	$InputTarget_["Player"] = %obj;
+		    		                    $InputTarget_["Client"] = %obj.client;
+		    		    case "AIPlayer": $InputTarget_["Bot"] = %obj;
+		    		}
+		    		$InputTarget_["MiniGame"] = getMiniGameFromObject(%obj);
+		    		%eventbrick.processInputEvent("onAZFirstEntry",%obj.client);
+				}
+			}
 
 			switch$(%zonename)
 			{
 				case "Start": %minigame.director(true);
 				case "Checkpoint": %minigame.director(false);
 				case "End": %minigame.director(false);
-				default: 	for(%g = 0; %g < %zone.simset.getCount(); %g++) 
-							if(isObject(%itembricks = %zone.simset.getObject(%g)) && %itembricks.getdataBlock().ZoneBrickType $= "item")
-							{		            
-								%minigame.schedule(100,sortItemSpawns,%zone);
-								break;
-							}
-			
-							for(%h = 0; %h < %zone.simset.getCount(); %h++) 
-							if(isObject(%spawnbricks = %zone.simset.getObject(%h)) && %spawnbricks.getdataBlock().ZoneBrickType $= "spawner" && strstr(strlwr(%spawnbricks.getname()),"_wander") != -1)
-							{	
-								%minigame.schedule(150,spawnZombies,"Wander",getRandom(15,25),%zone);
-								break;
-							}				
+				default: 	for(%g = 0; %g < %zone.simset.getCount(); %g++)
+							{
+								if(!%foundspawner && isObject(%itembricks = %zone.simset.getObject(%g)) && %itembricks.getdataBlock().ZoneBrickType $= "item")
+								{		            
+									%minigame.schedule(100,sortItemSpawns,%zone);
+									%founditemspawner = true;
+								}
+
+								if(!%foundbotspawner && isObject(%spawnbricks = %zone.simset.getObject(%g)) && %spawnbricks.getdataBlock().ZoneBrickType $= "spawner" && strstr(strlwr(%spawnbricks.getname()),"_wander") != -1)
+								{
+									%minigame.schedule(150,spawnZombies,"Wander",getRandom(15,25),%zone);
+									%foundbotspawner = true;
+								}
+
+								if(%foundbotspawner && %founditemspawner) break;								
+							}										
 			}
 		}
 	}

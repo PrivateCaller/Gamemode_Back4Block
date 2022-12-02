@@ -111,17 +111,12 @@ function ZombieTankHoleBot::onDisabled(%this,%obj)
 
 function ZombieTankHoleBot::onCollision(%this, %obj, %col, %fade, %pos, %norm)
 {
-	Parent::oncollision(%this, %obj, %col, %fade, %pos, %norm);
+	CommonZombieHoleBot::oncollision(%this, %obj, %col, %fade, %pos, %norm);
 }
 
 function ZombieTankHoleBot::onBotMelee(%this,%obj,%col)
 {
-	%oscale = getWord(%obj.getScale(),2);
-	if(%oScale >= 1.25 && %obj.lastpunch+500 < getsimtime())
-    {
-		%obj.lastpunch = getsimtime();
-		%obj.bigZombieMelee();
-	}
+	%obj.bigZombieMelee();	
 }
 
 function ZombieTankHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
@@ -144,6 +139,11 @@ function ZombieTankHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
 		}
 	}
 	Parent::onTrigger (%this, %obj, %triggerNum, %val);
+}
+
+function ZombieTankHoleBot::RbloodDismember(%this,%obj,%limb,%doeffects,%position)
+{
+	//ouch
 }
 
 function ZombieTankHoleBot::holeAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)

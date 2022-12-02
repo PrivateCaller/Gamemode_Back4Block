@@ -357,13 +357,20 @@ datablock PlayerData(SurvivorPlayer : PlayerStandardArmor)
 	groundImpactShakeDuration = 0.8;
 	groundImpactShakeFalloff = 15;
 
+	upMaxSpeed = 150;
+	upResistSpeed = 10;
+	upResistFactor = 0.25;	
+	horizMaxSpeed = 150;
+	horizResistSpeed = 10;
+	horizResistFactor = 0.25;
+
 	uiName = "Survivor Player";
 	usesL4DItems = true;
 	isSurvivor = true;
 	hType = "Survivors";
 	enableRBlood = true;
 	usesL4Bappearance = true;
-	renderFirstPerson = true;
+	//renderFirstPerson = true;
 	maxtools = 5;
 	maxWeapons = 5;
 
@@ -963,33 +970,29 @@ datablock ShapeBaseImageData(BileStatusPlayerImage)
 	offset = "0 0 -0.3";
 	eyeOffset = 0;
 	rotation = "0 0 0";
-
 	correctMuzzleVector = true;
-
 	className = "WeaponImage";
-
 	item = "";
 	ammo = " ";
 	projectile = "";
 	projectileType = Projectile;
-
 	melee = false;
 	armReady = false;
-
 	doColorShift = false;
 	colorShiftColor = "1 1 1 1";
 
-	stateName[0]                   = "Wait";
-	stateTimeoutValue[0]           = 0.4;
-	stateEmitter[0]                = BileStatusEmitter;
+	stateName[0]                   = "Status";
+	stateTimeoutValue[0]           = 0.5;
+	stateEmitter[0]                = "BileStatusEmitter";
 	stateEmitterTime[0]            = 1;
-	stateTransitionOnTimeout[0]    = "Poison";
+	stateTransitionOnTimeout[0]    = "Pulse";
 	
-	stateName[1]                   = "Poison";
-	stateEmitter[1]                = BilePulseEmitter;
-	stateEmitterTime[1]            = 0.4;
-	stateTimeoutValue[1]           = 0.1;
-	stateTransitionOnTimeout[1]    = "Wait";
+	stateName[1]                   = "Pulse";
+	stateEmitter[1]                = "BilePulseEmitter";
+	stateEmitterTime[1]            = 1;
+	stateTimeoutValue[1]           = 0.5;
+	stateTransitionOnTimeout[1]    = "Status";
+	stateScript[1]					= "onPulse";
 };
 
 
@@ -1585,39 +1588,30 @@ datablock ParticleEmitterData(BoomerVomitBallTrailEmitter)
 
 datablock ExplosionData(BoomerVomitBallExplosion)
 {
-   explosionShape = "base/data/shapes/empty.dts";
-   lifeTimeMS = 500;
-
-   soundProfile = spit_hit_sound;
-
-   particleEmitter = BoomerVomitBallHitEmitter;
-   particleDensity = 25;
-   particleRadius = 0.2;
-
-   faceViewer     = true;
-   explosionScale = "1 1 1";
-
-	damageRadius = 10;	//4
-	radiusDamage = 1;
-
-	impulseRadius = 0.1;
-	impulseForce = 1000;
-
+   	explosionShape = "base/data/shapes/empty.dts";
+   	lifeTimeMS = 500;
+   	soundProfile = spit_hit_sound;
+   	particleEmitter = BoomerVomitBallHitEmitter;
+   	particleDensity = 25;
+   	particleRadius = 0.2;
+   	faceViewer     = true;
+   	explosionScale = "2.5 2.5 2.5";
+	damageRadius = 0;
+	radiusDamage = 0;
+	impulseRadius = 0;
+	impulseForce = 0;
 };
 
-	datablock ProjectileData(BoomerVomitProjectile)
+datablock ProjectileData(BoomerVomitProjectile)
 {
    	directDamage        = 0;
 	radiusDamage		= 0;
    	explosion           = "BoomerVomitBallExplosion";
 	particleEmitter = "BoomerVomitBallTrailEmitter";
-
 	impactImpulse	   = 0;
 	verticalImpulse	   = 0;
-
 	muzzleVelocity      = 15;	//50
 	velInheritFactor    = 0.5;
-
 	armingDelay         = 0;
 	lifetime            = 5000;	//1200
 	fadeDelay           = 1000;
@@ -1627,35 +1621,6 @@ datablock ExplosionData(BoomerVomitBallExplosion)
 	gravityMod = 1;
 
 	hasLight    = false;
-	lightRadius = 3.0;
-	lightColor  = "0 0 0.5";
-
-   	uiName = "";
-};
-
-	datablock ProjectileData(BoomerVomitSpewedProjectile)
-{
-   	directDamage        = 0;
-	radiusDamage		= 0;
-   	explosion           = "BoomerVomitBallExplosion";
-	particleEmitter = "BoomerVomitBallTrailEmitter";
-
-	impactImpulse	   = 0;
-	verticalImpulse	   = 0;
-
-	muzzleVelocity      = 15;	//50
-	velInheritFactor    = 0.5;
-
-	armingDelay         = 0;
-	lifetime            = 5000;	//1200
-	fadeDelay           = 1000;
-	bounceElasticity    = 0.2;
-	bounceFriction      = 0.5;
-	isBallistic         = true;
-	gravityMod = 1;
-
-	hasLight    = false;
-
    	uiName = "";
 };
 
@@ -1800,6 +1765,7 @@ datablock TSShapeConstructor(ChargerMDts)
 	baseShape = "./models/zombie_charger.dts";
 	sequence0 = "./models/default_old.dsq";
 	sequence1 = "./models/zombie.dsq";
+	sequence2 = "./models/charger_zombie.dsq";
 };
 
 datablock PlayerData(ZombieChargerHoleBot : CommonZombieHoleBot)
@@ -1970,7 +1936,7 @@ datablock PlayerData(ZombieHunterHoleBot : CommonZombieHoleBot)
 
 	hName = "Hunter";//cannot contain spaces
 	hStrafe = 0;//Randomly strafe while following player
-	hAttackDamage = $Pref::L4B::Zombies::SpecialsDamage*0.75;
+	hAttackDamage = $Pref::L4B::Zombies::SpecialsDamage/2;
 
 	rechargeRate = 1.75;
 	maxenergy = 100;
@@ -2099,7 +2065,7 @@ datablock PlayerData(ZombieSmokerHoleBot : CommonZombieHoleBot)
 	maxdamage = 100;//Health
 
 	hName = "Smoker";//cannot contain spaces
-	hAttackDamage = $Pref::L4B::Zombies::SpecialsDamage;
+	hAttackDamage = $Pref::L4B::Zombies::SpecialsDamage/2.5;
 	hTickRate = 4000;
 
     maxForwardSpeed = 8;
@@ -2140,17 +2106,18 @@ datablock TSShapeConstructor(BoomerMDts)
 	baseShape = "./models/zombie_boomer.dts";
 	sequence0 = "./models/default_old.dsq";
 	sequence1 = "./models/zombie.dsq";
+	sequence2 = "./models/boomer_zombie.dsq";
 };
 
 datablock PlayerData(ZombieBoomerHoleBot : CommonZombieHoleBot)
 {
-	shapeFile = "./models/zombie_boomer.dts";
+	shapeFile = BoomerMDts.baseShape;
 	uiName = "Boomer Infected";
-	jumpForce = 9*350;
-	minImpactSpeed = 16;
+	jumpForce = 9*175;
+	minImpactSpeed = 20;
 	airControl = 0.01;
 	speedDamageScale = 10;
-	mass = 500;
+	mass = 250;
 
 	cameramaxdist = 2;
     cameraVerticalOffset = 1.1;
@@ -2158,9 +2125,9 @@ datablock PlayerData(ZombieBoomerHoleBot : CommonZombieHoleBot)
     cameratilt = 0.1;
     maxfreelookangle = 2;
 
-    maxForwardSpeed = 6;
-    maxBackwardSpeed = 4;
-    maxSideSpeed = 5;
+    maxForwardSpeed = 8;
+    maxBackwardSpeed = 6;
+    maxSideSpeed = 7;
 
  	maxForwardCrouchSpeed = 6;
     maxBackwardCrouchSpeed = 4;
@@ -2172,18 +2139,15 @@ datablock PlayerData(ZombieBoomerHoleBot : CommonZombieHoleBot)
 	SpecialCPMessage = "Right click to vomit";
 	hBigMeleeSound = "";
 	hNeedsWeapons = 1;
-
 	maxdamage = 100;
 	hTickRate = 4000;
-
 	hShoot = 1;
 	hMaxShootRange = 2.5;//The range in which the bot will shoot the player
 	hMoveSlowdown = 1;
-
 	hName = "Boomer";//cannot contain spaces
-	hAttackDamage = $Pref::L4B::Zombies::SpecialsDamage;
+	hAttackDamage = $Pref::L4B::Zombies::SpecialsDamage/3;
 
-	rechargeRate = 1.25;
+	rechargeRate = 0.5;
 	maxenergy = 100;
 	showEnergyBar = true;
 };

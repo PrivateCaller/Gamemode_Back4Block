@@ -6,7 +6,7 @@ function Melee_SwingCheck(obj,this,slot)
 
     local imagestate = ts.callobj(obj,"getImageState",0)
     if ts.getcallobj(obj,"getMountedImage(0).meleeDamageDivisor") == "" or imagestate == "Ready" or imagestate == "StopFire" then return end
-    local radius = 1
+    local radius = 2.5
     local pos = ts.callobj(obj,"getMuzzlePoint",slot)
     local endpos = VectorAdd(pos,VectorScale(ts.callobj(obj,"getMuzzleVector",slot),2.5*tonumber(ts.call("getWord",ts.callobj(obj,"getScale"),2))))
     local mask = ts.mask.general
@@ -17,10 +17,10 @@ function Melee_SwingCheck(obj,this,slot)
     while ts.isobject(scanned) do
         
         if ts.callobj(scanned,"getID") ~= ts.callobj(obj,"getID") then
-            local scannedpos = ts.getposition(scanned)
+            local scannedpos = ts.callobj(scanned,"getWorldBoxCenter")
 
             local ray = ts.raycast(pos, scannedpos, mask, obj)
-            if ts.isobject(ray) and tonumber(VectorDist(pos,scannedpos)) < 2.5 then
+            if ts.isobject(ray) and tonumber(VectorDist(pos,ts.call("posFromRaycast",ray))) < 1.5 then
 
                 local class = ts.callobj(ray, "getClassName")
                 local raypos = ts.call("posFromRaycast",ray)            

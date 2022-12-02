@@ -1,7 +1,6 @@
 AddDamageType("Crowbar",'<bitmap:Add-Ons/Gamemode_Left4Block/modules/add-ins/weapon_l4b/icons/ci_crowbar> %1','%2 <bitmap:Add-Ons/Gamemode_Left4Block/modules/add-ins/weapon_l4b/icons/ci_crowbar> %1',0.2,1);
-$DamageType::Crowbar.meleeType = true;
-AddDamageType("BoulderDirect",   '<bitmap:Add-ons/Gamemode_Left4Block/modules/add-ins/weapon_l4b/icons/CI_Boulder> %1',       '%2 <bitmap:Add-ons/Gamemode_Left4Block/modules/add-ins/weapon_l4b/icons/CI_Boulder> %1',1,1);
-AddDamageType("BoulderRadius",   '<bitmap:Add-ons/Gamemode_Left4Block/modules/add-ins/weapon_l4b/icons/CI_Boulder> %1', '%2 <bitmap:Add-ons/Gamemode_Left4Block/modules/add-ins/weapon_l4b/icons/CI_Boulder> %1',1,0);
+AddDamageType("BoulderDirect",'<bitmap:Add-ons/Gamemode_Left4Block/modules/add-ins/weapon_l4b/icons/CI_Boulder> %1',       '%2 <bitmap:Add-ons/Gamemode_Left4Block/modules/add-ins/weapon_l4b/icons/CI_Boulder> %1',1,1);
+AddDamageType("BoulderRadius",'<bitmap:Add-ons/Gamemode_Left4Block/modules/add-ins/weapon_l4b/icons/CI_Boulder> %1', '%2 <bitmap:Add-ons/Gamemode_Left4Block/modules/add-ins/weapon_l4b/icons/CI_Boulder> %1',1,0);
 AddDamageType("Molotov",'<bitmap:Add-Ons/Gamemode_Left4Block/modules/add-ins/weapon_l4b/icons/ci_molotov> %1','%2 <bitmap:Add-Ons/Gamemode_Left4Block/modules/add-ins/weapon_l4b/icons/ci_molotov> %1',1,1);
 AddDamageType("Flamer",'<bitmap:Add-Ons/Gamemode_Left4Block/modules/add-ins/weapon_l4b/icons/ci_fire> %1','%2 <bitmap:Add-Ons/Gamemode_Left4Block/modules/add-ins/weapon_l4b/icons/ci_fire> %1',1,1);
 

@@ -45,7 +45,7 @@ function ZombieHunterHoleBot::onDamage(%this,%obj,%delta)
 	}
 }
 
-function ZombieHunterHoleBot::PinAttackLoop(%obj,%col)
+function ZombieHunterHoleBot::onPinLoop(%this,%obj,%col)
 {
 	if(L4B_SpecialsPinCheck(%obj,%col))
 	{
@@ -56,24 +56,21 @@ function ZombieHunterHoleBot::PinAttackLoop(%obj,%col)
 		{
 			%obj.setmoveobject(%col);
 			%obj.setaimobject(%col.gethackposition());
-			%obj.hMeleeAttack(%col);
+			%obj.hMeleeAttack(%col);			
 		}
 		
-		%obj.HunterHurt = %this.schedule(250,PinAttackLoop,%obj,%col);		
+		%this.schedule(250,onPinLoop,%obj,%col);				
+		%this.RBloodSimulate(%col, %col.gethackposition(), 1, 25);
+		%col.damage(%obj.hFakeProjectile, %col.getposition(), $Pref::L4B::Zombies::SpecialsDamage/2.5, $DamageType::Hunter);
 	}
-}
-
-function ZombieHunterHoleBot::onDisabled(%this,%obj)
-{
-	Parent::onDisabled(%this,%obj);
+	else if(%col.getState() $= "Dead") %this.rBloodDismember(%col,1,true,%col.gethackposition());
 }
 
 function ZombieHunterHoleBot::onBotLoop(%this,%obj)
 {	
 	switch$(%obj.hState)
 	{
-		case "Wandering":	%obj.setMaxForwardSpeed(9);
-							%obj.isStrangling = false;
+		case "Wandering":	%obj.isStrangling = false;
 							%obj.hNoSeeIdleTeleport();
 
 							if(getsimtime() >= %obj.lastidle+8000)
@@ -94,7 +91,7 @@ function ZombieHunterHoleBot::onBotFollow( %this, %obj, %targ )
 		return;
 	}
 
-	if((%distance = vectordist(%obj.getposition(),%targ.getposition())) < 50)
+	if((%distance = vectordist(%obj.getposition(),%targ.getposition())) < 75)
 	{
 		if(!%obj.raisearms)
 		{	
@@ -143,11 +140,17 @@ function ZombieHunterHoleBot::onBotMelee(%this,%obj,%col)
 
 function ZombieHunterHoleBot::onImpact(%this, %obj, %col, %vec, %force)
 {
-	%obj.setMaxForwardSpeed(9);
-	%oScale = getWord(%obj.getScale(),0);
-	if(%oScale >= 0.9 && %obj.getstate() !$= "Dead") %obj.SpecialPinAttack(%col,%force/2.5);
-
 	Parent::onImpact(%this, %obj, %col, %vec, %force);
+
+	if(%oScale = getWord(%obj.getScale(),0) >= 0.9) 
+	if(!%obj.SpecialPinAttack(%col,%force/2.5))
+	{
+		%obj.playThread(3,"zstumble" @ getrandom(1,3));
+		%this.onDamage(%obj,10);
+		%obj.setMoveY(-0.375);
+		%obj.setMoveX(0);
+		%obj.setAimObject(%col);
+	}
 }
 
 function ZombieHunterHoleBot::holeAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
@@ -235,11 +238,11 @@ function ZombieHunterHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
 						%obj.setenergylevel(0);
 						%obj.playaudio(0,"hunter_attack" @ getrandom(1,3) @ "_sound");
 						%obj.playaudio(1,"hunter_lunge_sound");
-						%obj.playthread(0,jump);
-						%obj.playthread(1,activate2);											
-						%normVec = VectorNormalize(vectoradd(%obj.getEyeVector(),"0 0 0.005"));
-						%eye = vectorscale(%normVec,50);
-						%obj.setvelocity(%eye);												
+						%obj.playthread(0,"jump");
+						%obj.playthread(1,"activate2");											
+						%normVec = VectorNormalize(%obj.getEyeVector());
+						%eye = VectorAdd(vectorscale(%normVec,100),"0 0 1.25");
+						%obj.setvelocity(%eye);
 					}
 		}
 		else %obj.BeginPounce = false;

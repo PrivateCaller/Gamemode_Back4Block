@@ -28,6 +28,7 @@ function fxDTSBrick::zfakeKillBrick(%obj)
 {		
 	%obj.fakeKillBrick("0 0 1", "5");
 	%obj.schedule(5100,disappear,-1);
+	%obj.setName("_breakbrick");
 
 	$InputTarget_["Self"] = %obj;
 	%obj.processInputEvent("onzFakeKillBrick");
@@ -42,11 +43,9 @@ function Player::hMeleeAttack(%obj,%col)
 
 function Player::StunnedSlowDown(%obj,%slowdowndivider)
 {						
-	return;
 	if(!isObject(%obj) || %obj.getstate() $= "Dead") return;
 
 	%datablock = %obj.getDataBlock();
-
 	%obj.setMaxForwardSpeed(%datablock.MaxForwardSpeed/%slowdowndivider);
 	%obj.setMaxSideSpeed(%datablock.MaxSideSpeed/%slowdowndivider);
 	%obj.setMaxBackwardSpeed(%datablock.maxBackwardSpeed/%slowdowndivider);
@@ -244,16 +243,18 @@ function Player::bigZombieMelee(%obj)
 
 function Player::SpecialPinAttack(%obj,%col,%force)
 {	
-	if(!isObject(%col) || !isObject(%obj)) return;
+	if(!isObject(%col) || !isObject(%obj)) return false;
 
 	if(%col.getType() & $TypeMasks::PlayerObjectType && checkHoleBotTeams(%obj,%col) && miniGameCanDamage(%obj,%col))
 	{	
 		if(%obj.getState() !$= "Dead" && %col.getState() !$= "Dead" && !%obj.isStrangling && !%col.isBeingStrangled && %col.getdataBlock().isSurvivor)
-		{
+		{			
 			%col.isBeingStrangled = true;
 			%obj.isStrangling = true;
 			%obj.hEating = %col;
 			%col.hEater = %obj;
+			%obj.getDataBlock().schedule(100,onPinLoop,%obj,%col);
+			%pinmusic = %obj.getDataBlock().hName @ "_pin_sound";
 
 			if(%obj.getClassName() $= "AIPlayer")
 			{
@@ -261,31 +262,16 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 				{
 					%obj.schedule(100,hClearMovement);
 					%obj.stopHoleLoop();
-				}
-				
+				}				
 				%obj.hIgnore = %col;
-			}
-
-			switch$(%col.getclassname())
-			{
-				case "Player":	if(isObject(%minigame = getMiniGameFromObject(%col)))
-								%minigame.L4B_ChatMessage("<color:FFFF00>" @ %obj.getDatablock().hName SPC %obj.getdataBlock().hPinCI SPC %col.client.name,"victim_needshelp_sound",true);
-										
-								%col.client.camera.setOrbitMode(%col, %col.getTransform(), 0, 5, 0, 1);
-								%col.client.l4bMusic(%obj.getDataBlock().hName @ "_pin_sound", true, "Music");
-								//Billboard_NeedySurvivor(%col, "Strangled");
-								%col.client.setControlObject(%col.client.camera);
-								ServerCmdUnUseTool (%target.client);
-
-				case "AIPlayer": %col.stopHoleLoop();
-			}
+			}			
 
 			switch$(%obj.getdataBlock().getName()) 
 			{
-				case "ZombieChargerHoleBot": %obj.mountObject(%col,0);
-											 %obj.hSharkEatDelay = schedule(2000,0,L4B_holeChargerKill,%obj,%col);
-											 %forcedam = %force/2;
-											 %col.damage(%obj.hFakeProjectile, %col.getposition(),%forcedam, %obj.hDamageType);
+				case "ZombieChargerHoleBot": %obj.mountObject(%col,8);
+											%obj.playthread(0,"chargedidle");
+											%forcedam = %force/2;
+											%col.damage(%obj.hFakeProjectile, %col.getposition(),%forcedam, %obj.hDamageType);
 
 											%p = new Projectile()
 											{
@@ -296,15 +282,13 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 											};
 											MissionCleanup.add(%p);
 											%p.explode();
+											%pinmusic = "";
 
 				case "ZombieHunterHoleBot": %obj.playthread(0,root);
 											%col.playthread(0,death1);
 
-											%phackloc = %col.getHackPosition();
-											%obj.schedule(10,setvelocity,"0 0 0");
-											%obj.schedule(5,setTransform,%phackloc SPC %phackloc);
-
-											%obj.HunterHurt = schedule(100,0,L4B_holeHunterKill,%obj,%col);
+											%obj.schedule(5,setvelocity,"0 0 0");
+											%obj.schedule(15,setPosition,vectorScale(%col.getForwardVector(),1.5));
 
 											%forcedam = %force/4;
 											%col.damage(%obj.hFakeProjectile, %col.getposition(),%forcedam, %obj.hDamageType);
@@ -316,16 +300,33 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 											%obj.playthread(1,armreadyboth);
 											%obj.playaudio(0,"jockey_attack_loop" @ getrandom(1,2) @ "_sound");
 
-											%obj.JockeyHurt = schedule(1000,0,L4B_holeJockeyKill,%obj,%col);
-
 				case "ZombieSmokerHoleBot":  %obj.playaudio(1,"smoker_launch_tongue_sound");
 											 %col.playaudio(2,"smoker_tongue_hit_sound");
 											 %obj.playthread(2,"plant");
 											 %obj.playthread(3,"shiftup");
 											 %col.mountImage(ZombieSmokerConstrictImage, 2);
+											 %pinmusic = "smoker_tonguepin_sound";
 			}
+
+			switch$(%col.getclassname())
+			{
+				case "Player":	if(isObject(%minigame = getMiniGameFromObject(%col)))
+								%minigame.L4B_ChatMessage("<color:FFFF00>" @ %obj.getDatablock().hName SPC %obj.getdataBlock().hPinCI SPC %col.client.name,"victim_needshelp_sound",true);
+										
+								%col.client.camera.setOrbitMode(%col, %col.getTransform(), 0, 5, 0, 1);
+								%col.client.l4bMusic(%pinmusic, true, "Music");
+								//Billboard_NeedySurvivor(%col, "Strangled");
+								%col.client.setControlObject(%col.client.camera);
+								ServerCmdUnUseTool (%target.client);
+
+				case "AIPlayer": %col.stopHoleLoop();
+			}
+
+			return true;	
 		}
+		else return false;
 	}
+	else return false;
 }
 
 function L4B_SpecialsPinCheck(%obj,%col)
@@ -335,6 +336,7 @@ function L4B_SpecialsPinCheck(%obj,%col)
 		if(isObject(%col))
 		{
 			%col.isBeingStrangled = false;
+			%col.hEater = 0;
 
 			if(%col.getstate() !$= "Dead")
 			{
@@ -353,7 +355,9 @@ function L4B_SpecialsPinCheck(%obj,%col)
 			%obj.isStrangling = false;	
 			%obj.hIgnore = 0;
 			%obj.hEating = 0;
+			%obj.hitMusic = false;
 			%obj.stopAudio(0);
+			%obj.playthread(0,"root");
 
 			if(%obj.getState() !$= "Dead")
 			{
@@ -390,7 +394,9 @@ function L4B_SpecialsPinCheck(%obj,%col)
 					case "AIPlayer": %col.setControlObject(%col);
 									 %col.resetHoleLoop();
 				}
-				%col.playthread(0,root);
+				
+				if(%col.getdataBlock().isDowned) %col.playthread(0,"sit");
+				else %col.playthread(0,"root");
 			}
 		}
 		return false;

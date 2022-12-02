@@ -174,7 +174,12 @@ function Armor::L4BAppearance(%this,%obj,%client)
 
 function Armor::onBotMelee(%obj,%col)
 {
-	//Leaving this for the bots
+
+}
+
+function Armor::onPinLoop(%this,%obj,%col)
+{
+
 }
 
 package Player_L4B
@@ -187,9 +192,9 @@ package Player_L4B
 			{
 				if(%obj.getdataBlock().isSurvivor && %col.getdataBlock().isSurvivor) return false;
 
-				if(%obj.getdataBlock().getName() $= "ZombieChargerHoleBot" && %col.getdataBlock().getName() !$= "ZombieTankHoleBot")
+				if(%obj.getdataBlock().getName() $= "ZombieChargerHoleBot" && vectordist(%obj.getposition(),%col.getposition()) < 2.5 && (%force = mFloor(vectorDot(getWords(%obj.getVelocity(),0,1), %obj.getForwardVector()))) > 15)
 				{
-					if(vectordist(%obj.getposition(),%col.getposition()) < 2.5 && (%force = mFloor(vectorDot(getWords(%obj.getVelocity(),0,1), %obj.getForwardVector()))) > 15)
+					if(%col != %obj && %col.getdataBlock().getName() !$= "ZombieTankHoleBot")
 					{
 						if(!%obj.hEating)
 						{
@@ -201,14 +206,13 @@ package Player_L4B
 						{
 							%obj.playaudio(3,"charger_smash_sound");			
 							%obj.playthread(2,"shiftUp");
-							%eye = vectorscale(VectorNormalize(vectorAdd(%obj.getForwardVector(),"0" SPC "0" SPC "0.25")),%force);
-							%col.setvelocity(%eye);					
+							%col.setvelocity(vectorscale(VectorNormalize(vectorAdd(%obj.getForwardVector(),"0" SPC "0" SPC "0.25")),%force));
 							%col.damage(%obj.hFakeProjectile, %col.getposition(),5, %obj.hDamageType);
 							%obj.spawnExplosion(pushBroomProjectile,"1 1 1");
 						}
 
 						return false;
-					}					
+					}
 				}
 			}
 		return true;

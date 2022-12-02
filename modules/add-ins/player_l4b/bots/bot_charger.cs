@@ -1,8 +1,7 @@
 function ZombieChargerHoleBot::onNewDataBlock(%this,%obj)
 {
 	Parent::onNewDataBlock(%this,%obj);
-	CommonZombieHoleBot::onNewDataBlock(%this,%obj);
-	
+	CommonZombieHoleBot::onNewDataBlock(%this,%obj);	
 	%obj.setscale("1.15 1.15 1.15");
 }
 
@@ -23,36 +22,58 @@ function ZombieChargerHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage
 	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
 }
 
-function L4B_holeChargerKill(%obj,%col)
+function ZombieChargerHoleBot::onImpact(%this, %obj, %col, %vec, %force)
+{
+	Parent::onImpact(%this, %obj, %col, %vec, %force);
+
+	if((%class = %col.getClassName) !$= "AIPlayer" || %class !$= "Player")
+	{
+		%obj.playThread(3,"zstumble" @ getrandom(1,3));
+		%this.onDamage(%obj,10);
+		%obj.setMoveY(-0.375);
+		%obj.setMoveX(0);
+		%obj.setAimObject(%col);
+	}
+}
+
+function ZombieChargerHoleBot::onPinLoop(%this,%obj,%col)
 {
 	if(L4B_SpecialsPinCheck(%obj,%col))
 	{
-		%obj.mountImage(HateImage, 3);
-		%obj.setenergylevel(0);
-		%obj.playthread(1,"root");
-
-		if(%obj.getclassname() $= "AIPlayer")
+		if((%force = mFloor(vectorDot(getWords(%obj.getVelocity(),0,1), %obj.getForwardVector()))) < 5)
 		{
-			%obj.stopHoleLoop();
-			%obj.hClearMovement();
-		}
-		
-		%obj.schedule(10,playThread,1,plant);
-		%obj.schedule(10,playThread,2,shiftup);
-		%obj.schedule(100,playThread,2,shiftdown);
-		%obj.schedule(100,playaudio,3,"charger_smash_sound");
-		%col.schedule(100,playThread,2,plant);
-		%col.schedule(100,damage,%obj.hFakeProjectile, %col.getposition(), $Pref::L4B::Zombies::SpecialsDamage/1.15, $DamageType::Charger);
-		%obj.schedule(100,spawnExplosion,pushBroomProjectile,"0.5 0.5 0.5");
-		%obj.hSharkEatDelay = schedule(1250,0,L4B_holeChargerKill,%obj,%col);
-		%obj.playaudio(0,"charger_pummel" @ getrandom(1,4) @ "_sound");
-		%obj.schedule(50,setcrouching,1);
-		%obj.schedule(125,setcrouching,0);
-	}
+			if(!%obj.hitMusic && isObject(%col.client)) 
+			{
+				%col.client.l4bMusic("charger_pin_sound", true, "Music");
+				%obj.hitMusic = true;
+			}
 
+			if(%obj.getclassname() $= "AIPlayer")
+			{
+				%obj.stopHoleLoop();
+				%obj.hClearMovement();
+			}
+
+			%obj.mountImage(HateImage, 3);
+			%obj.setenergylevel(0);
+			%obj.playThread(1,"chargersmash");
+			%obj.schedule(100,playaudio,0,"charger_pummel" @ getrandom(1,4) @ "_sound");
+			%obj.schedule(250,playaudio,3,"charger_smash_sound");
+			%this.schedule(250,RBloodSimulate,%col, %col.gethackposition(), 1, 25);
+			%col.schedule(250,playthread,3,"plant");
+			%col.schedule(250,damage,%obj.hFakeProjectile, %col.getposition(), $Pref::L4B::Zombies::SpecialsDamage/1.5, $DamageType::Charger);
+			%obj.schedule(250,spawnExplosion,pushBroomProjectile,"0.5 0.5 0.5");
+		}
+		%this.schedule(1250,onPinLoop,%obj,%col);
+	}
+	else if(%col.getState() $= "Dead") 
+	{
+		%this.rBloodDismember(%col,0,true,%col.gethackposition());		
+		%this.rBloodDismember(%col,1,true,%col.gethackposition());		
+	}
 }
 
-function L4B_Charging(%obj,%targ)
+function ZombieChargerHoleBot::Charge(%this,%obj)
 {
 	if(isObject(%obj) && %obj.getState() !$= "Dead")
 	{
@@ -65,7 +86,8 @@ function L4B_Charging(%obj,%targ)
 		if(%obj.getClassName() $= "AIPlayer")
 		{
 			%obj.stopHoleLoop();
-			%obj.setAimLocation(vectoradd(%targ.gethackposition(),%targ.getVelocity()));
+			%obj.schedule(250,hShootAim,%obj.hFollowing);
+			%obj.schedule(500,clearAim);
 			%obj.StartAfterCharge = %obj.schedule(4000,startHoleLoop);
 			%obj.setmoveY(1);
 		}
@@ -73,42 +95,38 @@ function L4B_Charging(%obj,%targ)
 }
 
 function ZombieChargerHoleBot::onBotLoop(%this,%obj)
-{
-	%obj.hNoSeeIdleTeleport();
-	
-	if(!%obj.hFollowing)
+{	
+	if(%obj.getstate() !$= "Dead" && %obj.lastIdle+5000 < getsimtime())
 	{
-		%obj.setMaxForwardSpeed(9);
-		%obj.playaudio(0,"charger_lurk" @ getrandom(1,4) @ "_sound");
-		%obj.playthread(3,plant);	
-		%obj.playthread(1,"root");
-		%obj.raisearms = 0;
+		%obj.playthread(3,plant);
+		%obj.lastIdle = getsimtime();
+	
+		switch$(%obj.hState)
+		{
+			case "Wandering":	%obj.isStrangling = false;
+								%obj.hNoSeeIdleTeleport();
+								%obj.setMaxForwardSpeed(9);
+								%obj.playaudio(0,"charger_lurk" @ getrandom(1,4) @ "_sound");		
+								%obj.playthread(1,"root");
+								%obj.raisearms = 0;
+
+			case "Following": 	if(!isEventPending(%obj.AboutToCharge)) %obj.playaudio(0,"charger_recognize" @ getrandom(1,4) @ "_sound");
+		}
 	}
 }
 
-function ZombieChargerHoleBot::onBotFollow( %this, %obj, %targ )
+function ZombieChargerHoleBot::onBotFollow(%this,%obj,%targ )
 {
-	if(%obj.lastsaw+8000 < getsimtime() && vectorDist(%obj.getposition(),%targ.getposition()) > 8)
-	{
-		%obj.setAimObject(%targ);
-		%obj.lastsaw = getsimtime();
-		%obj.AboutToCharge = schedule(1000,0,L4B_Charging,%obj,%targ);
+	if((isObject(%obj) && %obj.getState() !$= "Dead" && %obj.hLoopActive && !isEventPending(%obj.AboutToCharge)) && (isObject(%targ) && %targ.getState() !$= "Dead")) 
+	%this.schedule(500,onBotFollow,%obj,%targ);
+	else return;	
 	
-		%obj.playthread(1,"armReadyright");
-		%obj.playthread(3,"plant");
-		%obj.playaudio(0,"charger_warn" @ getrandom(1,3) @ "_sound");
+	if(getWord(%obj.getScale(),2) >= 1.05)
+	{
+		%distance = vectorDist(%obj.getposition(),%targ.getposition());
+		%obj.setaimobject(%targ);
+		if(%distance < 75 && %obj.GetEnergyLevel() >= %this.MaxEnergy && !%obj.isStrangling) %this.onTrigger(%obj,4,1);		
 	}
-	if(!isEventPending(%obj.AboutToCharge)) %obj.playaudio(0,"charger_recognize" @ getrandom(1,4) @ "_sound");
-}
-
-function ZombieChargerHoleBot::onCollision(%this, %obj, %col, %fade, %pos, %norm)
-{
-	Parent::oncollision(%this, %obj, %col, %fade, %pos, %norm);
-}
-
-function ZombieChargerHoleBot::onImpact(%this, %obj, %col, %vec, %force)
-{
-	Parent::onImpact(%this, %obj, %col, %vec, %force);
 }
 
 function ZombieChargerHoleBot::onBotMelee(%this,%obj,%col)
@@ -116,33 +134,34 @@ function ZombieChargerHoleBot::onBotMelee(%this,%obj,%col)
 	%obj.bigZombieMelee(%col);
 }	
 
-function ZombieChargerHoleBot::onDamage(%this,%obj,%source,%pos,%damage,%type)
+function ZombieChargerHoleBot::onDamage(%this,%obj,%delta)
 {
-	if(%obj.getstate() $= "Dead") return;
+	Parent::onDamage(%this,%obj,%delta);	
 
-	if(%obj.lastdamage+1000 < getsimtime())//Check if the chest is the male variant and add a 1 second cooldown
-	{
-		%obj.playaudio(0,"charger_pain" @ getrandom(1,4) @ "_sound");
+    if(%delta > 5 && %obj.lastdamage+1000 < getsimtime())
+	{			
+		if(%obj.getstate() !$= "Dead") %obj.playaudio(0,"charger_pain" @ getrandom(1,4) @ "_sound");
+		else 
+		{
+			%obj.playaudio(0,"charger_die" @ getrandom(1,2) @ "_sound");
+
+			if(isObject(%obj.hEating))
+			{
+				%obj.hEating.isBeingStrangled = 0;
+				L4B_SpecialsPinCheck(%obj,%obj.hEating);
+			}			
+		}
+
+		%obj.playthread(2,"plant");
 		%obj.lastdamage = getsimtime();
+
+		if(%obj.raisearms)
+		{
+			%obj.raisearms = false;	
+			%obj.playthread(1,plant);
+		}		
 	}
-	
-	Parent::onDamage(%this,%obj,%source,%pos,%damage,%type);
-}
-
-function ZombieChargerHoleBot::onDisabled(%this,%obj)
-{
-	if(%obj.getstate() !$= "Dead") return;
-	
-	%obj.playaudio(0,"charger_die" @ getrandom(1,2) @ "_sound");
-
-	if(isObject(%obj.hEating))
-	{
-		%obj.hEating.isBeingStrangled = 0;
-		L4B_SpecialsPinCheck(%obj,%obj.hEating);
-	}
-
-	Parent::onDisabled(%this,%obj,%a);
-}
+}	
 
 function ZombieChargerHoleBot::holeAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {	
@@ -154,7 +173,6 @@ function ZombieChargerHoleBot::holeAppearance(%this,%obj,%skinColor,%face,%decal
 	%pantsColorRand = getRandomBotRGBColor();
 	%pantsColor = getWord(%pantsColorRand,0)*%pantsrandmultiplier SPC getWord(%pantsColorRand,1)*%pantsrandmultiplier SPC getWord(%pantsColorRand,2)*%pantsrandmultiplier SPC 1;
 	%shoeColor = %pantsColor;
-
 	%shirtColor = %skinColor;
 	%larmColor = %shirtColor;
 	%chargerhandColor = getWord(%skinColor,0)*0.5 SPC getWord(%skinColor,1)*0.5 SPC getWord(%skinColor,2)*0.5 SPC 1;
@@ -162,16 +180,9 @@ function ZombieChargerHoleBot::holeAppearance(%this,%obj,%skinColor,%face,%decal
 	%handColor = %skinColor;
 
 	%rLegColor = getRandom(0,1);
-	if(%rLegColor)
-	%rLegColor = %shoeColor;
-	else %rLegColor = %skinColor;
+	if(%rLegColor) %rLegColor = %shoeColor; else %rLegColor = %skinColor;
 	%lLegColor = getRandom(0,1);
-	if(%lLegColor)
-	%lLegColor = %shoeColor;
-	else %lLegColor = %skinColor;
-
-	%obj.bloody["rhand"] = false;
-	%obj.bloody["lhand"] = false;
+	if(%lLegColor) %lLegColor = %shoeColor;
 
 	%obj.accentColor = %accentColor;
 	%obj.accent =  0;
@@ -200,7 +211,6 @@ function ZombieChargerHoleBot::holeAppearance(%this,%obj,%skinColor,%face,%decal
 	%obj.llegColor = %lLegColor;
 	%obj.rleg =  0;
 	%obj.rlegColor = %rLegColor;
-
 	GameConnection::ApplyBodyParts(%obj);
 	GameConnection::ApplyBodyColors(%obj);
 }
@@ -289,29 +299,22 @@ function ZombieChargerHoleBot::L4BAppearance(%this,%client,%obj)
 
 function ZombieChargerHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
 {	
-	if(%obj.getClassName() $= "Player" && %obj.getstate() !$= "Dead")
+	if(%obj.getstate() !$= "Dead")
 	{
-		if(%val && !%obj.hEating)
+		if(%val && !%obj.hEating) switch(%triggerNum)
 		{
-			switch(%triggerNum)
-			{
-				case 0: if(%obj.getEnergyLevel() > 25 && isObject(%touchedobj = %obj.lastactivated) && checkHoleBotTeams(%obj,%touchedobj)) %obj.hMeleeAttack(%touchedobj);
-
-
-				case 4: if(%obj.GetEnergyLevel() >= %this.maxenergy && %val)
+			case 0: if(%obj.getEnergyLevel() > 25 && isObject(%touchedobj = %obj.lastactivated) && checkHoleBotTeams(%obj,%touchedobj)) %obj.hMeleeAttack(%touchedobj);
+			case 4: if(%obj.GetEnergyLevel() >= %this.MaxEnergy && %val)
+					{
+						if(!isEventPending(%obj.AboutToCharge))
 						{
-							if(!isEventPending(%obj.AboutToCharge))
-							{
-								%obj.playthread(1,"armReadyright");
-								%obj.playaudio(0,"charger_warn" @ getrandom(1,3) @ "_sound");
-								%obj.setMaxForwardSpeed(9);
-
-								%obj.AboutToCharge = schedule(1500,0,L4B_Charging,%obj,%targ);
-							}
-						}	
-				default:
-			}
-		}
+							%obj.playthread(1,"armReadyright");
+							%obj.playaudio(0,"charger_warn" @ getrandom(1,3) @ "_sound");
+							%obj.setMaxForwardSpeed(9);
+							%obj.AboutToCharge = %this.schedule(1000,Charge,%obj);
+						}
+					}
+		}		
 	}
 	Parent::onTrigger (%this, %obj, %triggerNum, %val);
 }
