@@ -166,6 +166,7 @@ function MiniGameSO::L4B_ClearData(%minigame,%client)
     if(isObject(%zone = AreaZoneGroup.getObject(%i)))
     {
         %zone.firstentry = false;
+        %zone.presenceallentered = false;
         for(%j = 0; %j < %zone.simset.getCount(); %j++)
         if(isObject(%brick = %zone.simset.getObject(%j)) && %brick.getdataBlock().ZoneBrickType $= "item") %brick.setItem(none);
     }
@@ -289,9 +290,9 @@ function MinigameSO::Director(%minigame,%enabled,%interval)
                         %chance = getRandom(1,100);
 
                         if(%chance <= 80) %round = 1;
-                        if(%chance <= $Pref::L4B::Zombies::TankRoundChance) %round = 2;
+                        if(%chance <= 40) %round = 2;
                         
-                        if(%stressed || %minigame.hordesroundcount > 2)
+                        if(%stressed)
                         {
                             %round = 0;
                             %minigame.hordesroundcount = 0;
@@ -310,19 +311,16 @@ function MinigameSO::Director(%minigame,%enabled,%interval)
         if(%minigame.RoundType $= "Panic")
         {
             %minigame.spawnZombies("Horde",10);
-            %minigame.spawnZombies("Special",1);      
-            if(getRandom(1,4) == 1 ) %minigame.spawnZombies("Tank",1);
+            %minigame.spawnZombies("Special",2);      
+            if(getRandom(1,10) == 1 ) %minigame.spawnZombies("Tank",1);
         }
         else switch(%interval)
         {
             case 1: %cue = true;            
             case 2: if(getRandom(1,2) == 1) %cue = true;
             
-                    if(!%stressed) %spawnchance = 4;
-                    else %spawnchance = 3;
-
-                    if(getRandom(1,%spawnchance) == 1) %minigame.spawnZombies("Horde",10);
-                    if(getRandom(1,2) == 1) %minigame.spawnZombies("Special",getRandom(1,2));
+                    %minigame.spawnZombies("Horde",getRandom(2,5));
+                    %minigame.spawnZombies("Special",getRandom(1,2));
 
             case 3: if(getRandom(1,2) == 1) %cue = true;
             default:
@@ -365,7 +363,7 @@ function MinigameSO::WitchRound(%minigame)
 
 function MinigameSO::TankRound(%minigame)
 {
-    if(!%minigame.DirectorStatus || %minigame.directorTankRound > $Pref::L4B::Zombies::TankRounds || !%minigame.spawnZombies("Tank",1)) return;    
+    if(!%minigame.DirectorStatus || %minigame.directorTankRound > 1 || !%minigame.spawnZombies("Tank",1)) return;    
 
     %minigame.directorTankRound++;
     %minigame.RoundType = "Tank";
@@ -539,7 +537,7 @@ function Player::doMRandomTele(%obj,%targetbrick)
 			if(!%tb) return false;
 			else %targetbrick = %teleportlist[%random];
 		}
-		else return false;
+		else %obj.kill();
 	}	
 	else
 	{		

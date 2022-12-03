@@ -152,7 +152,7 @@ function CommonZombieHoleBot::onBotMelee(%this,%obj,%col)
 	
 	if(%col.getType() & $TypeMasks::PlayerObjectType)
 	{
-		if(%col.getClassName() $= "Player") %col.spawnExplosion("ZombieHitProjectile",%meleeimpulse/2 SPC %meleeimpulse/2 SPC %meleeimpulse/2);
+		if(%col.getClassName() $= "Player") %col.spawnExplosion("ZombieHitProjectile",%meleeimpulse/4 SPC %meleeimpulse/4 SPC %meleeimpulse/4);
 		%col.playthread(3,"plant");
 		%col.StunnedSlowDown(3);
 		%col.setVelocity(vectorscale(%obj.getEyeVector(),-10));
@@ -197,7 +197,7 @@ function Player::ZombieLowerArms(%player)
 
 function CommonZombieHoleBot::holeAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
 {	
-	if(getRandom(1,1) == 1)
+	if(getRandom(1,10) == 1)
 	{ 
 		L4B_pushClientSnapshot(%obj,0,true);
 		return;

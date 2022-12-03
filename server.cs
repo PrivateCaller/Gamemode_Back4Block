@@ -1,6 +1,5 @@
 forceRequiredAddOn("Bot_Hole");
 forceRequiredAddOn("Support_Lua");
-
 exec("./modules/support/support.cs");
 exec("./modules/add-ins/player_l4b/player_l4b.cs");
 exec("./modules/add-ins/script_l4b/script_l4b.cs");
@@ -148,25 +147,6 @@ if(isFunction(registerPreferenceAddon))//Function for BLG preferences
 	{
 		className      = "Gamemode_Left4Block";
 		addon          = "Gamemode_Left4Block";
-		category       = "General";
-		title          = "Difficulty";
-		type           = "dropdown";
-		params         = "Normal 0 Advanced 1";
-		variable       = "$Pref::L4B::Zombies::Difficulty";
-		defaultValue   = "Normal 1";
-		updateCallback = "";
-		loadCallback   = "";
-		hostOnly       = false;
-		secret         = false;
-		loadNow        = false;
-		noSave         = false;
-		requireRestart = false;
-	};
-
-	new ScriptObject(Preference)
-	{
-		className      = "Gamemode_Left4Block";
-		addon          = "Gamemode_Left4Block";
 		category       = "Blood";
 		title          = "Blood damage threshold (0 to disable)";
 
@@ -263,44 +243,12 @@ else
 	$Pref::L4B::MapRotation::RequiredReload = 2;
 	$Pref::L4B::MapRotation::VoteMin = 5;
 	$Pref::L4B::MapRotation::MinReset = 5;
-	$Pref::L4B:MapRotation::CoolDown = 10;	
-	$Pref::L4B::Zombies::Difficulty = 1;
+	$Pref::L4B:MapRotation::CoolDown = 10;
 }
 
-function L4B_DifficultyAdjustment()
-{
-	switch($Pref::L4B::Zombies::Difficulty)
-	{
-		case 0: $Pref::L4B::Zombies::NormalDamage = 5;
-				$Pref::L4B::Zombies::SpecialsDamage = $Pref::L4B::Zombies::NormalDamage*3;
-				$Pref::L4B::Zombies::TankRounds = 1;
-				$Pref::L4B::Zombies::TankRoundChance = 50;
-				$Pref::L4B::Zombies::TankHealth = 5000;
-				$Pref::L4B::Zombies::MaxSpecial = 4;
-				$Pref::L4B::Zombies::MaxHorde = 50;
-				$Pref::L4B::Zombies::MaxTank = 1;
-
-		case 1: $Pref::L4B::Zombies::NormalDamage = 10;
-				$Pref::L4B::Zombies::SpecialsDamage = $Pref::L4B::Zombies::NormalDamage*4;
-				$Pref::L4B::Zombies::TankRounds = 2;
-				$Pref::L4B::Zombies::TankRoundChance = 75;
-				$Pref::L4B::Zombies::TankHealth = 10000;
-				$Pref::L4B::Zombies::MaxSpecial = 8;
-				$Pref::L4B::Zombies::MaxHorde = 75;
-				$Pref::L4B::Zombies::MaxTank = 2;
-
-		default:
-	}
-	eval("ZombieTankHoleBot.maxDamage =" @ $Pref::L4B::Zombies::TankHealth @ ";");
-}
-L4B_DifficultyAdjustment();
-
-
-function Gamemode_Left4Block_Difficulty::onUpdate(%this, %val) { L4B_DifficultyAdjustment(); }
-
-%time = strreplace(getDateTime(), "/", " ");
-$L4B_CurrentMonth = getWord(%time,0);
-
+$Pref::L4B::Zombies::NormalDamage = 5;
+$Pref::L4B::Zombies::SpecialsDamage = $Pref::L4B::Zombies::NormalDamage*3;
+$L4B_CurrentMonth = getWord(strreplace(getDateTime(), "/", " "),0);
 $RBloodLimbString0 = "headskin helmet bicorn visor shades gloweyes ballistichelmet constructionhelmet constructionhelmetbuds gloweyeL gloweyeR copHat caphat detective fancyhat fedora detectiveHat knitHat scoutHat fedoraHat shades gasmask";
 $RBloodLimbDismemberString0 = "headpart1 headpart3 headpart4 headpart5 headpart6 headskullpart1 headskullpart3 headskullpart4 headskullpart5 headskullpart6";
 $RBloodLimbString1 = "femchest chest clothstrap armor bucket cape pack quiver tank";
@@ -313,7 +261,6 @@ $RBloodLimbString5 = "lhand";
 $RBloodLimbString6 = "pants";
 $RBloodLimbString7 = "rshoe";
 $RBloodLimbString8 = "lshoe";
-
 $L4BHat[%L4BH++] = "helmet";
 $L4BHat[%L4BH++] = "capHat";
 $L4BHat[%L4BH++] = "detectiveHat";
@@ -322,10 +269,8 @@ $L4BHat[%L4BH++] = "fancyHat";
 $L4BHat[%L4BH++] = "copHat";
 $L4BHat[%L4BH++] = "knitHat";
 $L4BHat[%L4BH++] = "fedoraHat";
-
 $hZombieSkin[%hzskin++] = "0.16 0.25 0.21 1";
 $hZombieSkinAmount = %hzskin;
-
 $hZombieSpecialType[%hzs++] = "ZombieChargerHoleBot";
 $hZombieSpecialType[%hzs++] = "ZombieBoomerHoleBot";
 $hZombieSpecialType[%hzs++] = "ZombieSpitterHoleBot";
@@ -333,13 +278,11 @@ $hZombieSpecialType[%hzs++] = "ZombieHunterHoleBot";
 $hZombieSpecialType[%hzs++] = "ZombieSmokerHoleBot";
 $hZombieSpecialType[%hzs++] = "ZombieJockeyHoleBot";
 $hZombieSpecialTypeAmount = %hzs;
-
 $hZombieUncommonType[%hzu++] = "ZombieConstructionHoleBot";
 $hZombieUncommonType[%hzu++] = "ZombieFallenHoleBot";
 $hZombieUncommonType[%hzu++] = "ZombieCedaHoleBot";
 $hZombieUncommonType[%hzu++] = "ZombieSoldierHoleBot";
 $hZombieUncommonType[%hzu++] = "ZombiePoliceHoleBot";
 $hZombieUncommonTypeAmount = %hzu;
-
 configLoadL4BItemScavenge();
 configLoadL4BItemSlots();

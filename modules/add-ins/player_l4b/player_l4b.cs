@@ -9,6 +9,7 @@ registerInputEvent ("fxDTSBrick", "onTankTouch", "Self fxDTSBrick" TAB "Player P
 registerInputEvent ("fxDTSBrick", "onDoorClose", "Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "MiniGame MiniGame");
 registerInputEvent ("fxDTSBrick", "onDoorOpen", "Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "MiniGame MiniGame");
 registerOutputEvent ("fxDTSBrick", "zfakeKillBrick");
+
 registerOutputEvent ("Player", "Safehouse","bool");
 registerInputEvent ("fxDTSBrick", "onSurvivorTouch", "Self fxDTSBrick" TAB "Player Player" TAB "Bot Bot" TAB "Client GameConnection" TAB "MiniGame MiniGame");
 registerOutputEvent(Player,RemoveItem,"datablock ItemData",1);

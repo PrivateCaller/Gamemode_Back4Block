@@ -61,7 +61,7 @@ function ZombieHunterHoleBot::onPinLoop(%this,%obj,%col)
 		
 		%this.schedule(250,onPinLoop,%obj,%col);				
 		%this.RBloodSimulate(%col, %col.gethackposition(), 1, 25);
-		%col.damage(%obj.hFakeProjectile, %col.getposition(), $Pref::L4B::Zombies::SpecialsDamage/2.5, $DamageType::Hunter);
+		%obj.hMeleeAttack(%col);
 	}
 	else if(%col.getState() $= "Dead") %this.rBloodDismember(%col,1,true,%col.gethackposition());
 }

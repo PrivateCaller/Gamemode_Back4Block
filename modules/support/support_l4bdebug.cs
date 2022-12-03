@@ -30,11 +30,13 @@ function Player::l4bdebug(%obj)
 
 	//if(%obj.client.isSuperAdmin && isObject(%brickgroup = %obj.client.brickgroup))
 	//{		
-	//	//%count = %brickgroup.getCount();
-	//	//for (%i = 0; %i < %count; %i++) 
-	//	//{			
-	//	//	if(isObject(%brick = %brickgroup.getObject(%i)) && %brick.getDataBlock().ZoneBrickType $= "spawner") %brick.delete();
-	//	//}		
+	//	for (%i = 0; %i < %brickgroup.getCount(); %i++) 
+	//	if(isObject(%brick = %brickgroup.getObject(%i)) && %brick.getdataBlock().ZoneBrickType !$= "" && strstr(strlwr(%brick.getName()), "8m2_7") != -1)
+	//	{
+	//		
+	//		%brick.spawnExplosion(pushBroomProjectile,"1 1 1");
+	//	}
+	//	
 	//}
 
 	//for (%i = 0; %i < $L4B_clientLog.getCount(); %i++) 

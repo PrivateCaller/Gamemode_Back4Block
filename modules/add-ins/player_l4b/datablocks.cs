@@ -1826,7 +1826,7 @@ datablock PlayerData(ZombieTankHoleBot : CommonZombieHoleBot)
 {
 	uiName = "Tank Infected";
 	shapeFile = RotZTankDts.baseShape;
-	maxDamage = $Pref::L4B::Zombies::TankHealth;//Health
+	maxDamage = 5000;//Health
 	mass = 500;
 
 	runforce = 100 * 75;
