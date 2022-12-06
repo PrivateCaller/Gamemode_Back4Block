@@ -182,27 +182,35 @@ function SurvivorPlayerDowned::onNewDataBlock(%this,%obj)
 function SurvivorPlayerDowned::DownLoop(%this,%obj)
 { 
 	if(isobject(%obj) && %obj.getstate() !$= "Dead" && %obj.getdataBlock().isDowned)
-	{	
+	{
 		if(!%obj.isBeingSaved)
 		{
-			%obj.addhealth(-0.5);
-
-			if(%obj.getClassName() $= "Player")
-			{
-				%obj.client.Play2d("survivor_heartbeat_sound");
-				%obj.setdamageflash(16/%obj.getenergylevel());			
-			}			
+			%obj.addhealth(-5);
+			%obj.setdamageflash(0.25);
 
 			if(%obj.lastcry+10000 < getsimtime())
 			{
 				%obj.lastcry = getsimtime();
 				%obj.playaudio(0,"survivor_pain_high1_sound");
+				%obj.playthread(3,"plant");
 			}			
-			return;
 		}
 	
-		cancel(%obj.energydeath);
-		%obj.energydeath = schedule(750,0,energydamageloop,%obj);
+		cancel(%obj.downloop);
+		%obj.downloop = %this.schedule(1000,DownLoop,%obj);
 	}
 	else return;
+}
+
+function Player::sapHealth(%obj,%threshold)
+{
+	if(isObject(%obj) && %obj.getState() !$= "Dead" && %obj.getDamageLevel() > 50 && (%obj.getDataBlock().maxDamage-%obj.getDamageLevel()) >= %threshold)
+	{
+		%obj.addhealth(-0.5);		
+		%obj.playthread(3,"plant");
+		%obj.playaudio(0,"norm_cough" @ getrandom(1,3) @ "_sound");
+
+		cancel(%obj.sapHealthSchedule);
+		%obj.sapHealthSchedule = %obj.schedule(getRandom(2000,3000),sapHealth,%threshold);
+	}
 }

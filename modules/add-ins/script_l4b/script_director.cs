@@ -97,21 +97,32 @@ package L4B_Director
     }
 
     function Armor::Damage(%data, %obj, %sourceObject, %position, %damage, %damageType)
-    {
+    {        
+        if(isObject(%obj.hEating) && %obj.heating.getclassname() $= "Player") %victim = %obj.heating;        
+        
         Parent::Damage(%data, %obj, %sourceObject, %position, %damage, %damageType);
 
-        if(!isObject(%minigame = getMiniGameFromObject(%obj)) || %obj.hType !$= "Zombie" || %obj.getState() !$= "Dead") return;//Return if the object is not a zombie, not dead, is not targetting, 
-
         if(isObject(%sourceObject) && %sourceObject.getClassName() $= "Player") %source = %sourceObject;
-        else if(isObject(%sourceObject.sourceObject) && %sourceObject.sourceObject.getClassName() $= "Player") %source = %sourceObject.sourceObject;
-        else return;
+        else if(isObject(%sourceObject.sourceObject) && %sourceObject.sourceObject.getClassName() $= "Player") %source = %sourceObject.sourceObject;        
+
+        if(!isObject(%minigame = getMiniGameFromObject(%obj)) || %obj.hType !$= "Zombie" || !isObject(%source)) return;//Return if the object is not a zombie, not dead, is not targetting,         
         
         //When the bot is a special and dies
-        if(%obj.getdataBlock().hZombieL4BType $= "Special") 
-        %minigame.L4B_ChatMessage("\c0" @ %source.client.name SPC "<bitmapk:" @ $DamageType::MurderBitmap[%damageType] @ ">" SPC %obj.getdataBlock().hName @ "","victim_revived_sound",true); 
+        if(%obj.getdataBlock().hZombieL4BType $= "Special")
+        {
+            if(%obj.getDataBlock().getName() !$= "ZombieChargerHoleBot" && isObject(%victim))
+            {                
+                chatMessageTeam(%victim.client,'fakedeathmessage',"<color:00FF00> "@ %source.client.name @ " <bitmapk:add-ons/Gamemode_Left4Block/modules/add-ins/player_l4b/icons/CI_VictimSaved> " @ %victim.client.name);
+                %victim.isBeingStrangled = false;
+                L4B_SpecialsPinCheck(%obj,%victim);
+            }            
+
+            if(%obj.getState() $= "Dead") %minigame.L4B_ChatMessage("\c0" @ %source.client.name SPC "<bitmapk:" @ $DamageType::MurderBitmap[%damageType] @ ">" SPC %obj.getdataBlock().hName @ "","victim_revived_sound",true);
+        }
 
         //When a player kills a zombie the victim is unaware of
-        if(isObject(%target = %obj.hFollowing) && %target.getClassName() $= "Player" && %source !$= %target && !L4B_isInFOV(%target, %obj))
+        //Check if is not dead, if the zombie is after someone, it is a player and the killer is not the one the zombie is chasing, and if its not in the FOV
+        if(%obj.getState() $= "Dead" && isObject(%target = %obj.hFollowing) && %target.getClassName() $= "Player" && %source !$= %target && !L4B_isInFOV(%target, %obj))
         %minigame.L4B_ChatMessage("<color:00FF00>" @ %source.client.name SPC "protected" SPC %target.client.name,"victim_revived_sound",false);       
     }    
 };
@@ -350,7 +361,7 @@ function MinigameSO::BreakRound(%minigame)
     %minigame.deletel4bMusic("Stinger1");
     %minigame.deletel4bMusic("Stinger2");
     %minigame.deletel4bMusic("Stinger3");
-    %minigame.l4bMusic("nm_quarantine_" @ getRandom(1,3) @ "_sound",false,"Music");
+    %minigame.l4bMusic("musicData_L4D_quarantine_" @ getRandom(1,3),false,"Music");
 }
 
 function MinigameSO::WitchRound(%minigame)

@@ -1,4 +1,4 @@
----@diagnostic disable: undefined-global, param-type-mismatch
+---@diagnostic disable: undefined-global, param-type-mismatch, lowercase-global
 
 function Survivor_Rightclick(obj)
 
@@ -41,26 +41,27 @@ function Survivor_Rightclick(obj)
 
                     if ts.isobject(ray) then
 
-                        local class = ts.callobj(ray, "getClassName")
+                        local rayobject = ts.callobj(ray,"getID")
+                        local class = ts.callobj(rayobject, "getClassName")
                         ts.call("LuaProjecitle",ts.call("posFromRaycast",ray),"SecondaryMeleeProjectile")
                         ts.call("serverPlay3D","melee_hit" .. math.random(1,8) .. "_sound",ts.call("posFromRaycast",ray))
 
                         if class == "AIPlayer" or class == "Player" then
 
-                                if ts.getstate(ray) ~= "Dead" and tonumber(ts.minigamecandamage(obj,ray)) == 1 and ts.getcallobj(ts.callobj(ray,"getID"),"getDatablock().resistMelee") ~= "1" then 
+                                if ts.getstate(ray) ~= "Dead" and tonumber(ts.minigamecandamage(obj,ray)) == 1 and ts.getcallobj(ts.callobj(ray,"getID"),"getDatablock().resistMelee") ~= "1" then                                     
 
-                                    ts.setobj(obj,"SurvivorStress",math.clamp(tonumber(ts.getobj(obj,"SurvivorStress"))+0.25,0,20)) 
-                                    
+                                    ts.setobj(obj,"SurvivorStress",math.clamp(tonumber(ts.getobj(obj,"SurvivorStress"))+0.25,0,20))
+
+                                    ts.callobj(ray,"cancel","L4B_SpazzZombie")
+                                    ts.callobj(ray,"playThread",3,"zstumble"..math.random(1,3))
+                                    ts.callobj(ray,"damage",obj,ts.callobj(ray,"getHackPosition"),10,tonumber(ts.get("DamageType::Default")))
+                                    ts.callobj(ray,"applyimpulse",ts.call("posFromRaycast",ray),VectorAdd(VectorScale(ts.callobj(obj,"getForwardVector"),"500"),"0 0 250"))
+
                                     if class == "AIPlayer" then
                                         ts.callobj(ray,"setMoveY",-0.5)
                                         ts.callobj(ray,"setMoveX",0)
                                         ts.callobj(ray,"setAimObject",obj)
-                                    end
-
-                                    ts.callobj(ray,"cancel","L4B_SpazzZombie")
-                                    ts.callobj(ray,"playThread",3,"zstumble"..math.random(1,3))
-                                    ts.getcallobj(ts.callobj(ray,"getDatablock"),"onDamage("..ts.callobj(ray,"getID")..")")
-                                    ts.callobj(ray,"applyimpulse",ts.call("posFromRaycast",ray),VectorAdd(VectorScale(ts.callobj(obj,"getForwardVector"),"500"),"0 0 250"))
+                                    end                                    
                                 end                                
                                 
                         elseif class == "fxDTSBrick" or class == "WheeledVehicle" or class == "fxPlane" then
@@ -86,31 +87,12 @@ function Survivor_LeftClick(val,obj)
             local touchedobjclass = ts.callobj(touchedobj, "getClassName")
 
             if touchedobjclass == "Player" or touchedobjclass == "AIPlayer" then
-
-                if ts.getcallobj(touchedobj,"getdatablock().isDowned") == "1" then Survivor_ReviveDowned(obj) end
-                if tonumber(ts.getobj(touchedobj,"isbeingstrangled")) == 1 and tonumber(ts.getobj(touchedobj,"hisinfected")) ~= 1 then
-
-                    if ts.isobject(ts.getobj(touchedobj,"heater")) and ts.getcallobj(ts.getobj(touchedobj,"heater"),"getDatablock().getName()") ~= "ZombieChargerHoleBot" then
-
-                        local zombiepinner = ts.getobj(touchedobj,"heater")
-                        ts.setobj(touchedobj,"isbeingstrangled",0)
-                        ts.call("L4B_SpecialsPinCheck",touchedobj,zombiepinner)
-                        ts.callobj(touchedobj,"playThread",3,"plant")
-                        ts.callobj(obj,"playThread",3,"activate2")
-
-                        if touchedobjclass == "Player" then
-
-                            local touchedobjclient = ts.getobj(touchedobj,"client")
-                            local touchedobjminigame = ts.getobj(touchedobjclient,"minigame")
-                            ts.call("chatMessageTeam",touchedobjclient,'fakedeathmessage',"<color:00FF00> "..ts.getobj(client,"name").." <bitmapk:add-ons/Gamemode_Left4Block/modules/add-ins/player_l4b/icons/CI_VictimSaved> "..ts.getobj(touchedobjclient,"name"));
-                            ts.callobj(touchedobjminigame,"L4B_PlaySound","victim_saved_sound")                          
-
-                        elseif touchedobjclass == "AIPlayer" then ts.callobj(touchedobj,"resetHoleLoop")
-                        end                      
-                    end
+                
+                if ts.getobj(touchedobj,"hisinfected") ~= "1" and ts.getobj(touchedobj,"isbeingstrangled") ~= "1" and ts.getcallobj(touchedobj,"getdatablock().isDowned") == "1"then
+                     Survivor_ReviveDowned(obj)                 
                 end
             end
-        end
+        end        
     elseif tonumber(val) == 0 and ts.isobject(ts.getobj(obj,"LastActivated")) then
 
         local touchedobj = ts.callobj(ts.getobj(obj, "LastActivated"),"getID")
@@ -121,6 +103,7 @@ function Survivor_LeftClick(val,obj)
                 ts.setobj(touchedobj,"isbeingsaved",0)
                 ts.callobj(obj,"playthread",2,"root")
                 ts.setobj(obj,"revivecounter",0)
+                ts.callobj(ts.getobj(obj,"client"),"centerprint","<color:FFFFFF><font:impact:30>Hold left click with no equipped items to help <br><color:00e100>"..ts.getcallobj(touchedobj,"client.name").."<color:FFFFFF>!",4)
             end                
         end
     end
@@ -128,24 +111,27 @@ end
 
 function Survivor_ReviveDowned(obj)
     
-    if tonumber(ts.getobj(obj,"isActivating")) == 0 then
+    if ts.isobject(ts.getobj(obj,"LastActivated")) == false or tonumber(ts.getobj(obj,"isActivating")) == 0 or ts.isobject(ts.callobj(obj,"getMountedImage","0")) == true then
         return
     end
 
     local victim = ts.getobj(obj,"LastActivated")
     local dot = VectorDot(VectorNormalize(VectorSub(ts.callobj(victim,"getHackPosition"),ts.callobj(obj,"getHackPosition"))),ts.callobj(obj,"getEyeVector"))
+    local distance = VectorDist(ts.getposition(obj),ts.getposition(victim))
     local client = ts.getobj(obj,"client")
     local victimclient = ts.getobj(victim,"client")
     local objminigame = ts.getobj(obj,"minigame")
     
-    if tonumber(dot) >= 0.45 then
+    if tonumber(dot) >= 0.81 and tonumber(distance) < 2.5 then
 
         if tonumber(ts.getobj(obj,"revivecounter")) == nil then ts.setobj(obj,"revivecounter",0) end
         
-        if tonumber(ts.getobj(obj,"revivecounter")) < 4 then
+        if tonumber(ts.getobj(obj,"revivecounter")) <= 10 then
             
-            local RevivePlayerSched = schedule(1000, Survivor_ReviveDowned, obj)
+            local RevivePlayerSched = schedule(250, Survivor_ReviveDowned, obj)
             ts.setobj(obj,"revivecounter",ts.getobj(obj,"revivecounter")+1)
+            Survivor_ReviveDownedCounter(client,ts.getobj(obj,"revivecounter"))
+            Survivor_ReviveDownedCounter(victimclient,ts.getobj(obj,"revivecounter"))
 
             if ts.getobj(victim,"isbeingsaved") ~= obj then
                 ts.callobj(obj,"playthread",2,"armreadyright")
@@ -153,24 +139,34 @@ function Survivor_ReviveDowned(obj)
             end
 
         else
-            ts.callobj(obj,"playthread",2,"root")
-            ts.callobj(victim,"playthread",0,"root")
             
-            ts.setobj(obj,"revivecounter",0)
-            ts.call("chatMessageTeam",victimclient,'fakedeathmessage',"<color:00FF00> "..ts.getobj(client,"name").." <bitmapk:add-ons/Gamemode_Left4Block/modules/add-ins/player_survivor/icons/CI_VictimSaved> "..ts.getobj(victimclient,"name"));
+            ts.callobj(client,"centerprint","<color:FFFFFF><font:impact:40>You saved <color:00e100>"..ts.getobj(victimclient,"name"),2)
             ts.callobj(client,"play2d","victim_revived_sound")
-            ts.callobj(victimclient,"play2d","victim_revived_sound")
+            ts.callobj(obj,"playthread",2,"root")            
+            ts.setobj(obj,"revivecounter",0)
 
+            ts.call("chatMessageTeam",victimclient,'fakedeathmessage',"<color:00FF00> "..ts.getobj(client,"name").." <bitmapk:add-ons/Gamemode_Left4Block/modules/add-ins/player_l4b/icons/CI_VictimSaved> "..ts.getobj(victimclient,"name"));
+            ts.callobj(victimclient,"centerprint","<color:00e100><font:impact:40>"..ts.getobj(client,"name").." <color:FFFFFF>saved you",2)
+            ts.callobj(victimclient,"play2d","victim_revived_sound")
+            ts.callobj(victim,"playthread",0,"root")            
             ts.setobj(victim,"lastdamage",ts.call("getsimtime"))
             ts.callobj(victim,"SetDataBlock","SurvivorPlayer")
             ts.callobj(victim,"sethealth",25)
+            ts.callobj(victim,"sapHealth",1)
             ts.setobj(victim,"isbeingsaved",0)
         end
     else
-        ts.setobj(touchedobj,"isbeingsaved",0)
+        ts.setobj(victim,"isbeingsaved",0)
         ts.callobj(obj,"playthread",2,"root")
         ts.setobj(obj,"revivecounter",0)
     end
+end
+
+function Survivor_ReviveDownedCounter(client,amount)
+    addsymbol = ""
+    symbol = "|"
+    for i = 1, amount, 1 do addsymbol = addsymbol..symbol end
+    ts.callobj(client,"centerprint","<color:FFFFFF><font:impact:40> Get up! <br><color:00e100>"..addsymbol,1)
 end
 
 function Survivor_DamageCheck(obj,damage)

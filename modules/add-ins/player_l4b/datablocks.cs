@@ -241,10 +241,10 @@ datablock ExplosionData(SecondaryMeleeExplosion)
 
 	shakeCamera = true;
 	camShakeDuration = 1;
-	camShakeRadius = 10.0;
+	camShakeRadius = 2.5;
 
-	camShakeFreq = "3 3 3";
-	camShakeAmp = "0.6 0.6 0.6";
+	camShakeFreq = "1.5 1.5 1.5";
+	camShakeAmp = "0.75 0.75 0.75";
 	particleEmitter = SecondaryMeleeFlashEmitter;
 
 	lightStartRadius = 0;

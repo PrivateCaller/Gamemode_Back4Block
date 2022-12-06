@@ -46,11 +46,11 @@ function ZombieSmokerHoleBot::onBotMelee(%this,%obj,%col)
 {
 	if(%obj.isStrangling && !%obj.hitMusic && %col == %obj.hEating && isObject(%col.client)) 
 	{
-		%col.client.l4bMusic("smoker_pin_sound", true, "Music");
+		%col.client.l4bMusic("musicData_smoker_pin", true, "Music");
 		%obj.hitMusic = true;
 	}
 
-	%meleeimpulse = mClamp(%obj.hLastMeleeDamage, 1, 10);	
+	%meleeimpulse = mClamp(%obj.hLastMeleeDamage, 1, 10);
 	%obj.playthread(2,"zAttack" @ getRandom(1,3));
 	%obj.setaimobject(%col);
 	
@@ -298,7 +298,7 @@ function SmokerTongueShape::onTongueLoop(%this,%obj)
 				if(!%smoker.hitMusic && isObject(%end.client)) 
 				{
 					%end.playthread(3,"talk");
-					%end.client.l4bMusic("smoker_pin_sound", true, "Music");
+					%end.client.l4bMusic("musicData_smoker_pin", true, "Music");
 					%smoker.hitMusic = true;
 				}				
 			}			
@@ -321,7 +321,7 @@ function SmokerTongueShape::onTongueLoop(%this,%obj)
 
 			%end.setVelocity(getWords(%newvelocity, 0, 1) SPC %zinfluence);
 		}
-		else if(%smoker.lastattacked+375 < getsimtime())
+		else if(%smoker.lastattacked+300 < getsimtime())
 		{
 			%smoker.hMeleeAttack(%end);
 			%smoker.lastattacked = getSimTime();

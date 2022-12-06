@@ -21,9 +21,9 @@ function ZombieHunterHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,
 
 function ZombieHunterHoleBot::onDamage(%this,%obj,%delta)
 {
-	Parent::onDamage(%this,%obj,%delta);	
+	Parent::onDamage(%this,%obj,%delta);
 
-    if(%delta > 5 && %obj.lastdamage+1000 < getsimtime())
+    if(%obj.lastdamage+1000 < getsimtime())
 	{			
 		if(%obj.getstate() !$= "Dead") %obj.playaudio(0,"hunter_pain" @ getrandom(1,3) @ "_sound");
 		else %obj.playaudio(0,"hunter_death" @ getrandom(1,3) @ "_sound");
@@ -41,7 +41,7 @@ function ZombieHunterHoleBot::onDamage(%this,%obj,%delta)
 		{
 			%obj.hEating.isBeingStrangled = 0;
 			L4B_SpecialsPinCheck(%obj,%obj.hEating);
-		}		
+		}
 	}
 }
 
@@ -51,19 +51,14 @@ function ZombieHunterHoleBot::onPinLoop(%this,%obj,%col)
 	{
 		%obj.setenergylevel(0);
 		%obj.unmount();
-
-		if(%obj.getClassName() !$= "Player")
-		{
-			%obj.setmoveobject(%col);
-			%obj.setaimobject(%col.gethackposition());
-			%obj.hMeleeAttack(%col);			
-		}
-		
+		%obj.playthread(2,"zAttack" @ getRandom(1,3));		
+		%col.playthread(2,"activate2");
+		%col.playthread(3,"plant");
+		%obj.playaudio(2,"hunter_hit" @ getrandom(1,3) @ "_sound");
+		%this.RBloodSimulate(%col, %col.getMuzzlePoint(2), 1, 25);
+		%col.damage(%obj, %col.gethackposition(), $Pref::L4B::Zombies::SpecialsDamage/4, $DamageType::Hunter);		
 		%this.schedule(250,onPinLoop,%obj,%col);				
-		%this.RBloodSimulate(%col, %col.gethackposition(), 1, 25);
-		%obj.hMeleeAttack(%col);
 	}
-	else if(%col.getState() $= "Dead") %this.rBloodDismember(%col,1,true,%col.gethackposition());
 }
 
 function ZombieHunterHoleBot::onBotLoop(%this,%obj)

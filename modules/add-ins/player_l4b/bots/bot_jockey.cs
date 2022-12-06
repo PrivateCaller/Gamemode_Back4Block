@@ -21,8 +21,7 @@ function ZombieJockeyHoleBot::onPinLoop(%this,%obj,%col)
 	if(L4B_SpecialsPinCheck(%obj,%col))
 	{
 		if(%obj.getClassName() $= "AIPlayer") %obj.hRunAwayFromPlayer(%col);
-
-		%col.damage(%obj.hFakeProjectile, %col.getposition(), $Pref::L4B::Zombies::SpecialsDamage/3.5, $DamageType::Jockey);
+		%col.damage(%obj.hFakeProjectile, %col.getposition(), $Pref::L4B::Zombies::SpecialsDamage/2.5, $DamageType::Jockey);
 		%obj.playthread(2,"zAttack" @ getRandom(1,3));
 		%obj.playThread(3,talk);
 		%col.playThread(2,plant);
@@ -107,7 +106,7 @@ function ZombieJockeyHoleBot::onDamage(%this,%obj,%delta)
 {	
 	Parent::onDamage(%this,%obj,%source,%pos,%damage,%type);
 
-	if(%delta > 5 && %obj.lastdamage+500 < getsimtime())
+	if(%obj.lastdamage+500 < getsimtime())
 	{
 		if(%obj.getstate() !$= "Dead") %obj.playaudio(0,"jockey_pain" @ getrandom(1,4) @ "_sound");
 		else %obj.playaudio(0,"jockey_death" @ getrandom(1,3) @ "_sound");
@@ -122,6 +121,7 @@ function ZombieJockeyHoleBot::onDamage(%this,%obj,%delta)
 		{
 			%obj.hEating.isBeingStrangled = false;
 			L4B_SpecialsPinCheck(%obj,%obj.hEating);
+			%obj.addvelocity("0 0 15");
 		}
 
 		%obj.playthread(2,"plant");
@@ -133,7 +133,7 @@ function ZombieJockeyHoleBot::onTrigger(%this, %obj, %triggerNum, %val)
 {	
 	Parent::onTrigger (%this, %obj, %triggerNum, %val);
 
-	if(%obj.getstate() !$= "Dead")
+	if(isObject(%obj) && %obj.getstate() !$= "Dead")
 	{
 		if(%val) switch(%triggerNum)
 		{

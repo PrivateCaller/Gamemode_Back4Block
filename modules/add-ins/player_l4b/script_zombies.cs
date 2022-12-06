@@ -254,7 +254,7 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 			%obj.hEating = %col;
 			%col.hEater = %obj;
 			%obj.getDataBlock().schedule(100,onPinLoop,%obj,%col);
-			%pinmusic = %obj.getDataBlock().hName @ "_pin_sound";
+			%pinmusic = "musicData_" @ %obj.getDataBlock().hName @ "_pin";
 
 			if(%obj.getClassName() $= "AIPlayer")
 			{
@@ -286,9 +286,11 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 
 				case "ZombieHunterHoleBot": %obj.playthread(0,root);
 											%col.playthread(0,death1);
-
-											%obj.schedule(5,setvelocity,"0 0 0");
-											%obj.schedule(15,setPosition,vectorScale(%col.getForwardVector(),1.5));
+											%obj.schedule(25,setvelocity,"0 0 0");
+											%obj.schedule(50,setTransform,%col.getTransform());
+											%obj.schedule(100,setaimlocation,vectorAdd(%col.getMuzzlePoint(2),vectorScale(%col.getForwardVector(),-0.5)));
+											%obj.setMoveX(0);
+											%obj.setMoveY(0);											
 
 											%forcedam = %force/4;
 											%col.damage(%obj.hFakeProjectile, %col.getposition(),%forcedam, %obj.hDamageType);
@@ -305,7 +307,7 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 											 %obj.playthread(2,"plant");
 											 %obj.playthread(3,"shiftup");
 											 %col.mountImage(ZombieSmokerConstrictImage, 2);
-											 %pinmusic = "smoker_tonguepin_sound";
+											 %pinmusic = "musicData_smoker_tonguepin";
 			}
 
 			switch$(%col.getclassname())
@@ -319,6 +321,17 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 								%col.client.setControlObject(%col.client.camera);
 								ServerCmdUnUseTool (%target.client);
 
+								//%pos = %col.getPosition();
+								//%radius = 15;
+								//%searchMasks = $TypeMasks::PlayerObjectType;
+								//InitContainerRadiusSearch(%pos, %radius, %searchMasks);
+//
+								//while((%targetid = containerSearchNext()) != 0)
+								//{
+								//	if(%targetid == %col) continue;
+								//	else if(%targetid.getclassname() $= "Player" && %targetid.getdataBlock().isSurvivor) %targetid.client.centerPrint("<color:00e100><font:impact:40>" @ %col.client.name SPC "<color:FFFFFF>is in trouble <br>(and is very close to you!)",2);
+								//}
+
 				case "AIPlayer": %col.stopHoleLoop();
 			}
 
@@ -331,7 +344,8 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 
 function L4B_SpecialsPinCheck(%obj,%col)
 {
-	if((isObject(%obj) && isObject(%col) && !miniGameCanDamage(%obj,%col)) || (!isObject(%obj) || %obj.getstate() $= "Dead" || !%obj.isStrangling) || (!isObject(%col) || !%col.isBeingStrangled || %col.hIsInfected || %col.getState() $= "Dead") || (%obj.getdatablock().getName() $= "ZombieJockeyHoleBot" && %col.getdatablock().isDowned))
+	if((isObject(%obj) && isObject(%col) && !miniGameCanDamage(%obj,%col)) || (!isObject(%obj) || %obj.getstate() $= "Dead" || !%obj.isStrangling) || (!isObject(%col) || !%col.isBeingStrangled || %col.hIsInfected || %col.getState() $= "Dead") || 
+	(%obj.getdatablock().getName() $= "ZombieJockeyHoleBot" && %col.getdatablock().isDowned))
 	{
 		if(isObject(%col))
 		{

@@ -192,31 +192,35 @@ package Player_L4B
 			if(%obj.getType() & $TypeMasks::PlayerObjectType && %col.getType() & $TypeMasks::PlayerObjectType) 
 			{
 				if(%obj.getdataBlock().isSurvivor && %col.getdataBlock().isSurvivor) return false;
-
-				if(%obj.getdataBlock().getName() $= "ZombieChargerHoleBot" && vectordist(%obj.getposition(),%col.getposition()) < 2.5 && (%force = mFloor(vectorDot(getWords(%obj.getVelocity(),0,1), %obj.getForwardVector()))) > 15)
+				else switch$(%obj.getdataBlock().getName())
 				{
-					if(%col != %obj && %col.getdataBlock().getName() !$= "ZombieTankHoleBot")
-					{
-						if(!%obj.hEating)
-						{
-							%obj.SpecialPinAttack(%col,%force);
-							%obj.playaudio(3,"charger_smash_sound");
-						}
+					case "ZombieChargerHoleBot": if(vectordist(%obj.getposition(),%col.getposition()) < 2.5 && (%force = mFloor(vectorDot(getWords(%obj.getVelocity(),0,1), %obj.getForwardVector()))) > 15)
+												{
+													if(%col != %obj && %col.getdataBlock().getName() !$= "ZombieTankHoleBot")
+													{
+														if(!%obj.hEating)
+														{
+															%obj.SpecialPinAttack(%col,%force);
+															%obj.playaudio(3,"charger_smash_sound");
+														}
 
-						if(%col != %obj.hEating)
-						{
-							%obj.playaudio(3,"charger_smash_sound");			
-							%obj.playthread(2,"shiftUp");
-							%col.setvelocity(vectorscale(VectorNormalize(vectorAdd(%obj.getForwardVector(),"0" SPC "0" SPC "0.25")),%force));
-							%col.damage(%obj.hFakeProjectile, %col.getposition(),5, %obj.hDamageType);
-							%obj.spawnExplosion(pushBroomProjectile,"1 1 1");
-						}
+														if(%col != %obj.hEating)
+														{
+															%obj.playaudio(3,"charger_smash_sound");			
+															%obj.playthread(2,"shiftUp");
+															%col.setvelocity(vectorscale(VectorNormalize(vectorAdd(%obj.getForwardVector(),"0" SPC "0" SPC "0.25")),%force));
+															%col.damage(%obj.hFakeProjectile, %col.getposition(),5, %obj.hDamageType);
+															%obj.spawnExplosion(pushBroomProjectile,"1 1 1");
+														}
 
-						return false;
-					}
+														return false;
+													}
+												}
+					case "ZombieHunterHoleBot": if(%obj.hEating == %col) return false;
 				}
 			}
-		return true;
+
+			return true;
 		}
 	}
 
@@ -352,7 +356,11 @@ package Player_L4B
 
 			return true;
 		}
-		else return false;
+		else 
+		{
+			%obj.client.centerprint("<color:FFFFFF><font:impact:40>Drop slot<color:FFFF00>" SPC %slot+1 SPC "<color:FFFFFF>to pickup <color:FFFF00>" @ %item.getdataBlock().uiName,2);
+			return false;
+		}
 	}
 
 	function Player::Pickup(%obj,%item)

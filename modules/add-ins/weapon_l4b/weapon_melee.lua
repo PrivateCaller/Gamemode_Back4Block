@@ -52,5 +52,5 @@ function Melee_SwingCheck(obj,this,slot)
         scanned = ts.call("containerSearchNext")
     end
 
-    schedule(50, Melee_SwingCheck,obj,this,slot)
+    schedule(75, Melee_SwingCheck,obj,this,slot)
 end
