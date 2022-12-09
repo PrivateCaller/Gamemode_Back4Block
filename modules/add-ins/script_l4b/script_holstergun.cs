@@ -118,5 +118,3 @@ package L4B_HolsterItems
 	}
 };
 activatePackage("L4B_HolsterItems");
-
-T
