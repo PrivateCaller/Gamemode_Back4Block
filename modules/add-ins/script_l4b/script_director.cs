@@ -16,28 +16,39 @@ if(!isObject(L4B_BotSet))
     missionCleanup.add(L4B_BotSet);
 }
 
+function miniGameFriendlyFire(%objA,%objB)//Return true to indicate if we are firing on a friendly
+{    
+    if(!isObject(%objA) || !isObject(%objB)) return false;
+
+    if(%objA.getClassName() $= "GameConnection") %TargetA = %objA.player;
+    else %TargetA = %objA;
+
+    if(%objB.getClassName() $= "GameConnection") %TargetB = %objB.player;
+    else %TargetB = %objB;
+
+    if(%TargetA !$= %TargetB && getMiniGameFromObject(%TargetA) $= getMiniGameFromObject(%TargetB) && %TargetA.hType $= %TargetB.hType) return false;
+}
+
 package L4B_Director
 {
 	function minigameCanDamage(%objA, %objB)
-	{
-		if(!isObject(%objA) || !isObject(%objB)) return false;
-
+	{        
+        if(!isObject(%objA) || !isObject(%objB)) return false;
+    
         if(%objA.getClassName() $= "GameConnection") %TargetA = %objA.player;
         else %TargetA = %objA;
-
+    
         if(%objB.getClassName() $= "GameConnection") %TargetB = %objB.player;
         else %TargetB = %objB;
-
-		if(%TargetA !$= %TargetB && getMiniGameFromObject(%TargetA) $= getMiniGameFromObject(%TargetB) && %TargetA.hType $= %TargetB.hType) return false;
-		
-		Parent::minigameCanDamage(%objA, %objB);
+    
+        if(%TargetA !$= %TargetB && getMiniGameFromObject(%TargetA) $= getMiniGameFromObject(%TargetB) && %TargetA.hType $= %TargetB.hType) return false;
+        Parent::minigameCanDamage(%objA, %objB);
 	}
 
     function MiniGameSO::endGame(%minigame)
-    {
-        %minigame.L4B_ClearData(%client);
-		
+    {        	
 		Parent::endGame(%minigame);
+        %minigame.L4B_ClearData(%client);
     }
 
     function MiniGameSO::Reset(%minigame,%client)
@@ -424,7 +435,7 @@ function MinigameSO::spawnZombies(%minigame,%type,%amount,%spawnzone,%count)
 {
     if(!isObject(%spawnzone))//Just in case the zone wasn't listed then we can just choose from the area zone group and prioritize spawns
     {
-        if(%type $= "Horde" || %type $= "Wander") %priority = 2;//Common zombies don't get the high priority so just make them spawn wherever
+        if(%type $= "Horde" || %type $= "Wander") %priority = 2;//Common zombies don't get the high priority so just make them spawn whereever
         else %priority = 1;//Specials, tanks and witches spawn with higher priority
 
         switch(%priority)
@@ -516,6 +527,7 @@ function MinigameSO::spawnZombies(%minigame,%type,%amount,%spawnzone,%count)
             hMaxMoveSpeed = 1;
             hActivateDirection = %bottype.hActivateDirection;
             hGridPosition = %spawnbrick.getPosition();
+            currentZone = %zone;
             isHoleBot = 1;
         };
 
@@ -532,9 +544,14 @@ function MinigameSO::spawnZombies(%minigame,%type,%amount,%spawnzone,%count)
 }
 registerInputEvent("fxDTSBrick","onBotTeleSpawn","Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "Bot Bot" TAB "MiniGame MiniGame");
 
+registerOutputEvent("Bot","doMRandomTele","string 20 100");
+registerOutputEvent("Player","doMRandomTele","string 20 100");
+
+
+
 function Player::doMRandomTele(%obj,%targetbrick)
 {			
-	if(!isObject(%targetbrick))
+    if(!isObject(%targetbrick))
 	{		
 		if(isObject(AreaZoneGroup) && AreaZoneGroup.getCount()) 
 		{
@@ -542,29 +559,36 @@ function Player::doMRandomTele(%obj,%targetbrick)
 			for(%j = 0; %j < %zone.simset.getCount(); %j++) if(isObject(%brick = %zone.simset.getObject(%j)) && %brick.getdataBlock().ZoneBrickType $= "spawner" && strstr(strlwr(%brick.getName()),"_horde") != -1)
 			{
 				%teleportlist[%tb++] = %brick;
-				%teleportlist[%tb].currentset = %zone;
+				%teleportlistzone[%tb] = %zone;
 			}
 			%random = getRandom(1,%tb);
 			if(!%tb) return false;
-			else %targetbrick = %teleportlist[%random];
+			else 
+            {
+                %targetbrick = %teleportlist[%random];
+                %obj.currentZone = %teleportlistzone[%random];
+            }
 		}
-		else %obj.kill();
+		else return false;        
 	}	
-	else
-	{		
-		%obj.settransform(vectorAdd(getwords(%targetbrick.gettransform(),0,2),"0 0 0.25"));
-		%obj.setvelocity(%obj.getvelocity());
+    
+    %obj.settransform(vectorAdd(getwords(%targetbrick.gettransform(),0,2),"0 0 0.25"));
+    %obj.setvelocity(%obj.getvelocity());
 
-		$InputTarget_["Self"] = %targetbrick;
-		switch$(%obj.getclassname())
-		{
-			case "Player":	$InputTarget_["Player"] = %obj;
-							$InputTarget_["Client"] = %obj;
-			case "AIPlayer": $InputTarget_["Bot"] = %obj;
-		}
-		$InputTarget_["MiniGame"] = getMiniGameFromObject(%obj);
-		%targetbrick.processInputEvent("onBotTeleSpawn",%targetbrick.getgroup().client);
-	}
+    $InputTarget_["Self"] = %targetbrick;
+    switch$(%obj.getclassname())
+    {
+        case "Player":	$InputTarget_["Player"] = %obj;
+                        $InputTarget_["Client"] = %obj;
+        case "AIPlayer": $InputTarget_["Bot"] = %obj;
+    }
+    $InputTarget_["MiniGame"] = getMiniGameFromObject(%obj);
+    %targetbrick.processInputEvent("onBotTeleSpawn",%targetbrick.getgroup().client);
+}
+
+function AIPlayer::doMRandomTele(%obj,%targetbrick)
+{
+    Player::doMRandomTele(%obj,%targetbrick);
 }
 
 function MiniGameSO::l4bMusic(%minigame, %datablock, %loopable, %type)

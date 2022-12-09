@@ -116,13 +116,14 @@ function Survivor_ReviveDowned(obj)
     end
 
     local victim = ts.getobj(obj,"LastActivated")
+    local victimid = ts.callobj(victim,"getID")
     local dot = VectorDot(VectorNormalize(VectorSub(ts.callobj(victim,"getHackPosition"),ts.callobj(obj,"getHackPosition"))),ts.callobj(obj,"getEyeVector"))
     local distance = VectorDist(ts.getposition(obj),ts.getposition(victim))
     local client = ts.getobj(obj,"client")
     local victimclient = ts.getobj(victim,"client")
     local objminigame = ts.getobj(obj,"minigame")
     
-    if tonumber(dot) >= 0.81 and tonumber(distance) < 2.5 then
+    if tonumber(dot) >= 0.6 and tonumber(distance) < 2.5 then
 
         if tonumber(ts.getobj(obj,"revivecounter")) == nil then ts.setobj(obj,"revivecounter",0) end
         
@@ -140,7 +141,7 @@ function Survivor_ReviveDowned(obj)
 
         else
             
-            ts.callobj(client,"centerprint","<color:FFFFFF><font:impact:40>You saved <color:00e100>"..ts.getobj(victimclient,"name"),2)
+            ts.callobj(client,"centerprint","<color:FFFFFF><font:impact:40>You saved <color:00e100>"..ts.getobj(victimclient,"name"),2)            
             ts.callobj(client,"play2d","victim_revived_sound")
             ts.callobj(obj,"playthread",2,"root")            
             ts.setobj(obj,"revivecounter",0)
@@ -154,6 +155,7 @@ function Survivor_ReviveDowned(obj)
             ts.callobj(victim,"sethealth",25)
             ts.callobj(victim,"sapHealth",1)
             ts.setobj(victim,"isbeingsaved",0)
+            ts.getcallobj(victimid,"billboardbot.lighttomount.setdatablock(blankBillboard)")
         end
     else
         ts.setobj(victim,"isbeingsaved",0)

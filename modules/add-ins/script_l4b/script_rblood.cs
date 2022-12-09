@@ -1,4 +1,9 @@
-function serverCmdClearDecals(%client) 
+function RBloodLargeImage::onDone(%this, %obj)
+{
+	if(isObject(%obj)) %obj.delete();
+}
+
+function serverCmdClearDecals(%client)
 {	
 	if(!%client.isAdmin) 
 	{

@@ -1,15 +1,10 @@
 exec("./datablocks.cs");
 exec("./script_areazones.cs");
-//exec("./script_billboards.cs");
 exec("./script_director.cs");
 exec("./script_clientlogger.cs");
 exec("./script_rblood.cs");
 exec("./script_footsteps.cs");
-
-function RBloodLargeImage::onDone(%this, %obj)
-{
-	if(isObject(%obj)) %obj.delete();
-}
+exec("./script_holstergun.cs");
 
 function L4BHatModel::onAdd(%this, %obj) 
 {
@@ -33,16 +28,39 @@ function emptyPlayer::onAdd(%this, %obj)
 {
 	%obj.setDamageLevel(%this.maxDamage);
 
-	if(isObject(%source = %obj.source))
+	if(isObject(%source = %obj.source) && %obj.slotToMountBot)
 	{
 		%source.mountObject(%obj,%obj.slotToMountBot);
-		%obj.mountImage(%obj.imageToMount,0);
+		
+		if(%obj.imageToMount !$= "") %obj.mountImage(%obj.imageToMount,0);
+		if(%obj.lightToMount !$= "")
+		{
+			%billboard = new fxLight ("")
+			{
+				dataBlock = %obj.lightToMount;
+				source = %source;
+			};
+			
+			%obj.lightToMount = %billboard;
+			MissionCleanup.add(%billboard);
+			%billboard.setTransform(%obj.getTransform());
+			%billboard.attachToObject(%obj);
+
+			for (%i = 0; %i < clientgroup.getCount(); %i++) 			
+			if(isObject(%client clientgroup.getObject(%i)) && isObject(%client.player))
+			%billboard.ScopeToClient(%client);						
+		}
 	}
 	else
 	{
 		%obj.delete();
 		return;
 	}
+}
+
+function emptyPlayer::onRemove(%this, %obj)
+{
+	if(isObject(%obj.lightToMount)) %obj.lightToMount.delete();
 }
 function emptyPlayer::doDismount(%this, %obj, %forced) 
 {

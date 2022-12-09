@@ -370,7 +370,7 @@ datablock PlayerData(SurvivorPlayer : PlayerStandardArmor)
 	hType = "Survivors";
 	enableRBlood = true;
 	usesL4Bappearance = true;
-	//renderFirstPerson = true;
+	renderFirstPerson = true;
 	maxtools = 5;
 	maxWeapons = 5;
 
@@ -1043,7 +1043,7 @@ datablock ParticleEmitterData(BoomerBoomEmitter)
 
 datablock ExplosionData(BoomerExplosion)
 {
-	soundProfile		= boomer_explode_sound;
+	soundProfile		= "boomer_explode_sound";
 
    explosionShape = "";
    explosion           = "BoomerExplosion";
@@ -1053,6 +1053,12 @@ datablock ExplosionData(BoomerExplosion)
    particleRadius = 0.25;
 
    lifeTimeMS = 500;
+
+   subExplosion[0] = RBloodOrganExplosion;
+   subExplosion[1] = RBloodBrainExplosion;
+   //subExplosion[2] = bloodDebris3Explosion;
+   //subExplosion[3] = bloodDebris4Explosion;
+   //subExplosion[4] = bloodDebris5Explosion;   
 
    // Dynamic light
    lightStartRadius = 10;
@@ -1132,118 +1138,6 @@ datablock ParticleEmitterData(bloodStreakEmitter)
 	phiVariance			= 360;
 	overrideAdvance		= false;
 	particles			= "bloodStreakParticle";
-};
-
-datablock DebrisData(gib1Debris)
-{
-   emitters = "bloodStreakEmitter";
-
-	shapeFile = "./models/boomer/GIBLET1.dts";
-	lifetime = 10;
-	spinSpeed			= 2000.0;
-	minSpinSpeed = -100.0;
-	maxSpinSpeed = 100.0;
-	elasticity = 0.5;
-	friction = 0.4;
-	numBounces = 5;
-	staticOnMaxBounce = true;
-	snapOnMaxBounce = false;
-	fade = true;
-
-	gravModifier = 1.5;
-};
-
-datablock DebrisData(gib2Debris)
-{
-   emitters = "bloodStreakEmitter";
-
-	shapeFile = "./models/boomer/GIBLET2.dts";
-	lifetime = 10;
-	spinSpeed			= 2000.0;
-	minSpinSpeed = -600.0;
-	maxSpinSpeed = 600.0;
-	elasticity = 0.5;
-	friction = 0.3;
-	numBounces = 5;
-	staticOnMaxBounce = true;
-	snapOnMaxBounce = false;
-	fade = true;
-
-	gravModifier = 1.5;
-};
-
-datablock DebrisData(gib3Debris)
-{
-   emitters = "bloodStreakEmitter";
-
-	shapeFile = "./models/boomer/NEWGIB5.dts";
-	lifetime = 10;
-	spinSpeed			= 2000.0;
-	minSpinSpeed = -600.0;
-	maxSpinSpeed = 600.0;
-	elasticity = 0.5;
-	friction = 0.3;
-	numBounces = 5;
-	staticOnMaxBounce = true;
-	snapOnMaxBounce = false;
-	fade = true;
-
-	gravModifier = 1.5;
-};
-
-datablock DebrisData(gib4Debris)
-{
-   emitters = "bloodStreakEmitter";
-
-	shapeFile = "./models/boomer/NEWGIB3.dts";
-	lifetime = 10;
-	spinSpeed			= 2000.0;
-	minSpinSpeed = -600.0;
-	maxSpinSpeed = 600.0;
-	elasticity = 0.5;
-	friction = 0.3;
-	numBounces = 5;
-	staticOnMaxBounce = true;
-	snapOnMaxBounce = false;
-	fade = true;
-
-	gravModifier = 1.5;
-};
-
-datablock DebrisData(gib5Debris)
-{
-	shapeFile = "./models/boomer/NEWGIB2.dts";
-	lifetime = 10;
-	spinSpeed			= 2000.0;
-	minSpinSpeed = -600.0;
-	maxSpinSpeed = 600.0;
-	elasticity = 0.5;
-	friction = 0.3;
-	numBounces = 5;
-	staticOnMaxBounce = true;
-	snapOnMaxBounce = false;
-	fade = true;
-
-	gravModifier = 1.5;
-};
-
-datablock DebrisData(gib6Debris)
-{
-   emitters = "bloodStreakEmitter";
-
-	shapeFile = "./models/boomer/NEWGIB4.dts";
-	lifetime = 10;
-	spinSpeed			= 2000.0;
-	minSpinSpeed = -600.0;
-	maxSpinSpeed = 600.0;
-	elasticity = 0.5;
-	friction = 0.3;
-	numBounces = 5;
-	staticOnMaxBounce = true;
-	snapOnMaxBounce = false;
-	fade = true;
-
-	gravModifier = 1.5;
 };
 
 datablock ParticleData(bloodExplosionParticle)
@@ -1356,125 +1250,6 @@ datablock ParticleEmitterData(bloodSprayEmitter)
 
 //explosion
 //////////////////////////////////////////
-
-datablock ExplosionData(bloodDebris1Explosion)
-{
-   particleEmitter = bloodChunksEmitter;
-   particleDensity = 30;
-   particleRadius = 0.2;
-
-   debris = gib2Debris;
-   debrisNum = 8;
-   debrisNumVariance = 6;
-   debrisPhiMin = 0;
-   debrisPhiMax = 360;
-   debrisThetaMin = 0;
-   debrisThetaMax = 180;
-   debrisVelocity = 8;
-   debrisVelocityVariance = 6;
-};
-
-datablock ExplosionData(bloodDebris2Explosion)
-{
-   debris = gib3Debris;
-   debrisNum = 6;
-   debrisNumVariance = 6;
-   debrisPhiMin = 0;
-   debrisPhiMax = 360;
-   debrisThetaMin = 0;
-   debrisThetaMax = 180;
-   debrisVelocity = 8;
-   debrisVelocityVariance = 6;
-};
-datablock ExplosionData(bloodDebris3Explosion)
-{
-   debris = gib4Debris;
-   debrisNum = 9;
-   debrisNumVariance = 7;
-   debrisPhiMin = 0;
-   debrisPhiMax = 360;
-   debrisThetaMin = 0;
-   debrisThetaMax = 180;
-   debrisVelocity = 8;
-   debrisVelocityVariance = 6;
-};
-
-datablock ExplosionData(bloodDebris4Explosion)
-{
-   debris = gib5Debris;
-   debrisNum = 1;
-   debrisNumVariance = 0;
-   debrisPhiMin = 0;
-   debrisPhiMax = 360;
-   debrisThetaMin = 0;
-   debrisThetaMax = 180;
-   debrisVelocity = 12;
-   debrisVelocityVariance = 8;
-};
-
-datablock ExplosionData(bloodDebris5Explosion)
-{
-   debris = gib6Debris;
-   debrisNum = 16;
-   debrisNumVariance = 9;
-   debrisPhiMin = 0;
-   debrisPhiMax = 360;
-   debrisThetaMin = 0;
-   debrisThetaMax = 180;
-   debrisVelocity = 8;
-   debrisVelocityVariance = 6;
-};
-
-datablock ExplosionData(goremodExplosion)
-{
-	soundProfile		= boomer_kablooey_sound;
-
-   explosionShape = "";
-
-   lifeTimeMS = 150;
-
-   debris = gib1Debris;
-   debrisNum = 16;
-   debrisNumVariance = 16;
-   debrisPhiMin = 0;
-   debrisPhiMax = 360;
-   debrisThetaMin = 0;
-   debrisThetaMax = 180;
-   debrisVelocity = 8;
-   debrisVelocityVariance = 6;
-
-   particleEmitter = bloodExplosionEmitter;
-   particleDensity = 10;
-   particleRadius = 0.2;
-
-   emitter[0] = bloodSprayEmitter;
-
-   subExplosion[0] = bloodDebris1Explosion;
-   subExplosion[1] = bloodDebris2Explosion;
-   subExplosion[2] = bloodDebris3Explosion;
-   subExplosion[3] = bloodDebris4Explosion;
-   subExplosion[4] = bloodDebris5Explosion;
-
-   faceViewer     = true;
-   explosionScale = "1 1 1";
-
-   shakeCamera = true;
-   camShakeFreq = "10.0 11.0 10.0";
-   camShakeAmp = "3.0 10.0 3.0";
-   camShakeDuration = 0.1;
-   camShakeRadius = 20.0;
-};
-
-datablock ProjectileData(goreModProjectile)
-{
-	uiname							= "";
-
-	lifetime						= 10;
-	fadeDelay						= 10;
-	explodeondeath						= true;
-	explosion						= goremodExplosion;
-
-};
 
 ///////////////////////////
 //Boomer Vomit Datablocks//
@@ -1661,9 +1436,9 @@ datablock PlayerData(CommonZombieHoleBot : SurvivorPlayer)
 	speedDamageScale = 0.5;
 	isSurvivor = false;
 
-    maxForwardSpeed = 10;
-    maxSideSpeed = 9;
-	maxBackwardSpeed = 8;
+    maxForwardSpeed = 12;
+    maxSideSpeed = 11;
+	maxBackwardSpeed = 10;
 
  	maxForwardCrouchSpeed = 7;
 	maxSideCrouchSpeed = 6;

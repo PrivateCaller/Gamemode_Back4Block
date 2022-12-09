@@ -99,9 +99,6 @@ package L4B_AreaZones
 };
 activatePackage(L4B_AreaZones);
 
-registerOutputEvent("Bot","doMRandomTele","string 20 100");
-registerOutputEvent("Player","doMRandomTele","string 20 100");
-
 datablock fxDTSBrickData (brickAreaZoneSpawnerData:brick4x4fData)
 {
 	category = "Special";
@@ -317,7 +314,6 @@ function serverCmdazhelp(%client)
 {
 	messageClient(%client, '', "\c7--------------------------------------------------------------------------------");
 	messageClient(%client, '', "<font:Arial:25>\c6Current Area Zone:" SPC "\c4" @ %client.currAreaZone.zonename);
-	messageClient(%client, '', "<font:Arial:25>\c6Current Area Zone Number:" SPC "\c4" @ %client.currAreaZone.zonenumber);
 	if(isObject(%client.currAreaZone.simset)) messageClient(%client, '', "<font:Arial:25>\c6Current Area Zone Object Count:" SPC "\c4" @ %client.currAreaZone.simset.getCount());
 	messageClient(%client, '', "\c7--------------------------------------------------------------------------------");
 	messageClient(%client, '', "<tab:280>\c3/azcreate\c6 [\c3name\c6]\t\c6 Create a new named Area Zone.");
@@ -379,10 +375,8 @@ function servercmdazcreate(%client, %n1, %n2, %n3, %n4, %n5)
 	%pos = %client.player.getPosition();
 	%pos = (getWord(%pos, 0) | 0) SPC (getWord(%pos, 1) | 0) SPC (getWord(%pos, 2) | 0);
 
-	if(!%client.currAreaZoneNumber) %client.currAreaZoneNumber = 1;
 	%Zone = AreaZone(%name);
 	%Zone.setSize(vectorAdd(%pos, "-5 -5 0"), vectorAdd(%pos, "5 5 10"));
-	%zone.zonenumber = %client.currAreaZoneNumber++;
 	%client.currAreaZone = %Zone;
 	messageClient(%client, '', "\c6A new Zone has been created somewhere around your player.");
 	%client.player.setTransform(%client.player.getTransform());
@@ -420,7 +414,7 @@ function servercmdazlist(%client)
 	for(%i = 0; %i < AreaZoneGroup.getCount(); %i++)
 	{
 		%Zone = AreaZoneGroup.getObject(%i);
-		messageClient(%client, '', "\c6" @ %Zone.ZoneName SPC "\c6Number " @ %zone.zonenumber);
+		messageClient(%client, '', "\c6" @ %Zone.ZoneName);
 	}
 }
 
@@ -453,26 +447,6 @@ function servercmdazset(%client, %n1, %n2, %n3, %n4, %n5)
 		}			
 		return;
 	}
-}
-
-function servercmdazsetnum(%client, %name, %n1)
-{
-	if(!%client.isAdmin){messageClient(%client, '', $EZ::AdminFailMsg); return;}
-
-	if(isObject(%zone = findAreaZoneByName(%name)))
-	{
-		if(%n1)
-		{
-			%zone.zonenumber = %n1;
-			messageClient(%client, '', "\c0Set zone number to \c0" @ %n1);
-		}
-		else 
-		{
-			%zone.zonenumber = "";
-			messageClient(%client, '', "\c0Cleared zone number");
-		}
-	}
-	else messageClient(%client, '', "\c0There is no Zone with that name!");
 }
 
 function servercmdazedit(%client, %type)
@@ -546,7 +520,7 @@ function exportAreaZones(%filePath)
 	for(%i = 0; %i < AreaZoneGroup.getCount(); %i++)
 	{
 		%Zone = AreaZoneGroup.getObject(%i);
-		%file.writeLine(%Zone.ZoneName TAB %zone.zonenumber TAB %Zone.point1 TAB %Zone.point2);
+		%file.writeLine(%Zone.ZoneName TAB %Zone.point1 TAB %Zone.point2);
 	}
 
 	%file.delete();
@@ -618,11 +592,9 @@ function loadAreaZones(%filename)
 	{
 		%line = %file.readLine();
 		%name = getField(%line,0);
-		%zonenumber = getField(%line,1);
-		%point1 = getField(%line,2);
-		%point2 = getField(%line,3);
+		%point1 = getField(%line,1);
+		%point2 = getField(%line,2);
 		%Zone = AreaZone(%name);
-		%Zone.zonenumber = %zonenumber;
 		%Zone.setSize(%point1, %point2);
 		%Zone.updateShapeName();
 	}
@@ -650,7 +622,7 @@ function fxDTSBrick::CheckAllInAreaZone(%obj,%client)
 {
 	if(!isObject(%minigame = getMiniGameFromObject(%client.player))) return;
 
-	%zone = %brick.zone;
+	%zone = %obj.zone;
 	$InputTarget_["Self"] = %obj;
 	$InputTarget_["MiniGame"] = %minigame;
 	switch$(%obj.getclassname())
@@ -659,7 +631,7 @@ function fxDTSBrick::CheckAllInAreaZone(%obj,%client)
 						$InputTarget_["Client"] = %client;
 		case "AIPlayer": $InputTarget_["Player"] = %client.player;
 	}	
-	for(%i = 0; %i < %minigame.numMembers; %i++) if(isObject(%player = %minigame.member[%i].player) && !%player.hIsInfected && !%player.getdataBlock().isDowned) %livePlayerCount++;
+	for(%i = 0; %i < %minigame.numMembers; %i++) if(isObject(%player = %minigame.member[%i].player) && !%player.hIsInfected && !%player.getdataBlock().isDowned) %livePlayerCount++;	
 
 	if(%zone.presencecount == %livePlayerCount)	%obj.processInputEvent("onAllZoneTrue",%client);
 	else %obj.processInputEvent("onAllZoneFalse",%client);
@@ -677,7 +649,6 @@ function AreaZoneTrigger::onEnterTrigger(%this, %trigger, %obj)
 		%zone.presencecount++;
 		%zonename = %zone.zonename;
 		%obj.currentZone = %zone;
-		%obj.currentZoneNumber = %zone.zonenumber;
 
 		for(%i = 0; %i < %minigame.numMembers; %i++) if(isObject(%player = %minigame.member[%i].player) && !%player.hIsInfected && !%player.getdataBlock().isDowned) %livePlayerCount++;
 		
@@ -710,37 +681,37 @@ function AreaZoneTrigger::onEnterTrigger(%this, %trigger, %obj)
 			{
 				case "Start": 	%minigame.director(true);
 				default: 	for(%g = 0; %g < %zone.simset.getCount(); %g++)
+							{
+								if(isObject(%eventbrick = %zone.simset.getObject(%g)) && %eventbrick.getdataBlock().ZoneBrickType $= "event")
 								{
-									if(isObject(%eventbrick = %zone.simset.getObject(%g)) && %eventbrick.getdataBlock().ZoneBrickType $= "event")
+									$InputTarget_["Self"] = %eventbrick;
+									switch$(%obj.getclassname())
 									{
-		    							$InputTarget_["Self"] = %eventbrick;
-		    							switch$(%obj.getclassname())
-		    							{
-		    							    case "Player":	$InputTarget_["Player"] = %obj;
-		    							                    $InputTarget_["Client"] = %obj.client;
-		    							    case "AIPlayer": $InputTarget_["Bot"] = %obj;
-		    							}
-		    							$InputTarget_["MiniGame"] = getMiniGameFromObject(%obj);
-		    							%eventbrick.processInputEvent("onAZFirstEntry",%obj.client);
+										case "Player":	$InputTarget_["Player"] = %obj;
+														$InputTarget_["Client"] = %obj.client;
+										case "AIPlayer": $InputTarget_["Bot"] = %obj;
 									}
+									$InputTarget_["MiniGame"] = getMiniGameFromObject(%obj);
+									%eventbrick.processInputEvent("onAZFirstEntry",%obj.client);
+								}
+							}
+
+							for(%g = 0; %g < %zone.simset.getCount(); %g++)
+							{
+								if(!%foundspawner && isObject(%itembricks = %zone.simset.getObject(%g)) && %itembricks.getdataBlock().ZoneBrickType $= "item")
+								{		            
+									%minigame.schedule(100,sortItemSpawns,%zone);
+									%founditemspawner = true;
 								}
 
-								for(%g = 0; %g < %zone.simset.getCount(); %g++)
+								if(!%foundbotspawner && isObject(%spawnbricks = %zone.simset.getObject(%g)) && %spawnbricks.getdataBlock().ZoneBrickType $= "spawner" && strstr(strlwr(%spawnbricks.getname()),"_wander") != -1)
 								{
-									if(!%foundspawner && isObject(%itembricks = %zone.simset.getObject(%g)) && %itembricks.getdataBlock().ZoneBrickType $= "item")
-									{		            
-										%minigame.schedule(100,sortItemSpawns,%zone);
-										%founditemspawner = true;
-									}
+									%minigame.schedule(150,spawnZombies,"Wander",getRandom(15,25),%zone);
+									%foundbotspawner = true;
+								}
 
-									if(!%foundbotspawner && isObject(%spawnbricks = %zone.simset.getObject(%g)) && %spawnbricks.getdataBlock().ZoneBrickType $= "spawner" && strstr(strlwr(%spawnbricks.getname()),"_wander") != -1)
-									{
-										%minigame.schedule(150,spawnZombies,"Wander",getRandom(15,25),%zone);
-										%foundbotspawner = true;
-									}
-
-									if(%foundbotspawner && %founditemspawner) break;								
-								}													
+								if(%foundbotspawner && %founditemspawner) break;								
+							}													
 			}			
 		}
 	}

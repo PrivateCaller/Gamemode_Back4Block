@@ -286,3 +286,20 @@ $hZombieUncommonType[%hzu++] = "ZombiePoliceHoleBot";
 $hZombieUncommonTypeAmount = %hzu;
 configLoadL4BItemScavenge();
 configLoadL4BItemSlots();
+
+function GunImages_GenerateSideImages()
+{
+	for(%i = 0; %i < DatablockGroup.getCount(); %i++)	
+	if(isObject(%item = DatablockGroup.getObject(%i)) && %item.L4Bitemslot $= "Secondary")
+	{
+		%eval = %eval @ "datablock ShapeBaseImageData(" @ %item.image.getName() @ "GunImagesSIDE)";
+		%eval = %eval @ "{";
+			%eval = %eval @ "shapeFile = \"" @ %item.image.shapeFile @ "\";";
+			%eval = %eval @ "doColorShift = " @ (%item.image.doColorShift && 1) @ ";";
+			%eval = %eval @ "colorShiftColor = \"" @ %item.image.colorShiftColor @ "\";";
+			%eval = %eval @ "mountPoint = 1;";
+		%eval = %eval @ "};";
+		eval(%eval);
+	}	
+}
+GunImages_GenerateSideImages();

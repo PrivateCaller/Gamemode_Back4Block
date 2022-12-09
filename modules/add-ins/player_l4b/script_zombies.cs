@@ -310,6 +310,8 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 											 %pinmusic = "musicData_smoker_tonguepin";
 			}
 
+			if(isObject(%col.billboardbot.lightToMount)) %col.billboardbot.lightToMount.setdatablock("strangledBillboard");
+
 			switch$(%col.getclassname())
 			{
 				case "Player":	if(isObject(%minigame = getMiniGameFromObject(%col)))
@@ -317,20 +319,19 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 										
 								%col.client.camera.setOrbitMode(%col, %col.getTransform(), 0, 5, 0, 1);
 								%col.client.l4bMusic(%pinmusic, true, "Music");
-								//Billboard_NeedySurvivor(%col, "Strangled");
 								%col.client.setControlObject(%col.client.camera);
 								ServerCmdUnUseTool (%target.client);
 
-								//%pos = %col.getPosition();
-								//%radius = 15;
-								//%searchMasks = $TypeMasks::PlayerObjectType;
-								//InitContainerRadiusSearch(%pos, %radius, %searchMasks);
-//
-								//while((%targetid = containerSearchNext()) != 0)
-								//{
-								//	if(%targetid == %col) continue;
-								//	else if(%targetid.getclassname() $= "Player" && %targetid.getdataBlock().isSurvivor) %targetid.client.centerPrint("<color:00e100><font:impact:40>" @ %col.client.name SPC "<color:FFFFFF>is in trouble <br>(and is very close to you!)",2);
-								//}
+								%pos = %col.getPosition();
+								%radius = 15;
+								%searchMasks = $TypeMasks::PlayerObjectType;
+								InitContainerRadiusSearch(%pos, %radius, %searchMasks);
+
+								while((%targetid = containerSearchNext()) != 0)
+								{
+									if(%targetid == %col) continue;
+									else if(%targetid.getclassname() $= "Player" && %targetid.getdataBlock().isSurvivor) %targetid.client.centerPrint("<color:00e100><font:impact:40>" @ %col.client.name SPC "<color:FFFFFF>is in trouble <br>(and is very close to you!)",2);
+								}
 
 				case "AIPlayer": %col.stopHoleLoop();
 			}
@@ -347,23 +348,6 @@ function L4B_SpecialsPinCheck(%obj,%col)
 	if((isObject(%obj) && isObject(%col) && !miniGameCanDamage(%obj,%col)) || (!isObject(%obj) || %obj.getstate() $= "Dead" || !%obj.isStrangling) || (!isObject(%col) || !%col.isBeingStrangled || %col.hIsInfected || %col.getState() $= "Dead") || 
 	(%obj.getdatablock().getName() $= "ZombieJockeyHoleBot" && %col.getdatablock().isDowned))
 	{
-		if(isObject(%col))
-		{
-			%col.isBeingStrangled = false;
-			%col.hEater = 0;
-
-			if(%col.getstate() !$= "Dead")
-			{
-				switch$(%col.getClassName())
-				{
-					case "Player": %col.client.setControlObject(%col);
-					case "AIPlayer": %col.setControlObject(%col);
-									 %col.resetHoleLoop();
-				}
-				%col.playthread(0,root);
-			}
-		}		
-		
 		if(isObject(%obj))
 		{
 			%obj.isStrangling = false;	
@@ -398,6 +382,9 @@ function L4B_SpecialsPinCheck(%obj,%col)
 		if(isObject(%col))
 		{
 			%col.isBeingStrangled = false;
+			%col.hEater = 0;
+			if(isObject(%col.billboardbot.lightToMount) && !%col.getdataBlock().isDowned) %col.billboardbot.lightToMount.setdatablock("blankBillboard");
+
 			if(%col.getstate() !$= "Dead")
 			{
 				switch$(%col.getClassName())

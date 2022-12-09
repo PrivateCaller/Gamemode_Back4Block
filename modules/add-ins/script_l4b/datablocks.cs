@@ -19,6 +19,58 @@ while(%file !$= "")
 	%file = findNextFile(%pattern);
 }
 
+datablock fxLightData(blankBillboard)
+{
+	LightOn = false;
+	flareOn = true;
+	flarebitmap = "base/data/shapes/blank.png";
+	ConstantSize = 1;
+    ConstantSizeOn = true;
+	LinkFlare = false;
+	AnimOffsets = false;
+    FadeTime = 99999;
+	
+	blendMode = 1;
+	flareColor = "1 1 1 1";		
+	ConstantSize = 2;
+};
+
+datablock fxLightData(strangledBillboard : blankBillboard)
+{
+	flarebitmap = "./models/flare_strangled.png";
+};
+
+datablock fxLightData(incappedBillboard : blankBillboard)
+{
+	flarebitmap = "./models/flare_incapped.png";
+};
+
+datablock PlayerData(ItemHolsterPlayer)
+{
+    shapeFile = "./models/itemholsterplayer.dts";
+    boundingBox = "4 4 4";
+
+    splash = PlayerSplash;
+    splashEmitter[0] = PlayerFoamDropletsEmitter;
+    splashEmitter[1] = PlayerFoamEmitter;
+    splashEmitter[2] = PlayerBubbleEmitter;
+
+    mediumSplashSoundVelocity = 10;
+    hardSplashSoundVelocity = 20;
+    exitSplashSoundVelocity = 5;
+
+    impactWaterEasy = Splash1Sound;
+    impactWaterMedium = Splash1Sound;
+    impactWaterHard = Splash1Sound;
+    exitingWater = exitWaterSound;
+
+    jetEmitter = playerJetEmitter;
+    jetGroundEmitter = playerJetGroundEmitter;
+    jetGroundDistance = 4;
+    footPuffNumParts = 10;
+    footPuffRadius = 0.25;
+};
+
 datablock ParticleData(largeRBloodParticle)
 {
    dragCoefficient = 3;

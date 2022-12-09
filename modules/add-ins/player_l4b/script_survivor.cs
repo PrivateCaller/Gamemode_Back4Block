@@ -82,6 +82,17 @@ function SurvivorPlayer::onNewDataBlock(%this,%obj)
 {	
 	Parent::onNewDataBlock(%this,%obj);
 
+	if(!isObject(%obj.billboardbot))
+	{
+		%obj.billboardbot = new Player() 
+		{ 
+			dataBlock = "EmptyPlayer";
+			source = %obj;
+			slotToMountBot = 5;
+			lightToMount = "blankBillboard";
+		};
+	}
+	
 	%obj.SurvivorStress = 0;
 	%obj.hType = "Survivors";
 }
@@ -141,6 +152,8 @@ function SurvivorPlayerDowned::onDisabled(%this,%obj)
 		serverPlay3D("die_underwater_bubbles_sound",%obj.getPosition());
 	}
 	else %obj.playaudio(0,"survivor_death" @ getRandom(1, 8) @ "_sound");
+
+	if(isObject(%obj.billboardbot.lightToMount)) %obj.billboardbot.delete();
 }
 
 function SurvivorPlayer::onDisabled(%this,%obj,%state) { SurvivorPlayerDowned::onDisabled(%this,%obj,%state); }
@@ -168,10 +181,12 @@ function SurvivorPlayerDowned::onNewDataBlock(%this,%obj)
 	if(!%obj.hEater) %obj.playthread(0,sit);
 	%obj.lastcry = getsimtime();
 	%obj.playaudio(0,"survivor_pain_high1_sound");
-	%this.DownLoop(%obj);	
+	%this.DownLoop(%obj);
+
+	if(isObject(%obj.billboardbot.lightToMount)) %obj.billboardbot.lightToMount.setdatablock("incappedBillboard");
 	
 	if(%obj.getClassName() $= "Player" && isObject(%minigame = getMinigameFromObject(%obj)))
-	{
+	{		
 		%minigame.L4B_ChatMessage("<color:FFFF00><bitmapk:Add-Ons/Gamemode_Left4Block/modules/add-ins/player_l4b/icons/ci_down>" SPC %obj.client.name,"victim_needshelp_sound",true);
 		%minigame.checkLastManStanding();
 	}

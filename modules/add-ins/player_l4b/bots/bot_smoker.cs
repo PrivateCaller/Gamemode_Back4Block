@@ -238,7 +238,7 @@ function ZombieSmokerHoleBot::onTrigger(%this,%obj,%triggerNum,%val)
 						%obj.hClearMovement();
 						%obj.stopHoleLoop();
 					}				
-					%obj.ShootTongue = %obj.getDatablock().schedule(1250,ShootTongue,%obj);
+					%obj.ShootTongue = %obj.getDatablock().schedule(750,ShootTongue,%obj);
 					%obj.playaudio(0,"smoker_warn" @ getrandom(1,3) @ "_sound");
 				}
 	}	
@@ -304,7 +304,7 @@ function SmokerTongueShape::onTongueLoop(%this,%obj)
 			}			
 		}
 
-		if(vectorDist(%end.getposition(),%smoker.getposition()) > 1.25)
+		if(vectorDist(%end.getposition(),%smoker.getposition()) > 2)
 		{ 
 			if(getWord(%end.getVelocity(), 2) <= 0.75 && !%obj.hitMusic) %end.playthread(1,"activate2");
 

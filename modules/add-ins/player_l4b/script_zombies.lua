@@ -1,7 +1,6 @@
 ---@diagnostic disable: undefined-global, lowercase-global, redundant-parameter
 
-function hNoSeeIdleTeleport(obj)
-    
+function hNoSeeIdleTeleport(obj)    
     if ts.getstate(obj) == "Dead" or ts.isobject(ts.call("getMinigameFromObject",obj)) == false or ts.getobj(obj,"hState") == "Following" then 
         ts.setobj(obj,"hTimeLeftToTele",0)
         return 
@@ -13,14 +12,15 @@ function hNoSeeIdleTeleport(obj)
     
     if ts.getobj(obj,"hState") == "Wandering" then TimeMax = 10
     elseif ts.getobj(obj,"hState") == "Pathing" then TimeMax = 20
-    else TimeMax = 10 end
+    else TimeMax = 10 end    
 
     if hTimeLeftToTele >= TimeMax or (ts.getcallobj(obj,"currentZone.presencecount") == "" or ts.getcallobj(obj,"currentZone.presencecount") == "0") then--Only begin after a certain amount of time has passed, which is the amount of hole loops the bot does when its not in any of the returned states above
         ts.setobj(obj,"hTimeLeftToTele",0)
 
-        if ts.isobject(ts.call("getMinigameFromObject",obj)) then
+        if ts.isobject(ts.call("getMinigameFromObject",obj)) then            
            local minigame = ts.call("getMinigameFromObject",obj)
            local membercount = tonumber(ts.getcallobj(minigame,"numMembers"))
+           
 
             for memberloopcount = 0, membercount, 1 do
                 if ts.isobject(ts.getcallobj(minigame,"member["..memberloopcount.."]")) then--Check if the member exists
@@ -50,7 +50,7 @@ function hNoSeeIdleTeleport(obj)
                 end
             end
         end
-        if cansee == false then ts.getcallobj(obj,"doMRandomTele(\"Horde\")") end--Teleport if we cannot be observed
+        if cansee == false then ts.callobj(obj,"doMRandomTele") end--Teleport if we cannot be observed            
     end  
 end
 

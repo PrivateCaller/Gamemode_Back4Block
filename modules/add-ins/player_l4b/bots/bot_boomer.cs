@@ -89,14 +89,13 @@ function ZombieBoomerHoleBot::onDamage(%this,%obj,%delta)
 	
 		%b = new projectile()
 		{
-			datablock = goreModProjectile;
+			datablock = BoomerProjectile;
 			initialPosition = %obj.getPosition();
 			sourceObject = %obj;
-			scale = "2.5 2.5 2.5";
+			scale = "1 1 1";
 			damageType = $DamageType::Boomer;
 		};
 		%obj.unMountImage(0);
-		serverPlay3D("boomer_explode_sound",%obj.getPosition());
 	}	
 }
 
@@ -248,6 +247,40 @@ function ZombieBoomerHoleBot::L4BAppearance(%this,%obj,%client)
 	%obj.setNodeColor("rshoe",%rlegColor);
 	%obj.setNodeColor("lshoe",%llegColor);
 	%obj.setNodeColor("pants",%hipColor);	
+}
+
+function BoomerProjectile::onExplode(%this,%obj)
+{
+	Parent::onExplode(%this,%obj);
+
+    InitContainerRadiusSearch(%obj.getPosition(), 5, $TypeMasks::PlayerObjectType);
+    while ((%targetid = containerSearchNext()) != 0)
+    {
+        if((%targetid.getType() & $TypeMasks::PlayerObjectType) && checkHoleBotTeams(%obj.sourceObject,%targetid) && miniGameCanDamage(%obj.sourceObject,%targetid))
+        {
+			%targetid.setWhiteout(2);
+			if(%targetid.BoomerBiled) return Parent::onExplode(%this,%obj);
+			else
+			{
+				if(!%targetid.BoomerBiled)
+				{
+					if(isObject(%targetid.client) && isObject(%minigame = getMiniGameFromObject(%targetid))) 
+					{
+						%minigame.L4B_ChatMessage("<color:FFFF00>" @ %obj.sourceObject.getDatablock().hName SPC %obj.sourceObject.getdataBlock().hPinCI SPC %targetid.client.name,"victim_needshelp_sound",true);
+						if(%miniGame.DirectorStatus != 2 && %minigame.RoundType !$= "Horde") %minigame.schedule(1000,HordeRound);
+					}
+					%targetid.vomitbot = new Player() 
+					{ 
+						dataBlock = "EmptyPlayer";
+						source = %targetid;
+						slotToMountBot = 2;
+						imageToMount = "BileStatusPlayerImage";
+					};
+					%targetid.BoomerBiled = true;
+				}
+			}
+        }
+    }
 }
 
 function BoomerVomitProjectile::onExplode(%this,%obj)

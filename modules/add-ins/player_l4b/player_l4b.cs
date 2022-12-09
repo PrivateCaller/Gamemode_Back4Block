@@ -192,7 +192,8 @@ package Player_L4B
 			if(%obj.getType() & $TypeMasks::PlayerObjectType && %col.getType() & $TypeMasks::PlayerObjectType) 
 			{
 				if(%obj.getdataBlock().isSurvivor && %col.getdataBlock().isSurvivor) return false;
-				else switch$(%obj.getdataBlock().getName())
+
+				switch$(%obj.getdataBlock().getName())
 				{
 					case "ZombieChargerHoleBot": if(vectordist(%obj.getposition(),%col.getposition()) < 2.5 && (%force = mFloor(vectorDot(getWords(%obj.getVelocity(),0,1), %obj.getForwardVector()))) > 15)
 												{
@@ -218,6 +219,7 @@ package Player_L4B
 												}
 					case "ZombieHunterHoleBot": if(%obj.hEating == %col) return false;
 				}
+				//if(%obj.hIsInfected && %col.hIsInfected) return false;
 			}
 
 			return true;
@@ -431,7 +433,7 @@ package Player_L4B
 			%obj.hIsInfected = "";
 
 			if(%obj.getdatablock().hType !$= "") %obj.hType = %obj.getdatablock().hType;
-			if(isObject(%obj.client)) commandToClient( %obj.client, 'SetVignette', $EnvGuiServer::VignetteMultiply, $EnvGuiServer::VignetteColor);
+			if(isObject(%obj.client) && %obj.getDamagePercent() == 1) commandToClient( %obj.client, 'SetVignette', $EnvGuiServer::VignetteMultiply, $EnvGuiServer::VignetteColor);
 		}
 	}
 
