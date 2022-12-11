@@ -1384,7 +1384,7 @@ datablock ProjectileData(sPipeBombProjectile)
 	isDistraction = 1;
 	distractionFunction = PipeBombDistract;
 	distractionDelay = 1000;
-	projectileShapeName = "./models/sPipeBombProjectile.dts";
+	projectileShapeName = "./models/pipebombprojectile.dts";
 	directDamage        = 0;
 	explosion           = sPipeBombExplosion;
 	particleEmitter     = sPipeBombTrailEmitter;   
@@ -1441,7 +1441,7 @@ datablock ItemData(sPipeBombItem)
 	category = "Weapon";
 	className = "Weapon";
 
-	shapeFile = "./models/sPipeBombItem.dts";
+	shapeFile = "./models/pipebombitem.dts";
 	mass = 1;
 	density = 0.2;
 	elasticity = 0.2;
@@ -1459,10 +1459,10 @@ datablock ItemData(sPipeBombItem)
 
 datablock ShapeBaseImageData(sPipeBombImage)
 {
-   shapeFile = "./models/sPipeBombWeapon.dts";
+   shapeFile = "./models/pipebombitem.dts";
    emap = true;
    mountPoint = 0;
-   offset = "0.1 -0.1 0.7";
+   offset = "0 0 0";
    correctMuzzleVector = true;
    className = "WeaponImage";
    item = sPipeBombItem;
@@ -1701,8 +1701,7 @@ datablock ItemData(BileBombItem)
 	//gui stuff
 	uiName = "Bile Bomb";
 	iconName = "./icons/icon_BileBomb";
-	doColorShift = true;
-	colorShiftColor = "1 1 1 1";
+	doColorShift = false;
 
 	 // Dynamic properties defined by the scripts
 	image = BileBombImage;
@@ -1714,80 +1713,55 @@ datablock ShapeBaseImageData(BileBombImage)
    // Basic Item properties
    shapeFile = "./models/BileBombItem.dts";
    emap = true;
-
-   // Specify mount point & offset for 3rd person, and eye offset
-   // for first person rendering.
    mountPoint = 0;
-   offset = "-0.05 0.05 0";
-   //eyeOffset = "0.1 0.2 -0.55";
-
-   // When firing from a point offset from the eye, muzzle correction
-   // will adjust the muzzle vector to point to the eye LOS point.
-   // Since this weapon doesn't actually fire from the muzzle point,
-   // we need to turn this off.  
+   offset = "-0.5 0.5 0";
    correctMuzzleVector = true;
-
-   // Add the WeaponImage namespace as a parent, WeaponImage namespace
-   // provides some hooks into the inventory system.
    className = "WeaponImage";
 
-   // Projectile && Ammo.
    item = BileBombItem;
    ammo = " ";
    projectile = BileBombProjectile;
    projectileType = Projectile;
 
-   //melee particles shoot from eye node for consistancy
    melee = false;
-   //raise your arm up or not
    armReady = true;
+   doColorShift = false;
 
-   //casing = " ";
-   doColorShift = true;
-   colorShiftColor = "1 1 1 1";
+	// States
+	stateName[0]					= "Activate";
+	stateSequence[0]				= "ready";
+	stateSound[0]					= weaponSwitchSound;
+	stateTimeoutValue[0]			= 0.1;
+	stateTransitionOnTimeout[0]		= "Ready";
 
-   // Images have a state system which controls how the animations
-   // are run, which sounds are played, script callbacks, etc. This
-   // state system is downloaded to the client so that clients can
-   // predict state changes and animate accordingly.  The following
-   // system supports basic ready->fire->reload transitions as
-   // well as a no-ammo->dryfire idle state.
+	stateName[1]					= "Ready";
+	stateAllowImageChange[1]		= true;
+	stateTransitionOnTriggerDown[1]	= "Charge";
 
-  		// States
-		stateName[0]					= "Activate";
-		stateSequence[0]				= "ready";
-		stateSound[0]					= weaponSwitchSound;
-		stateTimeoutValue[0]			= 0.1;
-		stateTransitionOnTimeout[0]		= "Ready";
+	stateName[2]					= "Charge";
+	stateTimeoutValue[2]			= 0.3;
+	stateTransitionOnTimeout[2]		= "Charged";
+	stateTransitionOnTriggerUp[2]	= "AbortCharge";
+	stateScript[2]					= "onCharge";
+	stateWaitForTimeout[2]			= true;
 
-		stateName[1]					= "Ready";
-		stateAllowImageChange[1]		= true;
-		stateTransitionOnTriggerDown[1]	= "Charge";
+	stateName[3]					= "Charged";
+	stateAllowImageChange[3]		= false;
+	stateTransitionOnTriggerUp[3]	= "Fire";
 
-		stateName[2]					= "Charge";
-		stateTimeoutValue[2]			= 0.3;
-		stateTransitionOnTimeout[2]		= "Charged";
-		stateTransitionOnTriggerUp[2]	= "AbortCharge";
-		stateScript[2]					= "onCharge";
-		stateWaitForTimeout[2]			= true;
-
-		stateName[3]					= "Charged";
-		stateAllowImageChange[3]		= false;
-		stateTransitionOnTriggerUp[3]	= "Fire";
-
-		stateName[4]					= "Fire";
-		stateAllowImageChange[4]		= false;
-		stateFire[4]					= true;
-		stateScript[4]					= "onFire";
-		stateTimeoutValue[4]			= 0.5;
-		stateTransitionOnTimeout[4]		= "Done";
-		stateWaitForTimeout[4]			= true;
-		
-		stateName[5]					= "Done";
-		stateScript[5]					= "onDone";
-		
-		stateName[6]					= "AbortCharge";
-		stateScript[6]					= "onChargeAbort";
-		stateTimeoutValue[6]			= 0;
-		stateTransitionOnTimeout[6]		= "Ready";
-	};
+	stateName[4]					= "Fire";
+	stateAllowImageChange[4]		= false;
+	stateFire[4]					= true;
+	stateScript[4]					= "onFire";
+	stateTimeoutValue[4]			= 0.5;
+	stateTransitionOnTimeout[4]		= "Done";
+	stateWaitForTimeout[4]			= true;
+	
+	stateName[5]					= "Done";
+	stateScript[5]					= "onDone";
+	
+	stateName[6]					= "AbortCharge";
+	stateScript[6]					= "onChargeAbort";
+	stateTimeoutValue[6]			= 0;
+	stateTransitionOnTimeout[6]		= "Ready";
+};

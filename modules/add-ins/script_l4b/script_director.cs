@@ -153,6 +153,8 @@ function MiniGameSO::L4B_ClearData(%minigame,%client)
     }    
     
     %minigame.RoundType = "";
+    %minigame.hordecount = 0;
+    %minigame.directorMusicActive = false;
     cancel(%minigame.spawn["Horde"]);
     cancel(%minigame.spawn["Special"]);
     cancel(%minigame.directorSchedule);
@@ -314,11 +316,8 @@ function MinigameSO::Director(%minigame,%enabled,%interval)
                         if(%chance <= 80) %round = 1;
                         if(%chance <= 40) %round = 2;
                         
-                        if(%stressed)
-                        {
-                            %round = 0;
-                            %minigame.hordesroundcount = 0;
-                        } 
+                        if(%stressed) %round = 0;
+                    
 
                         switch(%round)
                         {
@@ -348,7 +347,7 @@ function MinigameSO::Director(%minigame,%enabled,%interval)
             default:
         }
         
-        if(%cue) switch$(%minigame.RoundType)
+        if(%cue && %minigame.directorMusicActive) switch$(%minigame.RoundType)
         {
             case "Break":   if(getRandom(1,2) == 1) %minigame.l4bMusic("zombiechoir_0" @ getrandom(1,6) @ "_sound",false,"Stinger1"); 
                             if(getRandom(1,8) == 1) %minigame.l4bMusic("aglimpseofhell_" @ getrandom(1,3) @ "_sound",false,"Stinger2");
@@ -364,7 +363,7 @@ function MinigameSO::Director(%minigame,%enabled,%interval)
 
 function MinigameSO::BreakRound(%minigame)
 {    
-    if(!%minigame.DirectorStatus) return;
+    if(!%minigame.DirectorStatus || %minigame.directorMusicActive) return;
 
     %minigame.RoundType = "Break";
     %minigame.deletel4bMusic("Music");
@@ -390,20 +389,16 @@ function MinigameSO::TankRound(%minigame)
     %minigame.directorTankRound++;
     %minigame.RoundType = "Tank";
     %minigame.DirectorStatus = 2;
-    %minigame.zhordecount = 9999;
 }
 
 function MinigameSO::PanicRound(%minigame)
 {
     if(!%minigame.DirectorStatus) return;
 
-    %minigame.zhordecount = 9999;
     %minigame.DirectorStatus = 2;
     %minigame.RoundType = "Panic";
     %minigame.L4B_ChatMessage("[They're coming!] <bitmapk:Add-Ons/Gamemode_Left4Block/modules/add-ins/player_l4b/icons/ci_skull2>","hordeincoming" @ getrandom(1,9) @ "_sound",true); 
     %minigame.l4bMusic("musicData_L4D_horde_urgent",false,"Music2");
-    %minigame.schedule(15000,l4bMusic,"musicData_L4D_horde_combat" @ getRandom(1,4),true,"Music");
-    %minigame.schedule(15000,l4bMusic,"drum_suspense_end_sound",false,"Stinger1");
 }
 
 function MiniGameSO::HordeRound(%minigame)
@@ -413,11 +408,7 @@ function MiniGameSO::HordeRound(%minigame)
     
     %minigame.DirectorStatus = 2;
     %minigame.RoundType = "Horde";
-    %minigame.zhordecount = %random;
-    %minigame.hordesroundcount++;
     %minigame.L4B_ChatMessage("[They're coming...]","hordeincoming" @ getrandom(1,9) @ "_sound",true); 
-    %minigame.schedule(4000,l4bMusic,"musicData_L4D_horde_combat" @ getRandom(1,4),true,"Music");
-    %minigame.schedule(4000,l4bMusic,"drum_suspense_end_sound",false,"Stinger1");
 }
 
 function MinigameSO::RoundEnd(%minigame)
@@ -425,6 +416,7 @@ function MinigameSO::RoundEnd(%minigame)
     if(!%minigame.DirectorStatus) return;
     
     %minigame.RoundType = "";
+    %minigame.directorMusicActive = false;
     %minigame.l4bMusic("drum_suspense_end_sound",false,"Stinger1");
     %minigame.deletel4bMusic("Music");
     %minigame.deletel4bMusic("Music2");
@@ -442,8 +434,10 @@ function MinigameSO::spawnZombies(%minigame,%type,%amount,%spawnzone,%count)
         {
             case 1: if(%minigame.numMembers) for(%i=0;%i <= %minigame.numMembers;%i++)//Create a list if there are lone survivors
                     if(isObject(%minigame.member[%i]) && isObject(%player = %minigame.member[%i].player) && %player.getdataBlock().isSurvivor && %player.currentZone.presencecount == 1)
-                    %lonelysurvivorzone[%lsz++] = %player.currentZone;
-                    %spawnzone = %lonelysurvivorzone[getRandom(1,%lsz)];
+                    {
+                        %lonelysurvivorzone[%lsz++] = %player.currentZone;
+                        %spawnzone = %lonelysurvivorzone[getRandom(1,%lsz)];
+                    }
 
                     if(!%lsz)//Make a generic list in case there are no lone survivors
                     {
@@ -451,12 +445,16 @@ function MinigameSO::spawnZombies(%minigame,%type,%amount,%spawnzone,%count)
                         %activezones[%az++] = AreaZoneGroup.getObject(%i);
                         %spawnzone = %activezones[getRandom(1,%az)];
                     }
+                    
+                    if(!%spawnzone) return;
 
             case 2: for(%i = 0; %i < AreaZoneGroup.getcount(); %i++) if(isObject(AreaZoneGroup.getObject(%i)) && AreaZoneGroup.getObject(%i).presencecount)
-                    %activezones[%az++] = AreaZoneGroup.getObject(%i);
-                    %spawnzone = %activezones[getRandom(1,%az)];
-        }    
-
+                    {
+                        %activezones[%az++] = AreaZoneGroup.getObject(%i);
+                        %spawnzone = %activezones[getRandom(1,%az)];
+                    }
+                    if(!%spawnzone) return;
+        }
     }    
     
     for(%i = 0; %i < %spawnzone.simset.getcount(); %i++)
@@ -567,6 +565,7 @@ function Player::doMRandomTele(%obj,%targetbrick)
             {
                 %targetbrick = %teleportlist[%random];
                 %obj.currentZone = %teleportlistzone[%random];
+                %obj.spawnType = "Horde";
             }
 		}
 		else return false;        

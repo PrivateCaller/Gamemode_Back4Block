@@ -171,7 +171,7 @@ function Player::bigZombieMelee(%obj)
 		if(isObject(%obscure) || ContainerSearchCurrRadiusDist() > 2 || %dot > 0.5)
 		continue;
 
-		if(%hit.getType() & $TypeMasks::PlayerObjectType && miniGameCanDamage(%obj,%hit) && checkHoleBotTeams(%obj,%hit))
+		if(%hit.getType() & $TypeMasks::PlayerObjectType && (miniGameCanDamage(%obj,%hit) && checkHoleBotTeams(%obj,%hit) && %obj.getdataBlock().getName() $= "ZombieChargerHoleBot") || %obj.getdataBlock().getName() $= "ZombieTankHoleBot")
 		{
 			if(%hit.getstate() $= "Dead")
 			continue;

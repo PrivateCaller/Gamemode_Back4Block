@@ -219,7 +219,7 @@ package Player_L4B
 												}
 					case "ZombieHunterHoleBot": if(%obj.hEating == %col) return false;
 				}
-				//if(%obj.hIsInfected && %col.hIsInfected) return false;
+				if(%obj.hIsInfected && %col.hIsInfected) return false;
 			}
 
 			return true;

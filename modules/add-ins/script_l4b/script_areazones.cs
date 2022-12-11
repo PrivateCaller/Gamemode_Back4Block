@@ -654,7 +654,7 @@ function AreaZoneTrigger::onEnterTrigger(%this, %trigger, %obj)
 		
 		if(%zone.presencecount == %livePlayerCount && !%zone.presenceallentered) for(%g = 0; %g < %zone.simset.getCount(); %g++)
 		{	
-			if (%zonename $= "End") 
+			if (strlwr(%zonename) $= "end") 
 			{
 				%minigame.director(false);
 				%minigame.checkLastManStanding();

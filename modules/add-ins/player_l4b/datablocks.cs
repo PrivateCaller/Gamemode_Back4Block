@@ -1498,7 +1498,7 @@ datablock PlayerData(CommonZombieHoleBot : SurvivorPlayer)
 	hSearch = 1;//Search for Players
 	hSearchRadius = 512;//in brick units
 	hSight = 1;//Require bot to see player before pursuing
-	hStrafe = 0;//Randomly strafe while following player
+	hStrafe = 1;//Randomly strafe while following player
 	hSearchFOV = 1;//if enabled disables normal hSearch
 	hFOVRadius = 10;//max 10
 	hAlertOtherBots = 1;//Alerts other bots when he sees a player, or gets attacked
@@ -1641,7 +1641,7 @@ datablock PlayerData(ZombieTankHoleBot : CommonZombieHoleBot)
 	resistMelee = true;
 	
 	hSearchRadius = 512;//in brick units
-	hStrafe = 0;//Randomly strafe while following player
+	hStrafe = 1;//Randomly strafe while following player
 	hSearchFOV = 1;//if enabled disables normal hSearch
 	hMaxShootRange = 120;//The range in which the bot will shoot the player
 
@@ -1710,7 +1710,7 @@ datablock PlayerData(ZombieHunterHoleBot : CommonZombieHoleBot)
 	hTickRate = 4000;
 
 	hName = "Hunter";//cannot contain spaces
-	hStrafe = 0;//Randomly strafe while following player
+	hStrafe = 1;//Randomly strafe while following player
 	hAttackDamage = $Pref::L4B::Zombies::SpecialsDamage/2;
 
 	rechargeRate = 1.75;

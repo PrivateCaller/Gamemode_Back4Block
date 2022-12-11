@@ -290,16 +290,37 @@ configLoadL4BItemSlots();
 function GunImages_GenerateSideImages()
 {
 	for(%i = 0; %i < DatablockGroup.getCount(); %i++)	
-	if(isObject(%item = DatablockGroup.getObject(%i)) && %item.L4Bitemslot $= "Secondary")
+	if(isObject(%item = DatablockGroup.getObject(%i)))
 	{
-		%eval = %eval @ "datablock ShapeBaseImageData(" @ %item.image.getName() @ "GunImagesSIDE)";
-		%eval = %eval @ "{";
-			%eval = %eval @ "shapeFile = \"" @ %item.image.shapeFile @ "\";";
-			%eval = %eval @ "doColorShift = " @ (%item.image.doColorShift && 1) @ ";";
-			%eval = %eval @ "colorShiftColor = \"" @ %item.image.colorShiftColor @ "\";";
-			%eval = %eval @ "mountPoint = 1;";
-		%eval = %eval @ "};";
-		eval(%eval);
+		if(%item.L4Bitemslot $= "Secondary")
+		{
+			if(%item.image.meleeDamageDivisor) %mount = 2;
+			else %mount = 1;
+
+			%eval = %eval @ "datablock ShapeBaseImageData(" @ %item.image.getName() @ "GunImagesSIDE)";
+			%eval = %eval @ "{";
+				%eval = %eval @ "shapeFile = \"" @ %item.image.shapeFile @ "\";";
+				%eval = %eval @ "doColorShift = " @ (%item.image.doColorShift && 1) @ ";";
+				%eval = %eval @ "colorShiftColor = \"" @ %item.image.colorShiftColor @ "\";";
+				%eval = %eval @ "offset = \"0 0 0\";";
+				%eval = %eval @ "mountPoint = " @ %mount @ ";";
+			%eval = %eval @ "};";
+			eval(%eval);
+		}
+
+		if(%item.L4Bitemslot $= "Grenade")
+		{			
+			%eval = %eval @ "datablock ShapeBaseImageData(" @ %item.image.getName() @ "GunImagesSIDE)";
+			%eval = %eval @ "{";
+				%eval = %eval @ "shapeFile = \"" @ %item.image.shapeFile @ "\";";
+				%eval = %eval @ "doColorShift = " @ (%item.image.doColorShift && 1) @ ";";
+				%eval = %eval @ "colorShiftColor = \"" @ %item.image.colorShiftColor @ "\";";
+				%eval = %eval @ "offset = \"0 0 0\";";
+				%eval = %eval @ "mountPoint = 3;";
+			%eval = %eval @ "};";
+			eval(%eval);
+		}
 	}	
+
 }
 GunImages_GenerateSideImages();

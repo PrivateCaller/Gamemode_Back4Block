@@ -51,13 +51,13 @@ function spawnDecal(%dataBlock, %position, %vector,%scale)
 	else if(DecalGroup.getCount() >= $Pref::L4B::Blood::BloodDecalsLimit) return; 
 
 	%obj = new StaticShape() { dataBlock = %dataBlock; };
-	if(getRandom(1,4) == 1)
-	{
-		%startpos = vectorAdd(%position, "0 0 0.1");
-		%endpos = vectorAdd(%position, "0 0 -1");
-		%raycheckbelow = containerRayCast(%startpos, %endpos, $TypeMasks::FxBrickObjectType | $TypeMasks::TerrainObjectType);
-		if(!isObject(%raycheckbelow)) %obj.ceilingBloodSchedule = schedule(getRandom(16, 500), 0, ceilingBloodLoop, %obj);		
-	}
+	//if(getRandom(1,4) == 1)
+	//{
+	//	%startpos = vectorAdd(%position, "0 0 0.1");
+	//	%endpos = vectorAdd(%position, "0 0 -1");
+	//	%raycheckbelow = containerRayCast(%startpos, %endpos, $TypeMasks::FxBrickObjectType | $TypeMasks::TerrainObjectType);
+	//	if(!isObject(%raycheckbelow)) %obj.ceilingBloodSchedule = schedule(getRandom(16, 500), 0, ceilingBloodLoop, %obj);		
+	//}
 
 	%obj.setTransform(%position SPC vectorToAxis(%vector));
 	%obj.setScale(getRandom(10,%scale)*0.1 SPC getRandom(10,%scale)*0.1 SPC 1);
@@ -82,13 +82,13 @@ function Armor::doSplatterBlood(%this,%obj,%amount)
 		{			
 			if(getRandom(1,4) == 1) serverPlay3d("blood_spill_sound", getWords(%ray, 1, 3));
 			spawnDecal(BloodDecal @ getRandom(1, 2),posFromRaycast(%ray),getWords(%ray, 4, 6),%amount*5);		
-			%projectile = new Projectile()
-			{
-				dataBlock = "bloodExplosionProjectile1";
-				initialPosition = posFromRaycast(%ray);
-			};
-			MissionCleanup.add(%projectile);
-			%projectile.explode();
+			//%projectile = new Projectile()
+			//{
+			//	dataBlock = "bloodExplosionProjectile1";
+			//	initialPosition = posFromRaycast(%ray);
+			//};
+			//MissionCleanup.add(%projectile);
+			//%projectile.explode();
 		}
 	}
 }

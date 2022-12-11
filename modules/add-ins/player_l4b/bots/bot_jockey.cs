@@ -97,7 +97,7 @@ function ZombieJockeyHoleBot::onBotFollow(%this,%obj,%targ)
 function ZombieJockeyHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
 {
 	%limb = %obj.rgetDamageLocation(%position);
-	if((%damageType !$= $DamageType::FallDamage || %damageType !$= $DamageType::Impact) && %limb) %damage = %damage/6;
+	if((%damageType !$= $DamageType::FallDamage || %damageType !$= $DamageType::Impact) && %limb) %damage = %damage/8;
 	
 	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
 }

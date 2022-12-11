@@ -40,6 +40,21 @@ function ItemHolsterPlayer::UpdateImages(%this,%obj,%player)
 			break;			
 		}		
 	}
+
+	for(%i = 0; %i < %player.getDataBlock().maxTools; %i++)//Grenade
+	{
+		if(%player.tool[%i].L4Bitemslot $= "Grenade")
+		{
+			if(%player.CurrTool == %i) 
+			{
+				%obj.unmountImage(2);
+				break;
+			}			
+			
+			%obj.mountImage(%player.tool[%i].image.getName() @ "GunImagesSIDE",2);
+			break;			
+		}		
+	}	
 }
 
 function ItemHolsterPlayer::onAdd(%this,%obj)

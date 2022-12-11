@@ -64,16 +64,23 @@ function CommonZombieHoleBot::onDisabled(%this,%obj)
 {
 	Parent::OnDisabled(%this,%obj);
 
-	if(%obj.getstate() !$= "Dead") return;	
 	if(isObject(%obj.client)) commandToClient(%obj.client,'SetVignette',$EnvGuiServer::VignetteMultiply,$EnvGuiServer::VignetteColor);
 
-	if(isObject(%minigame = getMiniGameFromObject(%obj)) && %minigame.DirectorStatus == 2) 
+	if(isObject(%minigame = getMiniGameFromObject(%obj)) && %obj.spawnType $= "Horde") 
 	{
-		%minigame.zhordecount--;
-		if(%minigame.zhordecount < 1)
+		%minigame.hordecount--;
+		if(%minigame.hordecount <= 0 && %minigame.directorMusicActive)
 		{
-			%minigame.RoundEnd();
-			%minigmae.zhordecount = 0;
+			%minigame.directorMusicActive = false;
+			%minigmae.hordecount = 0;
+
+			if(%minigame.RoundType $= "Horde") %minigame.RoundEnd();
+			else
+			{
+    			%minigame.l4bMusic("drum_suspense_end_sound",false,"Stinger1");
+				%minigame.deletel4bMusic("Music");
+	    		%minigame.deletel4bMusic("Music2");
+			}
 		}
 	}	
 
@@ -91,8 +98,26 @@ function CommonZombieHoleBot::onBotLoop(%this,%obj)
 
 	if(%obj.hState !$= "Following")
 	{		
-		if(!isObject(%obj.distraction)) %obj.hSearch = 1;
+		if(isObject(%minigame = getMiniGameFromObject(%obj)) && %obj.spawnType $= "Horde" && %obj.hasSpottedOnce) 
+		{
+			%obj.hasSpottedOnce = false;
+			%minigame.hordecount--;
+			if(%minigame.hordecount <= 0 && %minigame.directorMusicActive)
+			{
+				%minigame.directorMusicActive = false;
+				%minigmae.hordecount = 0;
 
+				if(%minigame.RoundType $= "Horde") %minigame.RoundEnd();
+				else
+				{
+    				%minigame.l4bMusic("drum_suspense_end_sound",false,"Stinger1");
+					%minigame.deletel4bMusic("Music");
+		    		%minigame.deletel4bMusic("Music2");
+				}
+			}
+		}
+
+		if(!isObject(%obj.distraction)) %obj.hSearch = 1;
 		%obj.raisearms = 0;
 		%obj.playthread(1,"root");
 		%obj.setMaxForwardSpeed(7);
@@ -115,20 +140,35 @@ function CommonZombieHoleBot::onBotFollow( %this, %obj, %targ )
 		case 1: %obj.playaudio(0,"zombiefemale_attack" @ getrandom(1,12) @ "_sound");
 	}
 
-	if(isObject(%targ) && vectordist(%obj.getposition(),%targ.getposition()) < 15)
+	if(isObject(%targ))
 	{
-		if(!%obj.raisearms)
-		{	
-			%obj.playthread(1,"armReadyboth");
-			%obj.raisearms = 1;
-		}
+		if(vectordist(%obj.getposition(),%targ.getposition()) < 15)
+		{
+			if(!%obj.raisearms)
+			{	
+				%obj.playthread(1,"armReadyboth");
+				%obj.raisearms = 1;
+			}
 
-		if(getRandom(1,4) == 1) L4B_SpazzZombie(%obj,0);
-	}
-	else if(%obj.raisearms)
-	{	
-		%obj.playthread(1,"root");
-		%obj.raisearms = 0;
+			if(getRandom(1,4) == 1) L4B_SpazzZombie(%obj,0);
+		}
+		else if(%obj.raisearms)
+		{	
+			%obj.playthread(1,"root");
+			%obj.raisearms = 0;
+		}		
+
+		if(isObject(%minigame = getMiniGameFromObject(%obj)) && %obj.spawnType $= "Horde" && !%obj.hasSpottedOnce)
+		{
+			%minigame.hordecount++;
+			%obj.hasSpottedOnce = true;
+			if(%miniGame.hordecount >= 15 && !%minigame.directorMusicActive)
+			{
+				%minigame.directorMusicActive = true;
+				%minigame.l4bMusic("musicData_L4D_horde_combat" @ getRandom(1,4),true,"Music");
+    			%minigame.l4bMusic("drum_suspense_end_sound",false,"Stinger1");
+			}
+		}
 	}	
 }
 
