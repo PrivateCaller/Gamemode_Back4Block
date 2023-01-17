@@ -1,64 +1,27 @@
-//Underwater Check
-package Swimming
+function Armor::FootstepLoop(%this,%obj)
 {
-	function Armor::onEnterLiquid(%data,%obj,%coverage,%type)
+	if(!isObject(%obj) || %obj.getState() $= "Dead" || !%obj.getDatablock().isSurvivor) return;
+	
+	cancel(%obj.FootstepLoop);
+	%obj.FootstepLoop = %this.schedule(320,FootstepLoop,%obj);
+
+	%pos = %obj.getPosition();
+	%vel = %obj.getVelocity();
+	%isground = footplacecheck(%obj); //check for solid ground
+	%localforwardspeed = mCeil(vectorDot(%obj.getVelocity(), %obj.getForwardVector()));
+
+	if(mAbs(getWord(%vel,0)) < 0.5 && mAbs(getWord(%vel,1)) < 0.5 || isObject(%obj.getObjectMount()) || %obj.isStepProning || !%isGround || %obj.isSwimming || %obj.isStepJetting) //if hasn't moved, or is crouching, or is midair, or is swimming, or is jetting
 	{
-		Parent::onEnterLiquid(%data,%obj,%coverage,%type);
-		%obj.isSwimming = true; //note when underwater
+		cancel(%obj.FootstepLoop);
+		%obj.FootstepLoop = %this.schedule(320,FootstepLoop,%obj);
 	}
-	function Armor::onLeaveLiquid(%data,%obj,%coverage,%type)
+	else if(mAbs(getWord(%vel,0)) > 3 || mAbs(getWord(%vel,1)) > 3) serverplay3d("movestep" @ getRandom(1,4) @ "_sound",%pos);
+	else serverplay3d("movequietstep" @ getRandom(1,4) @ "_sound",%pos);
+
+	if(%localforwardspeed < 0)
 	{
-		Parent::onLeaveLiquid(%data,%obj,%coverage,%type);
-		%obj.isSwimming = false; //note when out of water
-	}
-};
-activatepackage(Swimming);
-
-package Footsteps
-{
-	function Armor::onAdd(%data,%obj)
-	{
-		Parent::onAdd(%data,%obj);
-		HataFootstepLoop(%obj); //start on first spawn
-	}
-	function Armor::onTrigger(%data,%obj,%slot,%val)
-	{
-		Parent::onTrigger(%data,%obj,%slot,%val);
-		if(%slot == 3) %obj.isStepProning = %val;
-		if(%slot == 4 && %data.canJet) %obj.isStepJetting = %val;
-	}
-};activatepackage(Footsteps);
-
-
-function HataFootstepLoop(%obj)
-{
-	if(!isObject(%obj) || %obj.getState() $= "Dead") return;
-
-	if(%obj.getDatablock().usesL4Bappearance)
-	{		
-		cancel(%obj.HFsL); //don't double schedule
-		%obj.HFsL = schedule(320,0,HataFootstepLoop,%obj); //schedule next footstep
-
-		%pos = %obj.getPosition();
-		%vel = %obj.getVelocity();
-		%isground = footplacecheck(%obj); //check for solid ground
-		%localforwardspeed = vectorDot(%obj.getVelocity(), %obj.getForwardVector());
-
-		if(mAbs(getWord(%vel,0)) < 0.5 && mAbs(getWord(%vel,1)) < 0.5 || isObject(%obj.getObjectMount()) || %obj.isStepProning || !%isGround || %obj.isSwimming || %obj.isStepJetting) //if hasn't moved, or is crouching, or is midair, or is swimming, or is jetting
-		{
-			cancel(%obj.HFsL); //don't double schedule
-			%obj.HFsL = schedule(50,0,HataFootstepLoop,%obj); //schedule another movement check, with less timeout
-		}
-		else 
-
-		if(mAbs(getWord(%vel,0)) > 3 || mAbs(getWord(%vel,1)) > 3) serverplay3d("movestep" @ getRandom(1,4) @ "_sound",%pos);
-		else serverplay3d("movequietstep" @ getRandom(1,4) @ "_sound",%pos);
-
-		if(%localforwardspeed < 0)
-		{
-			cancel(%obj.HFsL); //don't double schedule
-			%obj.HFsL = schedule(240,0,HataFootstepLoop,%obj); //schedule next footstep
-		}
+		cancel(%obj.FootstepLoop);
+		%obj.FootstepLoop = %this.schedule(240,FootstepLoop,%obj);
 	}
 
 	if(%obj.lastStepTime < getSimTime())
@@ -113,3 +76,30 @@ function footplacecheck(%obj)
 	}
 	return isObject(%col0) && %col0 != %col1; //if on the ground, and ground is not overlapping him
 }
+
+package Footsteps
+{
+	function Armor::onEnterLiquid(%this,%obj,%coverage,%type)
+	{
+		Parent::onEnterLiquid(%this,%obj,%coverage,%type);
+		%obj.isSwimming = true; //note when underwater
+	}
+	function Armor::onLeaveLiquid(%this,%obj,%coverage,%type)
+	{
+		Parent::onLeaveLiquid(%this,%obj,%coverage,%type);
+		%obj.isSwimming = false; //note when out of water
+	}
+
+	function Armor::onAdd(%this,%obj)
+	{
+		Parent::onAdd(%this,%obj);
+		%obj.FootstepLoop = %this.schedule(320,FootstepLoop,%obj);
+	}
+	function Armor::onTrigger(%this,%obj,%slot,%val)
+	{
+		Parent::onTrigger(%this,%obj,%slot,%val);
+		if(%slot == 3) %obj.isStepProning = %val;
+		if(%slot == 4 && %this.canJet) %obj.isStepJetting = %val;
+	}
+};
+activatepackage(Footsteps);

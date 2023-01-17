@@ -6,24 +6,6 @@ exec("./script_rblood.cs");
 exec("./script_footsteps.cs");
 exec("./script_holstergun.cs");
 
-function L4BHatModel::onAdd(%this, %obj) 
-{
-	if(!isObject(%wearer = %obj.wearer))
-	{ 
-		%obj.delete();
-		return;
-	}
-
-	%obj.setDamageLevel(%this.maxDamage);
-	%obj.hideNode("ALL");
-	%obj.unhideNode(%obj.currentHat);
-	%obj.setNodeColor(%obj.currentHat,%obj.color);	
-	%obj.setTransform(%wearer.getTransform());
-	%obj.position = vectorAdd(%wearer.getMuzzlePoint(2),"0 0 0.35");
-	%objhalfvelocity = getWord(%wearer.getVelocity(),0)/2 SPC getWord(%wearer.getVelocity(),1)/2 SPC getWord(%wearer.getVelocity(),2)/2;
-	%obj.setvelocity(vectorAdd(%objhalfvelocity,getRandom(-8,8) SPC getRandom(-8,8) SPC getRandom(5,10)));	
-}
-
 function emptyPlayer::onAdd(%this, %obj) 
 {
 	%obj.setDamageLevel(%this.maxDamage);
@@ -32,7 +14,11 @@ function emptyPlayer::onAdd(%this, %obj)
 	{
 		%source.mountObject(%obj,%obj.slotToMountBot);
 		
-		if(%obj.imageToMount !$= "") %obj.mountImage(%obj.imageToMount,0);
+		if(%obj.imageToMount !$= "") 
+		{
+			if(%obj.imageColor !$= "") %obj.mountImage(%obj.imageToMount,0,1,%obj.imageColor);
+			else %obj.mountImage(%obj.imageToMount,0);
+		}
 		if(%obj.lightToMount !$= "")
 		{
 			%billboard = new fxLight ("")

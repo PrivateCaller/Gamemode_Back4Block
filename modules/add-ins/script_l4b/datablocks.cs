@@ -292,11 +292,6 @@ datablock ParticleEmitterData(bloodBurstLargeEmitter)
    particles = "bloodBurstLargeParticle";
 };
 
-datablock PlayerData(L4BHatModel)
-{
-	shapeFile = "./models/hats.dts";
-};
-
 datablock PlayerData(EmptyPlayer)
 {
 	shapeFile = "./models/emptymountable.dts";

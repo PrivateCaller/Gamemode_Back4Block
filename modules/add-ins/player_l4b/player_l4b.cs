@@ -1,3 +1,4 @@
+luaexec("./player_l4b.lua");
 exec("./datablocks.cs");
 exec("./script_survivor.cs");
 exec("./script_zombies.cs");
@@ -45,7 +46,8 @@ function Player::checkIfUnderwater(%obj)
 {
 	if(%obj.getWaterCoverage() == 0)
 	{
-		if(%obj.oxygenCount == 6 && %obj.getState() !$= "Dead") %obj.playaudio(0,"survivor_painhigh" @ getRandom(1, 4) @ "_sound");
+		if(%obj.oxygenCount == 6 && %obj.getState() !$= "Dead") 
+		%obj.playaudio(0,"survivor_painhigh" @ getRandom(1, 4) @ "_sound");
 		%obj.oxygenCount = 0;
 	}
    	cancel(%obj.oxygenTick);
@@ -264,7 +266,7 @@ package Player_L4B
 
 	function AIPlayer::hMeleeAttack(%obj,%col)
 	{
-		if(%obj.getState() $= "Dead") return;
+		if(%obj.getState() $= "Dead" || VectorDist(%obj.getposition(), %col.getposition()) > 2.5) return;
 
 		if(%col.getType() & $TypeMasks::VehicleObjectType || %col.getType() & $TypeMasks::PlayerObjectType)
 		{

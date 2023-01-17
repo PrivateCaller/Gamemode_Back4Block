@@ -49,6 +49,7 @@ package L4B_Director
     {        	
 		Parent::endGame(%minigame);
         %minigame.L4B_ClearData(%client);
+        showAreaZones(1);
     }
 
     function MiniGameSO::Reset(%minigame,%client)
@@ -58,6 +59,7 @@ package L4B_Director
 		%currTime = getSimTime();
 		if(%obj.lastResetTime + 5000 > %currTime) return;
 		%minigame.lastResetTime = %currTime;
+        showAreaZones(0);
 
         %minigame.L4B_ClearData(%client); 
         %minigame.l4bMusic("musicdata_L4D_safearea" @ getRandom(1,4),true,"Music");

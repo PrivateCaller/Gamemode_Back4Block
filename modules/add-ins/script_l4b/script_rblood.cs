@@ -225,11 +225,18 @@ function Armor::RbloodDismember(%this,%obj,%limb,%doeffects,%position)
 						{
 							%obj.hatprop = new Player() 
 							{ 
-								dataBlock = "L4BHatModel"; 
-								wearer = %obj;
-								currentHat = %obj.currenthat;
-								color = %obj.hatcolor;
+								dataBlock = "EmptyPlayer"; 
+								source = %obj;
+								slotToMountBot = 6;
+								imageToMount = %obj.currentHat @ "image";
+								imageColor = addTaggedString(luacall(getcolorname,%obj.hatColor));
 							};
+
+							%obj.unmountimage(2);
+							%obj.hatprop.unmount();
+							%obj.hatprop.setTransform(vectorAdd(%obj.getMuzzlePoint(2),"0 0 2.5"));
+							%objhalfvelocity = getWord(%obj.getVelocity(),0)/2 SPC getWord(%obj.getVelocity(),1)/2 SPC getWord(%obj.getVelocity(),2)/2;
+							%obj.hatprop.setvelocity(vectorAdd(%objhalfvelocity,getRandom(-8,8) SPC getRandom(-8,8) SPC getRandom(8,16)));								
 						}
 					}
 

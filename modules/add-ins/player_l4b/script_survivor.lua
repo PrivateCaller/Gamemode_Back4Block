@@ -51,7 +51,6 @@ function Survivor_Rightclick(obj)
                                 if ts.getstate(ray) ~= "Dead" and tonumber(ts.minigamecandamage(obj,ray)) == 1 and ts.getcallobj(ts.callobj(ray,"getID"),"getDatablock().resistMelee") ~= "1" then                                     
 
                                     ts.setobj(obj,"SurvivorStress",math.clamp(tonumber(ts.getobj(obj,"SurvivorStress"))+0.25,0,20))
-
                                     ts.callobj(ray,"cancel","L4B_SpazzZombie")
                                     ts.callobj(ray,"playThread",3,"zstumble"..math.random(1,3))
                                     ts.callobj(ray,"damage",obj,ts.callobj(ray,"getHackPosition"),10,tonumber(ts.get("DamageType::Default")))
@@ -228,4 +227,3 @@ function Survivor_FallDamage(obj,vector,force)--Default falling damage is garbag
     else ts.callobj(obj,"damage",obj,pos,falldamage*2.5,ts.get("DamageType::Fall"))--Ouch
     end
 end
-

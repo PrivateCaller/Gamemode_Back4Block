@@ -18,19 +18,23 @@ function SurvivorPlayer::L4BAppearance(%this,%obj,%client)
 		default:
 	}
 
-	switch(%client.hat)
-	{
-		case 0: 
-		case 1:  %obj.unhidenode($L4BHat[%client.hat]);
-				 %obj.setNodeColor($L4BHat[%client.hat],%client.hatColor);
-				 %obj.currentHat = $L4BHat[%client.hat];					 
-				 %obj.unhidenode("visor");
-				 %obj.setNodeColor("visor", getWords(%client.hatColor,0,2) SPC 0.5);
-				 %obj.currentHat = $L4BHat[%client.hat];
+	//Don't bother if they already have the hat
+	if((isObject(%obj.getmountedImage(2)) && %obj.getmountedImage(2).getName() $= $L4BHat[%client.hat] @ "image") || %obj.limbDismemberedLevel[0]) return;
 
-		default: %obj.unhidenode($L4BHat[%client.hat]);
-				 %obj.setNodeColor($L4BHat[%client.hat],%client.hatColor);
-				 %obj.currentHat = $L4BHat[%client.hat];			 
+	switch$(%client.hat)
+	{
+		case 1: if(%client.accent)
+				{
+					%obj.mountImage("helmet",2,1,addTaggedString(luacall(getcolorname,%client.hatColor)));	
+					%obj.currentHat = "helmet";
+				}		
+				else
+				{
+					%obj.mountImage("hoodieimage",2,1,addTaggedString(luacall(getcolorname,%client.hatColor)));	
+					%obj.currentHat = "hoodie";
+				}
+		default: %obj.mountImage($L4BHat[%client.hat] @ "image",2,1,addTaggedString(luacall(getcolorname,%client.hatColor)));
+				 %obj.currentHat = $L4BHat[%client.hat];
 	}
 }
 

@@ -41,7 +41,7 @@ function CommonZombieHoleBot::onDamage(%this,%obj)
 			}
 
 			%obj.MaxSpazzClick = getrandom(16,32);
-			L4B_SpazzZombie(%obj,0);
+			%obj.hSpazzClick();
 			
 		}
 		else switch(%obj.chest)	
@@ -130,33 +130,47 @@ function CommonZombieHoleBot::onBotFollow( %this, %obj, %targ )
 {
 	if(!isObject(%obj) || %obj.getState() $= "Dead") return;
 
-	%obj.playthread(2,plant);
-	%obj.setMaxForwardSpeed(11);
-	%obj.setmaxUnderwaterForwardSpeed(11);
-	
-	switch(%obj.chest)
-	{
-		case 0: %obj.playaudio(0,"zombiemale_attack" @ getrandom(1,10) @ "_sound");
-		case 1: %obj.playaudio(0,"zombiefemale_attack" @ getrandom(1,12) @ "_sound");
-	}
-
 	if(isObject(%targ))
 	{
 		if(vectordist(%obj.getposition(),%targ.getposition()) < 15)
 		{
+			cancel(%obj.hLastFollowSched);
+			%obj.hLastFollowSched = %this.schedule(1000,onBotFollow,%obj,%targ);
+			
 			if(!%obj.raisearms)
 			{	
 				%obj.playthread(1,"armReadyboth");
-				%obj.raisearms = 1;
+				%obj.raisearms = true;
 			}
 
-			if(getRandom(1,4) == 1) L4B_SpazzZombie(%obj,0);
+			if(vectordist(%obj.getposition(),%targ.getposition()) < 5 && !isEventPending(%obj.hFollowMeleeSched))
+			{
+				%obj.playthread(2,"zAttack" @ getRandom(1,3));
+				%obj.playaudio(3,"melee_swing" @ getrandom(1,2) @ "_sound");
+				cancel(%obj.hLastFollowMeleeSched);
+				%obj.hLastFollowMeleeSched = %obj.schedule(250,hMeleeAttack,%targ);				
+			}
 		}
 		else if(%obj.raisearms)
 		{	
 			%obj.playthread(1,"root");
-			%obj.raisearms = 0;
-		}		
+			%obj.raisearms = false;
+		}
+	}	
+
+	if(%obj.hLastFollowTime+getRandom(750,2500) < getSimTime())
+	{
+		%obj.hLastFollowTime = getsimtime();
+		%obj.playthread(2,plant);
+		%obj.setMaxForwardSpeed(11);
+		%obj.setmaxUnderwaterForwardSpeed(11);
+		if(getRandom(1,4) == 1) %obj.hSpazzClick();
+	
+		switch(%obj.chest)
+		{
+			case 0: %obj.playaudio(0,"zombiemale_attack" @ getrandom(1,10) @ "_sound");
+			case 1: %obj.playaudio(0,"zombiefemale_attack" @ getrandom(1,12) @ "_sound");
+		}
 
 		if(isObject(%minigame = getMiniGameFromObject(%obj)) && %obj.spawnType $= "Horde" && !%obj.hasSpottedOnce)
 		{
@@ -165,29 +179,22 @@ function CommonZombieHoleBot::onBotFollow( %this, %obj, %targ )
 			if(%miniGame.hordecount >= 15 && !%minigame.directorMusicActive)
 			{
 				%minigame.directorMusicActive = true;
-				%minigame.l4bMusic("musicData_L4D_horde_combat" @ getRandom(1,4),true,"Music");
+				%minigame.l4bMusic("musicData_L4D_horde_combat" @ getRandom(1,3),true,"Music");
     			%minigame.l4bMusic("drum_suspense_end_sound",false,"Stinger1");
 			}
-		}
-	}	
+		}			
+	}
 }
 
 function CommonZombieHoleBot::onCollision(%this, %obj, %col, %fade, %pos, %norm)
-{
-	if(%obj.lastattackis < getSimTime() && %col.getType() & $TypeMasks::PlayerObjectType && checkHoleBotTeams(%obj,%col) && minigameCanDamage(%obj,%col))
-	{
-		%obj.hMeleeAttack(%col);
-		%obj.lastattackis = getSimTime()+750;
-	}
-	
+{	
 	Parent::onCollision(%this, %obj, %col, %fade, %pos, %norm);
 }
 
 function CommonZombieHoleBot::onBotMelee(%this,%obj,%col)
 {		
 	%meleeimpulse = mClamp(%obj.hLastMeleeDamage, 1, 10);
-	%obj.playaudio(1,"melee_hit" @ getrandom(1,8) @ "_sound");
-	%obj.playthread(2,"zAttack" @ getRandom(1,3));
+	%obj.playaudio(1,"melee_hit" @ getrandom(1,8) @ "_sound");	
 	%obj.setaimobject(%col);
 	
 	if(%col.getType() & $TypeMasks::PlayerObjectType)
