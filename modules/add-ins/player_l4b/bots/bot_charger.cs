@@ -70,27 +70,6 @@ function ZombieChargerHoleBot::onPinLoop(%this,%obj,%col)
 	}
 }
 
-function ZombieChargerHoleBot::Charge(%this,%obj)
-{
-	if(isObject(%obj) && %obj.getState() !$= "Dead")
-	{
-		%obj.WalkAfterCharge = %obj.schedule(6000,setMaxForwardSpeed,9);
-		%obj.playaudio(0,"charger_charge" @ getrandom(1,2) @ "_sound");
-		%obj.mountImage(HateImage, 3);
-		%obj.setMaxForwardSpeed(50);
-		%obj.setenergylevel(0);
-
-		if(%obj.getClassName() $= "AIPlayer")
-		{
-			%obj.stopHoleLoop();
-			%obj.schedule(250,hShootAim,%obj.hFollowing);
-			%obj.schedule(500,clearAim);
-			%obj.StartAfterCharge = %obj.schedule(4000,startHoleLoop);
-			%obj.setmoveY(1);
-		}
-	}
-}
-
 function ZombieChargerHoleBot::onBotLoop(%this,%obj)
 {	
 	if(%obj.getstate() !$= "Dead" && %obj.lastIdle+5000 < getsimtime())
@@ -107,7 +86,7 @@ function ZombieChargerHoleBot::onBotLoop(%this,%obj)
 								%obj.playthread(1,"root");
 								%obj.raisearms = 0;
 
-			case "Following": 	if(!isEventPending(%obj.AboutToCharge)) %obj.playaudio(0,"charger_recognize" @ getrandom(1,4) @ "_sound");
+			case "Following": 	if(!isEventPending(%obj.SpecialSched)) %obj.playaudio(0,"charger_recognize" @ getrandom(1,4) @ "_sound");
 		}
 
 		if(%obj.hEating) %obj.hClearMovement();
@@ -116,21 +95,27 @@ function ZombieChargerHoleBot::onBotLoop(%this,%obj)
 
 function ZombieChargerHoleBot::onBotFollow(%this,%obj,%targ )
 {
-	if((isObject(%obj) && %obj.getState() !$= "Dead" && %obj.hLoopActive && !isEventPending(%obj.AboutToCharge)) && (isObject(%targ) && %targ.getState() !$= "Dead")) 
-	%this.schedule(500,onBotFollow,%obj,%targ);
+	if((isObject(%obj) && %obj.getState() !$= "Dead" && %obj.hLoopActive && !isEventPending(%obj.SpecialSched)) && (isObject(%targ) && %targ.getState() !$= "Dead")) 
+	%this.schedule(750,onBotFollow,%obj,%targ);
 	else return;	
-	
-	if(getWord(%obj.getScale(),2) >= 1.05)
-	{
-		%distance = vectorDist(%obj.getposition(),%targ.getposition());
-		%obj.setaimobject(%targ);
-		if(%distance < 75 && %obj.GetEnergyLevel() >= %this.MaxEnergy && !%obj.isStrangling) %this.onTrigger(%obj,4,1);		
-	}
-}
 
-function ZombieChargerHoleBot::onBotMelee(%this,%obj,%col)
-{
-	%obj.bigZombieMelee(%col);
+	%distance = vectorDist(%obj.getposition(),%targ.getposition());
+	
+	if(%distance < 75)
+	{				
+		if(%obj.GetEnergyLevel() >= %this.MaxEnergy && !%obj.isStrangling) 
+		{
+			%obj.setaimobject(%targ);
+			%this.onTrigger(%obj,4,1);
+		}
+		if(%distance < 3.5)
+		{
+			%this.onTrigger(%obj,0,true);
+			%obj.setMoveX(0);
+			%obj.setMoveY(1);
+			%obj.setmoveobject(%targ);
+		}
+	}
 }	
 
 function ZombieChargerHoleBot::onDamage(%this,%obj,%delta)
@@ -298,22 +283,67 @@ function ZombieChargerHoleBot::L4BAppearance(%this,%client,%obj)
 
 function ZombieChargerHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
 {	
-	if(%obj.getstate() !$= "Dead")
+	Parent::onTrigger(%this,%obj,%triggerNum,%val);
+
+	if(!isObject(%obj) || %obj.getState() $= "Dead") return;
+
+	if(isObject(%obj.hFollowing)) %targ = %obj.hFollowing;
+	else if(isObject(%obj.lastactivated))
 	{
-		if(%val && !%obj.hEating) switch(%triggerNum)
-		{
-			case 0: if(%obj.getEnergyLevel() > 25 && isObject(%touchedobj = %obj.lastactivated) && checkHoleBotTeams(%obj,%touchedobj)) %obj.hMeleeAttack(%touchedobj);
-			case 4: if(%obj.GetEnergyLevel() >= %this.MaxEnergy && %val)
-					{
-						if(!isEventPending(%obj.AboutToCharge))
-						{
-							%obj.playthread(1,"armReadyright");
-							%obj.playaudio(0,"charger_warn" @ getrandom(1,3) @ "_sound");
-							%obj.setMaxForwardSpeed(9);
-							%obj.AboutToCharge = %this.schedule(1000,Charge,%obj);
-						}
-					}
-		}		
+		if(%obj.lastactivated.getType() & $TypeMasks::PlayerObjectType) %targ = %obj.lastactivated;
+		else return;
 	}
-	Parent::onTrigger (%this, %obj, %triggerNum, %val);
+	else return;
+
+	if(%val) switch(%triggerNum)
+	{
+		case 0: if(!isEventPending(%obj.MeleeSched))
+				{
+					%obj.playthread(2,"chargermelee" @ getRandom(1,3));
+					cancel(%obj.MeleeSched);
+					%obj.MeleeSched = %this.schedule(350,Melee,%obj,%targ);
+				}
+
+		case 4: if(%obj.GetEnergyLevel() >= %this.MaxEnergy)
+				{
+					if(!isEventPending(%obj.SpecialSched))
+					{
+						%obj.playthread(1,"armReadyright");
+						%obj.playaudio(0,"charger_warn" @ getrandom(1,3) @ "_sound");
+						%obj.setMaxForwardSpeed(9);
+						%obj.SpecialSched = %this.schedule(1000,Special,%obj);
+					}
+				}
+	}		
+}
+
+function ZombieChargerHoleBot::Melee(%this,%obj,%targ)
+{
+	CommonZombieHoleBot::Melee(%this,%obj,%targ);
+}
+
+function ZombieChargerHoleBot::Special(%this,%obj)
+{
+	if(isObject(%obj) && %obj.getState() !$= "Dead")
+	{
+		%obj.WalkAfterCharge = %obj.schedule(6000,setMaxForwardSpeed,9);
+		%obj.playaudio(0,"charger_charge" @ getrandom(1,2) @ "_sound");
+		%obj.mountImage(HateImage, 3);
+		%obj.setMaxForwardSpeed(50);
+		%obj.setenergylevel(0);
+
+		if(%obj.getClassName() $= "AIPlayer")
+		{
+			%obj.stopHoleLoop();
+			%obj.schedule(250,hShootAim,%obj.hFollowing);
+			%obj.schedule(500,clearAim);
+			%obj.StartAfterCharge = %obj.schedule(4000,startHoleLoop);
+			%obj.setmoveY(1);
+		}
+	}
+}
+
+function ZombieChargerHoleBot::onBotMelee(%this,%obj,%col)
+{
+	%obj.bigZombieMelee(%col);
 }

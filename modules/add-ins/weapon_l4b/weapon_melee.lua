@@ -26,7 +26,7 @@ function Melee_SwingCheck(obj,this,slot)
 
                 if tonumber(ts.getobj(obj,"lastmeleeenvhitdelay")) == nil then ts.setobj(obj,"lastmeleeenvhitdelay",0) end                
                 if class == "AIPlayer" or class == "Player" then hitdelay = 15
-                elseif class == "fxDTSBrick" or class == "WheeledVehicle" or class == "fxPlane" then hitdelay = 75 end
+                elseif class == "fxDTSBrick" or class == "WheeledVehicle" or class == "fxPlane" then hitdelay = 50 end
 
                 if tonumber(ts.getobj(obj,"lastmeleeenvhitdelay"))+hitdelay < ts.getsimtime() then
                     ts.call("LuaProjecitle",ts.call("posFromRaycast",ray),"SecondaryMeleeProjectile")

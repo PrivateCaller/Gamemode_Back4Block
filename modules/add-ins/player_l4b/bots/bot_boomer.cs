@@ -36,23 +36,36 @@ function ZombieBoomerHoleBot::onBotMelee(%this,%obj,%col)
 function ZombieBoomerHoleBot::onBotFollow( %this, %obj, %targ )
 {
 	if((isObject(%obj) && %obj.getState() !$= "Dead" && %obj.hLoopActive) && (isObject(%targ) && %targ.getState() !$= "Dead") && (%distance = vectorDist(%obj.getposition(),%targ.getposition())) < 30)
-	%this.schedule(500,onBotFollow,%obj,%targ);
+	%this.schedule(750,onBotFollow,%obj,%targ);
 	else return;
-	
-	if(%distance < 10)
+		
+	if(%distance > 10 &&%distance < 20)
 	{
-		%obj.stopHoleLoop();
-		%obj.hRunAwayFromPlayer(%targ);
-		%obj.schedule(1500,startHoleLoop);
+		if(%obj.GetEnergyLevel() >= %this.maxenergy && !isEventPending(%obj.SpecialSched))
+		{
+			%this.onTrigger(%obj,4,1);
+			%obj.setMoveX(0);
+			%obj.setMoveY(0);
+			%obj.setJumping(0);
+			%obj.setCrouching(0);
+			%obj.setaimobject(%targ);
+		}
 	}
-	else if(%distance < 20)
-	{
-		if(%obj.GetEnergyLevel() >= %this.maxenergy) %this.onTrigger(%obj,4,1);
-		%obj.setMoveX(0);
-		%obj.setMoveY(0);
-		%obj.setJumping(0);
-		%obj.setCrouching(0);
-		%obj.setaimobject(%targ);		
+	else if(%distance < 10)
+	{		
+		if(%obj.GetEnergyLevel() >= %this.maxenergy)
+		{
+			%obj.stopHoleLoop();
+			%obj.hRunAwayFromPlayer(%targ);
+			%obj.schedule(1500,startHoleLoop);
+		}
+		else
+		{
+			%this.onTrigger(%obj,0,true);
+			%obj.setMoveX(0);
+			%obj.setMoveY(1);
+			%obj.setmoveobject(%targ);
+		}
 	}
 }
 
@@ -66,7 +79,7 @@ function ZombieBoomerHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,
 }
 
 function ZombieBoomerHoleBot::onDamage(%this,%obj,%delta)
-{
+{	
 	Parent::onDamage(%this,%obj,%delta);
 
 	if(%delta > 5 && %obj.lastdamage+500 < getsimtime())
@@ -80,12 +93,15 @@ function ZombieBoomerHoleBot::onDamage(%this,%obj,%delta)
 		%obj.lastdamage = getsimtime();	
 	}
 
-	if(%obj.getState() $= "Dead")
+	if(%obj.getState() $= "Dead") 
 	{
 		%obj.hideNode("ALL");
-		%obj.unhideNode("pants");
-		%obj.unhideNode("RShoe");
-		%obj.unhideNode("LShoe");			
+		%obj.schedule(50,delete);
+		%this.doSplatterBlood(%obj,30);
+
+		%datablock = "bloodHeadDebrisProjectile RBloodOrganProjectile 0 0 bloodHandDebrisProjectile bloodHandDebrisProjectile 0 bloodFootDebrisProjectile bloodFootDebrisProjectile";
+		for(%i = 0; %i < getWordCount(%datablock); %i++) if(isObject(getWord(%datablock, %i)) && !%obj.limbDismemberedLevel[%i]) doGibLimbExplosion(getWord(%datablock, %i),%obj.getHackPosition(), getWord(%obj.getScale(), 2));
+		for (%j = 0; %j < getRandom(10,15); %j++) doGibLimbExplosion("bloodDismemberProjectile",%obj.getHackPosition(), getWord(%obj.getScale(), 2));
 	
 		%b = new projectile()
 		{
@@ -99,32 +115,66 @@ function ZombieBoomerHoleBot::onDamage(%this,%obj,%delta)
 	}	
 }
 
+function ZombieBoomerHoleBot::RbloodDismember(%this,%obj,%limb,%doeffects,%position)
+{
+	return;	
+}
+
 function ZombieBoomerHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
 {		
-	Parent::onTrigger (%this, %obj, %triggerNum, %val);
+	Parent::onTrigger(%this,%obj,%triggerNum,%val);
 
-	CommonZombieHoleBot::onTrigger (%this, %obj, %triggerNum, %val);
-	if(%obj.getstate() !$= "Dead") switch(%triggerNum)
+	if(!isObject(%obj) || %obj.getState() $= "Dead") return;
+
+	if(isObject(%obj.hFollowing)) %targ = %obj.hFollowing;
+	else if(isObject(%obj.lastactivated))
 	{
-		case 4: if(%val && %obj.GetEnergyLevel() >= %this.maxenergy)
+		if(%obj.lastactivated.getType() & $TypeMasks::PlayerObjectType) %targ = %obj.lastactivated;
+		else return;
+	}
+	else return;
+		
+	if(%val) switch(%triggerNum)
+	{
+		case 0: if(!isEventPending(%obj.MeleeSched))
+				{
+					%obj.playthread(2,"zAttack" @ getRandom(1,3));
+					cancel(%obj.MeleeSched);
+					%obj.MeleeSched = %this.schedule(350,Melee,%obj,%targ);
+				}
+
+		case 4: if(%obj.GetEnergyLevel() >= %this.maxenergy)
 				{
 					%obj.setenergylevel(0);
+					%obj.stopaudio(0);
 					%obj.playaudio(0,"boomer_warn_sound");
 					%obj.playthread(1,"boomerwarn");
+					if(%obj.getclassname() $= "AIPlayer") %obj.stopHoleLoop();
 					%randomtime = getRandom(600,1000);
-					%obj.schedule(%randomtime,playaudio,0,"boomer_vomit" @ getrandom(1,4) @ "_sound");
-					%obj.schedule(%randomtime,playthread,1,"boomervomit");
-					%obj.vomitschedule = %this.schedule(%randomtime,Vomit,%obj,10);
+					%obj.SpecialSched = %this.schedule(%randomtime,Special,%obj,10);
 				}
 	}
 }
 
-function ZombieBoomerHoleBot::Vomit(%this,%obj,%limit,%count)
+function ZombieBoomerHoleBot::Melee(%this,%obj,%targ)
 {
-	if(isObject(%obj) && %obj.getState() !$= "Dead" && %count <= 10)
+	CommonZombieHoleBot::Melee(%this,%obj,%targ);
+}
+
+function ZombieBoomerHoleBot::Special(%this,%obj,%limit,%count)
+{
+	if(!isObject(%obj) || %obj.getState() $= "Dead") return;
+	
+	if(%count <= 10)
 	{
+		if(%count == 1)
+		{
+			%obj.playaudio(0,"boomer_vomit" @ getrandom(1,4) @ "_sound");
+			%obj.playthread(1,"boomervomit");
+		}
+
 		%obj.playthread(2,"plant");
-		%obj.vomitschedule = %this.schedule(100,Vomit,%obj,10,%count+1);
+		%obj.SpecialSched = %this.schedule(100,Special,%obj,10,%count+1);
 		%p = new Projectile()
 		{
 			dataBlock = "BoomerVomitProjectile";
@@ -135,6 +185,7 @@ function ZombieBoomerHoleBot::Vomit(%this,%obj,%limit,%count)
 		};
 		MissionCleanup.add(%p);
 	}
+	else if(%obj.getclassname() $= "AIPlayer") %obj.schedule(1500,startHoleLoop);
 }
 
 function ZombieBoomerHoleBot::holeAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)

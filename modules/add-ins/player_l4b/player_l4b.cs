@@ -221,7 +221,7 @@ package Player_L4B
 												}
 					case "ZombieHunterHoleBot": if(%obj.hEating == %col) return false;
 				}
-				if(%obj.hIsInfected && %col.hIsInfected) return false;
+				//if(%obj.hIsInfected && %col.hIsInfected) return false;
 			}
 
 			return true;
@@ -266,7 +266,12 @@ package Player_L4B
 
 	function AIPlayer::hMeleeAttack(%obj,%col)
 	{
-		if(%obj.getState() $= "Dead" || VectorDist(%obj.getposition(), %col.getposition()) > 2.5) return;
+		if((!isObject(%obj) || %obj.getState() $= "Dead")) return;
+
+		if(!isObject(%col)) return;
+
+		%cansee = vectorDot(%obj.getEyeVector(),vectorNormalize(vectorSub(%col.getposition(),%obj.getposition())));
+		if(VectorDist(%obj.getposition(), %col.getposition()) > 2.5 || %cansee < 0.5) return;
 
 		if(%col.getType() & $TypeMasks::VehicleObjectType || %col.getType() & $TypeMasks::PlayerObjectType)
 		{
@@ -282,6 +287,86 @@ package Player_L4B
 				%obj.getDataBlock().onBotMelee(%obj,%col);				
 			}
 		}
+	}
+
+	//function Player::hMeleeAttack(%obj,%col)
+	//{						
+	//	if((!isObject(%obj) || %obj.getState() $= "Dead") || (!isObject(%col) || %col.getState() $= "Dead")) return;		
+//
+	//	%cansee = vectorDot(%obj.getEyeVector(),vectorNormalize(vectorSub(%col.getposition(),%obj.getposition())));
+	//	if(VectorDist(%obj.getposition(), %col.getposition()) > 2.5 || %cansee < 0.5) return;		
+//
+	//	if(%col.getType() & $TypeMasks::VehicleObjectType || %col.getType() & $TypeMasks::PlayerObjectType)
+	//	{
+	//		%damage = %obj.hAttackDamage*getWord(%obj.getScale(),0);
+	//		%damagefinal = getRandom(%damage/4,%damage);
+	//		%obj.hlastmeleedamage = %damagefinal;
+	//		%obj.lastattacked = getsimtime()+1000;
+//
+	//		%obj.playthread(2,activate2);
+	//		%col.damage(%obj.hFakeProjectile, %col.getposition(), %damagefinal, %obj.hDamageType);
+	//		%obj.getDataBlock().onBotMelee(%obj,%col);				
+	//	}
+	//}	
+
+	// return the closest player within our field of view
+	function AIPlayer::hFindClosestPlayerFOV(%bot,%range,%hear)
+	{
+		%type = $TypeMasks::PlayerObjectType;
+		%scale = getWord(%bot.getScale(),0);
+
+		%pos = %bot.getPosition();
+		if(%bot.hSearchRadius == 0)	%bot.hFinalRadius = 0;
+		else %bot.hFinalRadius = brickToRadius( %bot.hSearchRadius )*%scale;
+		if(%bot.hSearchRadius == -2) %bot.hFinalRadius = 2000000000;
+
+		%n = 0;
+		initContainerRadiusSearch( %pos, %bot.hFinalRadius, %type );
+		while((%target = containerSearchNext()) != 0 )
+		{
+			if(%bot == %target || !%bot.hFOVCheck(%target)) continue;
+
+			if(%target.getState() !$= "Dead" && !%target.isCloaked && %bot.hIgnore != %target && checkHoleBotTeams(%bot,%target) && hLOSCheck(%bot,%target) && miniGameCanDamage(%target,%bot))
+			switch$(%bot.getdataBlock().hZombieL4BType)
+			{
+				case "Special": if(%target.getdataBlock().isDowned) return %target;
+								else return %target;
+				case "Normal": 	if(%target.BoomerBiled) return %target;
+								else return %target;
+				default: return %target;
+			}	
+		}
+
+		//Hearing
+		if(%bot.hHearing && %hear)
+		{
+			%pos = %bot.getPosition();
+			//%radius = 8*%scale;
+
+			initContainerRadiusSearch( %pos, %bot.hFinalRadius/2, %type );
+			while((%target = containerSearchNext()) != 0)
+			{
+				%target = %target.getID();
+				%speed = vectorLen( %target.getVelocity() );
+
+				if(%bot != %target && %speed > 3 && %target.getState() !$= "Dead" && !%target.isCloaked && checkHoleBotTeams(%bot,%target, 1) && miniGameCanDamage( %target, %bot ) == 1)
+				{
+					%bot.clearMoveY();
+					%bot.clearMoveX();
+					%bot.maxYawSpeed = 10;
+					%bot.maxPitchSPeed = 10;
+					%bot.setAimLocation( vectorAdd(%target.getPosition(), "0 0 2") );
+
+					if(%bot.hEmote)
+						%bot.emote(wtfImage);
+					cancel(%bot.hFOVSchedule);
+					%bot.hFOVSchedule = %bot.scheduleNoQuota( 500, hDoHoleFOVCheck, 0, 0, 0 );//%bot.hFOVRadius,0,0);
+
+					return -1;
+				}
+			}
+		}
+		return 0;
 	}
 
 	function Player::ActivateStuff (%player)//Not parenting, I made an overhaul of this function so it might cause compatibility issues...

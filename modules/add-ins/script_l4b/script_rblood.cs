@@ -44,7 +44,7 @@ function vectorToAxis(%vector)
 	return getWords(matrixCreateFromEuler(%euler), 3, 6);
 }
 
-function spawnDecal(%dataBlock, %position, %vector,%scale) 
+function spawnDecal(%dataBlock, %position,%vector,%scale) 
 {
 	if(!isObject(MissionCleanup) || !isObject(%dataBlock) || %dataBlock.getClassName() !$= StaticShapeData) return;
 	if(!isObject(DecalGroup)) MissionCleanup.add(new SimGroup(DecalGroup));	
@@ -184,7 +184,7 @@ function Armor::RBloodSimulate(%this, %obj, %position, %damagetype, %damage)
 		for(%i = 0; %i < getRandom(1,4); %i++)
 		{			
 			doBloodExplosion(%position, getWord(%obj.getScale(), 2));
-			%this.doSplatterBlood(%obj,5);
+			%this.doSplatterBlood(%obj,10);
 		}
 		serverPlay3D("blood_impact" @ getRandom(1,4) @ "_sound", %position);
 		%obj.lastDamaged = getSimTime()+50;
@@ -318,7 +318,7 @@ function Armor::RbloodDismember(%this,%obj,%limb,%doeffects,%position)
 
 	if(%doeffects == 2)
 	{
-		%this.doSplatterBlood(%obj,10);
+		%this.doSplatterBlood(%obj,20);
 		doBloodExplosion(%position, 1.5);
 		serverPlay3D("blood_dismember" @ getRandom(1,4) @ "_sound", %position);		
 	}
@@ -329,7 +329,7 @@ function Armor::RbloodDismember(%this,%obj,%limb,%doeffects,%position)
 	{
 		%obj.hideNode("ALL");
 		%obj.schedule(50,delete);
-		%this.doSplatterBlood(%obj,15);
+		%this.doSplatterBlood(%obj,30);
 		serverPlay3D("blood_explosion" @ getRandom(1,2) @ "_sound", %obj.getHackPosition());
 
 		%datablock = "bloodHeadDebrisProjectile RBloodOrganProjectile 0 0 bloodHandDebrisProjectile bloodHandDebrisProjectile 0 bloodFootDebrisProjectile bloodFootDebrisProjectile";

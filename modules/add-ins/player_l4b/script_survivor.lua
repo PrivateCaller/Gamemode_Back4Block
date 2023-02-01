@@ -51,7 +51,8 @@ function Survivor_Rightclick(obj)
                                 if ts.getstate(ray) ~= "Dead" and tonumber(ts.minigamecandamage(obj,ray)) == 1 and ts.getcallobj(ts.callobj(ray,"getID"),"getDatablock().resistMelee") ~= "1" then                                     
 
                                     ts.setobj(obj,"SurvivorStress",math.clamp(tonumber(ts.getobj(obj,"SurvivorStress"))+0.25,0,20))
-                                    ts.callobj(ray,"cancel","L4B_SpazzZombie")
+                                    ts.call("cancel",ts.getobj(ray,"hLastFollowSched"))
+                                    ts.call("cancel",ts.getobj(ray,"hSpecialSched"))                                    
                                     ts.callobj(ray,"playThread",3,"zstumble"..math.random(1,3))
                                     ts.callobj(ray,"damage",obj,ts.callobj(ray,"getHackPosition"),10,tonumber(ts.get("DamageType::Default")))
                                     ts.callobj(ray,"applyimpulse",ts.call("posFromRaycast",ray),VectorAdd(VectorScale(ts.callobj(obj,"getForwardVector"),"500"),"0 0 250"))

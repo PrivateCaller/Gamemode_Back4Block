@@ -80,38 +80,46 @@ function ZombieHunterHoleBot::onBotLoop(%this,%obj)
 
 function ZombieHunterHoleBot::onBotFollow( %this, %obj, %targ )
 {	
-	if(!isObject(%targ) || !isObject(%obj) || %obj.isStrangling || %obj.GetEnergyLevel() < %this.maxenergy)
-	{
-		if(isObject(%targ) && isObject(%obj) && !isEventPending(%obj.hAboutToAttack)) %this.schedule(500,onBotFollow,%obj,%targ);
-		return;
-	}
+	if((!isObject(%obj) || %obj.getState() $= "Dead" || %obj.isStrangling) || (!isObject(%targ)) || %targ.isBeingStrangled) return;
 
-	if((%distance = vectordist(%obj.getposition(),%targ.getposition())) < 75)
+	cancel(%obj.hLastFollowSched);
+	%obj.hLastFollowSched = %this.schedule(500,onBotFollow,%obj,%targ);	
+
+	if((%distance = vectordist(%obj.getposition(),%targ.getposition())) < 100)
 	{
+		if(%obj.GetEnergyLevel() >= %this.maxenergy && !isEventPending(%obj.SpecialSched))
+		{			
+
+				if(%distance > 15) %time = 750;
+				else %time = 500;
+
+				%obj.setJumping(0);
+				%obj.hCrouch(%time);
+				%obj.schedule(%time-50,hShootAim,%targ);
+				
+				cancel(%obj.SpecialSched);
+				%obj.SpecialSched = %obj.schedule(%time,hJump);
+		}
+		
+		if(%distance < 10)
+		{
+			%this.onTrigger(%obj,0,true);
+			%obj.setMoveX(0);
+			%obj.setMoveY(1);
+			%obj.setmoveobject(%targ);
+		}
+
 		if(!%obj.raisearms)
 		{	
 			%obj.playthread(1,"armReadyboth");
 			%obj.raisearms = true;
-		}
-		
-		%ray = containerRayCast(%obj.gethackposition(),%targ.gethackposition(),$TypeMasks::StaticObjectType | $TypeMasks::PlayerObjectType | $TypeMasks::VehicleObjectType | $TypeMasks::FxBrickObjectType,%obj);	
-		if(isObject(%ray) && %ray.getID() == %targ)
-		{
-			if(%distance > 15) %time = 1000;
-			else %time = 500;
-
-			%obj.hCrouch(%time);
-			%obj.schedule(%time-50,hShootAim,%targ);
-			%obj.hAboutToAttack = %obj.schedule(%time,hJump);
-		}
+		}	
 	}
 	else if(%obj.raisearms)
 	{	
 		%obj.playthread(1,"root");
 		%obj.raisearms = false;
 	}
-
-	if(isObject(%targ) && isObject(%obj) && !isEventPending(%obj.hAboutToAttack)) %this.schedule(500,onBotFollow,%obj,%targ);
 }
 
 function ZombieHunterHoleBot::onBotMelee(%this,%obj,%col)
@@ -218,29 +226,51 @@ function ZombieHunterHoleBot::L4BAppearance(%this,%obj,%client)
 
 function ZombieHunterHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
 {	
-	CommonZombieHoleBot::onTrigger (%this, %obj, %triggerNum, %val);
-
-	if(%obj.getstate() !$= "Dead" && %obj.GetEnergyLevel() >= %this.maxenergy)
-	{
-		if(%val) switch(%triggerNum)
-		{
-			case 3: %obj.playaudio(0,"hunter_recognize" @ getrandom(1,3) @ "_sound");
-					%obj.BeginPounce = true;
-									
-			case 2: if(getWord(%obj.getvelocity(),2) <= 5 && %obj.BeginPounce)
-					{
-						%obj.BeginPounce = false;
-						%obj.setenergylevel(0);
-						%obj.playaudio(0,"hunter_attack" @ getrandom(1,3) @ "_sound");
-						%obj.playaudio(1,"hunter_lunge_sound");
-						%obj.playthread(0,"jump");
-						%obj.playthread(1,"activate2");											
-						%normVec = VectorNormalize(%obj.getEyeVector());
-						%eye = VectorAdd(vectorscale(%normVec,100),"0 0 1.25");
-						%obj.setvelocity(%eye);
-					}
-		}
-		else %obj.BeginPounce = false;
-	}
 	Parent::onTrigger (%this, %obj, %triggerNum, %val);
+
+	if(!isObject(%obj) || %obj.getState() $= "Dead") return;
+
+	if(isObject(%obj.hFollowing)) %targ = %obj.hFollowing;
+	else if(isObject(%obj.lastactivated) && %obj.lastactivated.getType() && $TypeMasks::PlayerObjectType) %targ = %obj.lastactivated;
+	else return;	
+
+	if(%val) switch(%triggerNum)
+	{			
+		case 0: if(!isEventPending(%obj.MeleeSched))
+				{
+					%obj.playthread(2,"zAttack" @ getRandom(1,3));
+					cancel(%obj.MeleeSched);
+					%obj.MeleeSched = %this.schedule(350,Melee,%obj,%targ);
+				}
+
+		case 2: if(%obj.GetEnergyLevel() >= %this.maxenergy) %this.Special(%obj);
+
+		case 3: if(%obj.GetEnergyLevel() >= %this.maxenergy)
+				{
+					%obj.playaudio(0,"hunter_recognize" @ getrandom(1,3) @ "_sound");
+					%obj.BeginPounce = true;
+				}
+	}
+	else %obj.BeginPounce = false;
+}
+
+function ZombieHunterHoleBot::Melee(%this,%obj,%targ)
+{
+	CommonZombieHoleBot::Melee(%this,%obj,%targ);
+}
+
+function ZombieHunterHoleBot::Special(%this,%obj)
+{
+	if(getWord(%obj.getvelocity(),2) <= 5 && %obj.BeginPounce)
+	{
+		%obj.BeginPounce = false;
+		%obj.setenergylevel(0);
+		%obj.playaudio(0,"hunter_attack" @ getrandom(1,3) @ "_sound");
+		%obj.playaudio(1,"hunter_lunge_sound");
+		%obj.playthread(0,"jump");
+		%obj.playthread(1,"activate2");											
+		%normVec = VectorNormalize(%obj.getEyeVector());
+		%eye = VectorAdd(vectorscale(%normVec,100),"0 0 1.25");
+		%obj.setvelocity(%eye);		
+	}
 }

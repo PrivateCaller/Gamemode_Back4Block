@@ -1436,9 +1436,9 @@ datablock PlayerData(CommonZombieHoleBot : SurvivorPlayer)
 	speedDamageScale = 0.5;
 	isSurvivor = false;
 
-    maxForwardSpeed = 12;
-    maxSideSpeed = 11;
-	maxBackwardSpeed = 10;
+    maxForwardSpeed = 11;
+    maxSideSpeed = 10;
+	maxBackwardSpeed = 9;
 
  	maxForwardCrouchSpeed = 7;
 	maxSideCrouchSpeed = 6;
@@ -1498,7 +1498,7 @@ datablock PlayerData(CommonZombieHoleBot : SurvivorPlayer)
 	hSearch = 1;//Search for Players
 	hSearchRadius = 512;//in brick units
 	hSight = 1;//Require bot to see player before pursuing
-	hStrafe = 0;//Randomly strafe while following player
+	hStrafe = 1;//Randomly strafe while following player
 	hSearchFOV = 1;//if enabled disables normal hSearch
 	hFOVRadius = 10;//max 10
 	hAlertOtherBots = 1;//Alerts other bots when he sees a player, or gets attacked
@@ -2098,7 +2098,7 @@ datablock shapeBaseImageData(helmetimage : scouthatimage)
 datablock shapeBaseImageData(fedorahatimage : scouthatimage)
 {
 	shapefile = "./models/hats/fedorahat.dts";
-	offset = "0 0 0";
+	offset = "0 0 0.05";
 };
 
 datablock shapeBaseImageData(fancyhatimage : scouthatimage)

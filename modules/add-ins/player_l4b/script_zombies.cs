@@ -36,11 +36,6 @@ function fxDTSBrick::zfakeKillBrick(%obj)
 
 registerInputEvent("fxDTSBrick","onzFakeKillBrick","Self fxDTSBrick");
 
-function Player::hMeleeAttack(%obj,%col)
-{						
-	if(vectordist(%obj.getposition(),%col.getposition()) < 2) return AIPlayer::hMeleeAttack(%obj,%col);
-}
-
 function Player::StunnedSlowDown(%obj,%slowdowndivider)
 {						
 	if(!isObject(%obj) || %obj.getstate() $= "Dead") return;
@@ -306,7 +301,7 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 											 %col.playaudio(2,"smoker_tongue_hit_sound");
 											 %obj.playthread(2,"plant");
 											 %obj.playthread(3,"shiftup");
-											 %col.mountImage("ZombieSmokerConstrictImage", 3);
+											 %col.mountImage("ZombieSmokerConstrictImage",3);
 											 %pinmusic = "musicData_smoker_tonguepin";
 			}
 

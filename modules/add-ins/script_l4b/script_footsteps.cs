@@ -32,6 +32,7 @@ function Armor::FootstepLoop(%this,%obj)
 		{
 			if(getword(%obj.getvelocity(),2) < -15)
 			{
+				%obj.addvelocity("0 0 -2.5");
 				%obj.playthread(2,"side");
 				L4B_SpazzZombie(%obj,0);
 				if(!%obj.isFalling)

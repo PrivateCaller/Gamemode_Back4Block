@@ -9,7 +9,7 @@ function ZombieSmokerHoleBot::onNewDataBlock(%this,%obj)
 	Parent::onNewDataBlock(%this,%obj);
 	CommonZombieHoleBot::onNewDataBlock(%this,%obj);
 
-	%obj.mountImage(SmokeStatusPlayerImage, 1);
+	%obj.mountImage("SmokeStatusPlayerImage", 1);
 	%obj.setscale("0.95 1 1.25");
 }
 
@@ -102,31 +102,38 @@ function ZombieSmokerHoleBot::onDamage(%this,%obj,%delta)
 
 function ZombieSmokerHoleBot::onBotFollow( %this, %obj, %targ )
 {
-	if((isObject(%obj) && %obj.getState() !$= "Dead" && %obj.hLoopActive && !%obj.isStrangling && !isEventPending(%obj.ShootTongue)) && (isObject(%targ) && %targ.getState() !$= "Dead")) 
-	%this.schedule(500,onBotFollow,%obj,%targ);
+	if((isObject(%obj) && %obj.getState() !$= "Dead" && %obj.hLoopActive && !%obj.isStrangling && !isEventPending(%obj.SpecialSched)) && (isObject(%targ) && %targ.getState() !$= "Dead")) 
+	%this.schedule(750,onBotFollow,%obj,%targ);
 	else return;
 
-	if(getWord(%obj.getScale(),2) >= 1.05 && !%obj.isStrangling)
-	{
-		%distance = vectorDist(%obj.getposition(),%targ.getposition());
+	%distance = vectorDist(%obj.getposition(),%targ.getposition());
 
-		if(%distance > 25 && %distance < 75)
-		{	
+	if(%distance < 75)
+	{	
+		if(%distance < 10)
+		{
 			if(%obj.GetEnergyLevel() >= %this.maxenergy)
 			{
-				%obj.schedule(250,hClearMovement);
-				%obj.schedule(500,setaimobject,%targ);
-				%this.onTrigger(%obj,4,1);
-				%obj.schedule(1000,hShootAim,%targ);
-			}			
-		}		
-		else if(%distance < 25)
-		{			
-			%obj.stopHoleLoop();
-			%obj.hRunAwayFromPlayer(%targ);
-			%obj.schedule(2000,startHoleLoop);
-		}		
-	}	
+				%obj.stopHoleLoop();
+				%obj.hRunAwayFromPlayer(%targ);
+				%obj.schedule(1500,startHoleLoop);
+			}
+			else
+			{
+				%this.onTrigger(%obj,0,true);
+				%obj.setMoveX(0);
+				%obj.setMoveY(1);
+				%obj.setmoveobject(%targ);
+			}
+		}
+		else if(%obj.GetEnergyLevel() >= %this.maxenergy && !%obj.isStrangling)
+		{
+			%obj.schedule(250,hClearMovement);
+			%obj.schedule(500,setaimobject,%targ);
+			%this.onTrigger(%obj,4,1);
+			%obj.schedule(1000,hShootAim,%targ);
+		}
+	}		
 }
 
 function ZombieSmokerHoleBot::holeAppearance(%this,%obj,%skinColor,%face,%decal,%hat,%pack,%chest)
@@ -196,7 +203,43 @@ function ZombieSmokerHoleBot::L4BAppearance(%this,%obj,%client)
 	}
 }
 
-function ZombieSmokerHoleBot::ShootTongue(%this, %obj)
+function ZombieSmokerHoleBot::onTrigger(%this,%obj,%triggerNum,%val)
+{			
+	Parent::onTrigger(%this,%obj,%triggerNum,%val);
+
+	if(!isObject(%obj) || %obj.getState() $= "Dead") return;
+
+	if(isObject(%obj.hFollowing)) %targ = %obj.hFollowing;
+	else if(isObject(%obj.lastactivated))
+	{
+		if(%obj.lastactivated.getType() & $TypeMasks::PlayerObjectType) %targ = %obj.lastactivated;
+		else return;
+	}
+	else return;
+
+	if(%val) switch(%triggerNum)
+	{
+		case 0: if(!isEventPending(%obj.MeleeSched))
+				{
+					%obj.playthread(2,"zAttack" @ getRandom(1,3));
+					cancel(%obj.MeleeSched);
+					%obj.MeleeSched = %this.schedule(350,Melee,%obj,%targ);
+				}
+
+		case 4: if(%obj.GetEnergyLevel() >= %this.maxenergy && !%obj.isStrangling && !isEventPending(%obj.SpecialSched))
+				{
+					if(%obj.getClassName() $= "AIPlayer")
+					{							
+						%obj.hClearMovement();
+						%obj.stopHoleLoop();
+					}				
+					%obj.SpecialSched = %obj.getDatablock().schedule(750,Special,%obj);
+					%obj.playaudio(0,"smoker_warn" @ getrandom(1,3) @ "_sound");
+				}
+	}	
+}
+
+function ZombieSmokerHoleBot::Special(%this, %obj)
 {
 	if(!isObject(%obj) || %obj.getstate() $= "Dead") return;		
 	if(isObject(%obj.GHRope)) %obj.GHRope.delete();
@@ -222,26 +265,6 @@ function ZombieSmokerHoleBot::ShootTongue(%this, %obj)
 	};	
 	%obj.tongue = %tongue;
 	%p.tongue = %tongue;
-}
-
-function ZombieSmokerHoleBot::onTrigger(%this,%obj,%triggerNum,%val)
-{			
-	Parent::onTrigger (%this, %obj, %triggerNum, %val);
-
-	if(%obj.getstate() !$= "Dead") switch(%triggerNum)
-	{
-		case 0: CommonZombieHoleBot::onTrigger(%this, %obj, %triggerNum, %val);
-		case 4: if(%obj.GetEnergyLevel() >= %this.maxenergy && !%obj.isStrangling && !isEventPending(%obj.ShootTongue))
-				{
-					if(%obj.getClassName() $= "AIPlayer")
-					{							
-						%obj.hClearMovement();
-						%obj.stopHoleLoop();
-					}				
-					%obj.ShootTongue = %obj.getDatablock().schedule(750,ShootTongue,%obj);
-					%obj.playaudio(0,"smoker_warn" @ getrandom(1,3) @ "_sound");
-				}
-	}	
 }
 
 function SmokerTongueShape::onAdd(%this,%obj)
@@ -361,7 +384,7 @@ function SmokerTongueShape::onRemove(%this,%obj)
 	if((isObject(%end) && (%end.getClassName() $= "Player" || %end.getClassName() $= "AIPlayer")))
 	{
 		%end.isBeingStrangled = false;
-		if(isObject(%end.getMountedImage(2)) && %end.getMountedImage(2).getName() $= "ZombieSmokerConstrictImage") %end.unMountImage(2);
+		if(isObject(%end.getMountedImage(3)) && %end.getMountedImage(3).getName() $= "ZombieSmokerConstrictImage") %end.unMountImage(2);
 		if(%end.getState() $= "Dead") serverPlay3D("victim_smoked_sound",%end.getHackPosition());
 
 		L4B_SpecialsPinCheck(%smoker,%end);

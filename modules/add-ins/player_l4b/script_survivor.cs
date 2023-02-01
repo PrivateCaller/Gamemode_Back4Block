@@ -25,7 +25,7 @@ function SurvivorPlayer::L4BAppearance(%this,%obj,%client)
 	{
 		case 1: if(%client.accent)
 				{
-					%obj.mountImage("helmet",2,1,addTaggedString(luacall(getcolorname,%client.hatColor)));	
+					%obj.mountImage("helmetimage",2,1,addTaggedString(luacall(getcolorname,%client.hatColor)));	
 					%obj.currentHat = "helmet";
 				}		
 				else
@@ -102,7 +102,7 @@ function SurvivorPlayer::onNewDataBlock(%this,%obj)
 }
 
 function SurvivorPlayer::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
-{
+{	
 	if(luacall(Survivor_DownCheck,%obj,%damage,%damageType)) return;
 	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
 }
@@ -168,8 +168,7 @@ function SurvivorPlayerDowned::RbloodDismember(%this,%obj,%limb,%doeffects,%posi
 
 function SurvivorPlayerDowned::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
 {
-	if(!%obj.isBeingStrangled) %damage = %damage/2.5;//Make the downed player last a little longer
-	
+	if(!%obj.isBeingStrangled) %damage = %damage/3.25;//Make the downed player last a little longer if they aren't pinned	
 	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
 }
 
