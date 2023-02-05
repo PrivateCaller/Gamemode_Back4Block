@@ -1,6 +1,14 @@
 package L4B_AEBase_BreachEnter
 {
     //Let's add some animations from the survivor to this
+    //UZI
+    function BNE_UziImage::AEOnFire(%this,%obj,%slot)
+    {	    
+    	Parent::AEOnFire(%this, %obj, %slot);
+
+        if(%obj.getDataBlock().isSurvivor) %obj.playthread(2,"rifleFire1");                
+    }
+
     //SCARH
     function BNE_ScarHImage::AEOnFire(%this,%obj,%slot)
     {	    
