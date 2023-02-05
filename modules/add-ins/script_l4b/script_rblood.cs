@@ -209,7 +209,8 @@ function Armor::RbloodDismember(%this,%obj,%limb,%doeffects,%position)
 
 		switch(%limb)
 		{
-			case 0: %obj.unhidenode("brain");
+			case 0: if(%obj.hType $= "Zombie" && %obj.getState() !$= "Dead") %obj.playthread(3,"zstumble" @ getRandom(1,3));
+					%obj.unhidenode("brain");
 					if(%obj.getdataBlock().noHatRemoval) %dopartdismember = false;
 					else if(%doeffects)
 					{
