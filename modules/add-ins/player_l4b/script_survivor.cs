@@ -46,6 +46,7 @@ function SurvivorPlayer::RbloodDismember(%this,%obj,%limb,%doeffects,%position)
 function SurvivorPlayer::onImpact(%this, %obj, %col, %vec, %force)
 {
 	luacall(Survivor_FallDamage,%obj,%vec,%force);
+	if(%obj.getState() !$= "Dead" && !%obj.getdataBlock().isDowned && getWord(%vec,2)) %obj.playthread(0,"land");
 	Parent::onImpact(%this, %obj, %col, %vec, %force);
 }
 
@@ -85,6 +86,13 @@ function SurvivorPlayer::onTrigger (%this, %obj, %triggerNum, %val)
 function SurvivorPlayer::onNewDataBlock(%this,%obj)
 {	
 	Parent::onNewDataBlock(%this,%obj);
+
+	if(!%obj.isMounted())
+	{
+		%obj.playthread(0,"root");
+		%obj.playthread(3,"root");
+		%obj.playthread(2,"root");
+	}
 
 	if(!isObject(%obj.billboardbot))
 	{

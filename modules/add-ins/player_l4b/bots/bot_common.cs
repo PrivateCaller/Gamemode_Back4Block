@@ -150,10 +150,10 @@ function CommonZombieHoleBot::onBotLoop(%this,%obj)
 
 function CommonZombieHoleBot::onBotFollow( %this, %obj, %targ )
 {
-	if((!isObject(%obj) || %obj.getState() $= "Dead" || %obj.hState !$= "Following") || (!isObject(%targ) || (%targ.getType() & $TypeMasks::PlayerObjectType))) return;
+	if((!isObject(%obj) || %obj.getState() $= "Dead" || !%obj.hFollowing || (!isObject(%targ) || (%targ.getType() & !$TypeMasks::PlayerObjectType)))) return;
 
-	cancel(%obj.hLastFollowSched);
-	%obj.hLastFollowSched = %this.schedule(getRandom(250,750),onBotFollow,%obj,%targ);	
+	//cancel(%obj.hLastFollowSched);
+	//%obj.hLastFollowSched = %this.schedule(getRandom(250,750),onBotFollow,%obj,%targ);
 
 	if(vectordist(%obj.getposition(),%targ.getposition()) < 20)
 	{		

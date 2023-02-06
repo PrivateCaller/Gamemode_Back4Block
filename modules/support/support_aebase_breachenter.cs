@@ -190,8 +190,23 @@ package L4B_AEBase_BreachEnter
     	Parent::onPump(%this,%obj,%slot);
 
         if(%obj.getDataBlock().isSurvivor) %obj.playthread(2,"shotgunPump1");
-    }    
+    }
 
+    //SPAS12
+    function BNE_SPAS12Image::AEOnLowClimb(%this, %obj, %slot) 
+    {
+    	Parent::AEOnLowClimb(%this, %obj, %slot);
+
+        if(%obj.getDataBlock().isSurvivor) %obj.playthread(2,"shotgunFire1");
+    }
+
+    //AA12
+    function BNE_AA12Image::AEOnLowClimb(%this, %obj, %slot) 
+    {
+    	Parent::AEOnLowClimb(%this, %obj, %slot);
+
+        if(%obj.getDataBlock().isSurvivor) %obj.playthread(2,"shotgunFire1");
+    }    
 };
 
 //Eval edits
@@ -199,13 +214,18 @@ eval("BNE_870XPItem.AEAmmo = 6;");
 eval("BNE_M500Image.spreadBase = 1000;");
 eval("BNE_M500Image.spreadMin = 1000;");
 eval("BNE_M500Image.spreadMax = 1000;");
-eval("BNE_M500Image.projectileDamage = 17;");
-eval("BNE_M500Image.projectileCount = 14;");
+eval("BNE_M500Image.projectileDamage = 18;");
+eval("BNE_M500Image.projectileCount = 15;");
 eval("BNE_870XPImage.spreadBase = 1250;");
 eval("BNE_870XPImage.spreadMin = 1250;");
 eval("BNE_870XPImage.spreadMax = 1250;");
-eval("BNE_870XPImage.projectileDamage = 13;");
-eval("BNE_870XPImage.projectileCount = 11;");
+eval("BNE_870XPImage.projectileDamage = 15;");
+eval("BNE_870XPImage.projectileCount = 12;");
+eval("BNE_SPAS12Image.spreadMax = 1400;");
+eval("BNE_SPAS12Image.spreadBase = 1250;");
+eval("BNE_SPAS12Image.spreadMin = 1250;");
+eval("BNE_SPAS12Image.projectileDamage = 14;");
+eval("BNE_SPAS12Image.projectileCount = 16;");
 
 
 if(isPackage("L4B_AEBase_BreachEnter")) deactivatePackage("L4B_AEBase_BreachEnter");
