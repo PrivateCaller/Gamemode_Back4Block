@@ -56,7 +56,7 @@ function ZombieHunterHoleBot::onPinLoop(%this,%obj,%col)
 		%col.playthread(3,"plant");
 		%obj.playaudio(2,"hunter_hit" @ getrandom(1,3) @ "_sound");
 		%this.RBloodSimulate(%col, %col.getMuzzlePoint(2), 1, 25);
-		%col.damage(%obj, %col.gethackposition(), $Pref::L4B::Zombies::SpecialsDamage/4, $DamageType::Hunter);		
+		%col.damage(%obj, %col.gethackposition(), $Pref::L4B::Zombies::SpecialsDamage/4, $DamageType::Hunter);
 		%this.schedule(250,onPinLoop,%obj,%col);				
 	}
 }
@@ -153,6 +153,8 @@ function ZombieHunterHoleBot::onImpact(%this, %obj, %col, %vec, %force)
 		%obj.setMoveY(-0.375);
 		%obj.setMoveX(0);
 		%obj.setAimObject(%col);
+
+		if((%col.getType() & $TypeMasks::PlayerObjectType) && %col.getState() !$= "Dead") %col.damage(%obj, %col.gethackposition(), $Pref::L4B::Zombies::SpecialsDamage*2.5, $DamageType::Hunter);
 	}
 }
 

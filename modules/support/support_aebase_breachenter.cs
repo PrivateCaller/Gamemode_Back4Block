@@ -177,6 +177,21 @@ package L4B_AEBase_BreachEnter
         else Parent::onReloadStart(%this,%obj,%slot);
     }
 
+    //870 EXPRESS
+    function BNE_870XPImage::AEOnLowClimb(%this, %obj, %slot) 
+    {
+    	Parent::AEOnLowClimb(%this, %obj, %slot);
+
+        if(%obj.getDataBlock().isSurvivor) %obj.playthread(2,"shotgunFire1");
+    }
+
+    function BNE_870XPImage::onPump(%this,%obj,%slot)
+    {
+    	Parent::onPump(%this,%obj,%slot);
+
+        if(%obj.getDataBlock().isSurvivor) %obj.playthread(2,"shotgunPump1");
+    }
+
     //Mossberg
     function BNE_M500Image::AEOnLowClimb(%this, %obj, %slot) 
     {

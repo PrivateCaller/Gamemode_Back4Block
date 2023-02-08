@@ -259,7 +259,9 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 					%obj.stopHoleLoop();
 				}				
 				%obj.hIgnore = %col;
-			}			
+			}
+
+			if(%obj.getdataBlock().getName() $= "ZombieHunterHoleBot" && vectorDot(%obj.getForwardVector(),%col.getForwardVector()) > 0) return false;
 
 			switch$(%obj.getdataBlock().getName()) 
 			{
@@ -282,8 +284,8 @@ function Player::SpecialPinAttack(%obj,%col,%force)
 				case "ZombieHunterHoleBot": %obj.playthread(0,root);
 											%col.playthread(0,death1);
 											%obj.schedule(25,setvelocity,"0 0 0");
-											%obj.schedule(50,setTransform,%col.getTransform());
-											%obj.schedule(100,setaimlocation,vectorAdd(%col.getMuzzlePoint(2),vectorScale(%col.getForwardVector(),-0.5)));
+											%obj.schedule(50,setTransform,getWords(%col.getTransform(),0,2) SPC getWords(%obj.getTransform(),3,6));											
+											//%obj.schedule(100,setaimlocation,vectorAdd(vectorAdd(%col.getMuzzlePoint(2),vectorScale(%col.getForwardVector(),-0.5))),"0 0 -2.5");
 											%obj.setMoveX(0);
 											%obj.setMoveY(0);											
 

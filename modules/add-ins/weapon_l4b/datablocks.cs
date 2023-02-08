@@ -1714,7 +1714,7 @@ datablock ShapeBaseImageData(BileBombImage)
    shapeFile = "./models/BileBombItem.dts";
    emap = true;
    mountPoint = 0;
-   offset = "-0.5 0.5 0";
+   offset = "0 0 0";
    correctMuzzleVector = true;
    className = "WeaponImage";
 

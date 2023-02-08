@@ -24,15 +24,14 @@ datablock fxLightData(blankBillboard)
 	LightOn = false;
 	flareOn = true;
 	flarebitmap = "base/data/shapes/blank.png";
-	ConstantSize = 1;
+	ConstantSize = 0.1;
     ConstantSizeOn = true;
 	LinkFlare = false;
 	AnimOffsets = false;
     FadeTime = 99999;
 	
 	blendMode = 1;
-	flareColor = "1 1 1 1";		
-	ConstantSize = 2;
+	flareColor = "1 1 1 1";	
 };
 
 datablock fxLightData(strangledBillboard : blankBillboard)
