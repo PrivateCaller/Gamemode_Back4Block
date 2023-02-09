@@ -113,6 +113,14 @@ function SurvivorPlayer::Damage(%this,%obj,%sourceObject,%position,%damage,%dama
 {	
 	if(luacall(Survivor_DownCheck,%obj,%damage,%damageType)) return;
 	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
+
+	if(%damageType == $DamageType::Fall && %obj.getState() $= "Dead") 
+	{
+		%obj.stopAudio(0);//Do you expect to cry out in pain when you hit the ground and you die?
+		%this.RbloodDismember(%obj,7,true,%position);
+		%this.RbloodDismember(%obj,8,true,%position);
+		%this.RbloodDismember(%obj,6,true,%position);
+	}
 }
 
 function SurvivorPlayer::onDamage(%this,%obj,%delta)

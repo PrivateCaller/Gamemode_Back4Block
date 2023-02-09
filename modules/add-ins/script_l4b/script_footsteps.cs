@@ -7,6 +7,8 @@ function Armor::FootstepLoop(%this,%obj)
 
 	%pos = %obj.getPosition();
 	%vel = %obj.getVelocity();
+	%velz = getword(%vel,2);
+
 	%isground = footplacecheck(%obj); //check for solid ground
 	%localforwardspeed = mCeil(vectorDot(%obj.getVelocity(), %obj.getForwardVector()));
 
@@ -24,15 +26,16 @@ function Armor::FootstepLoop(%this,%obj)
 		%obj.FootstepLoop = %this.schedule(240,FootstepLoop,%obj);
 	}
 
+	if(%velz < 0) %obj.addvelocity("0 0 -0.5");	
+
 	if(%obj.lastStepTime < getSimTime())
 	{
 		%obj.lastStepTime = getSimTime()+1250;
 
 		if(%obj.getdataBlock().isSurvivor && isObject(getMiniGameFromObject(%obj)))
 		{
-			if(getword(%obj.getvelocity(),2) < -15)
-			{
-				%obj.addvelocity("0 0 -2.5");
+			if(%velz < -15)
+			{				
 				%obj.playthread(2,"side");
 				L4B_SpazzZombie(%obj,0);
 				if(!%obj.isFalling)

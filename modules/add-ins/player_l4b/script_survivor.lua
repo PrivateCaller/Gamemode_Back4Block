@@ -222,9 +222,9 @@ function Survivor_FallDamage(obj,vector,force)--Default falling damage is garbag
     local vectorz = math.abs(tonumber(ts.call("getword",vector,2)))
     local falldamage = vectorz/2 * tonumber(force)/2
 
-    if vectorz > tonumber(ts.getcallobj(obj,"getdatablock().minimpactspeed")) and vectorz < 25 then ts.callobj(obj,"damage",obj,pos,falldamage/3.75,ts.get("DamageType::Fall"))
-    elseif vectorz > 30 and vectorz < 35 then ts.callobj(obj,"damage",obj,pos,falldamage/1.875,ts.get("DamageType::Fall"))
-    elseif vectorz > 35 and vectorz < 60 then ts.callobj(obj,"damage",obj,pos,tonumber(ts.getcallobj(obj,"getdatablock().maxDamage")),ts.get("DamageType::Fall"))
-    else ts.callobj(obj,"damage",obj,pos,falldamage*2.5,ts.get("DamageType::Fall"))--Ouch
+    if vectorz > tonumber(ts.getcallobj(obj,"getdatablock().minimpactspeed")) and vectorz < 27 then ts.callobj(obj,"damage",obj,pos,falldamage/3.75,ts.get("DamageType::Fall"))
+    elseif vectorz > 27 and vectorz < 35 then ts.callobj(obj,"damage",obj,pos,falldamage/1.25,ts.get("DamageType::Fall"))
+    elseif vectorz < 40 then ts.callobj(obj,"damage",obj,pos,tonumber(ts.getcallobj(obj,"getdatablock().maxDamage")),ts.get("DamageType::Fall"))
+    else ts.callobj(obj,"damage",obj,pos,falldamage*2.5,ts.get("DamageType::Fall"))
     end
 end

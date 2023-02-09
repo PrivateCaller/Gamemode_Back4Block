@@ -54,6 +54,18 @@ function CommonZombieHoleBot::onDamage(%this,%obj)
 	Parent::OnDamage(%this,%obj);
 }
 
+function CommonZombieHoleBot::RbloodDismember(%this,%obj,%limb,%doeffects,%position)
+{
+	Parent::RbloodDismember(%this,%obj,%limb,%doeffects,%position);
+
+	if(%obj.nolegs && %obj.getState() !$= "Dead")//Ouch there goes my legs
+	switch(%obj.chest)
+	{
+		case 0: %obj.playaudio(0,"zombiemale_ignite" @ getrandom(1,5) @ "_sound");
+		case 1: %obj.playaudio(0,"zombiefemale_ignite" @ getrandom(1,5) @ "_sound");
+	}
+}		
+
 function CommonZombieHoleBot::onImpact(%this, %obj, %col, %vec, %force)
 {
 	luacall(Survivor_FallDamage,%obj,%vec,%force);
@@ -150,12 +162,14 @@ function CommonZombieHoleBot::onBotLoop(%this,%obj)
 
 function CommonZombieHoleBot::onBotFollow( %this, %obj, %targ )
 {
-	if((!isObject(%obj) || %obj.getState() $= "Dead" || !%obj.hFollowing || (!isObject(%targ) || (%targ.getType() & !$TypeMasks::PlayerObjectType)))) return;
+	if(!isObject(%obj) || %obj.getState() $= "Dead" || !%obj.hFollowing) return;
 
-	//cancel(%obj.hLastFollowSched);
-	//%obj.hLastFollowSched = %this.schedule(getRandom(250,750),onBotFollow,%obj,%targ);
+	cancel(%obj.hLastFollowSched);
+	%obj.hLastFollowSched = %this.schedule(500,onBotFollow,%obj,%targ);
 
-	if(vectordist(%obj.getposition(),%targ.getposition()) < 20)
+	%distance = vectordist(%obj.getposition(),%obj.hFollowing.getposition());
+
+	if(%distance < 20)
 	{		
 		if(!%obj.raisearms)
 		{	
@@ -163,12 +177,12 @@ function CommonZombieHoleBot::onBotFollow( %this, %obj, %targ )
 			%obj.raisearms = true;
 		}
 
-		if(vectordist(%obj.getposition(),%targ.getposition()) < 5)
+		if(%distance < 5)
 		{
 			%this.onTrigger(%obj,0,true);
 			%obj.setMoveX(0);
 			%obj.setMoveY(1);
-			%obj.setmoveobject(%targ);
+			%obj.setmoveobject(%obj.hFollowing);
 		}
 	}
 	else if(%obj.raisearms)

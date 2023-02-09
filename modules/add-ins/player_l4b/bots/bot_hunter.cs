@@ -148,13 +148,16 @@ function ZombieHunterHoleBot::onImpact(%this, %obj, %col, %vec, %force)
 	if(%oScale = getWord(%obj.getScale(),0) >= 0.9) 
 	if(!%obj.SpecialPinAttack(%col,%force/2.5))
 	{
-		%obj.playThread(3,"zstumble" @ getrandom(1,3));
-		%this.onDamage(%obj,10);
-		%obj.setMoveY(-0.375);
-		%obj.setMoveX(0);
-		%obj.setAimObject(%col);
+		if(%obj.getState() !$= "Dead")
+		{
+			%obj.playThread(3,"zstumble" @ getrandom(1,3));
+			%this.onDamage(%obj,10);
+			%obj.setMoveY(-0.375);
+			%obj.setMoveX(0);
+			%obj.setAimObject(%col);
 
-		if((%col.getType() & $TypeMasks::PlayerObjectType) && %col.getState() !$= "Dead") %col.damage(%obj, %col.gethackposition(), $Pref::L4B::Zombies::SpecialsDamage*2.5, $DamageType::Hunter);
+			if((%col.getType() & $TypeMasks::PlayerObjectType) && %col.getState() !$= "Dead") %col.damage(%obj, %col.gethackposition(), $Pref::L4B::Zombies::SpecialsDamage*2.5, $DamageType::Hunter);
+		}		
 	}
 }
 

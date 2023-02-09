@@ -277,7 +277,7 @@ function Armor::RbloodDismember(%this,%obj,%limb,%doeffects,%position)
 			case 8:	doGibLimbExplosion("bloodFootDebrisProjectile",%position,%scale);
 					%obj.unhideNode("legstumpl");
 					%obj.nolegs++;
-		}
+		}					
 	}
 
 	if(%obj.getState() $= "Dead" && %obj.limbDismemberedLevel[%limb] != 2)
@@ -366,6 +366,7 @@ package RBloodPackage
  		Parent::Damage(%this, %obj, %sourceObject, %position, %damage, %damageType);
 
 		if(!$Pref::L4B::Blood::BloodDamageThreshold || !%this.enableRBlood || %damage < $Pref::L4B::Blood::BloodDamageThreshold || %damageType == $DamageType::Lava || %damageType == $DamageType::Suicide) return;
+		if(%damageType == $DamageType::Fall && %damage < %this.maxDamage/2) return;
 
 		%this.RBloodSimulate(%obj, %position, %damagetype, %damage);
 	}
