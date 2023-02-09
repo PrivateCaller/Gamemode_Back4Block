@@ -162,10 +162,10 @@ function CommonZombieHoleBot::onBotLoop(%this,%obj)
 
 function CommonZombieHoleBot::onBotFollow( %this, %obj, %targ )
 {
-	if(!isObject(%obj) || %obj.getState() $= "Dead" || !%obj.hFollowing) return;
+	if(!isObject(%obj) || %obj.getState() $= "Dead" || !isObject(%obj.hFollowing)) return;
 
 	cancel(%obj.hLastFollowSched);
-	%obj.hLastFollowSched = %this.schedule(500,onBotFollow,%obj,%targ);
+	%obj.hLastFollowSched = %this.schedule(500,onBotFollow,%obj);
 
 	%distance = vectordist(%obj.getposition(),%obj.hFollowing.getposition());
 
