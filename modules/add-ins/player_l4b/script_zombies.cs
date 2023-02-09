@@ -149,21 +149,20 @@ function L4B_ZombieDropLoot(%obj,%lootitem,%chance) { luacall(L4B_ZombieDropLoot
 function L4B_ZombieLunge(%obj,%target,%power) { luacall(L4B_ZombieLunge,%obj,%target,%power); }
 
 function Player::bigZombieMelee(%obj)
-{	
+{
 	%this = %obj.getdataBlock();
 	%oscale = getWord(%obj.getScale(),2);
 	%mask = $TypeMasks::PlayerObjectType | $TypeMasks::VehicleObjectType | $TypeMasks::FxBrickObjectType;
 	initContainerRadiusSearch(%obj.getEyePoint(),10,%mask);
 	while(%hit = containerSearchNext())
 	{
-		if(%hit == %obj)
-		continue;
+		if(%hit == %obj) continue;
 
 		%line = vectorNormalize( vectorSub( %obj.getposition(), %hit.getposition()));
 		%dot = vectorDot( %obj.getEyeVector(), %line );
 		%obscure = containerRayCast(%obj.getEyePoint(),vectorAdd(%hit.getPosition(),"0 0 1.9"),$TypeMasks::InteriorObjectType | $TypeMasks::TerrainObjectType | $TypeMasks::FxBrickObjectType, %obj);
 
-		if(isObject(%obscure) || ContainerSearchCurrRadiusDist() > 2 || %dot > 0.5)
+		if(isObject(%obscure) || ContainerSearchCurrRadiusDist() > 5 || %dot > 0.5)
 		continue;
 
 		if(%hit.getType() & $TypeMasks::PlayerObjectType && (miniGameCanDamage(%obj,%hit) && checkHoleBotTeams(%obj,%hit) && %obj.getdataBlock().getName() $= "ZombieChargerHoleBot") || %obj.getdataBlock().getName() $= "ZombieTankHoleBot")
@@ -182,7 +181,7 @@ function Player::bigZombieMelee(%obj)
 				%eye = vectorscale(%normVec,30);
 				%hit.setvelocity(%eye/2);
 			}
-			%hit.damage(%obj.hFakeProjectile, %hit.getposition(), $Pref::L4B::Zombies::SpecialsDamage*%oScale, %obj.hDamageType);
+			%hit.damage(%obj.hFakeProjectile, %hit.getposition(), $Pref::L4B::Zombies::SpecialsDamage/4 * %oScale, %obj.hDamageType);
 
 			%p = new Projectile()
 			{
@@ -235,6 +234,8 @@ function Player::bigZombieMelee(%obj)
 		}
 	}
 }
+
+function AIPlayer::bigZombieMelee(%obj) { Player::bigZombieMelee(%obj); }
 
 function Player::SpecialPinAttack(%obj,%col,%force)
 {	

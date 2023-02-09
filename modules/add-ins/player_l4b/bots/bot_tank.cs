@@ -14,6 +14,19 @@ function ZombieTankHoleBot::onImpact(%this, %obj, %col, %vec, %force)
 
 function ZombieTankHoleBot::onBotFollow( %this, %obj, %targ )
 {
+	if(!isObject(%obj) || %obj.getState() $= "Dead" || !isObject(%obj.hFollowing) || %obj.hFollowing.getState() $= "Dead") return;
+
+	cancel(%obj.hLastFollowSched);
+	%obj.hLastFollowSched = %this.schedule(750,onBotFollow,%obj);
+
+	if((%distance = vectordist(%obj.getposition(),%obj.hFollowing.getposition())) < 5)
+	{		
+		%this.onTrigger(%obj,0,true);
+		%obj.setMoveX(0);
+		%obj.setMoveY(1);
+		%obj.setmoveobject(%obj.hFollowing);
+	}
+
 	if((getRandom(1,100) <= $Pref::L4B::Zombies::TankChance && getWord(%obj.getvelocity(),2) == 0 && vectorDist(%obj.getPosition(),%targ.getPosition()) >= 35) || %obj.tankstress >= 10)
 	{
 		%obj.setaimobject(%targ);
@@ -109,36 +122,37 @@ function ZombieTankHoleBot::onDisabled(%this,%obj)
 	}
 }
 
-function ZombieTankHoleBot::onCollision(%this, %obj, %col, %fade, %pos, %norm)
-{
-	CommonZombieHoleBot::oncollision(%this, %obj, %col, %fade, %pos, %norm);
-}
-
 function ZombieTankHoleBot::onBotMelee(%this,%obj,%col)
 {
-	%obj.bigZombieMelee();	
+
+}
+
+function ZombieTankHoleBot::onCollision(%this,%obj,%col,%normal,%speed)
+{
+	Parent::onCollision(%this,%obj,%col,%normal,%speed);
+
+    if((%col.getType() & $TypeMasks::PlayerObjectType) && %col.getState() !$= "Dead") %obj.bigZombieMelee();
 }
 
 function ZombieTankHoleBot::onTrigger (%this, %obj, %triggerNum, %val)
-{	
-	if(%obj.getClassName() $= "Player" && %obj.getstate() !$= "Dead")
-	{
-		if(%val)
-		switch(%triggerNum)
-		{
-			case 0: if(!isObject(%obj.getMountedImage(0)))
-					{
-						%obj.playthread(2,"activate2");
-						%obj.playthread(0,"jump");
-						%obj.bigZombieMelee();
-					}
-			case 4: if(%obj.GetEnergyLevel() >= %this.maxenergy)
-					%obj.mountImage(BoulderImage,0);
-				
-			default:
-		}
-	}
+{				
 	Parent::onTrigger (%this, %obj, %triggerNum, %val);
+
+	if(%obj.getstate() $= "Dead") return;
+	
+	if(%val) switch(%triggerNum)
+	{
+		case 0: if(!isObject(%obj.getMountedImage(0)))
+				{
+					%obj.playthread(2,"activate2");
+					%obj.playthread(0,"jump");
+					%obj.bigZombieMelee();
+				}
+		case 4: if(%obj.GetEnergyLevel() >= %this.maxenergy)
+				%obj.mountImage(BoulderImage,0);
+			
+		default:
+	}	
 }
 
 function ZombieTankHoleBot::RbloodDismember(%this,%obj,%limb,%doeffects,%position)

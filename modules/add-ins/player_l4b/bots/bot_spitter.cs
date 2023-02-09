@@ -32,14 +32,22 @@ function ZombieSpitterHoleBot::onBotLoop(%this,%obj)
 
 function ZombieSpitterHoleBot::onBotFollow( %this, %obj, %targ )
 {
-	if((isObject(%obj) && %obj.getState() !$= "Dead" && %obj.hLoopActive) && (isObject(%targ) && %targ.getState() !$= "Dead") && (%distance = vectorDist(%obj.getposition(),%targ.getposition())) < 25)
-	%this.schedule(500,onBotFollow,%obj,%targ);
-	else return;
+	if(!isObject(%obj) || %obj.getState() $= "Dead" || %obj.hState !$= "Following" || !isObject(%targ)) return;
+
+	cancel(%obj.hLastFollowSched);
+	%obj.hLastFollowSched = %this.schedule(750,onBotFollow,%obj,%targ);
 
 	if((%distance = vectorDist(%obj.getposition(),%targ.getposition())) > 10 && %distance < 25)
 	{
-		if(%obj.GetEnergyLevel() >= %this.maxenergy) %this.onTrigger(%obj,4,1);				
-		%obj.setMoveX(0);
+		if(%obj.GetEnergyLevel() >= %this.maxenergy) 
+		{
+            %cansee = vectorDot(%obj.getEyeVector(),vectorNormalize(vectorSub(%targ.getposition(),%obj.getposition()))) > 0.5;
+            %obscure = containerRayCast(%obj.getEyePoint(),%targ.getMuzzlePoint(2),$TypeMasks::InteriorObjectType | $TypeMasks::TerrainObjectType | $TypeMasks::FxBrickObjectType, %obj);
+
+            if(!isObject(%obscure) && %cansee) %this.onTrigger(%obj,4,1);
+		}
+		
+		%obj.setMoveX(getRandom(-1,1));
 		%obj.setMoveY(0);
 		%obj.setaimobject(%targ);
 	}

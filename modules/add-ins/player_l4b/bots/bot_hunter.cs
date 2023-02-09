@@ -88,7 +88,12 @@ function ZombieHunterHoleBot::onBotFollow( %this, %obj, %targ )
 	if((%distance = vectordist(%obj.getposition(),%targ.getposition())) < 100)
 	{
 		if(%obj.GetEnergyLevel() >= %this.maxenergy && !isEventPending(%obj.SpecialSched))
-		{			
+		{
+            %cansee = vectorDot(%obj.getEyeVector(),vectorNormalize(vectorSub(%targ.getposition(),%obj.getposition()))) > 0.5;
+            %obscure = containerRayCast(%obj.getEyePoint(),%targ.getMuzzlePoint(2),$TypeMasks::InteriorObjectType | $TypeMasks::TerrainObjectType | $TypeMasks::FxBrickObjectType, %obj);
+
+            if(!isObject(%obscure) && %cansee)
+			{
 
 				if(%distance > 15) %time = 750;
 				else %time = 500;
@@ -96,9 +101,10 @@ function ZombieHunterHoleBot::onBotFollow( %this, %obj, %targ )
 				%obj.setJumping(0);
 				%obj.hCrouch(%time);
 				%obj.schedule(%time-50,hShootAim,%targ);
-				
+			
 				cancel(%obj.SpecialSched);
 				%obj.SpecialSched = %obj.schedule(%time,hJump);
+			}
 		}
 		
 		if(%distance < 10)

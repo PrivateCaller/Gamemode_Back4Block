@@ -128,10 +128,16 @@ function ZombieSmokerHoleBot::onBotFollow( %this, %obj, %targ )
 		}
 		else if(%obj.GetEnergyLevel() >= %this.maxenergy && !%obj.isStrangling)
 		{
-			%obj.schedule(250,hClearMovement);
-			%obj.schedule(500,setaimobject,%targ);
-			%this.onTrigger(%obj,4,1);
-			%obj.schedule(1000,hShootAim,%targ);
+            %cansee = vectorDot(%obj.getEyeVector(),vectorNormalize(vectorSub(%targ.getposition(),%obj.getposition()))) > 0.5;
+            %obscure = containerRayCast(%obj.getEyePoint(),%targ.getMuzzlePoint(2),$TypeMasks::InteriorObjectType | $TypeMasks::TerrainObjectType | $TypeMasks::FxBrickObjectType, %obj);
+
+            if(!isObject(%obscure) && %cansee)
+			{
+				%obj.schedule(250,hClearMovement);
+				%obj.schedule(500,setaimobject,%targ);
+				%this.onTrigger(%obj,4,1);
+				%obj.schedule(700,hShootAim,%targ);
+			}
 		}
 	}		
 }
@@ -384,7 +390,7 @@ function SmokerTongueShape::onRemove(%this,%obj)
 	if((isObject(%end) && (%end.getClassName() $= "Player" || %end.getClassName() $= "AIPlayer")))
 	{
 		%end.isBeingStrangled = false;
-		if(isObject(%end.getMountedImage(3)) && %end.getMountedImage(3).getName() $= "ZombieSmokerConstrictImage") %end.unMountImage(2);
+		if(isObject(%end.getMountedImage(3)) && %end.getMountedImage(3).getName() $= "ZombieSmokerConstrictImage") %end.unMountImage(3);
 		if(%end.getState() $= "Dead") serverPlay3D("victim_smoked_sound",%end.getHackPosition());
 
 		L4B_SpecialsPinCheck(%smoker,%end);

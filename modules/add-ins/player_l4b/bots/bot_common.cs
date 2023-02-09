@@ -160,16 +160,14 @@ function CommonZombieHoleBot::onBotLoop(%this,%obj)
 	}
 }
 
-function CommonZombieHoleBot::onBotFollow( %this, %obj, %targ )
+function CommonZombieHoleBot::onBotFollow(%this,%obj,%targ)
 {
-	if(!isObject(%obj) || %obj.getState() $= "Dead" || !isObject(%obj.hFollowing)) return;
+	if(!isObject(%obj) || %obj.getState() $= "Dead" || !isObject(%obj.hFollowing) || %obj.hFollowing.getState() $= "Dead") return;
 
 	cancel(%obj.hLastFollowSched);
-	%obj.hLastFollowSched = %this.schedule(500,onBotFollow,%obj);
+	%obj.hLastFollowSched = %this.schedule(750,onBotFollow,%obj);
 
-	%distance = vectordist(%obj.getposition(),%obj.hFollowing.getposition());
-
-	if(%distance < 20)
+	if((%distance = vectordist(%obj.getposition(),%obj.hFollowing.getposition())) < 20)
 	{		
 		if(!%obj.raisearms)
 		{	
