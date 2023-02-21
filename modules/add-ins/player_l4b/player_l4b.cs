@@ -15,6 +15,57 @@ registerOutputEvent ("Player", "Safehouse","bool");
 registerInputEvent ("fxDTSBrick", "onSurvivorTouch", "Self fxDTSBrick" TAB "Player Player" TAB "Bot Bot" TAB "Client GameConnection" TAB "MiniGame MiniGame");
 registerOutputEvent(Player,RemoveItem,"datablock ItemData",1);
 
+function Player::StunnedSlowDown(%obj)
+{						
+	if(!isObject(%obj) || %obj.getstate() $= "Dead") return;
+
+	//%obj.SetTempSpeed(0.5);
+	//talk(%obj.CurrentSpeedPenalty);
+
+	//%obj.resetSpeedSched = %obj.schedule(2000,SetSpeed,true,%obj.CurrentSpeedPenalty);
+}
+
+function Player::SetTempSpeed(%obj,%slowdowndivider)
+{						
+	if(!isObject(%obj) || %obj.getstate() $= "Dead") return;
+
+	%datablock = %obj.getDataBlock();
+	%obj.setMaxForwardSpeed(%datablock.MaxForwardSpeed*%slowdowndivider);
+	%obj.setMaxSideSpeed(%datablock.MaxSideSpeed*%slowdowndivider);
+	%obj.setMaxBackwardSpeed(%datablock.maxBackwardSpeed*%slowdowndivider);
+
+	%obj.setMaxCrouchForwardSpeed(%datablock.maxForwardCrouchSpeed*%slowdowndivider);
+  	%obj.setMaxCrouchBackwardSpeed(%datablock.maxSideCrouchSpeed*%slowdowndivider);
+  	%obj.setMaxCrouchSideSpeed(%datablock.maxSideCrouchSpeed*%slowdowndivider);
+
+ 	%obj.setMaxUnderwaterBackwardSpeed(%datablock.MaxUnderwaterBackwardSpeed*%slowdowndivider);
+  	%obj.setMaxUnderwaterForwardSpeed(%datablock.MaxUnderwaterForwardSpeed*%slowdowndivider);
+  	%obj.setMaxUnderwaterSideSpeed(%datablock.MaxUnderwaterForwardSpeed*%slowdowndivider);
+}
+
+function Player::SetSpeed(%obj,%bool,%slowdowndivider)
+{						
+	if(!isObject(%obj) || %obj.getstate() $= "Dead") return;
+
+	if(!%bool) %slowdowndivider = 1;
+
+	if(!%obj.CurrentSpeedPenalty) %obj.CurrentSpeedPenalty = 1;
+	else %obj.CurrentSpeedPenalty = %slowdowndivider;
+
+	%datablock = %obj.getDataBlock();
+	%obj.setMaxForwardSpeed(%datablock.MaxForwardSpeed*%slowdowndivider);
+	%obj.setMaxSideSpeed(%datablock.MaxSideSpeed*%slowdowndivider);
+	%obj.setMaxBackwardSpeed(%datablock.maxBackwardSpeed*%slowdowndivider);
+
+	%obj.setMaxCrouchForwardSpeed(%datablock.maxForwardCrouchSpeed*%slowdowndivider);
+  	%obj.setMaxCrouchBackwardSpeed(%datablock.maxSideCrouchSpeed*%slowdowndivider);
+  	%obj.setMaxCrouchSideSpeed(%datablock.maxSideCrouchSpeed*%slowdowndivider);
+
+ 	%obj.setMaxUnderwaterBackwardSpeed(%datablock.MaxUnderwaterBackwardSpeed*%slowdowndivider);
+  	%obj.setMaxUnderwaterForwardSpeed(%datablock.MaxUnderwaterForwardSpeed*%slowdowndivider);
+  	%obj.setMaxUnderwaterSideSpeed(%datablock.MaxUnderwaterForwardSpeed*%slowdowndivider);
+}
+
 function Player::Safehouse(%player,%bool)
 {
 	%minigame = getMiniGameFromObject(%player);

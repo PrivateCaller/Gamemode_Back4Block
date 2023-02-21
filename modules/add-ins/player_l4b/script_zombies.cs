@@ -36,27 +36,6 @@ function fxDTSBrick::zfakeKillBrick(%obj)
 
 registerInputEvent("fxDTSBrick","onzFakeKillBrick","Self fxDTSBrick");
 
-function Player::StunnedSlowDown(%obj,%slowdowndivider)
-{						
-	if(!isObject(%obj) || %obj.getstate() $= "Dead") return;
-
-	%datablock = %obj.getDataBlock();
-	%obj.setMaxForwardSpeed(%datablock.MaxForwardSpeed/%slowdowndivider);
-	%obj.setMaxSideSpeed(%datablock.MaxSideSpeed/%slowdowndivider);
-	%obj.setMaxBackwardSpeed(%datablock.maxBackwardSpeed/%slowdowndivider);
-
-	%obj.setMaxCrouchForwardSpeed(%datablock.maxForwardCrouchSpeed/%slowdowndivider);
-  	%obj.setMaxCrouchBackwardSpeed(%datablock.maxSideCrouchSpeed/%slowdowndivider);
-  	%obj.setMaxCrouchSideSpeed(%datablock.maxSideCrouchSpeed/%slowdowndivider);
-
- 	%obj.setMaxUnderwaterBackwardSpeed(%datablock.MaxUnderwaterBackwardSpeed/%slowdowndivider);
-  	%obj.setMaxUnderwaterForwardSpeed(%datablock.MaxUnderwaterForwardSpeed/%slowdowndivider);
-  	%obj.setMaxUnderwaterSideSpeed(%datablock.MaxUnderwaterForwardSpeed/%slowdowndivider);
-
-	cancel(%obj.resetSpeedSched);
-	%obj.resetSpeedSched = %obj.schedule(2000,StunnedSlowDown,1);
-}
-
 function Player::hChangeBotToInfectedAppearance(%obj)
 {
 	%this = %obj.getdataBlock();

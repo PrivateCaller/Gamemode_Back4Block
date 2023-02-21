@@ -119,7 +119,7 @@ function CommonZombieHoleBot::onBotLoop(%this,%obj)
 								case 1: %obj.playaudio(0,"zombiefemale_attack" @ getrandom(1,12) @ "_sound");
 							}
 
-							if(isObject(%minigame = getMiniGameFromObject(%obj)) && %obj.spawnType $= "Horde" && !%obj.hasSpottedOnce)
+							if(isObject(%minigame = getMiniGameFromObject(%obj)) && !%obj.hasSpottedOnce)
 							{
 								%minigame.hordecount++;
 								%obj.hasSpottedOnce = true;
@@ -131,7 +131,7 @@ function CommonZombieHoleBot::onBotLoop(%this,%obj)
 								}
 							}
 
-		default: 	if(isObject(%minigame = getMiniGameFromObject(%obj)) && %obj.spawnType $= "Horde" && %obj.hasSpottedOnce) 
+		default: 	if(isObject(%minigame = getMiniGameFromObject(%obj)) && %obj.hasSpottedOnce) 
 				 	{
 				 		%obj.hasSpottedOnce = false;
 				 		%minigame.hordecount--;

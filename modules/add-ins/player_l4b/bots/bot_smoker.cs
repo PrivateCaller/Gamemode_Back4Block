@@ -112,19 +112,10 @@ function ZombieSmokerHoleBot::onBotFollow( %this, %obj, %targ )
 	{	
 		if(%distance < 10)
 		{
-			if(%obj.GetEnergyLevel() >= %this.maxenergy)
-			{
-				%obj.stopHoleLoop();
-				%obj.hRunAwayFromPlayer(%targ);
-				%obj.schedule(1500,startHoleLoop);
-			}
-			else
-			{
-				%this.onTrigger(%obj,0,true);
-				%obj.setMoveX(0);
-				%obj.setMoveY(1);
-				%obj.setmoveobject(%targ);
-			}
+			%this.onTrigger(%obj,0,true);
+			%obj.setMoveX(0);
+			%obj.setMoveY(1);
+			%obj.setmoveobject(%targ);			
 		}
 		else if(%obj.GetEnergyLevel() >= %this.maxenergy && !%obj.isStrangling)
 		{

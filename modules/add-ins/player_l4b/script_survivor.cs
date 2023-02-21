@@ -45,20 +45,19 @@ function SurvivorPlayer::RbloodDismember(%this,%obj,%limb,%doeffects,%position)
 
 function SurvivorPlayer::onImpact(%this, %obj, %col, %vec, %force)
 {
-	luacall(Survivor_FallDamage,%obj,%vec,%force);
-	if(%obj.getState() !$= "Dead" && !%obj.getdataBlock().isDowned && getWord(%vec,2)) %obj.playthread(0,"land");
+	luacall(Survivor_FallDamage,%obj,getWord(%vec,2),%force);
 	Parent::onImpact(%this, %obj, %col, %vec, %force);
 }
 
 function SurvivorPlayer::onEnterLiquid(%this, %obj, %cov, %type)
 {
 	cancel(%obj.oxygenTick);
-	%obj.oxygenTick = %obj.schedule(2500, oxygenTick);	
+	%obj.oxygenTick = %obj.schedule(2500, oxygenTick);
 	Parent::onEnterLiquid(%this, %obj, %cov, %type);
 }
 function SurvivorPlayer::onLeaveLiquid(%this, %obj, %type)
 {
-	%obj.schedule(150,checkIfUnderwater);	
+	%obj.schedule(150,checkIfUnderwater);
 	Parent::onLeaveLiquid(%this, %obj, %cov, %type);
 }
 

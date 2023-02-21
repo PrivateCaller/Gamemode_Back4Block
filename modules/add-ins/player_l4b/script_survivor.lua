@@ -217,10 +217,13 @@ end
 function Survivor_FallDamage(obj,vector,force)--Default falling damage is garbage so I made my own version thats more suited for the player
 
     if ts.getstate(obj) == "Dead" or ts.get("pref::Server::FallingDamage") == "0" and ts.isobject(ts.call("getMinigameFromObject",obj)) == false then return end
+    if(tonumber(vector) == 0) then return end
     
     local pos = ts.callobj(obj,"getPosition")
-    local vectorz = math.abs(tonumber(ts.call("getword",vector,2)))
+    local vectorz = math.abs(tonumber(vector))
     local falldamage = vectorz/2 * tonumber(force)/2
+
+    if vectorz > 0 and ts.getcallobj(obj,"getdatablock().isDowned") ~= "1" then ts.callobj(obj,"playThread",0,"land") end
 
     if vectorz > tonumber(ts.getcallobj(obj,"getdatablock().minimpactspeed")) and vectorz < 27 then ts.callobj(obj,"damage",obj,pos,falldamage/3.75,ts.get("DamageType::Fall"))
     elseif vectorz > 27 and vectorz < 35 then ts.callobj(obj,"damage",obj,pos,falldamage/1.25,ts.get("DamageType::Fall"))

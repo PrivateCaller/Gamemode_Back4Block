@@ -380,6 +380,7 @@ function flameSetGenerateMedian(%set)
 }
 function flameSetPlayAudio(%set)
 {
+	return;
 	if(isObject(%set.soundObj)) %set.soundObj.setTransform(%set.median);
 	else
 	{

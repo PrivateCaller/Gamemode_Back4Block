@@ -57,6 +57,12 @@ package L4B_AreaZones
 		}
 	}
 
+	function serverCmdClearAllBricks(%client)
+	{
+		Parent::serverCmdClearAllBricks(%client);
+		if(getBrickCount() && !$Game::MissionCleaningUp && %client.isAdmin) deleteAllAreaZones();
+	}
+
 	function GameConnection::onClientLeaveGame(%this)
 	{
 		if(isObject(%this.AreaEditZone)) %this.AreaEditZone.stopEdit();
@@ -700,13 +706,13 @@ function AreaZoneTrigger::onEnterTrigger(%this, %trigger, %obj)
 							{
 								if(!%foundspawner && isObject(%itembricks = %zone.simset.getObject(%g)) && %itembricks.getdataBlock().ZoneBrickType $= "item")
 								{		            
-									%minigame.schedule(100,sortItemSpawns,%zone);
+									%minigame.schedule(500,sortItemSpawns,%zone);
 									%founditemspawner = true;
 								}
 
 								if(!%foundbotspawner && isObject(%spawnbricks = %zone.simset.getObject(%g)) && %spawnbricks.getdataBlock().ZoneBrickType $= "spawner" && strstr(strlwr(%spawnbricks.getname()),"_wander") != -1)
 								{
-									%minigame.schedule(150,spawnZombies,"Wander",getRandom(15,25),%zone);
+									%minigame.schedule(500,spawnZombies,"Wander",getRandom(15,25),%zone);
 									%foundbotspawner = true;
 								}
 
