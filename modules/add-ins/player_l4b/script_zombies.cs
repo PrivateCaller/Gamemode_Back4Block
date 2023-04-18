@@ -129,38 +129,26 @@ function L4B_ZombieLunge(%obj,%target,%power) { luacall(L4B_ZombieLunge,%obj,%ta
 
 function Player::bigZombieMelee(%obj)
 {
+	if(!isObject(%obj) || %obj.getDataBlock().hZombieL4BType !$= "Special") return;
 	%this = %obj.getdataBlock();
 	%oscale = getWord(%obj.getScale(),2);
 	%mask = $TypeMasks::PlayerObjectType | $TypeMasks::VehicleObjectType | $TypeMasks::FxBrickObjectType;
 	initContainerRadiusSearch(%obj.getEyePoint(),10,%mask);
 	while(%hit = containerSearchNext())
-	{
-		if(%hit == %obj) continue;
+	{		
+		%obscure = containerRayCast(%obj.getEyePoint(),%hit.getWorldBoxCenter(),$TypeMasks::InteriorObjectType | $TypeMasks::TerrainObjectType | $TypeMasks::FxBrickObjectType, %obj);
+		%dot = vectorDot(%obj.getEyeVector(),vectorNormalize(vectorSub(%hit.getposition(),%obj.getposition())));
+		
+		if(%hit == %obj || isObject(%obscure) || ContainerSearchCurrRadiusDist() > 6 || %dot < 0.5) continue;
 
-		%line = vectorNormalize( vectorSub( %obj.getposition(), %hit.getposition()));
-		%dot = vectorDot( %obj.getEyeVector(), %line );
-		%obscure = containerRayCast(%obj.getEyePoint(),vectorAdd(%hit.getPosition(),"0 0 1.9"),$TypeMasks::InteriorObjectType | $TypeMasks::TerrainObjectType | $TypeMasks::FxBrickObjectType, %obj);
-
-		if(isObject(%obscure) || ContainerSearchCurrRadiusDist() > 5 || %dot > 0.5)
-		continue;
-
-		if(%hit.getType() & $TypeMasks::PlayerObjectType && (miniGameCanDamage(%obj,%hit) && checkHoleBotTeams(%obj,%hit) && %obj.getdataBlock().getName() $= "ZombieChargerHoleBot") || %obj.getdataBlock().getName() $= "ZombieTankHoleBot")
-		{
-			if(%hit.getstate() $= "Dead")
-			continue;
+		if(%hit.getType() & $TypeMasks::PlayerObjectType)
+		{			
+			if(!miniGameCanDamage(%obj,%hit) || %hit.getstate() $= "Dead" || %hit.getdataBlock().getName() $= "ZombieTankHoleBot") continue;
 
 			%obj.playaudio(3,%this.hBigMeleeSound);
-			%obj.playthread(1,"activate2");
-			
-			if(%this.getName() $= "ZombieTankHoleBot" || vectorDot(%obj.getVelocity(), %obj.getForwardVector()) < 20)
-			%hit.applyimpulse(%hit.getposition(),vectoradd(vectorscale(%obj.getforwardvector(),2000),"0 0 500"));
-			else
-			{
-				%normVec = VectorNormalize(vectorAdd(%obj.getForwardVector(),"0" SPC "0" SPC "0.15"));
-				%eye = vectorscale(%normVec,30);
-				%hit.setvelocity(%eye/2);
-			}
-			%hit.damage(%obj.hFakeProjectile, %hit.getposition(), $Pref::L4B::Zombies::SpecialsDamage/4 * %oScale, %obj.hDamageType);
+			%obj.playthread(1,"activate2");			
+			%hit.setvelocity(vectorscale(VectorNormalize(vectorAdd(%obj.getForwardVector(),"0" SPC "0" SPC "0.15")),30)/2);
+			%hit.damage(%obj.hFakeProjectile, %hit.getposition(), $Pref::L4B::Zombies::SpecialsDamage*400 * %oScale, %obj.hDamageType);
 
 			%p = new Projectile()
 			{

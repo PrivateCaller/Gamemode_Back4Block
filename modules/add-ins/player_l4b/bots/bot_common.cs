@@ -64,7 +64,17 @@ function CommonZombieHoleBot::RbloodDismember(%this,%obj,%limb,%doeffects,%posit
 		case 0: %obj.playaudio(0,"zombiemale_ignite" @ getrandom(1,5) @ "_sound");
 		case 1: %obj.playaudio(0,"zombiefemale_ignite" @ getrandom(1,5) @ "_sound");
 	}
-}		
+}
+
+function CommonZombieHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
+{	
+	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
+}
+
+function CommonZombieHoleBot::RBloodSimulate(%this, %obj, %position, %damagetype, %damage)
+{
+	Parent::RBloodSimulate(%this, %obj, %position, %damagetype, %damage);
+}
 
 function CommonZombieHoleBot::onImpact(%this, %obj, %col, %vec, %force)
 {

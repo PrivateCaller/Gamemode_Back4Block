@@ -18,35 +18,27 @@ if(!isObject(L4B_BotSet))
 
 function miniGameFriendlyFire(%objA,%objB)//Return true to indicate if we are firing on a friendly
 {    
-    if(!isObject(%objA) || !isObject(%objB)) return false;
-
     if(%objA.getClassName() $= "GameConnection") %TargetA = %objA.player;
     else %TargetA = %objA;
-
+    
     if(%objB.getClassName() $= "GameConnection") %TargetB = %objB.player;
     else %TargetB = %objB;
-
-    if(%TargetA !$= %TargetB && getMiniGameFromObject(%TargetA) $= getMiniGameFromObject(%TargetB) && %TargetA.hType $= %TargetB.hType) return false;
+    
+    if(%TargetA !$= %TargetB && %TargetA.hType $= %TargetB.hType) return true;
+    else return false;
 }
 
 package L4B_Director
 {
 	function minigameCanDamage(%objA, %objB)
-	{        
-        if(!isObject(%objA) || !isObject(%objB)) return false;
-    
-        if(%objA.getClassName() $= "GameConnection") %TargetA = %objA.player;
-        else %TargetA = %objA;
-    
-        if(%objB.getClassName() $= "GameConnection") %TargetB = %objB.player;
-        else %TargetB = %objB;
-    
-        if(%TargetA !$= %TargetB && getMiniGameFromObject(%TargetA) $= getMiniGameFromObject(%TargetB) && %TargetA.hType $= %TargetB.hType) return false;
-        Parent::minigameCanDamage(%objA, %objB);
+	{
+        if((!isObject(%objA) || !isObject(%objB)) || (!isObject(getMiniGameFromObject(%objA)) || !isObject(getMiniGameFromObject(%objA))) || (getMiniGameFromObject(%objA) !$= getMiniGameFromObject(%objB))) return false; 
+        if(!miniGameFriendlyFire(%objA,%objB)) Parent::minigameCanDamage(%objA,%objB);
+        else return false;
 	}
 
     function MiniGameSO::endGame(%minigame)
-    {        	
+    {
 		Parent::endGame(%minigame);
         %minigame.L4B_ClearData(%client);
         showAreaZones(1);

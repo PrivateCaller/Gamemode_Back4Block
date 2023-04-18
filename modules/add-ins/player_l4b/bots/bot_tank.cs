@@ -131,7 +131,7 @@ function ZombieTankHoleBot::onCollision(%this,%obj,%col,%normal,%speed)
 {
 	Parent::onCollision(%this,%obj,%col,%normal,%speed);
 
-    if((%col.getType() & $TypeMasks::PlayerObjectType) && %col.getState() !$= "Dead") %obj.bigZombieMelee();
+	if(%col.getType() & $TypeMasks::PlayerObjectType) %obj.bigZombieMelee();
 }
 
 function ZombieTankHoleBot::onTrigger (%this, %obj, %triggerNum, %val)

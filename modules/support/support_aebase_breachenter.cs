@@ -1,6 +1,22 @@
 package L4B_AEBase_BreachEnter
 {
     //Let's add some animations from the survivor to this
+    function BNE_M40Image::AEOnFire(%this,%obj,%slot)
+    {	    
+    	Parent::AEOnFire(%this, %obj, %slot);
+
+        if(%obj.getDataBlock().isSurvivor) %obj.playthread(2,"rifleFire1");
+        if(%obj.getDataBlock().isSurvivor) %obj.playthread(3,"weaponFire1");
+    }
+
+    function BNE_M82A1Image::AEOnFire(%this,%obj,%slot)
+    {	    
+    	Parent::AEOnFire(%this, %obj, %slot);
+
+        if(%obj.getDataBlock().isSurvivor) %obj.playthread(2,"rifleFire1");
+        if(%obj.getDataBlock().isSurvivor) %obj.playthread(3,"rifleFire1");
+    }    
+
     //UZI
     function BNE_UziImage::AEOnFire(%this,%obj,%slot)
     {	    
@@ -236,6 +252,15 @@ eval("BNE_870XPImage.spreadMin = 1250;");
 eval("BNE_870XPImage.spreadMax = 1250;");
 eval("BNE_870XPImage.projectileDamage = 15;");
 eval("BNE_870XPImage.projectileCount = 12;");
+
+
+eval("BNE_Ithaca37Item.AEAmmo = 8;");
+eval("BNE_Ithaca37Image.spreadBase = 1100;");
+eval("BNE_Ithaca37Image.spreadMin = 1100;");
+eval("BNE_Ithaca37Image.spreadMax = 1100;");
+eval("BNE_Ithaca37Image.projectileDamage = 20;");
+eval("BNE_Ithaca37Image.projectileCount = 18;");
+
 eval("BNE_SPAS12Image.spreadMax = 1400;");
 eval("BNE_SPAS12Image.spreadBase = 1250;");
 eval("BNE_SPAS12Image.spreadMin = 1250;");

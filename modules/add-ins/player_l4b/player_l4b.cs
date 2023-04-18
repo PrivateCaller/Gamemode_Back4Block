@@ -476,8 +476,7 @@ package Player_L4B
 			%player.lastActivated = %search;
 			return true;
 		}
-		else return false;
-	
+		else return false;	
 	}
 
 	function Player::PutItemInSlot(%obj,%slot,%item)

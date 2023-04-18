@@ -190,7 +190,7 @@ function Armor::RBloodSimulate(%this, %obj, %position, %damagetype, %damage)
 		%obj.lastDamaged = getSimTime()+50;
 	}
 
-	if(%obj.getstate() $= "Dead" && %damage > %obj.getdataBlock().maxDamage*2.5) %obj.markForGibExplosion = true;
+	if(%obj.getstate() $= "Dead" && %damage > %obj.getdataBlock().maxDamage*5) %obj.markForGibExplosion = true;
 	if($Pref::L4B::Blood::BloodDismemberThreshold && (%damage >= $Pref::L4B::Blood::BloodDismemberThreshold || %obj.limbShotgunStrike >= 2)) %this.RbloodDismember(%obj,%limb,true,%position);	
 }
 
@@ -365,9 +365,9 @@ package RBloodPackage
 	{
  		Parent::Damage(%this, %obj, %sourceObject, %position, %damage, %damageType);
 
-		if(!$Pref::L4B::Blood::BloodDamageThreshold || !%this.enableRBlood || %damage < $Pref::L4B::Blood::BloodDamageThreshold || %damageType == $DamageType::Lava || %damageType == $DamageType::Suicide) return;
-		if(%damageType == $DamageType::Fall && %damage < %this.maxDamage/2) return;
+		if(!$Pref::L4B::Blood::BloodDamageThreshold || !%this.enableRBlood || %damage < $Pref::L4B::Blood::BloodDamageThreshold || %damageType == $DamageType::Lava || %damageType == $DamageType::Suicide || (%damageType == $DamageType::Fall && %damage < %this.maxDamage/2)) return;
 
+		if(%this.hZombieL4BType $= "Normal") %damage = %damage*3;
 		%this.RBloodSimulate(%obj, %position, %damagetype, %damage);
 	}
 };
