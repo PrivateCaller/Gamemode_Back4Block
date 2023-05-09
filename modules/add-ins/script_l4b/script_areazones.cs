@@ -498,7 +498,6 @@ function servercmdazsave(%client, %f0, %f1, %f2, %f3, %f4, %f5, %f6, %f7)
 	}
 
 	%allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ._-()";
-	%filePath = "saves/" @ %fileName @ ".az";
 
 	for(%i = 0; %i < strLen(%fileName); %i++)
 	if(strStr(%allowed, getSubStr(%fileName, %i, 1)) == -1)
@@ -512,6 +511,8 @@ function servercmdazsave(%client, %f0, %f1, %f2, %f3, %f4, %f5, %f6, %f7)
 		messageClient(%client, '', "\c0The file name contains invalid characters, try again!");
 		return;
 	}
+
+	%filePath = "saves/" @ %fileName @ ".az";	
 
 	if(isFile(%filePath)) fileDelete(%filePath);
 	exportAreaZones(%filePath);
