@@ -1,5 +1,11 @@
 exec("./L4B_GUI.gui");
 
+if(isFile("Add-Ons/System_ReturnToBlockland/server.cs"))
+{
+	if(!$RTB::RTBR_InfoTips_Hook) exec("Add-Ons/System_ReturnToBlockland/RTBR_InfoTips_Hook.cs");		
+	RTB_addInfoTip("Using distractable items against common zombie hordes can quickly dispose of them, especially pipebombs.", "", "Left4Block");
+}
+
 //function RaddToMinigameGui(%target)
 //{
 //	for (%i = 0; %i < CMG_ScrollBox.getCount(); %i++) 
