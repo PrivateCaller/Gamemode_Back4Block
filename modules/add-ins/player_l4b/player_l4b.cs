@@ -282,13 +282,20 @@ package Player_L4B
 	function WeaponImage::onMount(%this,%obj,%slot)
 	{		
 		Parent::onMount(%this,%obj,%slot);
-		if(%obj.getdataBlock().isSurvivor && !%obj.getdataBlock().isDowned && (%obj.getMountedImage(0).armReady || %obj.getMountedImage(0).melee)) %obj.setDataBlock("SurvivorPlayerAiming");
+
+		if(%obj.getdataBlock().isSurvivor && !%obj.getdataBlock().isDowned)
+		switch(%obj.getMountedImage(0).armReady)
+		{
+			case 1: %obj.setarmthread("lookarmed");
+			case 2: %obj.setarmthread("lookarmedboth");
+					%obj.schedule(1,playthread,1,"armreadyboth");
+		}		
 	}
 
 	function WeaponImage::onUnMount(%this,%obj,%slot)
 	{		
 		Parent::onUnMount(%this,%obj,%slot);
-		if(%obj.getdataBlock().isSurvivor && !%obj.getdataBlock().isDowned) %obj.setDataBlock("SurvivorPlayer");
+		if(%obj.getdataBlock().isSurvivor && !%obj.getdataBlock().isDowned) %obj.setarmthread("look");
 	}	
 	
 	function AIPlayer::setCrouching(%player,%bool)

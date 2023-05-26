@@ -128,24 +128,6 @@ function SurvivorPlayer::onDamage(%this,%obj,%delta)
 	luacall(Survivor_DamageCheck,%obj,%delta);
 }
 
-function SurvivorPlayerAiming::onTrigger (%this, %obj, %triggerNum, %val) { SurvivorPlayer::onTrigger (%this, %obj, %triggerNum, %val); }
-
-function SurvivorPlayerAiming::onEnterLiquid(%this, %obj, %cov, %type) { SurvivorPlayer::onEnterLiquid(%this, %obj, %cov, %type); }
-
-function SurvivorPlayerAiming::onLeaveLiquid(%this, %obj, %type) { SurvivorPlayer::onLeaveLiquid(%this, %obj, %cov, %type); }
-
-function SurvivorPlayerAiming::onImpact(%this, %obj, %col, %vec, %force) { SurvivorPlayer::onImpact(%this, %obj, %col, %vec, %force); }
-
-function SurvivorPlayerAiming::onNewDataBlock(%this,%obj) { SurvivorPlayer::onNewDataBlock(%this,%obj); }
-
-function SurvivorPlayerAiming::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc) { SurvivorPlayer::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc); }
-
-function SurvivorPlayerAiming::onDamage(%this,%obj,%delta) { SurvivorPlayer::onDamage(%this,%obj,%delta); }
-
-function SurvivorPlayerAiming::L4BAppearance(%this,%obj,%client) { SurvivorPlayer::L4BAppearance(%this,%obj,%client); }
-
-function SurvivorPlayerAiming::RbloodDismember(%this,%obj,%limb,%doeffects,%position) { SurvivorPlayer::RbloodDismember(%this,%obj,%limb,%doeffects,%position); }
-
 function SurvivorPlayerDowned::L4BAppearance(%this,%obj,%client) { SurvivorPlayer::L4BAppearance(%this,%obj,%client); }
 
 function SurvivorPlayerDowned::onImpact(%this, %obj, %col, %vec, %force) { SurvivorPlayer::onImpact(%this, %obj, %col, %vec, %force); }
@@ -176,8 +158,6 @@ function SurvivorPlayerDowned::onDisabled(%this,%obj)
 }
 
 function SurvivorPlayer::onDisabled(%this,%obj,%state) { SurvivorPlayerDowned::onDisabled(%this,%obj,%state); }
-
-function SurvivorPlayerAiming::onDisabled(%this,%obj,%state) { SurvivorPlayerDowned::onDisabled(%this,%obj,%state); }
 
 function SurvivorPlayerDowned::RbloodDismember(%this,%obj,%limb,%doeffects,%position) { SurvivorPlayer::RbloodDismember(%this,%obj,%limb,%doeffects,%position); }
 

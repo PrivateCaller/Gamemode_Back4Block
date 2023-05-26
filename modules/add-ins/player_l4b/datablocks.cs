@@ -314,15 +314,10 @@ function oxygenBubbleImage::onDone(%this,%obj,%slot) { %obj.unMountImage(%slot);
 
 datablock TSShapeConstructor(NewMDts) 
 {
-	baseShape = "./models/newm.dts";
+	baseShape = "./models/newm.dts";	
 	sequence0 = "./models/default.dsq";
-	sequence1 = "./models/survivor.dsq";
-};
-
-datablock TSShapeConstructor(NewMDtsAiming : NewMDts) 
-{
-	baseShape = "./models/newm_aiming.dts";
-	sequence0 = "./models/default_aiming.dsq";
+	sequence1 = "./models/default_lookarmed.dsq";	
+	sequence2 = "./models/survivor.dsq";		
 };
 
 datablock PlayerData(SurvivorPlayer : PlayerStandardArmor)
@@ -384,11 +379,6 @@ datablock PlayerData(SurvivorPlayer : PlayerStandardArmor)
 	rechargeRate = 0.025;
 	maxenergy = 100;
 	showEnergyBar = false;
-};
-datablock PlayerData(SurvivorPlayerAiming : SurvivorPlayer)
-{
-	shapeFile = NewMDtsAiming.baseshape;
-	uiName = "";
 };
 datablock PlayerData(SurvivorPlayerDowned : SurvivorPlayer)
 {	

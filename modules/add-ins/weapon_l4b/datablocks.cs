@@ -960,7 +960,7 @@ datablock ShapeBaseImageData(PropaneTankImage)
    	projectileType = "";
 
    	melee = false;
-   	armReady = true;
+   	armReady = 2;
 
 	doColorShift = true;
 	colorShiftColor = "0.471 0.471 0.471 1.000";
