@@ -256,7 +256,7 @@ datablock ProjectileData(molotovProjectile : gunProjectile)
 	gravityMod 				= 1;
 	isBallistic 			= 1;
 	
-	sound = "molotovLoopSound";
+	sound = "molotov_loop_sound";
 	
 	impactImpulse = 0;
 	verticalImpulse = 0;
