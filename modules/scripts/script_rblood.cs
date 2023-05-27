@@ -190,7 +190,7 @@ function Armor::RBloodSimulate(%this, %obj, %position, %damagetype, %damage)
 		%obj.lastDamaged = getSimTime()+50;
 	}
 
-	if(%obj.getstate() $= "Dead" && %damage > %obj.getdataBlock().maxDamage*5) %obj.markForGibExplosion = true;
+	if(%obj.getstate() $= "Dead" && %damage > %obj.getdataBlock().maxDamage*10) %obj.markForGibExplosion = true;
 	if($Pref::L4B::Blood::BloodDismemberThreshold && (%damage >= $Pref::L4B::Blood::BloodDismemberThreshold || %obj.limbShotgunStrike >= 2)) %this.RbloodDismember(%obj,%limb,true,%position);	
 }
 

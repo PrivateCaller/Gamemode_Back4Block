@@ -400,9 +400,21 @@ function ZombieSpitterHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage
 {
 	%limb = %obj.rgetDamageLocation(%position);
 	if(%damageType !$= $DamageType::FallDamage || %damageType !$= $DamageType::Impact)
-	if(%limb) %damage = %damage/6;
+	if(%limb) %damage = %damage/3;
+	else %damage = %damage*2.5;
 	
 	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
+
+	if(%obj.lastDamaged < getSimTime())
+	{
+		for(%i = 0; %i < getRandom(1,5); %i++)
+		{			
+			doBloodExplosion(%position, getWord(%obj.getScale(), 2));
+			%this.doSplatterBlood(%obj,5);
+		}
+		serverPlay3D("blood_impact" @ getRandom(1,4) @ "_sound", %position);
+		%obj.lastDamaged = getSimTime()+50;
+	}
 }
 
 function ZombieSpitterHoleBot::onDamage(%this,%obj)

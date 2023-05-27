@@ -162,6 +162,17 @@ function ZombieTankHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,%d
 	if(%damageType !$= $DamageType::FallDamage || %damageType !$= $DamageType::Impact) %damage = %damage/1.5;
 	
 	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
+
+	if(%obj.lastDamaged < getSimTime())
+	{
+		for(%i = 0; %i < getRandom(1,5); %i++)
+		{			
+			doBloodExplosion(%position, getWord(%obj.getScale(), 2));
+			%this.doSplatterBlood(%obj,5);
+		}
+		serverPlay3D("blood_impact" @ getRandom(1,4) @ "_sound", %position);
+		%obj.lastDamaged = getSimTime()+50;
+	}
 }
 
 function ZombieTankHoleBot::onDamage(%this,%obj,%Am,%Type )

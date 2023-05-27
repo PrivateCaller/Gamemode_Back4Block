@@ -239,7 +239,15 @@ package L4B_AEBase_BreachEnter
     	Parent::AEOnLowClimb(%this, %obj, %slot);
 
         if(%obj.getDataBlock().isSurvivor) %obj.playthread(2,"shotgunFire1");
-    }    
+    }
+
+    //Double Barrel
+    function BNE_DoubleBarrelImage::AEOnLowClimb(%this, %obj, %slot) 
+    {
+    	Parent::AEOnLowClimb(%this, %obj, %slot);
+
+        if(%obj.getDataBlock().isSurvivor) %obj.playthread(2,"shotgunFire1");
+    }      
 };
 
 //Eval edits
@@ -255,13 +263,19 @@ eval("BNE_870XPImage.spreadMax = 1250;");
 eval("BNE_870XPImage.projectileDamage = 15;");
 eval("BNE_870XPImage.projectileCount = 12;");
 
-
 eval("BNE_Ithaca37Item.AEAmmo = 8;");
 eval("BNE_Ithaca37Image.spreadBase = 1100;");
 eval("BNE_Ithaca37Image.spreadMin = 1100;");
 eval("BNE_Ithaca37Image.spreadMax = 1100;");
 eval("BNE_Ithaca37Image.projectileDamage = 20;");
 eval("BNE_Ithaca37Image.projectileCount = 18;");
+
+eval("BNE_DoubleBarrelImage.AEAmmo = 2;");
+eval("BNE_DoubleBarrelImage.spreadBase = 1100;");
+eval("BNE_DoubleBarrelImage.spreadMin = 1100;");
+eval("BNE_DoubleBarrelImage.spreadMax = 1100;");
+eval("BNE_DoubleBarrelImage.projectileDamage = 15;");
+eval("BNE_DoubleBarrelImage.projectileCount = 25;");
 
 eval("BNE_SPAS12Image.spreadMax = 1400;");
 eval("BNE_SPAS12Image.spreadBase = 1250;");

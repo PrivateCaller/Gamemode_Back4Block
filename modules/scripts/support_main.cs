@@ -96,6 +96,20 @@ function Armor::L4BAppearance(%this,%obj,%client)
 
 package L4B_MainPackage
 {
+	function fxDTSBrickData::onColorChange (%data, %brick)
+	{
+		if(isObject(%brick.interactiveshape)) %brick.interactiveshape.setnodecolor("ALL",getwords(getColorIdTable(%brick.colorid),0,2) SPC "1");
+
+		Parent::onColorChange (%data, %brick);
+	}
+
+	function Armor::onCollision(%this,%obj,%col)
+	{
+		Parent::onCollision(%this,%obj,%col,%a,%b,%c,%d);
+
+		if(isObject(%col) && %col.getdatablock().isInteractiveShape) %col.getdatablock().CheckConditions(%col,%obj);
+	}
+
 	function Projectile::onAdd(%obj)
 	{
 		if(%obj.getdataBlock().isDistraction) %obj.schedule(%obj.getDataBlock().distractionDelay,%obj.getDataBlock().distractionFunction,0);

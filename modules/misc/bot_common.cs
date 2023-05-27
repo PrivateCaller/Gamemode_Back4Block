@@ -196,6 +196,10 @@ function CommonZombieHoleBot::RbloodDismember(%this,%obj,%limb,%doeffects,%posit
 
 function CommonZombieHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
 {	
+	%limb = %obj.rgetDamageLocation(%position);
+	if(%damageType !$= $DamageType::FallDamage || %damageType !$= $DamageType::Impact)
+	if(!%limb) %damage = %damage*2.5;
+
 	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
 }
 
@@ -213,6 +217,37 @@ function CommonZombieHoleBot::onImpact(%this, %obj, %col, %vec, %force)
 function CommonZombieHoleBot::onDisabled(%this,%obj)
 {
 	Parent::OnDisabled(%this,%obj);
+
+	if(isObject(%minigame = getMinigamefromObject(%obj)))
+	{
+		for(%i=0;%i<getRandom(1,10);%i++)
+		{
+			%pos = %obj.getPosition();
+			%posX = getWord(%pos,0);
+			%posY = getWord(%pos,1);
+			%posZ = getWord(%pos,2);
+			%vec = %obj.getVelocity();
+			%vecX = getWord(%vec,0);
+			%vecY = getWord(%vec,1);
+			%vecZ = getWord(%vec,2);
+
+			if(getRandom(1,1000) == 1) %datablock = "GGoldItem";
+			else %datablock = "GCASHItem";
+
+			%item = new Item()
+			{
+				dataBlock = %datablock;
+				position = %pos;
+			};
+			%itemVec = %vec;
+			%itemVec = vectorAdd(%itemVec,getRandom(-8,8) SPC getRandom(-8,8) SPC 10);
+			%item.BL_ID = %client.BL_ID;
+			%item.minigame = %minigame;
+			%item.spawnBrick = -1;
+			%item.setVelocity(%itemVec);						
+			%item.schedulePop();
+		}
+	}
 
 	if(isObject(%obj.client)) commandToClient(%obj.client,'SetVignette',$EnvGuiServer::VignetteMultiply,$EnvGuiServer::VignetteColor);
 

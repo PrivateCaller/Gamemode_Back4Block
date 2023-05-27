@@ -128,7 +128,7 @@ function Player::bigZombieMelee(%obj)
 			%obj.playaudio(3,%this.hBigMeleeSound);
 			%obj.playthread(1,"activate2");			
 			%hit.setvelocity(vectorscale(VectorNormalize(vectorAdd(%obj.getForwardVector(),"0" SPC "0" SPC "0.15")),30)/2);
-			%hit.damage(%obj.hFakeProjectile, %hit.getposition(), $Pref::L4B::Zombies::SpecialsDamage*400 * %oScale, %obj.hDamageType);
+			%hit.damage(%obj.hFakeProjectile, %hit.getposition(), $Pref::L4B::Zombies::SpecialsDamage*25 * %oScale, %obj.hDamageType);
 
 			%p = new Projectile()
 			{
