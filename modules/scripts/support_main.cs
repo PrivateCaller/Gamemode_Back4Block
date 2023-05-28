@@ -262,7 +262,6 @@ package L4B_MainPackage
 	//	}
 	//}	
 
-	// return the closest player within our field of view
 	function AIPlayer::hFindClosestPlayerFOV(%bot,%range,%hear)
 	{
 		%type = $TypeMasks::PlayerObjectType;

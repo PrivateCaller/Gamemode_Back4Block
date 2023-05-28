@@ -88,14 +88,15 @@ function SurvivorPlayer::L4BAppearance(%this,%obj,%client)
 	switch(%client.Pack)
 	{
 		case 0:
-		default: %obj.unHideNode("pack");
-				 %obj.setNodeColor("pack",%client.PackColor);
+		default: %obj.unHideNode($pack[%client.pack]);
+				 %obj.setNodeColor($pack[%client.pack],%client.PackColor);
 	}
 
 	switch(%client.secondPack)
 	{
 		case 0:
-		default:
+		default: %obj.unHideNode($secondpack[%client.secondPack]);
+				 %obj.setNodeColor($secondpack[%client.secondPack],%client.secondPackColor);
 	}
 
 	//Don't bother if they already have the hat

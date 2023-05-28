@@ -1,3 +1,5 @@
+return;
+
 if(isFile("Add-Ons/System_ReturnToBlockland/server.cs"))
 {
 	if(!$Fluidity::PrefsLoaded)
