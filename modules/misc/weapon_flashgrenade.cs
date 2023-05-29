@@ -28,23 +28,19 @@ datablock ParticleData(FlashgrenadeExplosionParticle)
 	spinRandomMax		= 50.0;
 	useInvAlpha		= true;
 	animateTexture		= false;
-	//framesPerSec		= 1;
 
 	textureName		= "base/data/particles/cloud";
-	//animTexName		= "~/data/particles/cloud";
-
-	// Interpolation variables
 	colors[0]	= "0.2 0.2 0.2 1.0";
 	colors[1]	= "0.25 0.25 0.25 0.2";
-   colors[2]	= "0.4 0.4 0.4 0.0";
+   	colors[2]	= "0.4 0.4 0.4 0.0";
 
 	sizes[0]	= 2.0;
 	sizes[1]	= 10.0;
-   sizes[2]	= 13.0;
+	sizes[2]	= 13.0;
 
 	times[0]	= 0.0;
 	times[1]	= 0.1;
-   times[2]	= 1.0;
+	times[2]	= 1.0;
 };
 
 datablock ParticleEmitterData(flashgrenadeExplosionEmitter)
@@ -270,7 +266,7 @@ datablock ProjectileData(flashgrenadeProjectile)
 	armingDelay         = 3500; 
 	lifetime            = 4000;
 	fadeDelay           = 3500;
-	bounceElasticity    = 0.5;
+	bounceElasticity    = 0.25;
 	bounceFriction      = 0.3;
 	isBallistic         = true;
 	gravityMod = 1.0;
@@ -422,6 +418,7 @@ function flashGrenadeProjectile::onExplode(%this,%obj)
 	initContainerRadiusSearch(%obj.getPosition(),30,$TypeMasks::PlayerObjectType);
 	while((%target = ContainerSearchNext()) != 0)
 	{
-		%target.addhealth(-5000);	
+		if(%target.hType $= "Zombie")
+		%target.addhealth(-5000);
 	}
 }

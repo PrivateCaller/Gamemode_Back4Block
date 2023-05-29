@@ -404,7 +404,15 @@ package L4B_MainPackage
 	}
 
 	function Player::Pickup(%obj,%item)
-	{		
+	{
+		if(%obj.getClassName() $= "Player" && %item.getdataBlock().getName() $= "CashItem")
+		{
+			serverPlay3D("cash_pickup_sound",%item.getposition());
+			%item.delete();
+			if(isObject(%obj.client)) %obj.client.incscore(5);
+			return;
+		}
+		
 		if(%obj.getDatablock().isSurvivor)
 		{
 			if(!isObject(%item) || !%item.canPickup || !miniGameCanUse(%obj,%item)) return;

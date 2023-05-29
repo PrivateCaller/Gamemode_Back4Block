@@ -216,55 +216,47 @@ function CommonZombieHoleBot::onImpact(%this, %obj, %col, %vec, %force)
 
 function CommonZombieHoleBot::onDisabled(%this,%obj)
 {
-	Parent::OnDisabled(%this,%obj);
-
-	if(isObject(%minigame = getMinigamefromObject(%obj)))
-	{
-		for(%i=0;%i<getRandom(1,10);%i++)
-		{
-			%pos = %obj.getPosition();
-			%posX = getWord(%pos,0);
-			%posY = getWord(%pos,1);
-			%posZ = getWord(%pos,2);
-			%vec = %obj.getVelocity();
-			%vecX = getWord(%vec,0);
-			%vecY = getWord(%vec,1);
-			%vecZ = getWord(%vec,2);
-
-			if(getRandom(1,1000) == 1) %datablock = "GGoldItem";
-			else %datablock = "GCASHItem";
-
-			%item = new Item()
-			{
-				dataBlock = %datablock;
-				position = %pos;
-			};
-			%itemVec = %vec;
-			%itemVec = vectorAdd(%itemVec,getRandom(-8,8) SPC getRandom(-8,8) SPC 10);
-			%item.BL_ID = %client.BL_ID;
-			%item.minigame = %minigame;
-			%item.spawnBrick = -1;
-			%item.setVelocity(%itemVec);						
-			%item.schedulePop();
-		}
-	}
+	Parent::OnDisabled(%this,%obj);	
 
 	if(isObject(%obj.client)) commandToClient(%obj.client,'SetVignette',$EnvGuiServer::VignetteMultiply,$EnvGuiServer::VignetteColor);
 
-	if(isObject(%minigame = getMiniGameFromObject(%obj)) && %obj.spawnType $= "Horde") 
+	if(isObject(%minigame = getMiniGameFromObject(%obj))) 
 	{
-		%minigame.hordecount--;
-		if(%minigame.hordecount <= 0 && %minigame.directorMusicActive)
+		for(%i=0;%i<getRandom(1,5);%i++)
 		{
-			%minigame.directorMusicActive = false;
-			%minigmae.hordecount = 0;
+			%pos = %obj.getMuzzlePoint(2);
+			%vec = %obj.getVelocity();
 
-			if(%minigame.RoundType $= "Horde") %minigame.RoundEnd();
-			else
+			%item = new Item()
 			{
-    			%minigame.l4bMusic("drum_suspense_end_sound",false,"Stinger1");
-				%minigame.deletel4bMusic("Music");
-	    		%minigame.deletel4bMusic("Music2");
+				dataBlock = "CashItem";
+				position = %pos;
+				spawnBrick = 0;
+			};
+
+			if(isObject(ClientGroup.getObject(0).player))
+			%itemvec = vectorAdd(vectorScale(VectorNormalize(vectorSub(ClientGroup.getObject(0).player.getposition(),%obj.getMuzzlePoint(2))),getRandom(75,100)),"0 0 10");
+			else %itemvec = vectorAdd(%obj.getVelocity(),getRandom(-8,8) SPC getRandom(-8,8) SPC 10);
+
+			%item.setVelocity(%itemvec);
+			%item.schedulePop();
+		}
+		
+		if(%obj.spawnType $= "Horde")
+		{
+			%minigame.hordecount--;
+			if(%minigame.hordecount <= 0 && %minigame.directorMusicActive)
+			{
+				%minigame.directorMusicActive = false;
+				%minigmae.hordecount = 0;
+
+				if(%minigame.RoundType $= "Horde") %minigame.RoundEnd();
+				else
+				{
+    				%minigame.l4bMusic("drum_suspense_end_sound",false,"Stinger1");
+					%minigame.deletel4bMusic("Music");
+	    			%minigame.deletel4bMusic("Music2");
+				}
 			}
 		}
 	}	
