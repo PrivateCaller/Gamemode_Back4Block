@@ -133,9 +133,10 @@ package L4B_MainPackage
 		Parent::onCollision(%this, %obj, %col, %fade, %pos, %normal, %velocity);
 	}
 
-	function onObjectCollisionTest(%obj, %col)//This function is part of the ObjectCollision.dll, please do not modify it unless you know what you are doing
+	function onObjectCollisionTest(%obj, %col)
 	{
 		return true;
+		//This dll is causing too many issues, need to figure out something else
 		
 		if(isObject(%obj) && isObject(%col))
 		{
