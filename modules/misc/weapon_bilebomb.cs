@@ -1,3 +1,57 @@
+datablock ParticleData(BileBombParticle)
+{
+	dragCoefficient      = 4;
+	gravityCoefficient   = 0.01;
+	inheritedVelFactor   = 0.2;
+	constantAcceleration = 0.0;
+	lifetimeMS = 15000;
+	lifetimeVarianceMS = 500;
+	textureName = "base/data/particles/cloud";
+	
+	spinSpeed = 25.0;
+	spinRandomMin = -500.0;
+	spinRandomMax = 500.0;
+	
+	colors[0] = 33/255 SPC 158/255 SPC 11/255 SPC 0.5;
+	colors[1] = 33/255 SPC 158/255 SPC 11/255 SPC 0.25;
+	colors[2] = 33/255 SPC 158/255 SPC 11/255 SPC 0.1;
+	sizes[0] = 5.0;
+	sizes[1] = 4.0;
+	sizes[2] = 3.0;
+	
+	useInvAlpha = true;
+};
+
+datablock ParticleEmitterData(BileBombEmitter)
+{
+	lifeTimeMS = 50;
+
+	ejectionPeriodMS = 3;
+	periodVarianceMS = 0;
+	ejectionVelocity = 1;
+	velocityVariance = 1.0;
+	ejectionOffset   = 2.0;
+	thetaMin         = 89;
+	thetaMax         = 90;
+	phiReferenceVel  = 0;
+	phiVariance      = 360;
+	overrideAdvance = false;
+	particles = "BileBombParticle";
+
+	emitterNode = HalfEmitterNode;
+};
+
+datablock ExplosionData(BileBombExplosion)
+{
+	lifeTimeMS = 15000;	
+	emitter[0] = BileBombEmitter;
+	particleEmitter = BileBombEmitter;
+	particleDensity = 100;
+	particleRadius = 1;	
+	faceViewer = true;
+	explosionScale = "1 1 1";
+};
+
 datablock ProjectileData(BileBombProjectile)
 {
 		projectileShapeName				= "./models/BileBombProjectile.dts";
@@ -8,7 +62,7 @@ datablock ProjectileData(BileBombProjectile)
 		
 		impactImpulse					= 0;
 		verticalImpulse					= 0;
-		explosion						= "Disease3SporeExplosion";
+		explosion						= "BileBombExplosion";
 		particleEmitter					= "";
 		
 		muzzleVelocity					= 25;
@@ -210,7 +264,7 @@ function Projectile::BileBombDistract(%obj, %count)
 
 			if(%obj.getdataBlock().getID() == BileBombFakeProjectile.getID() && ContainerSearchCurrRadiusDist() <= 4 && %targetid.hType $= "zombie")
 			{
-				%targetid.hType = "biled" @ getRandom(1,9999);
+				%targetid.hType = "Biled" @ getRandom(1,9999);
 				%targetid.mountImage(BileStatusPlayerImage, 2);
 				%targetid.BoomerBiled = 1;
 			}
@@ -221,7 +275,7 @@ function Projectile::BileBombDistract(%obj, %count)
 function BileBombProjectile::onCollision(%this, %obj)
 {
 	%pos = %obj.getPosition();
-	serverPlay3d("bilejar_explode_sound",%pos);
+	serverPlay3d("Bilejar_explode_sound",%pos);
 
    %p = new Projectile()
    {

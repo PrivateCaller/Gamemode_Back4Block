@@ -184,13 +184,13 @@ function Armor::RBloodSimulate(%this, %obj, %position, %damagetype, %damage)
 		for(%i = 0; %i < getRandom(1,4); %i++)
 		{			
 			doBloodExplosion(%position, getWord(%obj.getScale(), 2));
-			%this.doSplatterBlood(%obj,10);
+			%this.doSplatterBlood(%obj,4);
 		}
 		serverPlay3D("blood_impact" @ getRandom(1,4) @ "_sound", %position);
 		%obj.lastDamaged = getSimTime()+50;
 	}
 
-	if(%obj.getstate() $= "Dead" && %damage > %obj.getdataBlock().maxDamage*10) %obj.markForGibExplosion = true;
+	if(%obj.getstate() $= "Dead" && %damage > %obj.getdataBlock().maxDamage*5) %obj.markForGibExplosion = true;
 	if($Pref::L4B::Blood::BloodDismemberThreshold && (%damage >= $Pref::L4B::Blood::BloodDismemberThreshold || %obj.limbShotgunStrike >= 2)) %this.RbloodDismember(%obj,%limb,true,%position);	
 }
 

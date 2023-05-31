@@ -415,10 +415,24 @@ function flashGrenadeProjectile::onExplode(%this,%obj)
 {
    parent::onExplode(%this, %obj);
 
-	initContainerRadiusSearch(%obj.getPosition(),30,$TypeMasks::PlayerObjectType);
+	initContainerRadiusSearch(%obj.getWorldBoxCenter(),50,$TypeMasks::PlayerObjectType);
 	while((%target = ContainerSearchNext()) != 0)
 	{
-		if(%target.hType $= "Zombie")
-		%target.addhealth(-5000);
+		%obscure = containerRayCast(%obj.getWorldBoxCenter(),%target.getEyePoint(),$TypeMasks::InteriorObjectType | $TypeMasks::TerrainObjectType | $TypeMasks::FxBrickObjectType, %obj);
+		%dot = vectorDot(%target.getEyeVector(),vectorNormalize(vectorSub(%obj.getWorldBoxCenter(),%target.getEyePoint())));
+		%distance = containerSearchCurrDist()/2.5;
+
+		if(%dot > 0.1 && !isObject(%obscure) && miniGameCanDamage(%obj,%target) == 1 && %target.getState() !$= "Dead")
+		{			
+			switch$(%target.getClassName())
+			{
+				case "Player":	%target.setWhiteout(%dot/%distance);
+				case "AIPlayer": 	%target.mountImage("sm_stunImage",2);
+								 	%target.stopHoleLoop();
+								 	%target.schedule(4000,resetHoleLoop);
+								 	%target.setActionThread("sit",1);
+			}
+		}
+		
 	}
 }

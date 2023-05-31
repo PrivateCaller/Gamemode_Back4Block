@@ -135,6 +135,8 @@ package L4B_MainPackage
 
 	function onObjectCollisionTest(%obj, %col)//This function is part of the ObjectCollision.dll, please do not modify it unless you know what you are doing
 	{
+		return true;
+		
 		if(isObject(%obj) && isObject(%col))
 		{
 			if(%obj.getType() & $TypeMasks::PlayerObjectType && %col.getType() & $TypeMasks::PlayerObjectType) 

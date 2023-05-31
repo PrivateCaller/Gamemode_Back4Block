@@ -114,50 +114,7 @@ datablock ProjectileData(BigZombieHitProjectile)
    explosion = BigZombieHitExplosion;
 };
 
-if(!isObject(swordExplosionParticle)) //I mean... Just in case right?
-{
-	datablock ParticleData(swordExplosionParticle)
-	{
-		dragCoefficient			= 2;
-		gravityCoefficient		= 1.0;
-		inheritedVelFactor		= 0.2;
-		constantAcceleration	= 0.0;
-		
-		spinRandomMin			= -90;
-		spinRandomMax			= 90;
-		
-		lifetimeMS			 	= 500;
-		lifetimeVarianceMS		= 300;
-		
-		textureName				= "base/data/particles/chunk";
-		
-		colors[0]				= "0.7 0.7 0.9 0.9";
-		colors[1]				= "0.9 0.9 0.9 0.0";
-		sizes[0]				= 0.5;
-		sizes[1]				= 0.25;
-	};
-	
-	datablock ParticleEmitterData(swordExplosionEmitter)
-	{
-		ejectionPeriodMS	= 7;
-		periodVarianceMS	= 0;
-		ejectionVelocity	= 8;
-		velocityVariance	= 1.0;
-		ejectionOffset		= 0.0;
-		thetaMin			= 0;
-		thetaMax			= 60;
-		phiReferenceVel		= 0;
-		phiVariance			= 360;
-		
-		overrideAdvance		= false;
-		
-		particles			= "swordExplosionParticle";
-
-		uiName				= "Sword Hit";
-	};
-}
-
-datablock ParticleData(stunParticle)
+datablock ParticleData(L4B_stunParticle)
 {
 	dragCoefficient      = 13;
 	gravityCoefficient   = 0.2;
@@ -183,7 +140,7 @@ datablock ParticleData(stunParticle)
 
 	useInvAlpha = false;
 };
-datablock ParticleEmitterData(stunEmitter)
+datablock ParticleEmitterData(L4B_stunEmitter)
 {
 	ejectionPeriodMS = 12;
 	periodVarianceMS = 1;
@@ -195,15 +152,15 @@ datablock ParticleEmitterData(stunEmitter)
 	phiReferenceVel  = 0;
 	phiVariance      = 360;
 	overrideAdvance = false;
-	particles = stunParticle;
+	particles = L4B_stunParticle;
 };
-datablock ShapeBaseImageData(stunImage)
+datablock ShapeBaseImageData(L4B_stunImage)
 {
 	shapeFile = "base/data/shapes/empty.dts";
 	emap = false;
 
-	mountPoint = $HeadSlot;
-	offset = "0 0 0.4";
+	mountPoint = 5;
+	offset = "0 0 0";
 	eyeOffset = "0 0 999";
 
 	stateName[0]				= "Ready";
@@ -211,7 +168,7 @@ datablock ShapeBaseImageData(stunImage)
 	stateTransitionOnTimeout[0]	= "FireA";
 
 	stateName[1]				= "FireA";
-	stateEmitter[1]				= stunEmitter;
+	stateEmitter[1]				= L4B_stunEmitter;
 	stateEmitterTime[1]			= 1.2;
 	stateTimeoutValue[1]		= 1.2;
 	stateTransitionOnTimeout[1]	= "Done";
@@ -404,66 +361,3 @@ function HealImage::onDone(%data, %player, %slot)
 {
 	%player.unMountImage(%slot);
 }
-
-datablock ParticleData(Disease3Spores)
-{
-	dragCoefficient      = 4;
-	gravityCoefficient   = 0.01;
-	inheritedVelFactor   = 0.2;
-	constantAcceleration = 0.0;
-	lifetimeMS = 15000;
-	lifetimeVarianceMS = 500;
-	textureName = "base/data/particles/cloud";
-	
-	spinSpeed = 25.0;
-	spinRandomMin = -500.0;
-	spinRandomMax = 500.0;
-	
-	colors[0] = 33/255 SPC 158/255 SPC 11/255 SPC 0.3;
-	colors[1] = 33/255 SPC 158/255 SPC 11/255 SPC 0.3;
-	colors[2] = 33/255 SPC 158/255 SPC 11/255 SPC 0.3;
-	sizes[0] = 5.0;
-	sizes[1] = 4.0;
-	sizes[2] = 3.0;
-	
-	useInvAlpha = true;
-};
-
-datablock ParticleEmitterData(Disease3SporeEmitter)
-{
-	lifeTimeMS = 50;
-	
-   ejectionPeriodMS = 3;
-   periodVarianceMS = 0;
-   ejectionVelocity = 1;
-   velocityVariance = 1.0;
-   ejectionOffset   = 2.0;
-   thetaMin         = 89;
-   thetaMax         = 90;
-   phiReferenceVel  = 0;
-   phiVariance      = 360;
-   overrideAdvance = false;
-	particles = Disease3Spores;
-	
-	emitterNode = HalfEmitterNode;
-};
-
-datablock ExplosionData(Disease3SporeExplosion)
-{
-	lifeTimeMS = 15000;
-
-	soundProfile = "";
-	
-	emitter[0] = Disease3SporeEmitter;
-	particleEmitter = Disease3SporeEmitter;
-   particleDensity = 100;
-   particleRadius = 1;
-	
-	faceViewer = true;
-	explosionScale = "1 1 1";
-	
-	lightStartRadius = 0;
-	lightEndRadius = 0;
-	lightStartColor = "0.0 0.0 0.0";
-	lightEndColor = "0 0 0";
-};
