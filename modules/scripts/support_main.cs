@@ -122,8 +122,6 @@ package L4B_MainPackage
             if(%obj.getState() $= "Dead") %minigame.L4B_ChatMessage("\c0" @ %source.client.name SPC "<bitmapk:" @ $DamageType::MurderBitmap[%damageType] @ ">" SPC %obj.getdataBlock().hName @ "","victim_revived_sound",true);
         }
 
-        //When a player kills a zombie the victim is unaware of
-        //Check if is not dead, if the zombie is after someone, it is a player and the killer is not the one the zombie is chasing, and if its not in the FOV
         if(%obj.getState() $= "Dead" && isObject(%target = %obj.hFollowing) && %target.getClassName() $= "Player" && %source !$= %target && !L4B_isInFOV(%target, %obj))
         %minigame.L4B_ChatMessage("<color:00FF00>" @ %source.client.name SPC "protected" SPC %target.client.name,"victim_revived_sound",false);       
     }
@@ -134,28 +132,6 @@ package L4B_MainPackage
         if(!miniGameFriendlyFire(%objA,%objB)) Parent::minigameCanDamage(%objA,%objB);
         else return false;
 	}
-
-    function MiniGameSO::Reset(%minigame,%client)
-	{
-        Parent::Reset(%minigame,%client);
-
-		%currTime = getSimTime();
-		if(%obj.lastResetTime + 5000 > %currTime) return;
-		%minigame.lastResetTime = %currTime;
-        showAreaZones(0);
-
-        %minigame.L4B_ClearData(%client); 
-        %minigame.l4bMusic("musicdata_L4D_safearea" @ getRandom(1,4),true,"Music");
-        %minigame.l4bMusic("musicdata_ambience_DASH_Liminal_" @ getRandom(1,3),true,"Ambience");
-        %minigame.l4bMusic("game_start_sound",false,"Stinger1");
-	}	
-
-    function MiniGameSO::endGame(%minigame)
-    {
-		Parent::endGame(%minigame);
-        %minigame.L4B_ClearData(%client);
-        showAreaZones(1);
-    }
 
     function GameConnection::resetVehicles(%client)
     {
@@ -509,11 +485,6 @@ package L4B_MainPackage
 		Parent::Pickup(%obj,%item);
 	}
 
-	function Player::playThread(%obj,%slot,%thread)
-	{
-		Parent::playThread(%obj,%slot,%thread);
-	}	
-
 	function Armor::onRemove(%this,%obj)
 	{
 		if(isObject(%obj.hatprop)) %obj.hatprop.delete();
@@ -566,6 +537,24 @@ package L4B_MainPackage
 		%player.playthread(3,"activate");
 		%bool = Parent::ServerCmdDropTool (%client, %position);
 	}
+
+	function MiniGameSO::checkLastManStanding(%minigame)
+	{
+	    if(%minigame.RespawnTime > 0 || isEventPending(%minigame.resetSchedule)) return;
+	
+	    for(%i = 0; %i < %minigame.numMembers; %i++) if(isObject(%player = %minigame.member[%i].player) && !%player.hIsInfected && !%player.getdataBlock().isDowned) %livePlayerCount++;
+	
+	    if(!%livePlayerCount)
+	    {
+	        %minigame.VictoryTo = "Infected";
+	        %minigame.l4bMusic("game_lose_sound",false,"Music");
+	        %minigame.deletel4bMusic("Stinger1");
+	        %minigame.deletel4bMusic("Stinger2");
+	        %minigame.deletel4bMusic("Stinger3");
+	        %minigame.director(0,0);
+	        %minigame.scheduleReset(12000);
+	    }
+	}	
 
 	function holeZombieInfect(%obj, %col)
 	{					
@@ -676,7 +665,7 @@ package L4B_MainPackage
 		if(%client.team $= "zombie" && isObject(%client.Player))
 		{
 			%client.player.setDataBlock($hZombieSpecialType[getRandom(1,$hZombieSpecialTypeAmount)]);
-			commandToClient (%client, 'ShowEnergyBar', true);
+			commandToClient(%client, 'ShowEnergyBar', true);
 		}
 	}
 

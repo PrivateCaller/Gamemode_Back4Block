@@ -1,5 +1,52 @@
 luaexec("./script_zombies.lua");
 
+registerInputEvent("fxDTSBrick","onBotTeleSpawn","Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "Bot Bot" TAB "MiniGame MiniGame");
+registerOutputEvent("Bot","doMRandomTele","string 20 100");
+registerOutputEvent("Player","doMRandomTele","string 20 100");
+
+function Player::doMRandomTele(%obj,%targetbrick)
+{			
+    if(!isObject(%targetbrick))
+	{		
+		if(isObject(AreaZoneGroup) && AreaZoneGroup.getCount()) 
+		{
+			for(%i = 0; %i < AreaZoneGroup.getCount(); %i++) if(isObject(%zone = AreaZoneGroup.getObject(%i)) && %zone.presencecount)
+			for(%j = 0; %j < %zone.simset.getCount(); %j++) if(isObject(%brick = %zone.simset.getObject(%j)) && %brick.getdataBlock().ZoneBrickType $= "spawner" && strstr(strlwr(%brick.getName()),"_horde") != -1)
+			{
+				%teleportlist[%tb++] = %brick;
+				%teleportlistzone[%tb] = %zone;
+			}
+			%random = getRandom(1,%tb);
+			if(!%tb) return false;
+			else 
+            {
+                %targetbrick = %teleportlist[%random];
+                %obj.currentZone = %teleportlistzone[%random];
+                %obj.spawnType = "Horde";
+            }
+		}
+		else return false;        
+	}	
+    
+    %obj.settransform(vectorAdd(getwords(%targetbrick.gettransform(),0,2),"0 0 0.25"));
+    %obj.setvelocity(%obj.getvelocity());
+
+    $InputTarget_["Self"] = %targetbrick;
+    switch$(%obj.getclassname())
+    {
+        case "Player":	$InputTarget_["Player"] = %obj;
+                        $InputTarget_["Client"] = %obj;
+        case "AIPlayer": $InputTarget_["Bot"] = %obj;
+    }
+    $InputTarget_["MiniGame"] = getMiniGameFromObject(%obj);
+    %targetbrick.processInputEvent("onBotTeleSpawn",%targetbrick.getgroup().client);
+}
+
+function AIPlayer::doMRandomTele(%obj,%targetbrick)
+{
+    Player::doMRandomTele(%obj,%targetbrick);
+}
+
 function fxDTSBrick::RandomizeZombieSpecial(%obj) { %obj.hBotType = $hZombieSpecialType[getRandom(1,$hZombieSpecialTypeAmount)]; }
 
 function fxDTSBrick::RandomizeZombieUncommon(%obj) { %obj.hBotType = $hZombieUncommonType[getRandom(1,$hZombieUncommonTypeAmount)]; }
