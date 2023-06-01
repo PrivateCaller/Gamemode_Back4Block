@@ -96,6 +96,91 @@ function Armor::L4BAppearance(%this,%obj,%client)
 
 package L4B_MainPackage
 {
+    function Armor::Damage(%data, %obj, %sourceObject, %position, %damage, %damageType)
+    {
+        if(isObject(%obj.hEating) && %obj.heating.getclassname() $= "Player") %victim = %obj.heating;        
+        
+        Parent::Damage(%data, %obj, %sourceObject, %position, %damage, %damageType);
+
+        if(isObject(%sourceObject) && %sourceObject.getClassName() $= "Player") 
+			%source = %sourceObject;
+        else if(isObject(%sourceObject.sourceObject) && %sourceObject.sourceObject.getClassName() $= "Player") 
+			%source = %sourceObject.sourceObject;        
+
+        if(!isObject(%minigame = getMiniGameFromObject(%obj)) || %obj.hType !$= "Zombie" || !isObject(%source)) return;
+        
+        //When the bot is a special and dies
+        if(%obj.getdataBlock().hZombieL4BType $= "Special")
+        {
+            if(%obj.getDataBlock().getName() !$= "ZombieChargerHoleBot" && isObject(%victim))
+            {                
+                chatMessageTeam(%victim.client,'fakedeathmessage',"<color:00FF00> "@ %source.client.name @ " <bitmapk:add-ons/Gamemode_Left4Block/modules/add-ins/player_l4b/icons/CI_VictimSaved> " @ %victim.client.name);
+                %victim.isBeingStrangled = false;
+                L4B_SpecialsPinCheck(%obj,%victim);
+            }            
+
+            if(%obj.getState() $= "Dead") %minigame.L4B_ChatMessage("\c0" @ %source.client.name SPC "<bitmapk:" @ $DamageType::MurderBitmap[%damageType] @ ">" SPC %obj.getdataBlock().hName @ "","victim_revived_sound",true);
+        }
+
+        //When a player kills a zombie the victim is unaware of
+        //Check if is not dead, if the zombie is after someone, it is a player and the killer is not the one the zombie is chasing, and if its not in the FOV
+        if(%obj.getState() $= "Dead" && isObject(%target = %obj.hFollowing) && %target.getClassName() $= "Player" && %source !$= %target && !L4B_isInFOV(%target, %obj))
+        %minigame.L4B_ChatMessage("<color:00FF00>" @ %source.client.name SPC "protected" SPC %target.client.name,"victim_revived_sound",false);       
+    }
+
+	function minigameCanDamage(%objA, %objB)
+	{
+        if((!isObject(%objA) || !isObject(%objB)) || (!isObject(getMiniGameFromObject(%objA)) || !isObject(getMiniGameFromObject(%objA))) || (getMiniGameFromObject(%objA) !$= getMiniGameFromObject(%objB))) return false; 
+        if(!miniGameFriendlyFire(%objA,%objB)) Parent::minigameCanDamage(%objA,%objB);
+        else return false;
+	}
+
+    function MiniGameSO::Reset(%minigame,%client)
+	{
+        Parent::Reset(%minigame,%client);
+
+		%currTime = getSimTime();
+		if(%obj.lastResetTime + 5000 > %currTime) return;
+		%minigame.lastResetTime = %currTime;
+        showAreaZones(0);
+
+        %minigame.L4B_ClearData(%client); 
+        %minigame.l4bMusic("musicdata_L4D_safearea" @ getRandom(1,4),true,"Music");
+        %minigame.l4bMusic("musicdata_ambience_DASH_Liminal_" @ getRandom(1,3),true,"Ambience");
+        %minigame.l4bMusic("game_start_sound",false,"Stinger1");
+	}	
+
+    function MiniGameSO::endGame(%minigame)
+    {
+		Parent::endGame(%minigame);
+        %minigame.L4B_ClearData(%client);
+        showAreaZones(1);
+    }
+
+    function GameConnection::resetVehicles(%client)
+    {
+	    if(!isObject(MissionCleanup))
+	    {
+	    	if(getBuildString() !$= "Ship") error("ERROR: GameConnection::ResetVehicles() - MissionCleanUp group not found!");	    	
+	    	return;
+	    }
+	
+        for(%i = 0; %i < MissionCleanup.getCount(); %i++) if(isObject(%obj = MissionCleanup.getObject(%i)) && (%obj.getType() & ($TypeMasks::VehicleObjectType | $TypeMasks::PlayerObjectType)) && isObject(%obj.spawnBrick) && %obj.spawnBrick.getGroup() == %client.brickGroup)
+        %obj.spawnBrick.schedule(10, spawnVehicle);
+    }
+
+    function GameConnection::onClientLeaveGame (%client)
+    {
+        Parent::onClientLeaveGame(%client);
+
+        %client.deletel4bMusic("Music");
+        %client.deletel4bMusic("Musi2");
+        %client.deletel4bMusic("Stinger1");
+        %client.deletel4bMusic("Stinger2");
+        %client.deletel4bMusic("Stinger3");
+        %client.deletel4bMusic("Ambience");        
+    }
+
 	function fxDTSBrickData::onColorChange (%data, %brick)
 	{
 		if(isObject(%brick.interactiveshape)) %brick.interactiveshape.setnodecolor("ALL",getwords(getColorIdTable(%brick.colorid),0,2) SPC "1");
@@ -107,14 +192,14 @@ package L4B_MainPackage
 	{
 		Parent::onCollision(%this,%obj,%col,%a,%b,%c,%d);
 
-		if(isObject(%col) && %col.getdatablock().isInteractiveShape) %col.getdatablock().CheckConditions(%col,%obj);
+		if(%col.getClassName() $= "StaticShape" && %col.getdatablock().isInteractiveShape) %col.getdatablock().CheckConditions(%col,%obj);
 	}
 
 	function Projectile::onAdd(%obj)
 	{
 		if(%obj.getdataBlock().isDistraction) %obj.schedule(%obj.getDataBlock().distractionDelay,%obj.getDataBlock().distractionFunction,0);
 
-		Parent::onAdd(%obj,%datablock);
+		Parent::onAdd(%obj);
 	}
 
 	function ProjectileData::onCollision (%this, %obj, %col, %fade, %pos, %normal, %velocity)
@@ -170,7 +255,6 @@ package L4B_MainPackage
 												}
 					case "ZombieHunterHoleBot": if(%obj.hEating == %col) return false;
 				}
-				//if(%obj.hIsInfected && %col.hIsInfected) return false;
 			}
 
 			return true;

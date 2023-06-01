@@ -29,8 +29,6 @@ $colorValues["white"] = "1 1 1 1";
 $colorValues["black"] = "0.078 0.078 0.078 1";
 $colorValues["pitchblack"] = "0 0 0 1";
 
-$colorValues["brown"] = "";
-
 function getColorName(%RGBA)
 {
     %closestColor = "";
@@ -51,6 +49,18 @@ function getColorName(%RGBA)
     }
 
     return %closestColor;
+}
+
+function miniGameFriendlyFire(%objA,%objB)//Return true to indicate if we are firing on a friendly
+{    
+    if(%objA.getClassName() $= "GameConnection") %TargetA = %objA.player;
+    else %TargetA = %objA;
+    
+    if(%objB.getClassName() $= "GameConnection") %TargetB = %objB.player;
+    else %TargetB = %objB;
+    
+    if(%TargetA !$= %TargetB && %TargetA.hType $= %TargetB.hType) return true;
+    else return false;
 }
 
 function GunImages_GenerateSideImages()

@@ -9,122 +9,23 @@ $L4B_Music["Stinger2"] = 0;
 $L4B_Music["Stinger3"] = 0;
 $L4B_Music["Ambience"] = 0;
 
-function miniGameFriendlyFire(%objA,%objB)//Return true to indicate if we are firing on a friendly
-{    
-    if(%objA.getClassName() $= "GameConnection") %TargetA = %objA.player;
-    else %TargetA = %objA;
-    
-    if(%objB.getClassName() $= "GameConnection") %TargetB = %objB.player;
-    else %TargetB = %objB;
-    
-    if(%TargetA !$= %TargetB && %TargetA.hType $= %TargetB.hType) return true;
-    else return false;
-}
-
-package L4B_Director
+function MiniGameSO::checkLastManStanding(%minigame)
 {
-	function minigameCanDamage(%objA, %objB)
-	{
-        if((!isObject(%objA) || !isObject(%objB)) || (!isObject(getMiniGameFromObject(%objA)) || !isObject(getMiniGameFromObject(%objA))) || (getMiniGameFromObject(%objA) !$= getMiniGameFromObject(%objB))) return false; 
-        if(!miniGameFriendlyFire(%objA,%objB)) Parent::minigameCanDamage(%objA,%objB);
-        else return false;
-	}
+    if(%minigame.RespawnTime > 0 || isEventPending(%minigame.resetSchedule)) return;
 
-    function MiniGameSO::endGame(%minigame)
+    for(%i = 0; %i < %minigame.numMembers; %i++) if(isObject(%player = %minigame.member[%i].player) && !%player.hIsInfected && !%player.getdataBlock().isDowned) %livePlayerCount++;
+
+    if(!%livePlayerCount)
     {
-		Parent::endGame(%minigame);
-        %minigame.L4B_ClearData(%client);
-        showAreaZones(1);
+        %minigame.VictoryTo = "Infected";
+        %minigame.l4bMusic("game_lose_sound",false,"Music");
+        %minigame.deletel4bMusic("Stinger1");
+        %minigame.deletel4bMusic("Stinger2");
+        %minigame.deletel4bMusic("Stinger3");
+        %minigame.director(0,0);
+        %minigame.scheduleReset(12000);
     }
-
-    function MiniGameSO::Reset(%minigame,%client)
-	{
-        Parent::Reset(%minigame,%client);
-
-		%currTime = getSimTime();
-		if(%obj.lastResetTime + 5000 > %currTime) return;
-		%minigame.lastResetTime = %currTime;
-        showAreaZones(0);
-
-        %minigame.L4B_ClearData(%client); 
-        %minigame.l4bMusic("musicdata_L4D_safearea" @ getRandom(1,4),true,"Music");
-        %minigame.l4bMusic("musicdata_ambience_DASH_Liminal_" @ getRandom(1,3),true,"Ambience");
-        %minigame.l4bMusic("game_start_sound",false,"Stinger1");
-	}
-
-    function GameConnection::resetVehicles(%client)//Badspot's porn got to his head so I have to fix this
-    {
-	    if(!isObject(MissionCleanup))
-	    {
-	    	if(getBuildString() !$= "Ship") error("ERROR: GameConnection::ResetVehicles() - MissionCleanUp group not found!");	    	
-	    	return;
-	    }
-	
-        for(%i = 0; %i < MissionCleanup.getCount(); %i++) if(isObject(%obj = MissionCleanup.getObject(%i)) && (%obj.getType() & ($TypeMasks::VehicleObjectType | $TypeMasks::PlayerObjectType)) && isObject(%obj.spawnBrick) && %obj.spawnBrick.getGroup() == %client.brickGroup)
-        %obj.spawnBrick.schedule(10, spawnVehicle);
-    }    
-
-	function MiniGameSO::checkLastManStanding(%minigame)
-	{
-		if(%minigame.RespawnTime > 0 || isEventPending(%minigame.resetSchedule)) return;
-
-		for(%i = 0; %i < %minigame.numMembers; %i++) if(isObject(%player = %minigame.member[%i].player) && !%player.hIsInfected && !%player.getdataBlock().isDowned) %livePlayerCount++;
-
-		if(!%livePlayerCount)
-		{
-			%minigame.VictoryTo = "Infected";
-            %minigame.l4bMusic("game_lose_sound",false,"Music");
-            %minigame.deletel4bMusic("Stinger1");
-            %minigame.deletel4bMusic("Stinger2");
-            %minigame.deletel4bMusic("Stinger3");
-            %minigame.director(0,0);
-			%minigame.scheduleReset(12000);
-		}
-	}
-
-    function GameConnection::onClientLeaveGame (%client)
-    {
-        Parent::onClientLeaveGame(%client);
-
-        %client.deletel4bMusic("Music");
-        %client.deletel4bMusic("Musi2");
-        %client.deletel4bMusic("Stinger1");
-        %client.deletel4bMusic("Stinger2");
-        %client.deletel4bMusic("Stinger3");
-        %client.deletel4bMusic("Ambience");        
-    }
-
-    function Armor::Damage(%data, %obj, %sourceObject, %position, %damage, %damageType)
-    {        
-        if(isObject(%obj.hEating) && %obj.heating.getclassname() $= "Player") %victim = %obj.heating;        
-        
-        Parent::Damage(%data, %obj, %sourceObject, %position, %damage, %damageType);
-
-        if(isObject(%sourceObject) && %sourceObject.getClassName() $= "Player") %source = %sourceObject;
-        else if(isObject(%sourceObject.sourceObject) && %sourceObject.sourceObject.getClassName() $= "Player") %source = %sourceObject.sourceObject;        
-
-        if(!isObject(%minigame = getMiniGameFromObject(%obj)) || %obj.hType !$= "Zombie" || !isObject(%source)) return;//Return if the object is not a zombie, not dead, is not targetting,         
-        
-        //When the bot is a special and dies
-        if(%obj.getdataBlock().hZombieL4BType $= "Special")
-        {
-            if(%obj.getDataBlock().getName() !$= "ZombieChargerHoleBot" && isObject(%victim))
-            {                
-                chatMessageTeam(%victim.client,'fakedeathmessage',"<color:00FF00> "@ %source.client.name @ " <bitmapk:add-ons/Gamemode_Left4Block/modules/add-ins/player_l4b/icons/CI_VictimSaved> " @ %victim.client.name);
-                %victim.isBeingStrangled = false;
-                L4B_SpecialsPinCheck(%obj,%victim);
-            }            
-
-            if(%obj.getState() $= "Dead") %minigame.L4B_ChatMessage("\c0" @ %source.client.name SPC "<bitmapk:" @ $DamageType::MurderBitmap[%damageType] @ ">" SPC %obj.getdataBlock().hName @ "","victim_revived_sound",true);
-        }
-
-        //When a player kills a zombie the victim is unaware of
-        //Check if is not dead, if the zombie is after someone, it is a player and the killer is not the one the zombie is chasing, and if its not in the FOV
-        if(%obj.getState() $= "Dead" && isObject(%target = %obj.hFollowing) && %target.getClassName() $= "Player" && %source !$= %target && !L4B_isInFOV(%target, %obj))
-        %minigame.L4B_ChatMessage("<color:00FF00>" @ %source.client.name SPC "protected" SPC %target.client.name,"victim_revived_sound",false);       
-    }    
-};
-activatePackage(L4B_Director);
+}
 
 function MiniGameSO::L4B_ClearData(%minigame,%client)
 {
@@ -167,12 +68,7 @@ function MiniGameSO::L4B_ClearData(%minigame,%client)
         if(%brick.getdataBlock().isOpen) %brick.door(close);
     }
     
-    if(isObject(L4B_BotSet))
-    {
-        for(%z = 0; %z < L4B_BotSet.getCount(); %z++) 
-        if(isObject(%bot = L4B_BotSet.getObject(%z))) %bot.schedule(10,delete);
-    }        
-
+    if(isObject(Director_ZombieGroup)) Director_ZombieGroup.delete();
     if(isObject(AreaZoneGroup)) for(%i = 0; %i < AreaZoneGroup.getCount(); %i++)
     if(isObject(%zone = AreaZoneGroup.getObject(%i)))
     {
@@ -180,9 +76,7 @@ function MiniGameSO::L4B_ClearData(%minigame,%client)
         %zone.presenceallentered = false;
         for(%j = 0; %j < %zone.simset.getCount(); %j++)
         if(isObject(%brick = %zone.simset.getObject(%j)) && %brick.getdataBlock().ZoneBrickType $= "item") %brick.setItem(none);
-    }
-    
-       
+    }       
 }
 
 function MiniGameSO::SafehouseCheck(%minigame,%client)
@@ -519,27 +413,24 @@ function MinigameSO::spawnZombies(%minigame,%type,%amount,%spawnzone,%count)
         if(strlen(%bottype.hMeleeCI)) eval("%bot.hDamageType = $DamageType::" @ %bottype.hMeleeCI @ ";");
         else %bot.hDamageType = $DamageType::HoleMelee;        
         
-        if(!isObject(L4B_BotSet))
+        if(!isObject(Director_ZombieGroup))
         {
-            new SimSet(L4B_BotSet);
-            missionCleanup.add(L4B_BotSet);
+            new SimGroup(Director_ZombieGroup);
+            missionCleanup.add(Director_ZombieGroup);
         }
         
-        L4B_BotSet.add(%bot);
+        Director_ZombieGroup.add(%bot);
         %bot.doMRandomTele(%spawnbrick);
 
         cancel(%minigame.spawn[%type]);
-        %minigame.spawn[%type] = %minigame.scheduleNoQuota(100,spawnZombies,%type,%amount,%spawnzone,%count++);
+        %minigame.spawn[%type] = %minigame.scheduleNoQuota(50,spawnZombies,%type,%amount,%spawnzone,%count++);
         return true;
     }
     else return false;
 }
 registerInputEvent("fxDTSBrick","onBotTeleSpawn","Self fxDTSBrick" TAB "Player Player" TAB "Client GameConnection" TAB "Bot Bot" TAB "MiniGame MiniGame");
-
 registerOutputEvent("Bot","doMRandomTele","string 20 100");
 registerOutputEvent("Player","doMRandomTele","string 20 100");
-
-
 
 function Player::doMRandomTele(%obj,%targetbrick)
 {			

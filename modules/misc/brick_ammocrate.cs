@@ -27,7 +27,6 @@ function BrickAmmoCrateData::onPlant(%this, %obj)
 	Parent::onAdd(%this,%obj);
 	
 	%obj.setName("_Ammocrate");
-
 	%interactiveshape = new StaticShape()
 	{
 		datablock = %this.ShapeDatablock;

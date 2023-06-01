@@ -19,6 +19,7 @@ datablock StaticShapeData(HealthLockerShape)
 	isInvincible = true;
 	shapeFile = "./models/shape_healthlocker.dts";
 	shapeBrickPos = "0 0 -0.1";
+	isInteractiveShape = true;
 };
 
 function BrickLockerData::onPlant(%this, %obj)
@@ -76,7 +77,7 @@ function HealthLockerShape::Interact(%this,%col,%obj)
 
 function HealthLockerShape::CheckConditions(%this,%col,%obj)
 {
-	if(%obj.getdamagelevel() < 5 || %obj.getstate() $= "Dead" || %obj.hIsInfected) return false;	
+	if(%obj.getdamagelevel() < 5 || %obj.getstate() $= "Dead" || %obj.hIsInfected) return false;		
 
 	%brick = %col.spawnbrick;
 	if(%col.lasttouch+250 < getsimtime() && !%col.isshutting)
