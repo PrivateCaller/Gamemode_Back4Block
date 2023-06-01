@@ -4,8 +4,6 @@ This is a gamemode for Blockland, its purpose is to recreate the experience of t
 weapons, grenades, the zombie bots, a director, and multiple features. It is quite an expanded list, I will eventually update this readme to include more important information
 about the gamemode.
 
-Trello https://trello.com/b/u1GBYksd
-
 # Requirements
 
 https://github.com/Surdavow/Support_Lua
