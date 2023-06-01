@@ -657,7 +657,9 @@ function ZombieBoomerHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,
 {
 	%limb = %obj.rgetDamageLocation(%position);
 	if(%damageType !$= $DamageType::FallDamage || %damageType !$= $DamageType::Impact)
-	if(%limb) %damage = %damage/6;
+	if(!%limb) %damage = %damage*2;
+	else %damage = %damage/3;
+	
 	
 	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
 }

@@ -106,15 +106,15 @@ function SurvivorPlayer::L4BAppearance(%this,%obj,%client)
 	{
 		case 1: if(%client.accent)
 				{
-					%obj.mountImage("helmetimage",2,1,addTaggedString(luacall(getcolorname,%client.hatColor)));	
+					%obj.mountImage("helmetimage",2,1,addTaggedString(getColorName(%client.hatColor)));	
 					%obj.currentHat = "helmet";
 				}		
 				else
 				{
-					%obj.mountImage("hoodieimage",2,1,addTaggedString(luacall(getcolorname,%client.hatColor)));	
+					%obj.mountImage("hoodieimage",2,1,addTaggedString(getColorName(%client.hatColor)));	
 					%obj.currentHat = "hoodie";
 				}
-		default: %obj.mountImage($L4BHat[%client.hat] @ "image",2,1,addTaggedString(luacall(getcolorname,%client.hatColor)));
+		default: %obj.mountImage($L4BHat[%client.hat] @ "image",2,1,addTaggedString(getColorName(%client.hatColor)));
 				 %obj.currentHat = $L4BHat[%client.hat];
 	}
 }

@@ -245,26 +245,6 @@ package L4B_MainPackage
 		}
 	}
 
-	//function Player::hMeleeAttack(%obj,%col)
-	//{						
-	//	if((!isObject(%obj) || %obj.getState() $= "Dead") || (!isObject(%col) || %col.getState() $= "Dead")) return;		
-//
-	//	%cansee = vectorDot(%obj.getEyeVector(),vectorNormalize(vectorSub(%col.getposition(),%obj.getposition())));
-	//	if(VectorDist(%obj.getposition(), %col.getposition()) > 2.5 || %cansee < 0.5) return;		
-//
-	//	if(%col.getType() & $TypeMasks::VehicleObjectType || %col.getType() & $TypeMasks::PlayerObjectType)
-	//	{
-	//		%damage = %obj.hAttackDamage*getWord(%obj.getScale(),0);
-	//		%damagefinal = getRandom(%damage/4,%damage);
-	//		%obj.hlastmeleedamage = %damagefinal;
-	//		%obj.lastattacked = getsimtime()+1000;
-//
-	//		%obj.playthread(2,activate2);
-	//		%col.damage(%obj.hFakeProjectile, %col.getposition(), %damagefinal, %obj.hDamageType);
-	//		%obj.getDataBlock().onBotMelee(%obj,%col);				
-	//	}
-	//}	
-
 	function AIPlayer::hFindClosestPlayerFOV(%bot,%range,%hear)
 	{
 		%type = $TypeMasks::PlayerObjectType;
@@ -444,6 +424,11 @@ package L4B_MainPackage
 
 		Parent::Pickup(%obj,%item);
 	}
+
+	function Player::playThread(%obj,%slot,%thread)
+	{
+		Parent::playThread(%obj,%slot,%thread);
+	}	
 
 	function Armor::onRemove(%this,%obj)
 	{
