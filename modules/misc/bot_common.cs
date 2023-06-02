@@ -200,8 +200,6 @@ function CommonZombieHoleBot::Damage(%this,%obj,%sourceObject,%position,%damage,
 	if(%damageType !$= $DamageType::FallDamage || %damageType !$= $DamageType::Impact)
 	if(!%limb) %damage = %damage*2;
 
-	%obj.addhealth(%damage/2);
-
 	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
 }
 

@@ -157,6 +157,11 @@ package L4B_MainPackage
         %client.deletel4bMusic("Ambience");        
     }
 
+	function fxDTSBrickData::setMusic (%data, %brick)
+	{	
+		return;
+	}	
+
 	function fxDTSBrickData::onColorChange (%data, %brick)
 	{
 		if(isObject(%brick.interactiveshape)) %brick.interactiveshape.setnodecolor("ALL",getwords(getColorIdTable(%brick.colorid),0,2) SPC "1");
@@ -536,24 +541,6 @@ package L4B_MainPackage
 		if(isObject (%player = %client.player) && isObject(%item = %player.tool[%position]) && %item.canDrop)
 		%player.playthread(3,"activate");
 		%bool = Parent::ServerCmdDropTool (%client, %position);
-	}
-
-	function MiniGameSO::checkLastManStanding(%minigame)
-	{
-	    if(%minigame.RespawnTime > 0 || isEventPending(%minigame.resetSchedule)) return;
-	
-	    for(%i = 0; %i < %minigame.numMembers; %i++) if(isObject(%player = %minigame.member[%i].player) && !%player.hIsInfected && !%player.getdataBlock().isDowned) %livePlayerCount++;
-	
-	    if(!%livePlayerCount)
-	    {
-	        %minigame.VictoryTo = "Infected";
-	        %minigame.l4bMusic("game_lose_sound",false,"Music");
-	        %minigame.deletel4bMusic("Stinger1");
-	        %minigame.deletel4bMusic("Stinger2");
-	        %minigame.deletel4bMusic("Stinger3");
-	        %minigame.director(0,0);
-	        %minigame.scheduleReset(12000);
-	    }
 	}	
 
 	function holeZombieInfect(%obj, %col)

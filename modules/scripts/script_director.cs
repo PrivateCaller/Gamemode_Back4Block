@@ -3,98 +3,110 @@ package L4B_Director
     function MiniGameSO::Reset(%minigame,%client)
 	{
         Parent::Reset(%minigame,%client);
-
-        if(isObject(%brickgroup = %client.brickgroup) && %brickgroup.getCount())
-        for(%i = 0; %i < %brickgroup.getcount(); %i++) if(isObject(%brick = %brickgroup.getObject(%i)))
-        {            
-            if(%brick.getName() $= "_breakbrick")
-            {
-                %brick.setRendering(1);
-                %brick.setRaycasting(1);
-                %brick.setColliding(1);
-                %brick.setName("");
-            }
-            if(%brick.getdataBlock().isOpen) %brick.door(close);
-        }
-
-        if(isObject(Director_ZombieGroup)) Director_ZombieGroup.delete();
-        if(isObject(AreaZoneGroup)) for(%i = 0; %i < AreaZoneGroup.getCount(); %i++)
-        if(isObject(%zone = AreaZoneGroup.getObject(%i)))
-        {
-            %zone.firstentry = false;
-            %zone.presenceallentered = false;
-            for(%j = 0; %j < %zone.simset.getCount(); %j++)
-            if(isObject(%brick = %zone.simset.getObject(%j)) && %brick.getdataBlock().ZoneBrickType $= "item") %brick.setItem(none);
-        }        
-
-        showAreaZones(0);
-        %minigame.director(false);
-        %minigame.l4bMusic("musicdata_L4D_safearea" @ getRandom(1,4),true,"Music");
-        %minigame.l4bMusic("game_start_sound",false,"Stinger1");
+        %minigame.director(5);        
 	}	
 
     function MiniGameSO::endGame(%minigame)
     {
 		Parent::endGame(%minigame);
-
-        if(isObject(%brickgroup = %client.brickgroup) && %brickgroup.getCount())
-        for(%i = 0; %i < %brickgroup.getcount(); %i++) if(isObject(%brick = %brickgroup.getObject(%i)))
-        {            
-            if(%brick.getName() $= "_breakbrick")
-            {
-                %brick.setRendering(1);
-                %brick.setRaycasting(1);
-                %brick.setColliding(1);
-                %brick.setName("");
-            }
-            if(%brick.getdataBlock().isOpen) %brick.door(close);
-        }
-
-        if(isObject(Director_ZombieGroup)) Director_ZombieGroup.delete();
-        if(isObject(AreaZoneGroup)) for(%i = 0; %i < AreaZoneGroup.getCount(); %i++)
-        if(isObject(%zone = AreaZoneGroup.getObject(%i)))
-        {
-            %zone.firstentry = false;
-            %zone.presenceallentered = false;
-            for(%j = 0; %j < %zone.simset.getCount(); %j++)
-            if(isObject(%brick = %zone.simset.getObject(%j)) && %brick.getdataBlock().ZoneBrickType $= "item") %brick.setItem(none);
-        }        
-
-		showAreaZones(1);
-        %minigame.director(false);
+        %minigame.director(5);
+        %minigame.director.delete();
+        showAreaZones(true);
     }
+
+	function MiniGameSO::checkLastManStanding(%minigame)
+	{
+	    if(%minigame.RespawnTime > 0 || isEventPending(%minigame.resetSchedule)) return;
+	
+	    for(%i = 0; %i < %minigame.numMembers; %i++) if(isObject(%player = %minigame.member[%i].player) && !%player.hIsInfected && !%player.getdataBlock().isDowned) %livePlayerCount++;
+	
+	    if(!%livePlayerCount)
+	    {	        
+            if(isObject(%minigame.director))
+            {
+	            %minigame.director(false);
+                %minigame.director.l4bMusic("game_lose_sound",false,"Music");
+            }
+	        %minigame.scheduleReset(12000);
+	    }
+	}    
 };
 
 if(isPackage(L4B_Director)) deactivatePackage(L4B_Director);
 activatePackage(L4B_Director);
 
-registerOutputEvent(Minigame, "Director", "List Disable 0 Enable 1 Horde 2 Tank 3 Panic 4 Safehouse 5",0);
+registerOutputEvent(Minigame, "Director", "List Disable 0 Enable 1 Horde 2 Tank 3 Panic 4 Safehouse 5 Reset",0);
 registerOutputEvent(Minigame, "DirectorCCR", "bool",0);
-$L4B_Music["Music"] = 0;
-$L4B_Music["Music2"] = 0;
-$L4B_Music["Stinger1"] = 0;
-$L4B_Music["Stinger2"] = 0;
-$L4B_Music["Stinger3"] = 0;
-$L4B_Music["Ambience"] = 0;
 
 function MinigameSO::Director(%minigame,%type,%client)
 {
     switch(%type)
     {
-        case 0: if(isObject(%minigame.director)) %minigame.director.delete();
-
-                    %minigame.deletel4bMusic("Music");
-                    %minigame.deletel4bMusic("Music2");
-                    %minigame.deletel4bMusic("Stinger1");
-                    %minigame.deletel4bMusic("Stinger2");
-                    %minigame.deletel4bMusic("Stinger3");
-                    %minigame.deletel4bMusic("Ambience");        
+        case 0: if(isObject(%minigame.director)) %minigame.director.stop();       
         
-        case 1:  if(isObject(%minigame.director)) %minigame.director.delete();                    
+        case 1: if(!isObject(%minigame.director))
+                {
                     %minigame.director = new ScriptObject(Director);
                     %minigame.director.minigame = %minigame;
+                }
+                
+                %minigame.director.canChangeRound = true;
+                %minigame.director.roundUpdate();
+        
+        case 2: if(isObject(%minigame.director))
+                {
+                    %minigame.director.roundType = "horde";
                     %minigame.director.canChangeRound = true;
-                    %minigame.director.roundUpdate();                                        
+                    %minigame.director.roundUpdate();
+                }
+
+        case 3: if(isObject(%minigame.director))
+                {
+                    %minigame.director.roundType = "panic";
+                    %minigame.director.canChangeRound = true;
+                    %minigame.director.roundUpdate();
+                }
+
+        case 4: if(isObject(%minigame.director))
+                {
+                    %minigame.director.roundType = "tank";
+                    %minigame.director.canChangeRound = true;
+                    %minigame.director.roundUpdate();
+                }
+
+        case 5: if(!isObject(%minigame.director))
+                {
+                    %minigame.director = new ScriptObject(Director);
+                    %minigame.director.minigame = %minigame;
+                }
+
+                if(isObject(%brickgroup = %client.brickgroup) && %brickgroup.getCount())
+                for(%i = 0; %i < %brickgroup.getcount(); %i++) if(isObject(%brick = %brickgroup.getObject(%i)))
+                {            
+                    if(%brick.getName() $= "_breakbrick")
+                    {
+                        %brick.setRendering(1);
+                        %brick.setRaycasting(1);
+                        %brick.setColliding(1);
+                        %brick.setName("");
+                    }
+                    if(%brick.getdataBlock().isOpen) %brick.door(close);
+                }
+
+                if(isObject(DecalGroup)) DecalGroup.deleteAll();
+                if(isObject(%minigame.director.ZombieGroup)) %minigame.director.ZombieGroup.delete();
+                if(isObject(AreaZoneGroup)) for(%i = 0; %i < AreaZoneGroup.getCount(); %i++)
+                if(isObject(%zone = AreaZoneGroup.getObject(%i)))
+                {
+                    %zone.firstentry = false;
+                    %zone.presenceallentered = false;
+                    for(%j = 0; %j < %zone.simset.getCount(); %j++)
+                    if(isObject(%brick = %zone.simset.getObject(%j)) && %brick.getdataBlock().ZoneBrickType $= "item") %brick.setItem(none);
+                }        
+
+                showAreaZones(0);
+                %minigame.director.schedule(1900,l4bMusic,"musicdata_L4D_safearea" @ getRandom(1,4),true,"Music");
+                %minigame.director.l4bMusic("game_start_sound",false,"Stinger1");           
     }
 }
 
@@ -106,6 +118,19 @@ function MinigameSO::DirectorCCR(%minigame,%bool)
 
 function Director::onRemove(%obj)
 {
+    cancel(%obj.roundUpdateSched);
+}
+
+function Director::Stop(%obj)
+{
+    %obj.canChangeRound = false;
+    %obj.roundType = "";    
+    %obj.deletel4bMusic("Music");
+    %obj.deletel4bMusic("Music2");
+    %obj.deletel4bMusic("Stinger1");
+    %obj.deletel4bMusic("Stinger2");
+    %obj.deletel4bMusic("Stinger3");
+    %obj.deletel4bMusic("Ambience"); 
     cancel(%obj.roundUpdateSched);
 }
 
@@ -221,9 +246,12 @@ function Director::RoundEnd(%obj)
     %obj.roundType = "";
     %obj.MusicActive = false;
     %obj.canChangeRound = true;
-    %minigame.l4bMusic("drum_suspense_end_sound",false,"Stinger1");
-    %minigame.deletel4bMusic("Music");
-    %minigame.deletel4bMusic("Music2");    
+    %obj.l4bMusic("drum_suspense_end_sound",false,"Stinger1");
+    %obj.deletel4bMusic("Music");
+    %obj.deletel4bMusic("Music2");
+    %obj.deletel4bMusic("Stinger1");
+    %obj.deletel4bMusic("Stinger2");
+    %obj.deletel4bMusic("Stinger3");     
 }
 
 function Director::l4bMusic(%obj, %datablock, %loopable, %type)
@@ -234,7 +262,7 @@ function Director::l4bMusic(%obj, %datablock, %loopable, %type)
     if(isObject(%mgmember = %minigame.member[%i]))
     {
         if((isObject(%player = %mgmember.player) && %player.isBeingStrangled)) return;
-        %mgmember.l4bMusic(%dataBlock,%loopable,%type);
+        %mgmember.l4bMusic(%dataBlock,%loopable,%type);        
     }
 }
 
@@ -311,7 +339,6 @@ function Director::SafehouseCheck(%obj)
 	{
 		if(isEventPending(%minigame.resetSchedule))	return;
 
-   		%minigame.VictoryTo = "Survivors";
 		%minigame.scheduleReset(8000);
 		%minigame.l4bMusic("game_win_sound",false,"Music");
 		%minigame.deletel4bMusic("Stinger1");
@@ -440,13 +467,13 @@ function Director::spawnZombies(%obj,%type,%amount,%spawnzone,%count)
         if(strlen(%bottype.hMeleeCI)) eval("%bot.hDamageType = $DamageType::" @ %bottype.hMeleeCI @ ";");
         else %bot.hDamageType = $DamageType::HoleMelee;        
         
-        if(!isObject(Director_ZombieGroup))
+        if(!isObject(%obj.ZombieGroup))
         {
-            new SimGroup(Director_ZombieGroup);
-            missionCleanup.add(Director_ZombieGroup);
+            %obj.ZombieGroup = new SimGroup();
+            missionCleanup.add(%obj.ZombieGroup);
         }
         
-        Director_ZombieGroup.add(%bot);
+        %obj.ZombieGroup.add(%bot);
         %bot.doMRandomTele(%spawnbrick);
 
         cancel(%minigame.spawn[%type]);

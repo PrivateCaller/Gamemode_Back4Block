@@ -342,17 +342,6 @@ function Armor::RbloodDismember(%this,%obj,%limb,%doeffects,%position)
 
 package RBloodPackage
 {
-	function MiniGameSO::reset(%this, %client) 
-	{		
-		Parent::reset(%this, %client);
-
-		%currTime = getSimTime();
-		if(%obj.lastResetTime + 5000 > %currTime) return;
-		%minigame.lastResetTime = %currTime;
-
-		if(isObject(DecalGroup)) DecalGroup.deleteAll();		
-	}
-
 	function ProjectileData::radiusDamage(%this, %obj, %col, %distanceFactor, %pos, %damageAmt)
 	{			
 		if(%col.getType() & $TypeMasks::PlayerObjectType && %col.getDamageLevel()+%damageAmt > %col.getdataBlock().maxDamage && (vectorDist(%pos, %col.getHackPosition()) / getWord(%col.getScale(), 2)) < %obj.getdataBlock().damageRadius) 
@@ -365,7 +354,7 @@ package RBloodPackage
 	{
  		Parent::Damage(%this, %obj, %sourceObject, %position, %damage, %damageType);
 
-		if(!$Pref::L4B::Blood::BloodDamageThreshold || !%this.enableRBlood || %damage < $Pref::L4B::Blood::BloodDamageThreshold || %damageType == $DamageType::Lava || %damageType == $DamageType::Suicide || (%damageType == $DamageType::Fall && %damage < %this.maxDamage/2)) return;
+		if(!$Pref::L4B::Blood::BloodDamageThreshold || !%this.enableRBlood || %damage < $Pref::L4B::Blood::BloodDamageThreshold || %damageType == $DamageType::Lava || (%damageType == $DamageType::Fall && %damage < %this.maxDamage/2)) return;
 
 		if(%this.hZombieL4BType $= "Normal") %damage = %damage*3;
 		%this.RBloodSimulate(%obj, %position, %damagetype, %damage);
