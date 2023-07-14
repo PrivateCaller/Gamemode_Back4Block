@@ -29,11 +29,6 @@ $colorValues["white"] = "1 1 1 1";
 $colorValues["black"] = "0.078 0.078 0.078 1";
 $colorValues["pitchblack"] = "0 0 0 1";
 
-function L4B_isInFOV(%viewer, %target)
-{    
-    if(isObject(%viewer) && isObject(%target)) return vectorDot(%viewer.getEyeVector(), vectorNormalize(vectorSub(%target.getPosition(), %viewer.getPosition()))) >= 0.7;
-}
-
 function getColorName(%RGBA)
 {
     %closestColor = "";
@@ -54,6 +49,11 @@ function getColorName(%RGBA)
     }
 
     return %closestColor;
+}
+
+function L4B_isInFOV(%viewer, %target)
+{    
+    if(isObject(%viewer) && isObject(%target)) return vectorDot(%viewer.getEyeVector(), vectorNormalize(vectorSub(%target.getPosition(), %viewer.getPosition()))) >= 0.7;
 }
 
 function miniGameFriendlyFire(%objA,%objB)//Return true to indicate if we are firing on a friendly
