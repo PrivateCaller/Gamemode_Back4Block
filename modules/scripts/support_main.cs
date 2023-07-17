@@ -199,49 +199,6 @@ package L4B_MainPackage
 		Parent::onCollision(%this, %obj, %col, %fade, %pos, %normal, %velocity);
 	}
 
-	function onObjectCollisionTest(%obj, %col)
-	{
-		return true;
-		//This dll is causing too many issues, need to figure out something else
-		
-		if(isObject(%obj) && isObject(%col))
-		{
-			if(%obj.getType() & $TypeMasks::PlayerObjectType && %col.getType() & $TypeMasks::PlayerObjectType) 
-			{
-				if(%obj.getdataBlock().isSurvivor && %col.getdataBlock().isSurvivor) return false;
-
-				switch$(%obj.getdataBlock().getName())
-				{
-					case "ZombieChargerHoleBot": if(vectordist(%obj.getposition(),%col.getposition()) < 2.5 && (%force = mFloor(vectorDot(getWords(%obj.getVelocity(),0,1), %obj.getForwardVector()))) > 15)
-												{
-													if(%col != %obj && %col.getdataBlock().getName() !$= "ZombieTankHoleBot")
-													{
-														if(!%obj.hEating)
-														{
-															%obj.SpecialPinAttack(%col,%force);
-															%obj.playaudio(3,"charger_smash_sound");
-														}
-
-														if(%col != %obj.hEating)
-														{
-															%obj.playaudio(3,"charger_smash_sound");			
-															%obj.playthread(2,"shiftUp");
-															%col.setvelocity(vectorscale(VectorNormalize(vectorAdd(%obj.getForwardVector(),"0" SPC "0" SPC "0.25")),%force));
-															%col.damage(%obj.hFakeProjectile, %col.getposition(),5, %obj.hDamageType);
-															%obj.spawnExplosion(pushBroomProjectile,"1 1 1");
-														}
-
-														return false;
-													}
-												}
-					case "ZombieHunterHoleBot": if(%obj.hEating == %col) return false;
-				}
-			}
-
-			return true;
-		}
-	}
-
 	function WeaponImage::onMount(%this,%obj,%slot)
 	{		
 		Parent::onMount(%this,%obj,%slot);

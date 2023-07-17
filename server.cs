@@ -1,6 +1,5 @@
 if(ForceRequiredAddOn("Bot_Hole") == $Error::AddOn_NotFound) return error("Bot_Hole is required for Gamemode_Left4Block to work");
 if(ForceRequiredAddOn("Projectile_Radio_Wave") == $Error::AddOn_NotFound) return error("Projectile_Radio_Wave is required for Gamemode_Left4Block to work");
-if(ForceRequiredAddOn("Support_Lua") == $Error::AddOn_NotFound || !isFunction(luacall)) return error("Support_Lua and the Lua dll are required for Gamemode_Left4Block to work");
 
 exec("./modules/scripts/module_scripts.cs");
 exec("./modules/misc/module_misc.cs");
