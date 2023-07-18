@@ -125,9 +125,18 @@ function SurvivorPlayer::RbloodDismember(%this,%obj,%limb,%doeffects,%position)
 }
 
 function SurvivorPlayer::onImpact(%this, %obj, %col, %vec, %force)
-{
-	luacall(Survivor_FallDamage,%obj,getWord(%vec,2),%force);
-	Parent::onImpact(%this, %obj, %col, %vec, %force);
+{	
+	if(%obj.getState() !$= "Dead")
+	{				
+		%zvector = getWord(%vec,2);
+		if(%zvector > %this.minImpactSpeed) %obj.playthread(0,"land");
+
+		if(%zvector > %this.minImpactSpeed && %zvector < %this.minImpactSpeed+5) %force = %force*3;
+		else if(%zvector > %this.minImpactSpeed+5 && %zvector < %this.minImpactSpeed+15) %force = %force*6.5;
+		else %force = %force*10;
+	}
+
+	Parent::onImpact(%this, %obj, %col, %vec, %force);	
 }
 
 function SurvivorPlayer::onEnterLiquid(%this, %obj, %cov, %type)
@@ -156,8 +165,8 @@ function SurvivorPlayer::onTrigger (%this, %obj, %triggerNum, %val)
 	{		
 		switch(%triggerNum)
 		{
-			case 0: luacall(Survivor_LeftClick,%val,%obj);
-			case 4: luacall(Survivor_Rightclick,%obj);
+			case 0: //luacall(Survivor_LeftClick,%val,%obj);
+			case 4: //luacall(Survivor_Rightclick,%obj);
 			default:
 		}
 	}
@@ -191,7 +200,7 @@ function SurvivorPlayer::onNewDataBlock(%this,%obj)
 
 function SurvivorPlayer::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc)
 {	
-	if(luacall(Survivor_DownCheck,%obj,%damage,%damageType)) return;
+	//if(luacall(Survivor_DownCheck,%obj,%damage,%damageType)) return;
 	Parent::Damage(%this,%obj,%sourceObject,%position,%damage,%damageType,%damageLoc);
 
 	if(%damageType == $DamageType::Fall && %obj.getState() $= "Dead") 
@@ -206,7 +215,7 @@ function SurvivorPlayer::Damage(%this,%obj,%sourceObject,%position,%damage,%dama
 function SurvivorPlayer::onDamage(%this,%obj,%delta)
 {
 	Parent::onDamage(%this,%obj,%delta);
-	luacall(Survivor_DamageCheck,%obj,%delta);
+	//luacall(Survivor_DamageCheck,%obj,%delta);
 }
 
 function SurvivorPlayerDowned::L4BAppearance(%this,%obj,%client) { SurvivorPlayer::L4BAppearance(%this,%obj,%client); }

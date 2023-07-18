@@ -1,5 +1,3 @@
-luaexec("./script_survivor.lua");
-
 registerOutputEvent(fxDTSBrick, "RandomizeZombieSpecial");
 registerOutputEvent(fxDTSBrick, "RandomizeZombieUncommon");
 registerInputEvent ("fxDTSBrick", "onZombieTouch", "Self fxDTSBrick" TAB "Player Player" TAB "Bot Bot" TAB "Client GameConnection" TAB "MiniGame MiniGame");
