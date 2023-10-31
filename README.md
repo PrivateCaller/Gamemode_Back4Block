@@ -1,4 +1,4 @@
-# Gamemode_Left4Block
+# Gamemode_Back4Block
 
 A minified fork of Davow's Gamemode_Left4Block, with many embedded features like grenades, guns, etc. removed. Just the zombies and maybe a small director. Intended to replace the niche of the original Bot_Zombie_L4D2, also by Davow.
 
