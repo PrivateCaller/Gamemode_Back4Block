@@ -1,8 +1,6 @@
 # Gamemode_Left4Block
 
-This is a gamemode for Blockland, its purpose is to recreate the experience of the hit zombie game 'Left 4 Dead' in the Blockland experience. This pack features
-weapons, grenades, the zombie bots, a director, and multiple features. It is quite an expanded list, I will eventually update this readme to include more important information
-about the gamemode.
+A minified fork of Davow's Gamemode_Left4Block, with many embedded features like grenades, guns, etc. removed. Just the zombies and maybe a small director. Intended to replace the niche of the original Bot_Zombie_L4D2, also by Davow.
 
 # Requirements
 
